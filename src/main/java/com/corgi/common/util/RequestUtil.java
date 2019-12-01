@@ -23,27 +23,6 @@ public class RequestUtil {
         return request;
     }
 
-    public static String getUserId() {
-        LoginUser loginUser = (LoginUser) getRequest().getAttribute("login_user");
-        if (StringUtils.isEmpty(loginUser.getStaffId())) {
-            return loginUser.getUserId();
-        }
-        return loginUser.getStaffId();
-    }
-
-    public static LoginUser getLoginUser() {
-        LoginUser loginUser = (LoginUser) getRequest().getAttribute("login_user");
-        return loginUser;
-    }
-
-    public static String getUserName() {
-        LoginUser loginUser = (LoginUser) getRequest().getAttribute("login_user");
-        if (loginUser != null) {
-            return loginUser.getNickname();
-        }
-        return null;
-    }
-
     public static String getAppname() {
         String appname = getRequest().getHeader("appname");
         if (StringUtils.isEmpty(appname)) {
@@ -69,19 +48,6 @@ public class RequestUtil {
             return "";
         }
         return packageStr;
-    }
-
-    public static String getPortal() {
-        LoginUser loginUser = (LoginUser) getRequest().getAttribute("login_user");
-        return loginUser.getPortal();
-    }
-
-    public static void setPortal(String portal){
-        LoginUser loginUser = (LoginUser) getRequest().getAttribute("login_user");
-        if(loginUser == null){
-            loginUser = new LoginUser();
-        }
-        loginUser.setPortal(portal);
     }
 
     public static String getAPPID() {
