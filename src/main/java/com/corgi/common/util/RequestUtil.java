@@ -1,4 +1,4 @@
-package com.platform.common.util;
+package com.corgi.common.util;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;

@@ -1,4 +1,4 @@
-package com.platform.exception;
+package com.corgi.exception;
 
 public class APIException extends RuntimeException {
     public int errorCode;

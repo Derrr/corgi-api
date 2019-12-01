@@ -1,7 +1,7 @@
-package com.platform;
+package com.corgi;
 
-import com.platform.common.filter.CorgiCorsFilter;
-import com.platform.common.filter.RequestFilter;
+import com.corgi.common.filter.CorgiCorsFilter;
+import com.corgi.common.filter.RequestFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

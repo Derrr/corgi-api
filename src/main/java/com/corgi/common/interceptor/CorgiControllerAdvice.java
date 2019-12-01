@@ -1,7 +1,7 @@
-package com.platform.common.interceptor;
+package com.corgi.common.interceptor;
 
-import com.platform.common.JsonResult;
-import com.platform.exception.APIException;
+import com.corgi.common.JsonResult;
+import com.corgi.exception.APIException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +18,9 @@ import javax.servlet.http.HttpServletRequest;
  * @create 2019-03-15
  */
 @ControllerAdvice
-public class PlatformControllerAdvice {
+public class CorgiControllerAdvice {
 
-    private static final Logger logger = LogManager.getLogger(PlatformControllerAdvice.class);
+    private static final Logger logger = LogManager.getLogger(CorgiControllerAdvice.class);
 
     /**
      * 应用到所有@RequestMapping注解方法，在其执行之前初始化数据绑定器

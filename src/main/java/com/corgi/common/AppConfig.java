@@ -1,4 +1,4 @@
-package com.platform.common;
+package com.corgi.common;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

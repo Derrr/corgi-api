@@ -1,4 +1,4 @@
-package com.platform.common;
+package com.corgi.common;
 
 import lombok.Data;
 

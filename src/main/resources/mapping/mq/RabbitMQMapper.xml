@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.platform.mapper.mq.RabbitMQMapper">
-    <insert id="insertMQLog" parameterType="com.belle.topsports.new_epp_java_sdk.mq.MQLog">
-        insert into epp_mq_log(id, message, cuid, opuid, status)
-        values(#{id},#{message},#{cuid},#{opuid},#{status})
-    </insert>
-</mapper>

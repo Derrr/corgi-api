@@ -1,8 +1,7 @@
-package com.platform.common.filter;
+package com.corgi.common.filter;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 public class CorgiCorsFilter extends org.springframework.web.filter.CorsFilter {
 
