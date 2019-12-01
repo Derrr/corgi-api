@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("user")
 public class CorgierController extends BaseController {
-    @Reference(version = "1.0.0",check = false)
+    @Reference(version = "1.0.0")
     private CorgierProfileService corgierProfileService;
 
-    @GetMapping("/regist")
-    public JsonResult regist() {
+    @GetMapping("/register")
+    public JsonResult register() {
         corgierProfileService.register();
         return new JsonResult(null);
     }
