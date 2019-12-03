@@ -19,7 +19,7 @@ public class CorgiUserController extends BaseController {
     @Reference
     private CorgiUserService corgiUserService;
 
-    @GetMapping("/register")
+    @GetMapping("/login")
     public JsonResult register() {
         UserLogin userLogin = new UserLogin();
         userLogin.setTelNo("11222223343");
