@@ -12,7 +12,7 @@
 	<groupId>com.corgi</groupId>
 	<artifactId>corgi-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>dasuan-platform</name>
+	<name>corgi-api</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

@@ -2,7 +2,8 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
-import com.corgi.user.api.profile.service.CorgierProfileService;
+import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.entity.UserLogin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,13 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("user")
-public class CorgierController extends BaseController {
+public class CorgiUserController extends BaseController {
     @Reference
-    private CorgierProfileService corgierProfileService;
+    private CorgiUserService corgiUserService;
 
     @GetMapping("/register")
     public JsonResult register() {
-        corgierProfileService.register();
+        UserLogin userLogin = new UserLogin();
+        userLogin.setTelNo("11222223343");
+        userLogin.setImId("xxxzzxcocox");
+        corgiUserService.login(userLogin);
         return new JsonResult(null);
     }
 
