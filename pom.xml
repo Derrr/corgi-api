@@ -61,15 +61,9 @@
 			<version>2.9.1</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.json-lib</groupId>
-			<artifactId>json-lib</artifactId>
-			<classifier>jdk15</classifier>
-			<version>2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.9</version>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.62</version>
 		</dependency>
 		<dependency>
 			<groupId>com.corgi</groupId>
@@ -86,7 +80,17 @@
             <artifactId>zkclient</artifactId>
             <version>0.1</version>
         </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>com.corgi</groupId>
+			<artifactId>corgi-common</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.aliyun.oss</groupId>
+			<artifactId>aliyun-sdk-oss</artifactId>
+			<version>3.8.0</version>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<finalName>corgi-api</finalName>

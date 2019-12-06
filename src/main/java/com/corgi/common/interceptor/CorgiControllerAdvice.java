@@ -36,17 +36,7 @@ public class CorgiControllerAdvice {
     @ModelAttribute
     public void addAttributes(Model model) {}
 
-    @ExceptionHandler(APIException.class)
-    @ResponseBody
-    public ResponseEntity handleControllerException(HttpServletRequest request, APIException ex) {
 
-        logger.warn(ex.getMessage(), ex);
-        JsonResult jsonResult = new JsonResult("");
-        jsonResult.setCode(ex.errorCode);
-        jsonResult.setMessage(ex.errorMsg);
-        jsonResult.setData(request.getParameterMap());
-        return new ResponseEntity(jsonResult, HttpStatus.OK);
-    }
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
@@ -57,7 +47,7 @@ public class CorgiControllerAdvice {
         }
         logger.error(errorMsg, ex);
         JsonResult jsonResult = new JsonResult("");
-        jsonResult.setCode(-1);
+        jsonResult.setCode(500);
         jsonResult.setMessage(ex.getMessage());
         jsonResult.setData(request.getParameterMap());
         return new ResponseEntity(jsonResult, HttpStatus.OK);

@@ -1,0 +1,6 @@
+package com.corgi.common.constant;
+
+public class Constants {
+    public static final int API_ERROR_CODE = 100;
+    public static final int PARAMETER_ERROR_CODE = 300;
+}
