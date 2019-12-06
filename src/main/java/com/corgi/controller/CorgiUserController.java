@@ -113,6 +113,7 @@ public class CorgiUserController extends BaseController {
             final AssumeRoleResponse response = client.getAcsResponse(request);
             return new JsonResult(response.getCredentials());
         } catch (ClientException e) {
+            log.error(e.getMessage(), e);
             return new JsonResult(500, e.getErrMsg());
         }
     }
