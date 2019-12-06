@@ -10,6 +10,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.entity.StorageToken;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserLogin;
@@ -43,6 +44,9 @@ public class CorgiUserController extends BaseController {
 
     @Value("${aliyun.AccessKeySecret}")
     private String accessKeySecret;
+
+    @Value("${aliyun.sts.endpoint}")
+    private String stsEndpoint;
 
     @Value("${aliyun.endpoint}")
     private String endpoint;
@@ -87,7 +91,8 @@ public class CorgiUserController extends BaseController {
     @PostMapping("/add_user_pic")
     public JsonResult addUserPic(@RequestBody UserPic userPic) {
         String result = corgiUserService.addUserPic(userPic);
-        return getJsonResult(result);
+        userPic.setPicId(result);
+        return new JsonResult(userPic);
     }
 
     @GetMapping("/get_user_detail")
@@ -111,10 +116,18 @@ public class CorgiUserController extends BaseController {
             request.setRoleSessionName("corgiManager");
             request.setDurationSeconds(3600L);
             final AssumeRoleResponse response = client.getAcsResponse(request);
-            return new JsonResult(response.getCredentials());
+
+            StorageToken token = new StorageToken();
+            token.setBucketName(bucketName);
+            token.setEndpoint(endpoint);
+            token.setSecurityToken(response.getCredentials().getSecurityToken());
+            token.setAccessKeyId(response.getCredentials().getAccessKeyId());
+            token.setAccessKeySecret(response.getCredentials().getAccessKeySecret());
+            token.setExpiration(response.getCredentials().getExpiration());
+            return new JsonResult(token);
         } catch (ClientException e) {
             log.error(e.getMessage(), e);
-            return new JsonResult(500, e.getErrMsg());
+            return new JsonResult(Constants.SYS_ERROR_CODE, e.getErrMsg());
         }
     }
 

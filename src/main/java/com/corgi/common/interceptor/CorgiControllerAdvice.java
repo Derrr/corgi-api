@@ -1,6 +1,7 @@
 package com.corgi.common.interceptor;
 
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.Constants;
 import com.corgi.exception.APIException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -47,7 +48,7 @@ public class CorgiControllerAdvice {
         }
         logger.error(errorMsg, ex);
         JsonResult jsonResult = new JsonResult("");
-        jsonResult.setCode(500);
+        jsonResult.setCode(Constants.SYS_ERROR_CODE);
         jsonResult.setMessage(ex.getMessage());
         jsonResult.setData(request.getParameterMap());
         return new ResponseEntity(jsonResult, HttpStatus.OK);
