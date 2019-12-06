@@ -108,6 +108,7 @@ public class CorgiUserController extends BaseController {
             final AssumeRoleRequest request = new AssumeRoleRequest();
             request.setMethod(MethodType.POST);
             request.setRoleArn(roleArn);
+            request.setRoleSessionName("corgiManager");
             request.setDurationSeconds(3600L);
             final AssumeRoleResponse response = client.getAcsResponse(request);
             return new JsonResult(response.getCredentials());
