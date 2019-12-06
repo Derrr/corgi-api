@@ -105,7 +105,7 @@ public class CorgiUserController extends BaseController {
     public JsonResult getUploadToken() {
         try {
             // 添加endpoint（直接使用STS endpoint，前两个参数留空，无需添加region ID）
-            DefaultProfile.addEndpoint("", "", "Sts", endpoint);
+            DefaultProfile.addEndpoint("", "", "Sts", stsEndpoint);
             // 构造default profile（参数留空，无需添加region ID）
             IClientProfile profile = DefaultProfile.getProfile("", accessKeyId, accessKeySecret);
             // 用profile构造client
