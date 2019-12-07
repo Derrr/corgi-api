@@ -12,9 +12,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.entity.StorageToken;
 import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserLogin;
-import com.corgi.user.entity.UserPic;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,7 +81,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/delete_user_pic")
-    public JsonResult deleteUserPic(@RequestParam("pic_id") String picId) {
+    public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
         String result = corgiUserService.deleteUserPic(picId);
         return getJsonResult(result);
     }
@@ -100,6 +98,7 @@ public class CorgiUserController extends BaseController {
         UserDetail userDetail = corgiUserService.getUserDetail(userId);
         return new JsonResult(userDetail);
     }
+
 
     @GetMapping("/get_upload_token")
     public JsonResult getUploadToken() {
@@ -129,6 +128,24 @@ public class CorgiUserController extends BaseController {
             log.error(e.getMessage(), e);
             return new JsonResult(Constants.SYS_ERROR_CODE, e.getErrMsg());
         }
+    }
+
+    @PostMapping("/update_user_position")
+    public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) {
+        corgiUserService.updateUserPosition(userPosition);
+        return new JsonResult();
+    }
+
+    @PostMapping("/get_nearby_user")
+    public JsonResult getNearbyUser(@RequestParam("userId") String userId, @RequestParam("lat") Double lat, @RequestParam("lng") Double lng, @RequestParam("range") Double range) {
+        UserPosition userPosition = new UserPosition();
+        userPosition.setUserId(userId);
+        userPosition.setLat(lat);
+        userPosition.setLng(lng);
+        
+        corgiUserService.updateUserPosition(userPosition);
+        List<UserProfile> userProfiles = corgiUserService.getNearByUser(userPosition, range);
+        return new JsonResult(userProfiles);
     }
 
 }
