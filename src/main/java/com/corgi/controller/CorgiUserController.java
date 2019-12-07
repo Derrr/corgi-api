@@ -142,7 +142,7 @@ public class CorgiUserController extends BaseController {
         userPosition.setUserId(userId);
         userPosition.setLat(lat);
         userPosition.setLng(lng);
-        
+
         corgiUserService.updateUserPosition(userPosition);
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userPosition, range);
         return new JsonResult(userProfiles);
