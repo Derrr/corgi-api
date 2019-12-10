@@ -10,6 +10,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.StorageToken;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
@@ -146,6 +147,16 @@ public class CorgiUserController extends BaseController {
         corgiUserService.updateUserPosition(userPosition);
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userPosition, range);
         return new JsonResult(userProfiles);
+    }
+
+    @GetMapping("/send_code")
+    public JsonResult sendToken(@RequestParam("telNo") String telNo) {
+        return null;
+    }
+
+    @GetMapping("get_user_questions")
+    public JsonResult getUserQuestions(){
+        return new JsonResult(CharacterUtils.getUserQuestions());
     }
 
 }
