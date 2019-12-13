@@ -170,6 +170,7 @@ public class CorgiUserController extends BaseController {
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
         }
+        log.info(code+".....");
         redisTemplate.opsForValue().set(CODE_PREFIX + telNo, code, 5, TimeUnit.MINUTES);
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         IAcsClient client = new DefaultAcsClient(profile);
