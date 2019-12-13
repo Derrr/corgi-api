@@ -1,10 +1,14 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.aliyuncs.CommonRequest;
+import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
 import com.aliyuncs.auth.sts.AssumeRoleRequest;
 import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
@@ -24,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -58,10 +64,12 @@ public class CorgiUserController extends BaseController {
     @Value("${aliyun.role.arn}")
     private String roleArn;
 
+    private static String CODE_PREFIX = "telCode_";
 
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
-        if ("000000".equals(userLogin.getCode())) {
+        String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
+        if (code.equals(userLogin.getCode())) {
             userLogin = corgiUserService.login(userLogin);
             return new JsonResult(userLogin);
         }
@@ -156,7 +164,34 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
-        return null;
+        Random random = new Random();
+        String code = "";
+        for (int i = 0; i < 4; i++) {
+            code += random.nextInt(10);
+        }
+        redisTemplate.opsForValue().set(CODE_PREFIX + telNo, code, 5, TimeUnit.MINUTES);
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "<accessKeyId>", "<accessSecret>");
+        IAcsClient client = new DefaultAcsClient(profile);
+
+        CommonRequest request = new CommonRequest();
+        request.setMethod(MethodType.POST);
+        request.setDomain("dysmsapi.aliyuncs.com");
+        request.setVersion("2017-05-25");
+        request.setAction("SendSms");
+        request.putQueryParameter("RegionId", "cn-hangzhou");
+        request.putQueryParameter("PhoneNumbers", telNo);
+        request.putQueryParameter("SignName", "Corgi");
+        request.putQueryParameter("TemplateCode", "SMS_180049529");
+        request.putQueryParameter("TemplateParam", "{\"code\":\"1234\"}");
+        try {
+            CommonResponse response = client.getCommonResponse(request);
+            System.out.println(response.getData());
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (ClientException e) {
+            e.printStackTrace();
+        }
+        return new JsonResult();
     }
 
     @GetMapping("get_user_questions")
@@ -191,7 +226,7 @@ public class CorgiUserController extends BaseController {
 
         UserDetail userDetail = new UserDetail();
         userDetail.setUserId("1");
-        userDetail.setPreferGroup(Arrays.asList("熊","猪猪","鱼"));
+        userDetail.setPreferGroup(Arrays.asList("熊", "猪猪", "鱼"));
         userDetail.setGroup("地瓜");
         userDetail.setAvatar("d=aweijgawe/vawjieo");
         userDetail.setBirthday("1989/11/28");
@@ -203,7 +238,7 @@ public class CorgiUserController extends BaseController {
         userDetail.setRole("awieg阿维");
         corgiUserService.addDetail(userDetail);
 
-        UserPic userPic =new UserPic();
+        UserPic userPic = new UserPic();
         userPic.setPicUrl("awiegaow/wiego/aoe");
         userPic.setUserId("1");
         corgiUserService.addUserPic(userPic);
