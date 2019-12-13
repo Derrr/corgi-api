@@ -12,14 +12,17 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.StorageToken;
+import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
+import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,6 +34,8 @@ import java.util.List;
 public class CorgiUserController extends BaseController {
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -155,8 +160,59 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_user_questions")
-    public JsonResult getUserQuestions(){
+    public JsonResult getUserQuestions() {
         return new JsonResult(CharacterUtils.getUserQuestions());
+    }
+
+    @GetMapping("follow")
+    public JsonResult follow(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+        corgiUserFollowService.follow(userId, targetUserId);
+        return new JsonResult();
+    }
+
+    @GetMapping("unfollow")
+    public JsonResult unfollow(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+        corgiUserFollowService.unFollow(userId, targetUserId);
+        return new JsonResult();
+    }
+
+    @GetMapping("is_followed")
+    public JsonResult isFollowed(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+        int result = corgiUserFollowService.isFollowed(userId, targetUserId);
+        return new JsonResult(result);
+    }
+
+    @GetMapping("test")
+    public JsonResult test() {
+        UserPosition userPosition = new UserPosition();
+        userPosition.setLng(0.0);
+        userPosition.setLat(1.0);
+        corgiUserService.updateUserPosition(userPosition);
+
+        UserDetail userDetail = new UserDetail();
+        userDetail.setUserId("1");
+        userDetail.setPreferGroup(Arrays.asList("熊","猪猪","鱼"));
+        userDetail.setGroup("地瓜");
+        userDetail.setAvatar("d=aweijgawe/vawjieo");
+        userDetail.setBirthday("1989/11/28");
+        userDetail.setCharacter("NKEOW91");
+        userDetail.setDesc("a0weg");
+        userDetail.setHeight(124);
+        userDetail.setWeight(283);
+        userDetail.setNickName("cccc");
+        userDetail.setRole("awieg阿维");
+        corgiUserService.addDetail(userDetail);
+
+        UserPic userPic =new UserPic();
+        userPic.setPicUrl("awiegaow/wiego/aoe");
+        userPic.setUserId("1");
+        corgiUserService.addUserPic(userPic);
+
+        userDetail.setRole("w阿维 i 恶搞 i");
+        corgiUserService.updateDetail(userDetail);
+
+
+        return new JsonResult();
     }
 
 }

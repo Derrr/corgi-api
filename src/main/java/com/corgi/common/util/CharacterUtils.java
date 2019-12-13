@@ -13,27 +13,27 @@ import java.util.Random;
 public class CharacterUtils {
     private static List<UserQuestion> EI_QUESTIONS =
             Arrays.asList(
-                    new UserQuestion().setQuestion("姐妹聚会，你介绍大家互相认识那只花蝴蝶吗？").addOption("E", "是").addOption("I", "不是"),
-                    new UserQuestion().setQuestion("玩狼人杀局，你是一直发言说“过”的无知村妇吗？").addOption("E", "是").addOption("I", "不是"),
-                    new UserQuestion().setQuestion("有1时，你是勾搭他还是等他勾搭？").addOption("E", "勾搭他").addOption("I", "等勾搭"));
+                    new UserQuestion().setQuestion("基友聚会，你会是动介绍大家相互认识吗？").addOption("E", "是").addOption("I", "不是"),
+                    new UserQuestion().setQuestion("如果玩桌游游戏，你是一直闷不吭声，发言简短的小透明吗？").addOption("E", "是").addOption("I", "不是"),
+                    new UserQuestion().setQuestion("在聚会上看到有“菜”靠近时，你会？").addOption("E", "勾搭他").addOption("I", "等勾搭"));
 
     private static List<UserQuestion> SN_QUESTIONS =
             Arrays.asList(
-                    new UserQuestion().setQuestion("啪啪的时候，你喜欢尝试新zishi吗？").addOption("S", "不喜欢").addOption("N", "是的"),
-                    new UserQuestion().setQuestion("姐妹们都是怎么评价你的？").addOption("S", "像1").addOption("N", "是1"),
-                    new UserQuestion().setQuestion("哪一类美人儿更吸引你？").addOption("S", "可爱的").addOption("N", "成熟的"));
+                    new UserQuestion().setQuestion("对于“做AI”的姿势及玩具方面，你属于哪一派？").addOption("S", "经典姿势保守派").addOption("N", "开拓创新挑战派"),
+                    new UserQuestion().setQuestion("好基友们都是怎么评价你的？").addOption("S", "较真务实像个壹").addOption("N", "诡计多端小机零"),
+                    new UserQuestion().setQuestion("哪一款菜会更吸引你？").addOption("S", "幽默可爱的").addOption("N", "成熟老练的"));
 
     private static List<UserQuestion> TF_QUESTIONS =
             Arrays.asList(
                     new UserQuestion().setQuestion("你觉得自己是个怎样的人").addOption("T", "理智的").addOption("F", "感性的"),
-                    new UserQuestion().setQuestion("你喜欢怎样的姐妹").addOption("T", "言语尖锐、但合乎逻辑").addOption("F", "天性淳良、但逻辑性差"),
+                    new UserQuestion().setQuestion("你喜欢怎样的基友").addOption("T", "言语尖锐、但合乎逻辑").addOption("F", "天性淳良、但逻辑性差"),
                     new UserQuestion().setQuestion("做决定时，你认为比较重要的是").addOption("T", "根据事实衡量").addOption("F", "考虑他人的感受和意见"));
 
     private static List<UserQuestion> JP_QUESTIONS =
             Arrays.asList(
-                    new UserQuestion().setQuestion("和男神约会，你会提前安排好节目吗？").addOption("J", "提前安排好").addOption("P", "随性看节目"),
-                    new UserQuestion().setQuestion("如果要组织一个姐妹爬梯，你会怎么安排").addOption("J", "把姐妹们活动流程计划好").addOption("P", "先邀请再安排"),
-                    new UserQuestion().setQuestion("和老公出去旅游，你是安排行程的那个吗？").addOption("J", "是").addOption("P", "不是"));
+                    new UserQuestion().setQuestion("和男神约会，你会？").addOption("J", "提前安排好“节目”").addOption("P", "随性看，想到什么就干什么"),
+                    new UserQuestion().setQuestion("如果要组织一个基友派对，你会？").addOption("J", "把活动细节考虑细致到统一着装").addOption("P", "人来就好，外卖搞定一切"),
+                    new UserQuestion().setQuestion("和基友们出去旅游，你是大总管吗？").addOption("J", "是").addOption("P", "不是"));
 
     private static List<UserQuestion> FACTOR1_QUESTIONS =
             Arrays.asList(
@@ -42,8 +42,8 @@ public class CharacterUtils {
 
     private static List<UserQuestion> FACTOR2_QUESTIONS =
             Arrays.asList(
-                    new UserQuestion().setQuestion("相处的话，你喜欢对方比你高还是比你矮？").addOption("5", "比我高").addOption("6", "比我矮"),
-                    new UserQuestion().setQuestion("你更喜欢肉壮的还是精瘦的？").addOption("7", "肉壮").addOption("8", "精瘦"));
+                    new UserQuestion().setQuestion("找男朋友的话，你喜欢对方？").addOption("5", "比我高").addOption("6", "比我矮"),
+                    new UserQuestion().setQuestion("你更喜欢的体型？").addOption("7", "肉壮").addOption("8", "精瘦"));
 
     public static List<UserQuestion> getUserQuestions() {
         List<UserQuestion> questions = new ArrayList<>();
