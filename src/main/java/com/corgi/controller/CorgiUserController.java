@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class CorgiUserController extends BaseController {
     @Reference
     private CorgiUserService corgiUserService;
+
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
 
@@ -207,7 +208,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("unfollow")
     public JsonResult unfollow(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
-        corgiUserFollowService.unFollow(userId, targetUserId);
+        corgiUserFollowService.unfollow(userId, targetUserId);
         return new JsonResult();
     }
 
