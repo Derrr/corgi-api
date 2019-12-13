@@ -170,7 +170,6 @@ public class CorgiUserController extends BaseController {
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
         }
-        log.info(code+".....");
         redisTemplate.opsForValue().set(CODE_PREFIX + telNo, code, 5, TimeUnit.MINUTES);
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         IAcsClient client = new DefaultAcsClient(profile);
@@ -184,7 +183,7 @@ public class CorgiUserController extends BaseController {
         request.putQueryParameter("PhoneNumbers", telNo);
         request.putQueryParameter("SignName", "Corgi");
         request.putQueryParameter("TemplateCode", "SMS_180049529");
-        request.putQueryParameter("TemplateParam", "{\"code\":\"1234\"}");
+        request.putQueryParameter("TemplateParam", "{\"code\":\"" + code + "\"}");
         try {
             CommonResponse response = client.getCommonResponse(request);
             log.info(response.getData());
