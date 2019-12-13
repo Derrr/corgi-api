@@ -151,7 +151,7 @@ public class CorgiUserController extends BaseController {
         return new JsonResult();
     }
 
-    @PostMapping("/get_nearby_user")
+    @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(@RequestParam("userId") String userId, @RequestParam("lat") Double lat, @RequestParam("lng") Double lng, @RequestParam("range") Double range) {
         UserPosition userPosition = new UserPosition();
         userPosition.setUserId(userId);
