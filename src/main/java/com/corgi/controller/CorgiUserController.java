@@ -235,7 +235,7 @@ public class CorgiUserController extends BaseController {
         userDetail.setDesc("a0weg");
         userDetail.setHeight(124);
         userDetail.setWeight(283);
-        userDetail.setNickName("cccc");
+        userDetail.setNickname("cccc");
         userDetail.setRole("awieg阿维");
         corgiUserService.addDetail(userDetail);
 
