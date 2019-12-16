@@ -18,8 +18,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiActivityService corgiActivityService;
 
     @GetMapping("add_activity")
-    public JsonResult addActivity(@RequestBody CorgiActivity activity) {
-        activity = new CorgiActivity();
+    public JsonResult addActivity() {
+        CorgiActivity activity = new CorgiActivity();
         corgiActivityService.addCorgiActivity(activity);
         return new JsonResult();
     }
