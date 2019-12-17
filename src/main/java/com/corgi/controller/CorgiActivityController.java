@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author tairanliu
@@ -23,6 +24,9 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("add_activity")
     public JsonResult addActivity() {
         CorgiActivity activity = new CorgiActivity();
+        Random random = new Random();
+        activity.setLng(random.nextDouble());
+        activity.setLat(random.nextDouble());
         activity.setPics(Arrays.asList("awegaweg", "awega", "awieow/ajie"));
         activity = corgiActivityService.addCorgiActivity(activity);
         return new JsonResult(activity);
