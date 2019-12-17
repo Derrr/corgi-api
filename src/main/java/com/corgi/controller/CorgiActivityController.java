@@ -32,7 +32,7 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(activity);
     }
 
-    @GetMapping("get_range_activiy")
+    @GetMapping("get_range_activity")
     public JsonResult getRangeActivity(@RequestParam("lng") double lng, @RequestParam("lat") double lat, @RequestParam("range") double range) {
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range);
         return new JsonResult(activityList);
