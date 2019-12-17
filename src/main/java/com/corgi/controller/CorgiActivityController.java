@@ -7,6 +7,9 @@ import com.corgi.common.JsonResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author tairanliu
  */
@@ -20,7 +23,14 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("add_activity")
     public JsonResult addActivity() {
         CorgiActivity activity = new CorgiActivity();
-        corgiActivityService.addCorgiActivity(activity);
-        return new JsonResult();
+        activity.setPics(Arrays.asList("awegaweg", "awega", "awieow/ajie"));
+        activity = corgiActivityService.addCorgiActivity(activity);
+        return new JsonResult(activity);
+    }
+
+    @GetMapping("get_range_activiy")
+    public JsonResult getRangeActivity(@RequestParam("lng") double lng, @RequestParam("lat") double lat, @RequestParam("range") double range) {
+        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range);
+        return new JsonResult(activityList);
     }
 }
