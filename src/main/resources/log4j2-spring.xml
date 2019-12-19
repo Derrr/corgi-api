@@ -6,7 +6,7 @@
         </Console>
 
         <RollingFile name="RollingFile" fileName="/root/data/corgi-api/logs/corgi-api.log"
-                     filePattern="/data/shoe-inspire-api/inspire-api/logs/corgi-api-%d{yyyy-MM-dd}.log"
+                     filePattern="/root/data/corgi-api/logs/corgi-api-%d{yyyy-MM-dd}.log"
                      filePermissions="rw-r--r--">
             <PatternLayout alwaysWriteExceptions="false" pattern="%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %L %M requestId: %X{reqId} - userID : %X{usrID} %msg%dT%xEx%n" />
             <Policies>

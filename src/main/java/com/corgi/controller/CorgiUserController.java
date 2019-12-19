@@ -70,7 +70,7 @@ public class CorgiUserController extends BaseController {
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
-        if (code.equals(userLogin.getCode()) || "00000".equals(userLogin.getCode())) {
+        if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode())) {
             userLogin = corgiUserService.login(userLogin);
             return new JsonResult(userLogin);
         }
