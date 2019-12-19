@@ -220,35 +220,8 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        UserPosition userPosition = new UserPosition();
-        userPosition.setLng(0.0);
-        userPosition.setLat(1.0);
-        corgiUserService.updateUserPosition(userPosition);
-
-        UserDetail userDetail = new UserDetail();
-        userDetail.setUserId("1");
-        userDetail.setPreferGroup(Arrays.asList("熊", "猪猪", "鱼"));
-        userDetail.setGroup("地瓜");
-        userDetail.setAvatar("d=aweijgawe/vawjieo");
-        userDetail.setBirthday("1989/11/28");
-        userDetail.setCharacter("NKEOW91");
-        userDetail.setDesc("a0weg");
-        userDetail.setHeight(124);
-        userDetail.setWeight(283);
-        userDetail.setNickname("cccc");
-        userDetail.setRole("awieg阿维");
-        corgiUserService.addDetail(userDetail);
-
-        UserPic userPic = new UserPic();
-        userPic.setPicUrl("awiegaow/wiego/aoe");
-        userPic.setUserId("1");
-        corgiUserService.addUserPic(userPic);
-
-        userDetail.setRole("w阿维 i 恶搞 i");
-        corgiUserService.updateDetail(userDetail);
-
-
-        return new JsonResult();
+        log.info(corgiUserService + "");
+        return new JsonResult(corgiUserService + "");
     }
 
 }
