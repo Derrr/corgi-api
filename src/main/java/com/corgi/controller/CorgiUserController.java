@@ -220,8 +220,12 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        log.info(corgiUserService + "");
-        return new JsonResult(corgiUserService + "");
+        UserLogin userLogin = new UserLogin();
+        userLogin.setImId("1234");
+        userLogin.setTelNo("18017951373");
+        userLogin.setCode("00000");
+        userLogin = corgiUserService.login(userLogin);
+        return new JsonResult(userLogin);
     }
 
 }
