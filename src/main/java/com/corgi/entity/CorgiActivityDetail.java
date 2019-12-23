@@ -19,7 +19,7 @@ public class CorgiActivityDetail extends CorgiActivity {
         setAddress(activity.getAddress());
         setBudget(activity.getBudget());
         setContent(activity.getContent());
-        setEnlistTime(activity.getEnlistTime());
+        setSignUpTime(activity.getSignUpTime());
         setId(activity.getId());
         setLat(activity.getLat());
         setLng(activity.getLng());
