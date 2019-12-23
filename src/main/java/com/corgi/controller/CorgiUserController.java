@@ -69,13 +69,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
-        log.info("getting redis...");
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
-        log.info("code is " + code);
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode())) {
-            log.info("ready login...");
             userLogin = corgiUserService.login(userLogin);
-            log.info("finish login...");
             return new JsonResult(userLogin);
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
