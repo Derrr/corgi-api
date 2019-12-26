@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 public class CorgiActivityDetail extends CorgiActivity {
-    private Double match;
+    private double match;
 
     public CorgiActivityDetail() {
         super();
