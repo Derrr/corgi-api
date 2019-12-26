@@ -109,6 +109,7 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
+                log.info("match..." + match);
                 detailList.add(new CorgiActivityDetail(activity).initMatch(match));
             }
         }
