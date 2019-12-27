@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.user.api.CorgiFavorActivityService;
 import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserMatchService;
 import com.corgi.user.entity.UserProfile;
@@ -27,9 +28,10 @@ public class CorgiActivityController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserMatchService corgiUserMatchService;
-
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiFavorActivityService corgiFavorActivityService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
@@ -103,17 +105,53 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam("lng") double lng, @RequestParam("lat") double lat, @RequestParam("range") double range) {
-        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range);
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam("lng") double lng, @RequestParam("lat") double lat, @RequestParam("range") double range, @RequestParam(name = "type", required = false) String type) {
+        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, type);
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
-                log.info("match..." + match);
                 detailList.add(new CorgiActivityDetail(activity).initMatch(match));
             }
         }
         detailList.sort(detailComparator);
         return new JsonResult(detailList);
+    }
+
+    @GetMapping("get_user_activity")
+    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam("status") String status) {
+        List<CorgiActivity> result = new ArrayList<>();
+        if (CorgiActivity.CREATED.equals(status)) {
+            result = corgiActivityService.getUserRunningActivity(userId);
+        } else if (CorgiActivity.ENDED.equals(status)) {
+            result = corgiActivityService.getUserEndedActivity(userId);
+        }
+        return new JsonResult(result);
+    }
+
+    @GetMapping("add_favor")
+    public JsonResult addFavor(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        corgiFavorActivityService.addFavor(userId, activityId);
+        return new JsonResult();
+    }
+
+    @GetMapping("delete_favor")
+    public JsonResult deleteFavor(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        corgiFavorActivityService.deleteFavor(userId, activityId);
+        return new JsonResult();
+    }
+
+    @GetMapping("check_favor")
+    public JsonResult checkFavor(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        int result = corgiFavorActivityService.countActivity(userId, activityId);
+        return new JsonResult(result);
+    }
+
+    @GetMapping("get_favor")
+    public JsonResult getFavor(@RequestParam("userId") String userId, @RequestParam(name = "page", required = false, defaultValue = "1") Integer page, @RequestParam(name = "pageSize", required = false, defaultValue =
+            "20") Integer pageSize) {
+        List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
+        return new JsonResult(activityList);
     }
 }

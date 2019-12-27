@@ -7,6 +7,7 @@ import lombok.Data;
  */
 @Data
 public class StorageToken {
+    private String statusCode;
     private String bucketName;
     private String endpoint;
     private String securityToken;
