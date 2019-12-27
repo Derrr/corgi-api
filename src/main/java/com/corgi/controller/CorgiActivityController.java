@@ -154,4 +154,17 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         return new JsonResult(activityList);
     }
+
+    @GetMapping("test")
+    public JsonResult test() {
+        corgiFavorActivityService.addFavor("1", "aaaa");
+        corgiFavorActivityService.addFavor("1", "bbbb");
+        corgiFavorActivityService.addFavor("1", "cccc");
+        corgiFavorActivityService.deleteFavor("1", "cccc");
+        log.info("check" + corgiFavorActivityService.countActivity("1", "bbbb"));
+        corgiFavorActivityService.getActivity("1", 1, 20);
+        corgiActivityService.getUserRunningActivity("1");
+        corgiActivityService.getUserRunningActivity("1");
+        return new JsonResult();
+    }
 }
