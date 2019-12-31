@@ -57,7 +57,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("query_activity")
     public JsonResult queryActivity(CorgiActivity activity) {
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity);
-        return new JsonResult(activity);
+        return new JsonResult(activityList);
     }
 
 }
