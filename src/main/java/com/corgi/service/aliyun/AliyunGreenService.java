@@ -79,6 +79,7 @@ public class AliyunGreenService {
         for (CorgiPic pic : urls) {
             JSONObject task = new JSONObject();
             String id = UUID.randomUUID().toString();
+            log.info("dataId=" + id);
             task.put("dataId", id);
             picMap.put(id, pic);
             //设置图片链接
