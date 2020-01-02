@@ -47,6 +47,7 @@ public class AliyunGreenService {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
+
         ImageSyncScanRequest imageSyncScanRequest = new ImageSyncScanRequest();
         // 指定api返回格式
         imageSyncScanRequest.setAcceptFormat(FormatType.JSON);
@@ -74,17 +75,19 @@ public class AliyunGreenService {
          */
         List<JSONObject> tasks = new ArrayList<>();
         Date now = new Date();
+        Map<String, CorgiPic> picMap = new HashMap<>();
         for (CorgiPic pic : urls) {
             JSONObject task = new JSONObject();
             String id = UUID.randomUUID().toString();
             task.put("dataId", id);
-            pic.setId(id);
+            picMap.put(id, pic);
             //设置图片链接
             task.put("url", pic.getUrl());
             task.put("time", now);
             tasks.add(task);
         }
         httpBody.put("tasks", tasks);
+        httpBody.put("bizType", "sexy_pic");
 
         imageSyncScanRequest.setHttpContent(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(httpBody.toJSONString()),
                 "UTF-8", FormatType.JSON);
@@ -110,7 +113,9 @@ public class AliyunGreenService {
             JSONArray taskResults = scrResponse.getJSONArray("data");
             if (200 == requestCode) {
                 for (Object taskResult : taskResults) {
-                    log.info(JSON.toJSONString(taskResult));
+                    log.info(((JSONObject) taskResult).toJSONString());
+                    String dataId = ((JSONObject) taskResult).getString("dateId");
+                    CorgiPic pic = picMap.get(dataId);
                     //单张图片的处理结果
                     int taskCode = ((JSONObject) taskResult).getIntValue("code");
                     //图片要检测的场景的处理结果, 如果是多个场景，则会有每个场景的结果
@@ -118,10 +123,15 @@ public class AliyunGreenService {
                     if (200 == taskCode) {
                         for (Object sceneResult : sceneResults) {
                             String scene = ((JSONObject) sceneResult).getString("scene");
+                            String label = ((JSONObject) sceneResult).getString("label");
+                            Double rate = ((JSONObject) sceneResult).getDouble("rate");
                             String suggestion = ((JSONObject) sceneResult).getString("suggestion");
-                            //根据scene和suggetion做相关处理
-                            log.info("scene = [" + scene + "]");
-                            log.info("suggestion = [" + suggestion + "]");
+                            if (!suggestion.equals("pass")) {
+                                pic.setStatus(CorgiPic.NEED_CHECK);
+                                pic.setResult(scene + "-" + label + "-" + rate);
+                            } else {
+                                pic.setStatus(CorgiPic.NORMAL);
+                            }
                         }
                     } else {
                         //单张图片处理失败, 原因视具体的情况详细分析
@@ -145,14 +155,4 @@ public class AliyunGreenService {
         }
         return urls;
     }
-
-    private CorgiPic getCorgiPic(List<CorgiPic> pics, String id) {
-        for (CorgiPic pic : pics) {
-            if (id.equals(pic.getId())) {
-                return pic;
-            }
-        }
-        return null;
-    }
-
 }
