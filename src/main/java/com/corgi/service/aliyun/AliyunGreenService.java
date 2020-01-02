@@ -82,6 +82,7 @@ public class AliyunGreenService {
             //设置图片链接
             task.put("url", pic.getUrl());
             task.put("time", now);
+            tasks.add(task);
         }
         httpBody.put("tasks", tasks);
 
