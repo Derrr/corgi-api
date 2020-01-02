@@ -79,7 +79,6 @@ public class AliyunGreenService {
         for (CorgiPic pic : urls) {
             JSONObject task = new JSONObject();
             String id = UUID.randomUUID().toString();
-            log.info("dataId=" + id);
             task.put("dataId", id);
             picMap.put(id, pic);
             //设置图片链接
@@ -115,7 +114,7 @@ public class AliyunGreenService {
             if (200 == requestCode) {
                 for (Object taskResult : taskResults) {
                     log.info(((JSONObject) taskResult).toJSONString());
-                    String dataId = ((JSONObject) taskResult).getString("dateId");
+                    String dataId = ((JSONObject) taskResult).getString("dataId");
                     CorgiPic pic = picMap.get(dataId);
                     //单张图片的处理结果
                     int taskCode = ((JSONObject) taskResult).getIntValue("code");
