@@ -15,7 +15,9 @@ import com.aliyuncs.profile.IClientProfile;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.CharacterUtils;
+import com.corgi.entity.CorgiPic;
 import com.corgi.entity.StorageToken;
+import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
@@ -43,6 +45,9 @@ public class CorgiUserController extends BaseController {
 
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -220,12 +225,11 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        UserLogin userLogin = new UserLogin();
-        userLogin.setImId("1234");
-        userLogin.setTelNo("18017951373");
-        userLogin.setCode("00000");
-        userLogin = corgiUserService.login(userLogin);
-        return new JsonResult(userLogin);
+        CorgiPic pic = new CorgiPic();
+        pic.setUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
+        aliyunGreenService.checkPic(Arrays.asList(pic));
+        return new JsonResult();
+
     }
 
 }
