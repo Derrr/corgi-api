@@ -18,6 +18,7 @@ import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.CorgiPic;
 import com.corgi.entity.StorageToken;
 import com.corgi.service.aliyun.AliyunGreenService;
+import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
@@ -42,6 +43,9 @@ import java.util.concurrent.TimeUnit;
 public class CorgiUserController extends BaseController {
     @Reference
     private CorgiUserService corgiUserService;
+
+    @Reference
+    private CorgiPicService corgiPicService;
 
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
@@ -84,6 +88,8 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/add_user")
     public JsonResult addUser(@RequestBody UserDetail userDetail) {
+        List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics());
+        userDetail.setUserPics(pics);
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
     }
@@ -102,13 +108,14 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/delete_user_pic")
     public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
-        String result = corgiUserService.deleteUserPic(picId);
+        String result = corgiPicService.deleteUserPic(picId);
         return getJsonResult(result);
     }
 
     @PostMapping("/add_user_pic")
     public JsonResult addUserPic(@RequestBody UserPic userPic) {
-        String result = corgiUserService.addUserPic(userPic);
+        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic));
+        String result = corgiPicService.addUserPic(userPics.get(0));
         userPic.setPicId(result);
         return new JsonResult(userPic);
     }
@@ -226,7 +233,7 @@ public class CorgiUserController extends BaseController {
     @GetMapping("test")
     public JsonResult test() {
         CorgiPic pic = new CorgiPic();
-        pic.setUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
+        pic.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
         aliyunGreenService.checkPic(Arrays.asList(pic));
         return new JsonResult();
 

@@ -43,7 +43,7 @@ public class AliyunGreenService {
         this.managementClient = new DefaultAcsClient(profile);
     }
 
-    public List<CorgiPic> checkPic(List<CorgiPic> urls) {
+    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls) {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
@@ -80,9 +80,10 @@ public class AliyunGreenService {
             JSONObject task = new JSONObject();
             String id = UUID.randomUUID().toString();
             task.put("dataId", id);
+            pic.setDataId(id);
             picMap.put(id, pic);
             //设置图片链接
-            task.put("url", pic.getUrl());
+            task.put("url", pic.getPicUrl());
             task.put("time", now);
             tasks.add(task);
         }
@@ -128,14 +129,18 @@ public class AliyunGreenService {
                             String suggestion = ((JSONObject) sceneResult).getString("suggestion");
                             if (!suggestion.equals("pass")) {
                                 pic.setStatus(CorgiPic.NEED_CHECK);
-                                pic.setResult(scene + "-" + label + "-" + rate);
+                                pic.setResult(suggestion + "-" + scene + "-" + label + "-" + rate);
                             } else {
                                 pic.setStatus(CorgiPic.NORMAL);
+                                pic.setResult(suggestion);
                             }
                         }
                     } else {
+                        String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
+                        pic.setStatus(CorgiPic.NEED_CHECK);
+                        pic.setResult(result);
                         //单张图片处理失败, 原因视具体的情况详细分析
-                        log.info("task process fail. task response:" + JSON.toJSONString(taskResult));
+                        log.info(result);
                     }
                 }
             } else {
@@ -149,9 +154,6 @@ public class AliyunGreenService {
                     log.info(result);
                 }
             }
-        }
-        for (CorgiPic pic : urls) {
-            pic.setId(null);
         }
         return urls;
     }

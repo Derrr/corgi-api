@@ -5,13 +5,17 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.CorgiFavorActivityService;
+import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.api.CorgiUserMatchService;
+import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +37,10 @@ public class CorgiActivityController extends BaseController {
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiFavorActivityService corgiFavorActivityService;
+    @Reference
+    private CorgiPicService corgiPicService;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
@@ -128,6 +136,20 @@ public class CorgiActivityController extends BaseController {
             result = corgiActivityService.getUserEndedActivity(userId);
         }
         return new JsonResult(result);
+    }
+
+    @GetMapping("/delete_activity_pic")
+    public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
+        String result = corgiPicService.deleteActivityPic(picId);
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/add_activity_pic")
+    public JsonResult addUserPic(@RequestBody ActivityPic activityPic) {
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic));
+        String result = corgiPicService.addActivityPic(activityPics.get(0));
+        activityPic.setPicId(result);
+        return new JsonResult(activityPic);
     }
 
     @GetMapping("add_favor")
