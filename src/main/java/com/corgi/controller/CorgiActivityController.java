@@ -44,6 +44,8 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics());
+        activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         return new JsonResult(activity);
     }
