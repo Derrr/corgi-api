@@ -67,8 +67,22 @@ public class CorgiActivityController extends BaseController {
         activity.setTitle("测试");
         activity.setPeopleCount(341);
         activity.setSignUpTime("2020/11/11 00:00");
+        List<ActivityPic> activityPics = new ArrayList<>();
+        ActivityPic pic1 = new ActivityPic();
+        ActivityPic pic2 = new ActivityPic();
+        activityPics.add(pic1);
+        activityPics.add(pic2);
+        pic1.setDataId("awegaweg");
+        pic1.setPicUrl("awjeigaowejg");
+        pic1.setResult("pass");
+        pic1.setStatus("normal");
+        pic2.setDataId("awegrhrshw4wgewa");
+        pic2.setPicUrl("awjeawegigaowejg");
+        pic2.setResult("cheawegwegaack");
+        pic2.setStatus("check");
+        activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        activity.setTitle("测试33");
+        activity.setTitle("测试34");
         corgiActivityService.updateCorgiActivity(activity);
         return new JsonResult(activity);
     }
