@@ -260,22 +260,9 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        UserPic pic = new UserPic();
-        pic.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
-        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(pic));
-
-        UserDetail userDetail = new UserDetail();
-        userDetail.setUserPics(userPics);
-        userDetail.setUserId("-2");
-        userDetail.setRole("geawa");
-        userDetail.setWeight(0);
-        userDetail.setHeight(1);
-        userDetail.setDesc("j=lllllllll");
-        userDetail.setCharacter("aweg");
-        corgiUserService.addDetail(userDetail);
-
-        return new JsonResult();
-
+        corgiUserTagService.updateUserInterest("1", "阿维噶", Arrays.asList("快看看", "g高温"));
+        corgiUserTagService.updateUserTag("1", Arrays.asList("阿个 i 哦老公", "结果 i 为哦过"));
+        return new JsonResult(corgiUserService.getUserDetail("1"));
     }
 
 }
