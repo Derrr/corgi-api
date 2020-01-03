@@ -21,6 +21,7 @@ import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.api.CorgiUserTagService;
 import com.corgi.user.entity.*;
 import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,9 @@ public class CorgiUserController extends BaseController {
 
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+
+    @Reference
+    private CorgiUserTagService corgiUserTagService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -228,6 +232,30 @@ public class CorgiUserController extends BaseController {
     public JsonResult isFollowed(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
         int result = corgiUserFollowService.isFollowed(userId, targetUserId);
         return new JsonResult(result);
+    }
+
+    @GetMapping("get_tags")
+    public JsonResult getTags() {
+        List<String> tags = corgiUserTagService.getTags();
+        return new JsonResult(tags);
+    }
+
+    @GetMapping("get_interests")
+    public JsonResult getInterests(@RequestParam("category") String category) {
+        List<String> interests = corgiUserTagService.getInterestsByCategory(category);
+        return new JsonResult(interests);
+    }
+
+    @GetMapping("update_user_tag")
+    public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam("tags") List<String> tags) {
+        corgiUserTagService.updateUserTag(userId, tags);
+        return new JsonResult();
+    }
+
+    @GetMapping("update_user_interest")
+    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam("interests") List<String> interests) {
+        corgiUserTagService.updateUserInterest(userId, category, interests);
+        return new JsonResult();
     }
 
     @GetMapping("test")
