@@ -19,9 +19,9 @@ import com.corgi.entity.CorgiPic;
 import com.corgi.entity.StorageToken;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.CorgiPicService;
+import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.api.CorgiUserTagService;
 import com.corgi.user.entity.*;
 import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class CorgiUserController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
 
     @Reference
-    private CorgiUserTagService corgiUserTagService;
+    private CorgiToolService corgiToolService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -234,34 +234,23 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(result);
     }
 
-    @GetMapping("get_tags")
-    public JsonResult getTags() {
-        List<String> tags = corgiUserTagService.getTags();
-        return new JsonResult(tags);
-    }
-
-    @GetMapping("get_interests")
-    public JsonResult getInterests(@RequestParam("category") String category) {
-        List<String> interests = corgiUserTagService.getInterestsByCategory(category);
-        return new JsonResult(interests);
-    }
 
     @GetMapping("update_user_tag")
     public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam("tags") List<String> tags) {
-        corgiUserTagService.updateUserTag(userId, tags);
+        corgiToolService.updateUserTag(userId, tags);
         return new JsonResult();
     }
 
     @GetMapping("update_user_interest")
     public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam("interests") List<String> interests) {
-        corgiUserTagService.updateUserInterest(userId, category, interests);
+        corgiToolService.updateUserInterest(userId, category, interests);
         return new JsonResult();
     }
 
     @GetMapping("test")
     public JsonResult test() {
-        corgiUserTagService.updateUserInterest("1", "阿维噶", Arrays.asList("快看看", "g高温"));
-        corgiUserTagService.updateUserTag("1", Arrays.asList("阿个 i 哦老公", "结果 i 为哦过"));
+        corgiToolService.updateUserInterest("1", "阿维噶", Arrays.asList("快看看", "g高温"));
+        corgiToolService.updateUserTag("1", Arrays.asList("阿个 i 哦老公", "结果 i 为哦过"));
         return new JsonResult(corgiUserService.getUserDetail("1"));
     }
 
