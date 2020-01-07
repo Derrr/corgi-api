@@ -115,4 +115,15 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_statistics")
+    public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+        List<CorgiStatistic> statistics = corgiToolService.getCount(type, startDate, endDate);
+        return new JsonResult(statistics);
+    }
+
+    @GetMapping("sum_statistics")
+    public JsonResult sumStatistics(@RequestParam("type") String type) {
+        long sum = corgiToolService.sumCount(type);
+        return new JsonResult(sum);
+    }
 }

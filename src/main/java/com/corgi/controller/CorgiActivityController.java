@@ -71,7 +71,9 @@ public class CorgiActivityController extends BaseController {
         activity.setSignUpTime("2020/11/11 00:00");
         ActivityPic pic1 = new ActivityPic();
         pic1.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1), CheckPic.ACTIVITY);
+        ActivityPic pic2 = new ActivityPic();
+        pic2.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs1.com/avatar/2/1577412815326");
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1,pic2), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         activity.setTitle("测试34");
