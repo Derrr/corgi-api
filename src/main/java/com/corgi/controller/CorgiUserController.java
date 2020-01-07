@@ -255,6 +255,7 @@ public class CorgiUserController extends BaseController {
        UserDetail userDetail = new UserDetail();
        userDetail.setNickname("testtestsss");
        userDetail.setAvatar("http://www.aeeddd.com");
+       userDetail = aliyunGreenService.checkAvatar(userDetail);
        corgiUserService.addDetail(userDetail);
        return new JsonResult(corgiUserService.getUserDetail("1"));
     }
