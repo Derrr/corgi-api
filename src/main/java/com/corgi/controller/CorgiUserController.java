@@ -15,7 +15,7 @@ import com.aliyuncs.profile.IClientProfile;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.CharacterUtils;
-import com.corgi.entity.CorgiPic;
+import com.corgi.entity.CheckPic;
 import com.corgi.entity.StorageToken;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.CorgiPicService;
@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -92,14 +93,16 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/add_user")
     public JsonResult addUser(@RequestBody UserDetail userDetail) {
-        List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics());
+        List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), CheckPic.USER);
         userDetail.setUserPics(pics);
+        userDetail = aliyunGreenService.checkAvatar(userDetail);
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
     }
 
     @PostMapping("/update_user")
     public JsonResult updateUser(@RequestBody UserDetail userDetail) {
+        userDetail = aliyunGreenService.checkAvatar(userDetail);
         String result = corgiUserService.updateDetail(userDetail);
         return getJsonResult(result);
     }
@@ -118,7 +121,7 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/add_user_pic")
     public JsonResult addUserPic(@RequestBody UserPic userPic) {
-        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic));
+        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
         String result = corgiPicService.addUserPic(userPics.get(0));
         userPic.setPicId(result);
         return new JsonResult(userPic);

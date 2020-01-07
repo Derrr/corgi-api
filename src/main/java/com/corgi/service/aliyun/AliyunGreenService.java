@@ -12,11 +12,17 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.http.ProtocolType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiPic;
+import com.corgi.user.api.CorgiPicService;
+import com.corgi.user.entity.UserDetail;
+import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -37,13 +43,28 @@ public class AliyunGreenService {
 
     private IAcsClient managementClient;
 
+    @Reference
+    private CorgiPicService corgiPicService;
+
     @PostConstruct
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
         this.managementClient = new DefaultAcsClient(profile);
     }
 
-    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls) {
+    public UserDetail checkAvatar(UserDetail userDetail) {
+        if (StringUtils.isEmpty(userDetail.getAvatar())) {
+            return userDetail;
+        }
+        CorgiPic corgiPic = new CorgiPic();
+        corgiPic.setPicUrl(userDetail.getAvatar());
+        corgiPic = checkPic(Arrays.asList(corgiPic), CheckPic.AVATAR).get(0);
+        userDetail.setAvatarStatus(corgiPic.getStatus());
+        userDetail.setAvatarDataId(corgiPic.getDataId());
+        return userDetail;
+    }
+
+    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String type) {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
@@ -130,6 +151,7 @@ public class AliyunGreenService {
                             if (!suggestion.equals("pass")) {
                                 pic.setStatus(CorgiPic.NEED_CHECK);
                                 pic.setResult(suggestion + "-" + scene + "-" + label + "-" + rate);
+                                addCheckPic(pic, type);
                             } else {
                                 pic.setStatus(CorgiPic.NORMAL);
                                 pic.setResult(suggestion);
@@ -139,6 +161,7 @@ public class AliyunGreenService {
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
                         pic.setStatus(CorgiPic.NEED_CHECK);
                         pic.setResult(result);
+                        addCheckPic(pic, type);
                         //单张图片处理失败, 原因视具体的情况详细分析
                         log.info(result);
                     }
@@ -151,10 +174,18 @@ public class AliyunGreenService {
                     pic.setStatus(CorgiPic.NEED_CHECK);
                     String result = JSON.toJSONString("the whole image scan request failed. response:" + JSON.toJSONString(scrResponse));
                     pic.setResult(result);
+                    addCheckPic(pic, type);
                     log.info(result);
                 }
             }
         }
         return urls;
+    }
+
+    private void addCheckPic(CorgiPic corgiPic, String type) {
+        CheckPic checkPic = new CheckPic();
+        BeanUtils.copyProperties(corgiPic, checkPic);
+        checkPic.setType(type);
+        corgiPicService.addCheckPic(checkPic);
     }
 }

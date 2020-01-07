@@ -4,16 +4,16 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
+import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.service.aliyun.AliyunGreenService;
-import com.corgi.user.api.CorgiFavorActivityService;
-import com.corgi.user.api.CorgiPicService;
-import com.corgi.user.api.CorgiUserActivityService;
-import com.corgi.user.api.CorgiUserMatchService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,12 +39,16 @@ public class CorgiActivityController extends BaseController {
     private CorgiPicService corgiPicService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
+    private CorgiUtilService corgiUtilService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics());
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         return new JsonResult(activity);
@@ -69,7 +73,7 @@ public class CorgiActivityController extends BaseController {
         activity.setSignUpTime("2020/11/11 00:00");
         ActivityPic pic1 = new ActivityPic();
         pic1.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1));
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         activity.setTitle("测试34");
@@ -97,9 +101,11 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("agree")
     public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        corgiUtilService.lock("agree_" + activityId);
         UserSignUp userSignUp = new UserSignUp(userId, activityId);
         userSignUp.setStatus(UserSignUp.AGREE);
         corgiUserActivityService.updateSignUp(userSignUp);
+        corgiUtilService.unlock("agree_" + activityId);
         return new JsonResult();
     }
 
@@ -150,7 +156,7 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("/add_activity_pic")
     public JsonResult addUserPic(@RequestBody ActivityPic activityPic) {
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic));
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic), CheckPic.ACTIVITY);
         String result = corgiPicService.addActivityPic(activityPics.get(0));
         activityPic.setPicId(result);
         return new JsonResult(activityPic);
