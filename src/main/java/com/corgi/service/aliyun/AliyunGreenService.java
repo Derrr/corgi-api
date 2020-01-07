@@ -1,5 +1,6 @@
 package com.corgi.service.aliyun;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -16,7 +17,6 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiPic;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.UserDetail;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
