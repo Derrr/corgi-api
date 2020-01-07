@@ -40,8 +40,6 @@ public class CorgiActivityController extends BaseController {
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
-    private StringRedisTemplate redisTemplate;
-    @Autowired
     private CorgiUtilService corgiUtilService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());

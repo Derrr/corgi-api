@@ -252,9 +252,11 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        corgiToolService.updateUserInterest("1", "阿维噶", Arrays.asList("快看看", "g高温"));
-        corgiToolService.updateUserTag("1", Arrays.asList("阿个 i 哦老公", "结果 i 为哦过"));
-        return new JsonResult(corgiUserService.getUserDetail("1"));
+       UserDetail userDetail = new UserDetail();
+       userDetail.setNickname("testtestsss");
+       userDetail.setAvatar("http://www.aeeddd.com");
+       corgiUserService.addDetail(userDetail);
+       return new JsonResult(corgiUserService.getUserDetail("1"));
     }
 
 }
