@@ -4,11 +4,13 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.Constants;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.*;
+import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +75,7 @@ public class CorgiActivityController extends BaseController {
         pic1.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
         ActivityPic pic2 = new ActivityPic();
         pic2.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs1.com/avatar/2/1577412815326");
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1,pic2), CheckPic.ACTIVITY);
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1, pic2), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         activity.setTitle("测试34");
@@ -100,13 +102,53 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("agree")
-    public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
-        corgiUtilService.lock("agree_" + activityId);
-        UserSignUp userSignUp = new UserSignUp(userId, activityId);
-        userSignUp.setStatus(UserSignUp.AGREE);
-        corgiUserActivityService.updateSignUp(userSignUp);
-        corgiUtilService.unlock("agree_" + activityId);
-        return new JsonResult();
+    public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId, @RequestParam("peopleCount") Integer peopleCount) {
+        String lockKey = "agree_" + activityId;
+        corgiUtilService.lock(lockKey);
+        try {
+            List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+            if (CollectionUtils.isEmpty(activityList)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+            }
+            CorgiActivity activity = activityList.get(0);
+            if (activity.getStatus().equals(CorgiActivity.DELETED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "活动已被删除");
+            }
+            if (activity.getStatus().equals(CorgiActivity.ENDED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
+            }
+            if (activity.getStatus().equals(CorgiActivity.FULL)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+            }
+            boolean hasUser = false;
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId);
+            int count = 0;
+            for (UserProfile userProfile : userProfiles) {
+                if (userProfile.getSignUpStatus() == UserSignUp.AGREE) {
+                    count++;
+                } else {
+                    hasUser |= userProfile.getUserId().equals(userId);
+                }
+            }
+            if (count >= peopleCount) {
+                activity.setStatus(CorgiActivity.FULL);
+                corgiActivityService.updateCorgiActivity(activity);
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+            }
+            if (hasUser) {
+                UserSignUp userSignUp = new UserSignUp(userId, activityId);
+                userSignUp.setStatus(UserSignUp.AGREE);
+                corgiUserActivityService.updateSignUp(userSignUp);
+                count++;
+                if (peopleCount.equals(count)) {
+                    activity.setStatus(CorgiActivity.FULL);
+                    corgiActivityService.updateCorgiActivity(activity);
+                }
+            }
+            return new JsonResult();
+        } finally {
+            corgiUtilService.unlock(lockKey);
+        }
     }
 
     @GetMapping("refuse")
