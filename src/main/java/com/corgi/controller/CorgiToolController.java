@@ -8,6 +8,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiStatistic;
+import com.corgi.entity.CorgiTopic;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserService;
@@ -62,20 +63,20 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_topics")
-    public JsonResult getTopics() {
-        List<String> topics = corgiToolService.getTopics();
+    public JsonResult getTopics(@RequestParam("status") String status) {
+        List<CorgiTopic> topics = corgiToolService.getTopics(status);
         return new JsonResult(topics);
     }
 
     @GetMapping("add_topic")
-    public JsonResult addTopic(@RequestParam("topic") String topic) {
+    public JsonResult addTopic(CorgiTopic topic) {
         corgiToolService.addTopic(topic);
         return new JsonResult();
     }
 
-    @GetMapping("delete_topic")
-    public JsonResult deleteTopic(@RequestParam("topic") String topic) {
-        corgiToolService.deleteTopic(topic);
+    @GetMapping("update_topic")
+    public JsonResult upadteTopic(CorgiTopic topic) {
+        corgiToolService.updateTopic(topic);
         return new JsonResult();
     }
 
