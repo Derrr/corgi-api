@@ -68,6 +68,7 @@ public class AliyunGreenService {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
+        log.info("pics = " + urls);
 
         ImageSyncScanRequest imageSyncScanRequest = new ImageSyncScanRequest();
         // 指定api返回格式
