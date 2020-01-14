@@ -10,6 +10,8 @@ import org.springframework.beans.BeanUtils;
 @Data
 public class CorgiActivityDetail extends CorgiActivity {
     private Double match = 0.0;
+    private Integer height = 0;
+    private Integer width = 0;
 
     public CorgiActivityDetail() {
         super();
@@ -21,6 +23,12 @@ public class CorgiActivityDetail extends CorgiActivity {
 
     public CorgiActivityDetail initMatch(double match) {
         setMatch(match);
+        return this;
+    }
+
+    public CorgiActivityDetail initSize(int height, int width) {
+        this.height = height;
+        this.width = width;
         return this;
     }
 }

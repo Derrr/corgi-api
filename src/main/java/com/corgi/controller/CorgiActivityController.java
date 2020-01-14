@@ -5,17 +5,16 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +38,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiFavorActivityService corgiFavorActivityService;
     @Reference
     private CorgiPicService corgiPicService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -151,6 +152,25 @@ public class CorgiActivityController extends BaseController {
         }
     }
 
+    @GetMapping("get_detail")
+    public JsonResult getDetail(@RequestParam("activityId") String activityId, @RequestParam("userId") String userId) {
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            return new JsonResult();
+        }
+        return new JsonResult(convertDetail(Arrays.asList(corgiActivities.get(0)), userId).get(0));
+    }
+
+    @GetMapping("get_follow_activity")
+    public JsonResult getFollowActivity(@RequestParam("userId") String userId, @RequestParam(name = "page", defaultValue = "1") Integer page, @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        List<String> userIds = corgiUserFollowService.getFollowUser(userId);
+        if (CollectionUtils.isEmpty(userIds)) {
+            return new JsonResult();
+        }
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByUserIds(userIds, CorgiActivity.CREATED, page, size);
+        return new JsonResult(convertDetail(corgiActivities, userId));
+    }
+
     @GetMapping("refuse")
     public JsonResult refuse(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
         UserSignUp userSignUp = new UserSignUp(userId, activityId);
@@ -166,26 +186,20 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam("lng") double lng, @RequestParam("lat") double lat, @RequestParam("range") double range, @RequestParam(name = "type", required = false) String type) {
-        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, type);
-        List<CorgiActivityDetail> detailList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(activityList)) {
-            for (CorgiActivity activity : activityList) {
-                double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
-                detailList.add(new CorgiActivityDetail(activity).initMatch(match));
-            }
-        }
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam("lng") double lng, @RequestParam("lat") double lat, @RequestParam("range") double range, ActivityQuery activityQuery) {
+        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         detailList.sort(detailComparator);
         return new JsonResult(detailList);
     }
 
     @GetMapping("get_user_activity")
-    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam("status") String status) {
+    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam("status") String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<CorgiActivity> result = new ArrayList<>();
         if (CorgiActivity.CREATED.equals(status)) {
-            result = corgiActivityService.getUserRunningActivity(userId);
+            result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
         } else if (CorgiActivity.ENDED.equals(status)) {
-            result = corgiActivityService.getUserEndedActivity(userId);
+            result = corgiActivityService.getUserEndedActivity(userId, page, pageSize);
         }
         return new JsonResult(result);
     }
@@ -227,7 +241,8 @@ public class CorgiActivityController extends BaseController {
             "20") Integer pageSize) {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(activityList);
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
+        return new JsonResult(detailList);
     }
 
     @GetMapping("test")
@@ -238,8 +253,25 @@ public class CorgiActivityController extends BaseController {
         corgiFavorActivityService.deleteFavor("1", "cccc");
         log.info("check" + corgiFavorActivityService.countActivity("1", "bbbb"));
         corgiFavorActivityService.getActivity("1", 1, 20);
-        corgiActivityService.getUserRunningActivity("1");
-        corgiActivityService.getUserRunningActivity("1");
+        corgiActivityService.getUserRunningActivity("1", 1, 20);
+        corgiActivityService.getUserRunningActivity("1", 1, 20);
         return new JsonResult();
+    }
+
+    private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(activityList)) {
+            for (CorgiActivity activity : activityList) {
+                Integer height = 0;
+                Integer width = 0;
+                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                    String picUrl = activity.getPics().get(0).getPicUrl();
+
+                }
+                double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
+                detailList.add(new CorgiActivityDetail(activity).initMatch(match).initSize(height, width));
+            }
+        }
+        return detailList;
     }
 }

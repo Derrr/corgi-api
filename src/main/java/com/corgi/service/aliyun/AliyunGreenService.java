@@ -183,6 +183,8 @@ public class AliyunGreenService {
         return urls;
     }
 
+
+
     private void addCheckPic(CorgiPic corgiPic, String type) {
         CheckPic checkPic = new CheckPic();
         BeanUtils.copyProperties(corgiPic, checkPic);
