@@ -8,6 +8,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.entity.PicInfo;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.*;
@@ -266,7 +267,9 @@ public class CorgiActivityController extends BaseController {
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
-
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    height = picInfo.getHeight();
+                    width = picInfo.getWidth();
                 }
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
                 detailList.add(new CorgiActivityDetail(activity).initMatch(match).initSize(height, width));

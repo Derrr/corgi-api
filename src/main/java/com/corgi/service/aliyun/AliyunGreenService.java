@@ -13,10 +13,13 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.http.ProtocolType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.corgi.common.util.CorgiHttpUtil;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiPic;
+import com.corgi.entity.PicInfo;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.UserDetail;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +45,8 @@ public class AliyunGreenService {
     String REGION_ID = "cn-shanghai";
 
     private IAcsClient managementClient;
+
+    private static final String IMAGE_INFO = "?x-oss-process=image/info";
 
     @Reference
     private CorgiPicService corgiPicService;
@@ -183,6 +188,18 @@ public class AliyunGreenService {
         return urls;
     }
 
+    public PicInfo getAliyunPicInfo(String url) {
+        PicInfo picInfo = new PicInfo();
+        String result = CorgiHttpUtil.doGet(url + IMAGE_INFO, null, null);
+        try {
+            JSONObject image = JSONObject.parseObject(result);
+            picInfo.setHeight(image.getJSONObject("ImageHeight").getInteger("value"));
+            picInfo.setWidth(image.getJSONObject("ImageWidth").getInteger("value"));
+        } catch (Exception e) {
+            log.error("get pic info:" + url + " failed", e);
+        }
+        return picInfo;
+    }
 
 
     private void addCheckPic(CorgiPic corgiPic, String type) {
