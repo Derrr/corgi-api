@@ -119,6 +119,13 @@ public class CorgiUserController extends BaseController {
         return getJsonResult(result);
     }
 
+    @PostMapping("/update_user_pic")
+    public JsonResult updateUserPic(@RequestBody UserPic userPic) {
+        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
+        String result = corgiPicService.updateUserPic(userPics.get(0));
+        return getJsonResult(result);
+    }
+
     @PostMapping("/add_user_pic")
     public JsonResult addUserPic(@RequestBody UserPic userPic) {
         List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
@@ -252,12 +259,12 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-       UserDetail userDetail = new UserDetail();
-       userDetail.setNickname("testtestsss");
-       userDetail.setAvatar("http://www.aeeddd.com");
-       userDetail = aliyunGreenService.checkAvatar(userDetail);
-       corgiUserService.addDetail(userDetail);
-       return new JsonResult(corgiUserService.getUserDetail("1"));
+        UserDetail userDetail = new UserDetail();
+        userDetail.setNickname("testtestsss");
+        userDetail.setAvatar("http://www.aeeddd.com");
+        userDetail = aliyunGreenService.checkAvatar(userDetail);
+        corgiUserService.addDetail(userDetail);
+        return new JsonResult(corgiUserService.getUserDetail("1"));
     }
 
 }
