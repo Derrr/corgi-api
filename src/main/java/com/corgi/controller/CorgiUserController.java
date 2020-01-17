@@ -227,21 +227,30 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("follow")
-    public JsonResult follow(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+    public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         corgiUserFollowService.follow(userId, targetUserId);
         return new JsonResult();
     }
 
     @GetMapping("unfollow")
-    public JsonResult unfollow(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+    public JsonResult unfollow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         corgiUserFollowService.unfollow(userId, targetUserId);
         return new JsonResult();
     }
 
     @GetMapping("is_followed")
-    public JsonResult isFollowed(@Param("userId") String userId, @Param("targetUserId") String targetUserId) {
+    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         int result = corgiUserFollowService.isFollowed(userId, targetUserId);
         return new JsonResult(result);
+    }
+
+    @GetMapping("get_follow_user")
+    public JsonResult getFollowUser(@RequestParam("userId") String userId, @RequestParam("type") String type,
+                                    @RequestParam(name = "lat", required = false) Double lat,
+                                    @RequestParam(name = "lng", required = false) Double lng,
+                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
+        return new JsonResult(userProfiles);
     }
 
 
