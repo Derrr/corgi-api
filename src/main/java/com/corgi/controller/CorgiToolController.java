@@ -7,8 +7,10 @@ import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.entity.CheckPic;
+import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
+import com.corgi.user.api.CorgiAreaService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserService;
@@ -36,6 +38,8 @@ public class CorgiToolController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiPicService corgiPicService;
+    @Reference
+    private CorgiAreaService corgiAreaService;
 
     @GetMapping("query_user")
     public JsonResult queryUser(UserDetail userDetail) {
@@ -126,5 +130,11 @@ public class CorgiToolController extends BaseController {
     public JsonResult sumStatistics(@RequestParam("type") String type) {
         long sum = corgiToolService.sumCount(type);
         return new JsonResult(sum);
+    }
+
+    @GetMapping("get_city_area")
+    public JsonResult getCityArea(@RequestParam("city") String city) {
+        List<CorgiArea> corgiAreas = corgiAreaService.getAreaByCity(city);
+        return new JsonResult(corgiAreas);
     }
 }

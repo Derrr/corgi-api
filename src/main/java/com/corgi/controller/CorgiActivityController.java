@@ -5,10 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
-import com.corgi.entity.ActivityQuery;
-import com.corgi.entity.CheckPic;
-import com.corgi.entity.CorgiActivityDetail;
-import com.corgi.entity.PicInfo;
+import com.corgi.entity.*;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.*;
@@ -17,6 +14,7 @@ import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -41,6 +39,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiAreaService corgiAreaService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -53,6 +53,7 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
+        addArea(activity);
         return new JsonResult(activity);
     }
 
@@ -276,5 +277,28 @@ public class CorgiActivityController extends BaseController {
             }
         }
         return detailList;
+    }
+
+    private void addArea(CorgiActivity corgiActivity) {
+        String city = corgiActivity.getCity();
+        String adname = corgiActivity.getAdname();
+        if (StringUtils.isEmpty(city) || StringUtils.isEmpty(adname)) {
+            return;
+        }
+        if (!StringUtils.isEmpty(corgiActivity.getStation())) {
+            corgiAreaService.addArea(CorgiArea.builder()
+                    .city(city).adname(adname)
+                    .type(CorgiArea.STATION)
+                    .areaName(corgiActivity.getStation())
+                    .lat(corgiActivity.getLat()).lng(corgiActivity.getLng())
+                    .build());
+        }
+        if (!StringUtils.isEmpty(corgiActivity.getBusinessArea())) {
+            corgiAreaService.addArea(CorgiArea.builder()
+                    .city(city).adname(adname)
+                    .type(CorgiArea.BUSINESS)
+                    .areaName(corgiActivity.getBusinessArea())
+                    .build());
+        }
     }
 }
