@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class AddActivityResult extends CorgiActivity {
-    private List<CorgiActivity> similarActivity;
+    private List<CorgiActivityDetail> similarActivity;
 
     public static AddActivityResult getResult(CorgiActivity corgiActivity) {
         AddActivityResult result = new AddActivityResult();
@@ -16,7 +16,7 @@ public class AddActivityResult extends CorgiActivity {
         return result;
     }
 
-    public AddActivityResult setSimilar(List<CorgiActivity> list) {
+    public AddActivityResult setSimilar(List<CorgiActivityDetail> list) {
         this.similarActivity = list;
         return this;
     }
