@@ -54,7 +54,8 @@ public class CorgiActivityController extends BaseController {
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         addArea(activity);
-        return new JsonResult(activity);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
+        return new JsonResult(AddActivityResult.getResult(activity).setSimilar(corgiActivities));
     }
 
     @GetMapping("test_add_activity")
