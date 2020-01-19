@@ -96,7 +96,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("delete_activity")
-    public JsonResult deleteActivity(String activityId) {
+    public JsonResult deleteActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.deleteCorgiActivity(activityId);
         return new JsonResult();
     }
