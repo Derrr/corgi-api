@@ -268,12 +268,11 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        UserDetail userDetail = new UserDetail();
-        userDetail.setNickname("testtestsss");
-        userDetail.setAvatar("http://www.aeeddd.com");
-        userDetail = aliyunGreenService.checkAvatar(userDetail);
-        corgiUserService.addDetail(userDetail);
-        return new JsonResult(corgiUserService.getUserDetail("1"));
+        UserPic userPic = new UserPic();
+        userPic.setPicUrl("atestsaweg");
+        String picId = corgiPicService.addUserPic(userPic);
+        log.info("picId=" + picId);
+        return new JsonResult(picId);
     }
 
 }
