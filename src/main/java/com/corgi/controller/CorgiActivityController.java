@@ -56,7 +56,8 @@ public class CorgiActivityController extends BaseController {
         addArea(activity);
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
-        return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details));
+        long count = corgiActivityService.countUserActivity(activity.getUserId());
+        return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
     }
 
     @GetMapping("test_add_activity")
