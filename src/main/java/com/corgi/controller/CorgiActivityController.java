@@ -200,7 +200,9 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false) double lng, @RequestParam(name = "lat", required = false) double lat, @RequestParam(name = "range", required = false) double range, ActivityQuery activityQuery) {
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-        detailList.sort(detailComparator);
+        if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
+            detailList.sort(detailComparator);
+        }
         return new JsonResult(detailList);
     }
 
@@ -294,14 +296,14 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(city) || StringUtils.isEmpty(adname)) {
             return;
         }
-        if (!StringUtils.isEmpty(corgiActivity.getStation())) {
-            corgiAreaService.addArea(CorgiArea.builder()
-                    .city(city).adname(adname)
-                    .type(CorgiArea.STATION)
-                    .areaName(corgiActivity.getStation())
-                    .lat(corgiActivity.getLat()).lng(corgiActivity.getLng())
-                    .build());
-        }
+//        if (!StringUtils.isEmpty(corgiActivity.getStation())) {
+//            corgiAreaService.addArea(CorgiArea.builder()
+//                    .city(city).adname(adname)
+//                    .type(CorgiArea.STATION)
+//                    .areaName(corgiActivity.getStation())
+//                    .lat(corgiActivity.getLat()).lng(corgiActivity.getLng())
+//                    .build());
+//        }
         if (!StringUtils.isEmpty(corgiActivity.getBusinessArea())) {
             corgiAreaService.addArea(CorgiArea.builder()
                     .city(city).adname(adname)
