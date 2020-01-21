@@ -107,6 +107,12 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("sign_out")
+    public JsonResult signOut(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        corgiUserActivityService.signOut(new UserSignUp(userId, activityId));
+        return new JsonResult();
+    }
+
     @GetMapping("agree")
     public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId, @RequestParam("peopleCount") Integer peopleCount) {
         String lockKey = "agree_" + activityId;
