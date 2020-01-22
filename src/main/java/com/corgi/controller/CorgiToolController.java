@@ -10,18 +10,16 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
+import com.corgi.entity.tool.CorgiPage;
 import com.corgi.user.api.CorgiAreaService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -42,15 +40,27 @@ public class CorgiToolController extends BaseController {
     private CorgiAreaService corgiAreaService;
 
     @GetMapping("query_user")
-    public JsonResult queryUser(UserDetail userDetail) {
-        List<UserProfile> profiles = corgiUserService.searchUsers(userDetail);
+    public JsonResult queryUser(UserDetail userDetail, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<UserProfile> profiles = corgiUserService.searchUsers(userDetail, page, pageSize);
         return new JsonResult(profiles);
     }
 
+    @GetMapping("count_user")
+    public JsonResult countUser(UserDetail userDetail) {
+        long count = corgiUserService.countUsers(userDetail);
+        return new JsonResult(count);
+    }
+
     @GetMapping("query_activity")
-    public JsonResult queryActivity(CorgiActivity activity) {
-        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity);
+    public JsonResult queryActivity(CorgiActivity activity, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
         return new JsonResult(activityList);
+    }
+
+    @GetMapping("count_activity")
+    public JsonResult countActivity(CorgiActivity activity) {
+        long count = corgiActivityService.countCorgiActivity(activity);
+        return new JsonResult(count);
     }
 
 
