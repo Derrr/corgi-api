@@ -28,6 +28,8 @@ import java.util.List;
 @RestController
 @RequestMapping("tool")
 public class CorgiToolController extends BaseController {
+    public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png";
+
     @Reference
     private CorgiUserService corgiUserService;
     @Reference
@@ -146,5 +148,11 @@ public class CorgiToolController extends BaseController {
     public JsonResult getCityArea(@RequestParam("city") String city) {
         List<CorgiArea> corgiAreas = corgiAreaService.getAreaByCity(city);
         return new JsonResult(corgiAreas);
+    }
+
+    @GetMapping("get_character_pic")
+    public JsonResult getPic(@RequestParam("answer") String character) {
+        String type = character.substring(0,4);
+        return new JsonResult(String.format(URL,type));
     }
 }
