@@ -197,7 +197,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false) double lng, @RequestParam(name = "lat", required = false) double lat, @RequestParam(name = "range", required = false) double range, ActivityQuery activityQuery) {
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false,defaultValue = "0") double range, ActivityQuery activityQuery) {
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
