@@ -9,6 +9,7 @@ import com.corgi.entity.*;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.aliyun.AliyunGreenService;
 import com.corgi.user.api.*;
+import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
@@ -169,7 +170,12 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(corgiActivities)) {
             return new JsonResult();
         }
-        return new JsonResult(convertDetail(Arrays.asList(corgiActivities.get(0)), userId).get(0));
+        CorgiActivity activity = corgiActivities.get(0);
+        CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
+        List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
+        List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
+        detail.setSimilarActivity(similarActivity);
+        return new JsonResult(detail);
     }
 
     @GetMapping("get_follow_activity")
@@ -197,7 +203,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false,defaultValue = "0") double range, ActivityQuery activityQuery) {
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
@@ -275,6 +281,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
+                List<UserPic> userPics = corgiPicService.getUserPic(activity.getUserId());
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
@@ -284,7 +291,7 @@ public class CorgiActivityController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
-                detailList.add(new CorgiActivityDetail(activity).initMatch(match).initSize(height, width));
+                detailList.add(new CorgiActivityDetail(activity).initUserPic(userPics).initMatch(match).initSize(height, width));
             }
         }
         return detailList;
@@ -296,14 +303,6 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(city) || StringUtils.isEmpty(adname)) {
             return;
         }
-//        if (!StringUtils.isEmpty(corgiActivity.getStation())) {
-//            corgiAreaService.addArea(CorgiArea.builder()
-//                    .city(city).adname(adname)
-//                    .type(CorgiArea.STATION)
-//                    .areaName(corgiActivity.getStation())
-//                    .lat(corgiActivity.getLat()).lng(corgiActivity.getLng())
-//                    .build());
-//        }
         if (!StringUtils.isEmpty(corgiActivity.getBusinessArea())) {
             corgiAreaService.addArea(CorgiArea.builder()
                     .city(city).adname(adname)
