@@ -85,8 +85,15 @@ public class CorgiUserController extends BaseController {
     public JsonResult register(@RequestBody UserLogin userLogin) {
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode())) {
-            userLogin = corgiUserService.login(userLogin);
-            return new JsonResult(userLogin);
+            if (StringUtils.isEmpty(userLogin.getUserId())) {
+                userLogin = corgiUserService.login(userLogin);
+                return new JsonResult(userLogin);
+            } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
+                return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
+            }else{
+                corgiUserService.updateUserLogin(userLogin);
+                return new JsonResult("更新手机号成功");
+            }
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
     }
