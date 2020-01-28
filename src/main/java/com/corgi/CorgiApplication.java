@@ -1,8 +1,10 @@
 package com.corgi;
 
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
+import com.corgi.common.CorgiQueueName;
 import com.corgi.common.filter.CorgiCorsFilter;
 import com.corgi.common.filter.RequestFilter;
+import org.springframework.amqp.core.Queue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -29,5 +31,10 @@ public class CorgiApplication {
     @Order(2)
     public Filter getRequestFilter() {
         return new RequestFilter();
+    }
+
+    @Bean
+    public Queue pushMessageQueue() {
+        return new Queue(CorgiQueueName.PUSH_MESSAGE_QUEUE);
     }
 }

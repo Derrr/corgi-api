@@ -4,8 +4,10 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
+import com.corgi.common.CorgiQueueName;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
@@ -17,6 +19,8 @@ import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,6 +44,8 @@ public class CorgiToolController extends BaseController {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiAreaService corgiAreaService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @GetMapping("query_user")
     public JsonResult queryUser(UserDetail userDetail, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -152,7 +158,23 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_character_pic")
     public JsonResult getPic(@RequestParam("answer") String character) {
-        String type = character.substring(0,4);
-        return new JsonResult(String.format(URL,type));
+        String type = character.substring(0, 4);
+        return new JsonResult(String.format(URL, type));
+    }
+
+    @PostMapping("push_message")
+    public JsonResult pushMessage(@RequestBody PushMessage pushMessage) {
+        rabbitTemplate.convertAndSend(CorgiQueueName.PUSH_MESSAGE_QUEUE, pushMessage);
+        return new JsonResult();
+    }
+
+    @GetMapping("test")
+    public JsonResult test() {
+        PushMessage pushMessage = new PushMessage();
+        pushMessage.setMessage("aaaa");
+        pushMessage.setTargetUserId("1111");
+        pushMessage.setSourceUserId("222");
+        rabbitTemplate.convertAndSend(CorgiQueueName.PUSH_MESSAGE_QUEUE, pushMessage);
+        return new JsonResult();
     }
 }
