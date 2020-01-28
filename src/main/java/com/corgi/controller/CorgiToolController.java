@@ -170,11 +170,6 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        PushMessage pushMessage = new PushMessage();
-        pushMessage.setMessage("aaaa");
-        pushMessage.setTargetUserId("2");
-        pushMessage.setSourceUserId("3");
-        rabbitTemplate.convertAndSend(CorgiQueueName.PUSH_MESSAGE_QUEUE, pushMessage);
         return new JsonResult();
     }
 }
