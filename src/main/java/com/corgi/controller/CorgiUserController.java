@@ -14,16 +14,17 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.StorageToken;
-import com.corgi.service.aliyun.AliyunGreenService;
+import com.corgi.service.AliyunGreenService;
+import com.corgi.service.PushService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.*;
-import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +62,9 @@ public class CorgiUserController extends BaseController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private PushService pushService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
@@ -90,7 +95,7 @@ public class CorgiUserController extends BaseController {
                 return new JsonResult(userLogin);
             } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
                 return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
-            }else{
+            } else {
                 corgiUserService.updateUserLogin(userLogin);
                 return new JsonResult("更新手机号成功");
             }
@@ -181,6 +186,21 @@ public class CorgiUserController extends BaseController {
     @PostMapping("/update_user_position")
     public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) {
         corgiUserService.updateUserPosition(userPosition);
+        String key = "sentMatch_" + userPosition.getUserId();
+        String matchTime = redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(matchTime)) {
+            String nowTime = System.currentTimeMillis() + "";
+            HashMap extra = new HashMap();
+            extra.put("lat", userPosition.getLat());
+            extra.put("lng", userPosition.getLng());
+            pushService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.MATCH)
+                    .message(PushMessage.MATCH_90_MESSAGE)
+                    .sourceUserId(userPosition.getUserId())
+                    .extra(extra)
+                    .build());
+            redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
+        }
         return new JsonResult();
     }
 
@@ -236,6 +256,11 @@ public class CorgiUserController extends BaseController {
     @GetMapping("follow")
     public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         corgiUserFollowService.follow(userId, targetUserId);
+        pushService.sendMessage(PushMessage.builder()
+                .type(PushMessage.FOLLOW)
+                .sourceUserId(userId)
+                .targetUserId(targetUserId)
+                .build());
         return new JsonResult();
     }
 

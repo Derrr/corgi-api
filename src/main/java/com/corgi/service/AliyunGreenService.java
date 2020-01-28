@@ -1,4 +1,4 @@
-package com.corgi.service.aliyun;
+package com.corgi.service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;

@@ -5,9 +5,11 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.*;
 import com.corgi.service.CorgiUtilService;
-import com.corgi.service.aliyun.AliyunGreenService;
+import com.corgi.service.AliyunGreenService;
+import com.corgi.service.PushService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
@@ -46,6 +48,8 @@ public class CorgiActivityController extends BaseController {
     private AliyunGreenService aliyunGreenService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private PushService pushService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
@@ -58,6 +62,11 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
+        pushService.sendMessage(PushMessage.builder()
+                .type(PushMessage.ACTIVITY)
+                .sourceUserId(activity.getUserId())
+                .message(PushMessage.ACTIVITY_MESSAGE)
+                .build());
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
     }
 
@@ -105,6 +114,14 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("sign_up")
     public JsonResult signUp(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+        if(!CollectionUtils.isEmpty(corgiActivities)) {
+            pushService.sendMessage(PushMessage.builder()
+                    .sourceUserId(userId)
+                    .targetUserId(corgiActivities.get(0).getUserId())
+                    .message(PushMessage.SIGN_UP_MESSAGE)
+                    .build());
+        }
         return new JsonResult();
     }
 
@@ -157,6 +174,10 @@ public class CorgiActivityController extends BaseController {
                     activity.setStatus(CorgiActivity.FULL);
                     corgiActivityService.updateCorgiActivity(activity);
                 }
+                pushService.sendMessage(PushMessage.builder()
+                        .targetUserId(userId)
+                        .message(PushMessage.AGREE_MESSAGE)
+                        .build());
             }
             return new JsonResult();
         } finally {
