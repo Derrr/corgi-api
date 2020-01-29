@@ -11,6 +11,7 @@ import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.PushService;
 import com.corgi.user.api.*;
+import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
@@ -44,6 +45,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiAreaService corgiAreaService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -115,7 +118,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult signUp(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
-        if(!CollectionUtils.isEmpty(corgiActivities)) {
+        if (!CollectionUtils.isEmpty(corgiActivities)) {
             pushService.sendMessage(PushMessage.builder()
                     .sourceUserId(userId)
                     .targetUserId(corgiActivities.get(0).getUserId())
@@ -302,7 +305,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
-                List<UserPic> userPics = corgiPicService.getUserPic(activity.getUserId());
+                UserDetail userDetail = corgiUserService.getUserDetail(userId);
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
@@ -312,7 +315,7 @@ public class CorgiActivityController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
-                detailList.add(new CorgiActivityDetail(activity).initUserPic(userPics).initMatch(match).initSize(height, width));
+                detailList.add(new CorgiActivityDetail(activity).initUserDetail(userDetail).initMatch(match).initSize(height, width));
             }
         }
         return detailList;

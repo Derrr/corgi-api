@@ -1,6 +1,7 @@
 package com.corgi.entity;
 
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 public class CorgiActivityDetail extends CorgiActivity {
     private List<CorgiActivityDetail> similarActivity;
-    private List<UserPic> userPics;
+    private UserDetail userDetail;
     private Double match = 0.0;
     private Integer height = 0;
     private Integer width = 0;
@@ -26,8 +27,8 @@ public class CorgiActivityDetail extends CorgiActivity {
         BeanUtils.copyProperties(activity, this);
     }
 
-    public CorgiActivityDetail initUserPic(List<UserPic> userPics){
-        this.userPics = userPics;
+    public CorgiActivityDetail initUserDetail(UserDetail userDetail){
+        this.userDetail = userDetail;
         return this;
     }
 

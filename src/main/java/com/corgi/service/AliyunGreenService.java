@@ -149,6 +149,7 @@ public class AliyunGreenService {
                     //图片要检测的场景的处理结果, 如果是多个场景，则会有每个场景的结果
                     JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
                     if (200 == taskCode) {
+                        boolean needCheck = false;
                         for (Object sceneResult : sceneResults) {
                             String scene = ((JSONObject) sceneResult).getString("scene");
                             String label = ((JSONObject) sceneResult).getString("label");
@@ -158,10 +159,13 @@ public class AliyunGreenService {
                                 pic.setStatus(CorgiPic.NEED_CHECK);
                                 pic.setResult(suggestion + "-" + scene + "-" + label + "-" + rate);
                                 addCheckPic(pic, type);
-                            } else {
-                                pic.setStatus(CorgiPic.NORMAL);
-                                pic.setResult(suggestion);
+                                needCheck = true;
+                                break;
                             }
+                        }
+                        if (!needCheck) {
+                            pic.setStatus(CorgiPic.NORMAL);
+                            pic.setResult("pass");
                         }
                     } else {
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
