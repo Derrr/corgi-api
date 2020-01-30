@@ -12,7 +12,6 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
-import com.corgi.entity.tool.CorgiPage;
 import com.corgi.user.api.CorgiAreaService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
@@ -179,7 +178,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("agree_nickname")
     public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
         if (!StringUtils.isEmpty(nickname)) {
-            String result = corgiUserService.updateUserNickname(userId, nickname, "");
+            String result = corgiUserService.updateUserNickname(userId, nickname, nickname);
             if (!CorgiConstants.SUCCESS.equals(result)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
             }
@@ -201,10 +200,33 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("agree_title")
+    public JsonResult agreeTitle(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "title", defaultValue = "") String title) {
+        if (!StringUtils.isEmpty(title)) {
+            corgiActivityService.updateByColumnn(activityId, "title", title);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("agree_content")
+    public JsonResult agreeContent(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "content", defaultValue = "") String content) {
+        if (!StringUtils.isEmpty(content)) {
+            corgiActivityService.updateByColumnn(activityId, "content", content);
+        }
+        return new JsonResult();
+    }
+
+
     @GetMapping("delete_user")
     public JsonResult deleteUser(@RequestParam("userId") String userId) {
         corgiUserService.deleteUser(userId);
         corgiActivityService.deleteUserActivity(userId);
+        return new JsonResult();
+    }
+
+    @GetMapping("remove_activity")
+    public JsonResult removeActivity(@RequestParam("activityId") String activityId) {
+        corgiActivityService.removeActivity(activityId);
         return new JsonResult();
     }
 
