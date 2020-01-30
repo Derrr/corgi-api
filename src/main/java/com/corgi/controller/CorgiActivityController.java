@@ -329,7 +329,7 @@ public class CorgiActivityController extends BaseController {
         }
         if (!StringUtils.isEmpty(corgiActivity.getBusinessArea())) {
             corgiAreaService.addArea(CorgiArea.builder()
-                    .city(city).adname(adname)
+                    .city(city).adname(adname).address("商圈")
                     .type(CorgiArea.BUSINESS)
                     .areaName(corgiActivity.getBusinessArea())
                     .build());
