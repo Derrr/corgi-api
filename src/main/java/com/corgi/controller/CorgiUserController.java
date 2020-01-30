@@ -20,6 +20,7 @@ import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.StorageToken;
 import com.corgi.service.AliyunGreenService;
+import com.corgi.service.EasemobService;
 import com.corgi.service.PushService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
@@ -48,43 +49,33 @@ import java.util.concurrent.TimeUnit;
 public class CorgiUserController extends BaseController {
     @Reference
     private CorgiUserService corgiUserService;
-
     @Reference
     private CorgiPicService corgiPicService;
-
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
-
     @Reference
     private CorgiToolService corgiToolService;
-
     @Autowired
     private AliyunGreenService aliyunGreenService;
-
+    @Autowired
+    private EasemobService easemobService;
     @Autowired
     private StringRedisTemplate redisTemplate;
-
     @Autowired
     private PushService pushService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
-
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
-
     @Value("${aliyun.AccessKeySecret}")
     private String accessKeySecret;
-
     @Value("${aliyun.sts.endpoint}")
     private String stsEndpoint;
-
     @Value("${aliyun.endpoint}")
     private String endpoint;
-
     @Value("${aliyun.role.arn}")
     private String roleArn;
-
     private static String CODE_PREFIX = "telCode_";
 
     @PostMapping("/login")
@@ -93,6 +84,10 @@ public class CorgiUserController extends BaseController {
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode())) {
             if (StringUtils.isEmpty(userLogin.getUserId())) {
                 userLogin = corgiUserService.login(userLogin);
+                if ("-1".equals(userLogin.getStatus())) {
+                    easemobService.registerUser(userLogin.getUserId());
+                    userLogin.setStatus("0");
+                }
                 return new JsonResult(userLogin);
             } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
                 return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
