@@ -109,12 +109,17 @@ public class CorgiUserController extends BaseController {
         List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), CheckPic.USER);
         userDetail.setUserPics(pics);
         userDetail = aliyunGreenService.checkAvatar(userDetail);
+        userDetail = aliyunGreenService.checkDesc(userDetail);
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
     }
 
     @PostMapping("/update_user")
     public JsonResult updateUser(@RequestBody UserDetail userDetail) {
+        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+        }
+        userDetail = aliyunGreenService.checkDesc(userDetail);
         userDetail = aliyunGreenService.checkAvatar(userDetail);
         String result = corgiUserService.updateDetail(userDetail);
         return getJsonResult(result);
@@ -122,16 +127,24 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_nickname")
     public JsonResult updateNickname(@RequestBody UserDetail userDetail) {
-        if(StringUtils.isEmpty(userDetail.getUserId())){
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"userId为空");
+        if (StringUtils.isEmpty(userDetail.getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "userId为空");
         }
-        if(StringUtils.isEmpty(userDetail.getNickname())){
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"昵称为空");
+        if (StringUtils.isEmpty(userDetail.getNickname())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
+        }
+        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getNickname())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
 
-        String result = corgiUserService.updateUserNickname(userDetail.getUserId(),userDetail.getNickname());
-        if(!CorgiConstants.SUCCESS.equals(result)){
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"昵称已存在");
+        String result;
+        if (aliyunGreenService.checkText(userDetail.getNickname())) {
+            result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
+        } else {
+            result = corgiUserService.updateUserNickname(userDetail.getUserId(), AliyunGreenService.TEXT_FORBIDDEN, userDetail.getNickname());
+        }
+        if (!CorgiConstants.SUCCESS.equals(result)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称已存在");
         }
         return getJsonResult(result);
     }

@@ -21,6 +21,7 @@ import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -117,13 +118,13 @@ public class CorgiToolController extends BaseController {
     @GetMapping("count_check_pic")
     public JsonResult countCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status,
                                  @RequestParam(required = false, name = "type", defaultValue = "") String type) {
-        long count = corgiPicService.countCheckPic(status,type);
+        long count = corgiPicService.countCheckPic(status, type);
         return new JsonResult(count);
     }
 
     @GetMapping("get_check_pic")
-    public JsonResult getCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("size") int size,@RequestParam(required = false,name = "type",defaultValue = "")String type) {
-        List<CheckPic> checkPics = corgiPicService.getCheckPic(status,type, page, size);
+    public JsonResult getCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("size") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+        List<CheckPic> checkPics = corgiPicService.getCheckPic(status, type, page, size);
         return new JsonResult(checkPics);
     }
 
@@ -172,6 +173,31 @@ public class CorgiToolController extends BaseController {
     @PostMapping("push_message")
     public JsonResult pushMessage(@RequestBody PushMessage pushMessage) {
         rabbitTemplate.convertAndSend(CorgiQueueName.PUSH_MESSAGE_QUEUE, pushMessage);
+        return new JsonResult();
+    }
+
+    @GetMapping("agree_nickname")
+    public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
+        if (!StringUtils.isEmpty(nickname)) {
+            String result = corgiUserService.updateUserNickname(userId, nickname, "");
+            if (!CorgiConstants.SUCCESS.equals(result)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
+            }
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("agree_desc")
+    public JsonResult agreeDesc(@RequestParam("userId") String userId, @RequestParam(required = false, name = "desc", defaultValue = "") String desc) {
+        if (!StringUtils.isEmpty(desc)) {
+            UserDetail userDetail = new UserDetail();
+            userDetail.setDesc(desc);
+            userDetail.setUserId(userId);
+            String result = corgiUserService.updateDetail(userDetail);
+            if (!CorgiConstants.SUCCESS.equals(result)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
+            }
+        }
         return new JsonResult();
     }
 

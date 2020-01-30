@@ -6,7 +6,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.green.model.v20180509.ImageSyncScanRequest;
+import com.aliyuncs.green.model.v20180509.TextScanRequest;
 import com.aliyuncs.http.FormatType;
 import com.aliyuncs.http.HttpResponse;
 import com.aliyuncs.http.MethodType;
@@ -28,6 +31,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -36,6 +40,8 @@ import java.util.*;
 @Slf4j
 @Service
 public class AliyunGreenService {
+    public static final String TEXT_FORBIDDEN = "(内容已被屏蔽)";
+
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
 
@@ -55,6 +61,7 @@ public class AliyunGreenService {
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
         this.managementClient = new DefaultAcsClient(profile);
+
     }
 
     public UserDetail checkAvatar(UserDetail userDetail) {
@@ -66,6 +73,15 @@ public class AliyunGreenService {
         corgiPic = checkPic(Arrays.asList(corgiPic), CheckPic.AVATAR).get(0);
         userDetail.setAvatarStatus(corgiPic.getStatus());
         userDetail.setAvatarDataId(corgiPic.getDataId());
+        return userDetail;
+    }
+
+    public UserDetail checkDesc(UserDetail userDetail){
+        String desc = userDetail.getDesc();
+        if (!this.checkText(desc)) {
+            userDetail.setCheckDesc(desc);
+            userDetail.setDesc(AliyunGreenService.TEXT_FORBIDDEN);
+        }
         return userDetail;
     }
 
@@ -211,5 +227,71 @@ public class AliyunGreenService {
         BeanUtils.copyProperties(corgiPic, checkPic);
         checkPic.setType(type);
         corgiPicService.addCheckPic(checkPic);
+    }
+
+    public boolean checkText(String text) {
+        if (StringUtils.isEmpty(text)) {
+            return true;
+        }
+        TextScanRequest textScanRequest = new TextScanRequest();
+        textScanRequest.setAcceptFormat(FormatType.JSON);
+        textScanRequest.setHttpContentType(FormatType.JSON);
+        textScanRequest.setMethod(com.aliyuncs.http.MethodType.POST);
+        textScanRequest.setEncoding("UTF-8");
+        textScanRequest.setRegionId("cn-shanghai");
+        List<Map<String, Object>> tasks = new ArrayList<>();
+        Map<String, Object> task1 = new LinkedHashMap<>();
+        task1.put("dataId", UUID.randomUUID().toString());
+        /**
+         * 待检测的文本，长度不超过10000个字符
+         */
+        task1.put("content", text);
+        tasks.add(task1);
+        JSONObject data = new JSONObject();
+
+        /**
+         * 检测场景，文本垃圾检测传递：antispam
+         **/
+        data.put("scenes", Arrays.asList("antispam"));
+        data.put("tasks", tasks);
+        System.out.println(JSON.toJSONString(data, true));
+        // 请务必设置超时时间
+        textScanRequest.setConnectTimeout(3000);
+        textScanRequest.setReadTimeout(6000);
+        try {
+            textScanRequest.setHttpContent(data.toJSONString().getBytes("UTF-8"), "UTF-8", FormatType.JSON);
+            HttpResponse httpResponse = managementClient.doAction(textScanRequest);
+            if (httpResponse.isSuccess()) {
+                JSONObject scrResponse = JSON.parseObject(new String(httpResponse.getHttpContent(), "UTF-8"));
+                System.out.println(JSON.toJSONString(scrResponse, true));
+                if (200 == scrResponse.getInteger("code")) {
+                    JSONArray taskResults = scrResponse.getJSONArray("data");
+                    for (Object taskResult : taskResults) {
+                        if (200 == ((JSONObject) taskResult).getInteger("code")) {
+                            JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
+                            for (Object sceneResult : sceneResults) {
+                                String suggestion = ((JSONObject) sceneResult).getString("suggestion");
+                                if (!"pass".equals(suggestion)) {
+                                    return false;
+                                }
+                            }
+                        } else {
+                            log.error("task process fail:" + ((JSONObject) taskResult).getInteger("code"));
+                        }
+                    }
+                } else {
+                    log.error("detect not success. code:" + scrResponse.getInteger("code"));
+                }
+            } else {
+                log.error("response not success. status:" + httpResponse.getStatus());
+            }
+        } catch (ServerException e) {
+            log.error(e.getMessage(), e);
+        } catch (ClientException e) {
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return true;
     }
 }
