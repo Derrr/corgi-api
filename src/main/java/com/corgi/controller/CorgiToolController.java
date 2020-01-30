@@ -201,6 +201,13 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("delete_user")
+    public JsonResult deleteUser(@RequestParam("userId") String userId) {
+        corgiUserService.deleteUser(userId);
+        corgiActivityService.deleteUserActivity(userId);
+        return new JsonResult();
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         return new JsonResult();
