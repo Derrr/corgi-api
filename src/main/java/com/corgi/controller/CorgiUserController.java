@@ -120,7 +120,7 @@ public class CorgiUserController extends BaseController {
         return getJsonResult(result);
     }
 
-    @PostMapping("/update_nicknamee")
+    @PostMapping("/update_nickname")
     public JsonResult updateNickname(@RequestBody UserDetail userDetail) {
         if(StringUtils.isEmpty(userDetail.getUserId())){
             return new JsonResult(Constants.PARAMETER_ERROR_CODE,"userId为空");
