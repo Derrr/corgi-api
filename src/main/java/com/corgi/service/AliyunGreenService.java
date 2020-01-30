@@ -16,6 +16,7 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.http.ProtocolType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.util.CorgiHttpUtil;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiPic;
@@ -76,7 +77,7 @@ public class AliyunGreenService {
         return userDetail;
     }
 
-    public UserDetail checkDesc(UserDetail userDetail){
+    public UserDetail checkDesc(UserDetail userDetail) {
         String desc = userDetail.getDesc();
         if (!this.checkText(desc)) {
             userDetail.setCheckDesc(desc);
@@ -293,5 +294,19 @@ public class AliyunGreenService {
             log.error(e.getMessage(), e);
         }
         return true;
+    }
+
+    public CorgiActivity checkActivity(CorgiActivity activity) {
+        String title = activity.getTitle();
+        String content = activity.getContent();
+        if (!StringUtils.isEmpty(title) && !checkText(title)) {
+            activity.setTitle(TEXT_FORBIDDEN);
+            activity.setCheckTitle(title);
+        }
+        if (!StringUtils.isEmpty(content) && !checkText(content)) {
+            activity.setContent(TEXT_FORBIDDEN);
+            activity.setCheckContent(content);
+        }
+        return activity;
     }
 }
