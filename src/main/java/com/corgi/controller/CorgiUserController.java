@@ -12,6 +12,7 @@ import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
@@ -116,6 +117,22 @@ public class CorgiUserController extends BaseController {
     public JsonResult updateUser(@RequestBody UserDetail userDetail) {
         userDetail = aliyunGreenService.checkAvatar(userDetail);
         String result = corgiUserService.updateDetail(userDetail);
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/update_nicknamee")
+    public JsonResult updateNickname(@RequestBody UserDetail userDetail) {
+        if(StringUtils.isEmpty(userDetail.getUserId())){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"userId为空");
+        }
+        if(StringUtils.isEmpty(userDetail.getNickname())){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"昵称为空");
+        }
+
+        String result = corgiUserService.updateUserNickname(userDetail.getUserId(),userDetail.getNickname());
+        if(!CorgiConstants.SUCCESS.equals(result)){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"昵称已存在");
+        }
         return getJsonResult(result);
     }
 
