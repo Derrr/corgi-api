@@ -139,7 +139,7 @@ public class CorgiUserController extends BaseController {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), AliyunGreenService.TEXT_FORBIDDEN, userDetail.getNickname());
         }
         if (!CorgiConstants.SUCCESS.equals(result)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称已存在");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
         }
         return getJsonResult(result);
     }
