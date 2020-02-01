@@ -85,14 +85,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_topics")
-    public JsonResult getTopics(@RequestParam("status") String status) {
-        List<CorgiTopic> topics = corgiToolService.getTopics(status);
-        return new JsonResult(topics);
-    }
-
-    @GetMapping("search_topic")
-    public JsonResult searchTopic(@RequestParam("text") String text) {
-        List<CorgiTopic> topics = corgiToolService.searchTopic(text);
+    public JsonResult getTopics(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false, name = "text") String text) {
+        List<CorgiTopic> topics = corgiToolService.searchTopic(text, status);
         return new JsonResult(topics);
     }
 
