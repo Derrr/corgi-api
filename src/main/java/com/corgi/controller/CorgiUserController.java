@@ -324,6 +324,17 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(userProfiles);
     }
 
+    @GetMapping("count_follow_user")
+    public JsonResult countFollowUser(@RequestParam("userId") String userId) {
+        int count = corgiUserFollowService.countFollow(userId);
+        return new JsonResult(count);
+    }
+
+    @GetMapping("count_be_followed")
+    public JsonResult countBeFollowed(@RequestParam("userId") String userId) {
+        int count = corgiUserFollowService.countFollowed(userId);
+        return new JsonResult(count);
+    }
 
     @GetMapping("update_user_tag")
     public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam("tags") List<String> tags) {
