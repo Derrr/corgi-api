@@ -213,8 +213,10 @@ public class AliyunGreenService {
         String result = CorgiHttpUtil.doGet(url + IMAGE_INFO, null, null);
         try {
             JSONObject image = JSONObject.parseObject(result);
-            picInfo.setHeight(image.getJSONObject("ImageHeight").getInteger("value"));
-            picInfo.setWidth(image.getJSONObject("ImageWidth").getInteger("value"));
+            if (image != null && image.getJSONObject("ImageHeight") != null && image.getJSONObject("ImageWidth") != null) {
+                picInfo.setHeight(image.getJSONObject("ImageHeight").getInteger("value"));
+                picInfo.setWidth(image.getJSONObject("ImageWidth").getInteger("value"));
+            }
         } catch (Exception e) {
             log.error("get pic info:" + url + " failed", e);
         }

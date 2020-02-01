@@ -104,7 +104,7 @@ public class CorgiUserController extends BaseController {
         }
         UserPic userPic = aliyunGreenService.checkAvatar(userDetail);
         if (userPic != null) {
-            pics.add(0,userPic);
+            pics.add(0, userPic);
         }
         userDetail.setUserPics(pics);
         userDetail = aliyunGreenService.checkDesc(userDetail);
@@ -120,6 +120,18 @@ public class CorgiUserController extends BaseController {
         userDetail = aliyunGreenService.checkDesc(userDetail);
         String result = corgiUserService.updateDetail(userDetail);
         return getJsonResult(result);
+    }
+
+    @GetMapping("/check_nickname")
+    public JsonResult checkNickname(@RequestParam("nickname") String nickname) {
+        if (StringUtils.isEmpty(nickname)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
+        }
+        int count = corgiUserService.countUserNickname(nickname);
+        if (count > 0) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
+        }
+        return new JsonResult();
     }
 
     @PostMapping("/update_nickname")
