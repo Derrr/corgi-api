@@ -34,10 +34,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -102,8 +99,14 @@ public class CorgiUserController extends BaseController {
     @PostMapping("/add_user")
     public JsonResult addUser(@RequestBody UserDetail userDetail) {
         List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), CheckPic.USER);
+        if (pics == null) {
+            pics = new ArrayList<>();
+        }
+        UserPic userPic = aliyunGreenService.checkAvatar(userDetail);
+        if (userPic != null) {
+            pics.add(0,userPic);
+        }
         userDetail.setUserPics(pics);
-        userDetail = aliyunGreenService.checkAvatar(userDetail);
         userDetail = aliyunGreenService.checkDesc(userDetail);
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
@@ -115,7 +118,6 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
         userDetail = aliyunGreenService.checkDesc(userDetail);
-        userDetail = aliyunGreenService.checkAvatar(userDetail);
         String result = corgiUserService.updateDetail(userDetail);
         return getJsonResult(result);
     }

@@ -23,6 +23,7 @@ import com.corgi.entity.CorgiPic;
 import com.corgi.entity.PicInfo;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.UserPic;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -65,16 +66,14 @@ public class AliyunGreenService {
 
     }
 
-    public UserDetail checkAvatar(UserDetail userDetail) {
+    public UserPic checkAvatar(UserDetail userDetail) {
         if (StringUtils.isEmpty(userDetail.getAvatar())) {
-            return userDetail;
+            return null;
         }
-        CorgiPic corgiPic = new CorgiPic();
+        UserPic corgiPic = new UserPic();
         corgiPic.setPicUrl(userDetail.getAvatar());
-        corgiPic = checkPic(Arrays.asList(corgiPic), CheckPic.AVATAR).get(0);
-        userDetail.setAvatarStatus(corgiPic.getStatus());
-        userDetail.setAvatarDataId(corgiPic.getDataId());
-        return userDetail;
+        corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), CheckPic.USER).get(0);
+        return corgiPic;
     }
 
     public UserDetail checkDesc(UserDetail userDetail) {
