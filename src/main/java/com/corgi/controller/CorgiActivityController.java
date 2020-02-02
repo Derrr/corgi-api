@@ -307,7 +307,10 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
-                UserDetail userDetail = corgiUserService.getUserDetail(userId);
+                UserDetail userDetail = new UserDetail();
+                if (activity.getUserId() != null) {
+                    userDetail = corgiUserService.getUserDetail(activity.getUserId());
+                }
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
