@@ -42,7 +42,7 @@ import java.util.*;
 @Slf4j
 @Service
 public class AliyunGreenService {
-    public static final String TEXT_FORBIDDEN = "(内容已被屏蔽)";
+    public static final String TEXT_FORBIDDEN = "(内容审核中)";
 
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;

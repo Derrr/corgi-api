@@ -224,6 +224,12 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_city")
+    public JsonResult getCity() {
+        List<String> city = corgiAreaService.getCity();
+        return new JsonResult(city);
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         return new JsonResult();

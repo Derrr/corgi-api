@@ -62,7 +62,7 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        addArea(activity);
+        //(activity);
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
