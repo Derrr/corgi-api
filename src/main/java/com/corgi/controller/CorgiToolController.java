@@ -12,10 +12,7 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
-import com.corgi.user.api.CorgiAreaService;
-import com.corgi.user.api.CorgiPicService;
-import com.corgi.user.api.CorgiToolService;
-import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -38,6 +36,8 @@ public class CorgiToolController extends BaseController {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiToolService corgiToolService;
+    @Reference
+    private CorgiStatisticService corgiStatisticService;
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
@@ -104,7 +104,7 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_statistic")
     public JsonResult getStatistic(@RequestParam("type") String type, @RequestParam("beginDate") String beginDate, @RequestParam("endDate") String endDate) {
-        List<CorgiStatistic> statistics = corgiToolService.getCount(type, beginDate, endDate);
+        List<HashMap> statistics = corgiStatisticService.getMap(type, beginDate, endDate);
         return new JsonResult(statistics);
     }
 
@@ -141,13 +141,13 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_statistics")
     public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
-        List<CorgiStatistic> statistics = corgiToolService.getCount(type, startDate, endDate);
+        List<CorgiStatistic> statistics = corgiStatisticService.getCount(type, startDate, endDate);
         return new JsonResult(statistics);
     }
 
     @GetMapping("sum_statistics")
-    public JsonResult sumStatistics(@RequestParam("type") String type) {
-        long sum = corgiToolService.sumCount(type);
+    public JsonResult sumStatistics(@RequestParam("type") String type, @RequestParam(required = false, name = "beginDate") String beginDate, @RequestParam(required = false, name = "endDate") String endDate) {
+        long sum = corgiStatisticService.sumCount(type, beginDate, endDate);
         return new JsonResult(sum);
     }
 
