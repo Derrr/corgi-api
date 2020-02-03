@@ -256,6 +256,7 @@ public class AliyunGreenService {
          **/
         data.put("scenes", Arrays.asList("antispam"));
         data.put("tasks", tasks);
+        data.put("bizType", "sexy_pic");
         System.out.println(JSON.toJSONString(data, true));
         // 请务必设置超时时间
         textScanRequest.setConnectTimeout(3000);
