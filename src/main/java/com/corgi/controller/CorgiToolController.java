@@ -49,7 +49,7 @@ public class CorgiToolController extends BaseController {
     private RabbitTemplate rabbitTemplate;
 
     @GetMapping("query_user")
-    public JsonResult queryUser(UserDetail userDetail, @RequestParam(required = false, name = "userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult queryUser(UserDetail userDetail, @RequestParam(required = false, name = "loginUserId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> profiles = corgiUserService.searchUsers(userDetail, userId, page, pageSize);
         return new JsonResult(profiles);
     }
