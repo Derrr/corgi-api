@@ -102,17 +102,6 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("get_statistic")
-    public JsonResult getStatistic(@RequestParam("type") String type, @RequestParam("beginDate") String beginDate, @RequestParam("endDate") String endDate) {
-        List<HashMap> statistics = null;
-        if (CorgiStatistic.ACTIVITY_TYPE.equals(type) || CorgiStatistic.USER_CITY.equals(type)) {
-            statistics = corgiStatisticService.getList(type, beginDate, endDate);
-        } else {
-            statistics = corgiStatisticService.getMap(type, beginDate, endDate);
-        }
-        return new JsonResult(statistics);
-    }
-
     @GetMapping("count_check_pic")
     public JsonResult countCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status,
                                  @RequestParam(required = false, name = "type", defaultValue = "") String type) {
@@ -146,8 +135,12 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_statistics")
     public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
-        List<CorgiStatistic> statistics = corgiStatisticService.getCount(type, startDate, endDate);
-        return new JsonResult(statistics);
+        List<HashMap> statistics = null;
+        if (CorgiStatistic.ACTIVITY_TYPE.equals(type) || CorgiStatistic.USER_CITY.equals(type)) {
+            statistics = corgiStatisticService.getList(type, startDate, endDate);
+        } else {
+            statistics = corgiStatisticService.getMap(type, startDate, endDate);
+        }        return new JsonResult(statistics);
     }
 
     @GetMapping("sum_statistics")
