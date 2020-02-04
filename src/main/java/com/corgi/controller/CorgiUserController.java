@@ -106,7 +106,11 @@ public class CorgiUserController extends BaseController {
         if (userPic != null) {
             pics.add(0, userPic);
         }
+        userDetail.setCheckStatus(AliyunGreenService.PASS);
         userDetail.setUserPics(pics);
+        if (!aliyunGreenService.checkText(userDetail.getNickname())) {
+            userDetail.setCheckStatus(AliyunGreenService.CHECK);
+        }
         userDetail = aliyunGreenService.checkDesc(userDetail);
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
@@ -151,6 +155,8 @@ public class CorgiUserController extends BaseController {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
         } else {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), AliyunGreenService.TEXT_FORBIDDEN, userDetail.getNickname());
+            userDetail.setCheckStatus(AliyunGreenService.CHECK);
+            corgiUserService.updateDetail(userDetail);
         }
         if (!CorgiConstants.SUCCESS.equals(result)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");

@@ -12,6 +12,7 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -140,7 +141,8 @@ public class CorgiToolController extends BaseController {
             statistics = corgiStatisticService.getList(type, startDate, endDate);
         } else {
             statistics = corgiStatisticService.getMap(type, startDate, endDate);
-        }        return new JsonResult(statistics);
+        }
+        return new JsonResult(statistics);
     }
 
     @GetMapping("sum_statistics")
@@ -192,6 +194,15 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("agree_user")
+    public JsonResult agreeUser(@RequestParam("userId") String userId) {
+        UserDetail detail = new UserDetail();
+        detail.setUserId(userId);
+        detail.setCheckStatus(AliyunGreenService.PASS);
+        corgiUserService.updateDetail(detail);
+        return new JsonResult();
+    }
+
     @GetMapping("agree_title")
     public JsonResult agreeTitle(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "title", defaultValue = "") String title) {
         if (!StringUtils.isEmpty(title)) {
@@ -221,6 +232,13 @@ public class CorgiToolController extends BaseController {
         corgiActivityService.removeActivity(activityId);
         return new JsonResult();
     }
+
+    @GetMapping("agree_activity")
+    public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {
+        corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.PASS);
+        return new JsonResult();
+    }
+
 
     @GetMapping("get_city")
     public JsonResult getCity() {

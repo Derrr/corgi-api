@@ -44,6 +44,9 @@ import java.util.*;
 public class AliyunGreenService {
     public static final String TEXT_FORBIDDEN = "(内容审核中)";
 
+    public static String CHECK = "check";
+    public static String PASS = "pass";
+
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
 
@@ -81,6 +84,7 @@ public class AliyunGreenService {
         if (!this.checkText(desc)) {
             userDetail.setCheckDesc(desc);
             userDetail.setDesc(AliyunGreenService.TEXT_FORBIDDEN);
+            userDetail.setCheckStatus(CHECK);
         }
         return userDetail;
     }
@@ -304,10 +308,12 @@ public class AliyunGreenService {
         if (!StringUtils.isEmpty(title) && !checkText(title)) {
             activity.setTitle(TEXT_FORBIDDEN);
             activity.setCheckTitle(title);
+            activity.setCheckStatus(CHECK);
         }
         if (!StringUtils.isEmpty(content) && !checkText(content)) {
             activity.setContent(TEXT_FORBIDDEN);
             activity.setCheckContent(content);
+            activity.setCheckStatus(CHECK);
         }
         return activity;
     }
