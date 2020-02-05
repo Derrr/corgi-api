@@ -238,6 +238,8 @@ public class CorgiUserController extends BaseController {
             HashMap extra = new HashMap();
             extra.put("lat", userPosition.getLat());
             extra.put("lng", userPosition.getLng());
+            extra.put("type",PushMessage.MATCH_90_MESSAGE_TYPE);
+            extra.put("userId",userPosition.getUserId());
             pushService.sendMessage(PushMessage.builder()
                     .type(PushMessage.MATCH)
                     .message(PushMessage.MATCH_90_MESSAGE)

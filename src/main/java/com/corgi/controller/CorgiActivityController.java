@@ -67,10 +67,14 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
+        HashMap extra = new HashMap();
+        extra.put("activityId",activity.getId());
+        extra.put("type",PushMessage.ACTIVITY_MESSAGE_TYPE);
         pushService.sendMessage(PushMessage.builder()
                 .type(PushMessage.ACTIVITY)
                 .sourceUserId(activity.getUserId())
                 .message(PushMessage.ACTIVITY_MESSAGE)
+                .extra(extra)
                 .build());
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
     }
@@ -123,9 +127,13 @@ public class CorgiActivityController extends BaseController {
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (!CollectionUtils.isEmpty(corgiActivities)) {
+            HashMap extra = new HashMap();
+            extra.put("activityId",activityId);
+            extra.put("type",PushMessage.SIGN_UP_MESSAGE_TYPE);
             pushService.sendMessage(PushMessage.builder()
                     .sourceUserId(userId)
                     .targetUserId(corgiActivities.get(0).getUserId())
+                    .extra(extra)
                     .message(PushMessage.SIGN_UP_MESSAGE)
                     .build());
         }
@@ -181,9 +189,13 @@ public class CorgiActivityController extends BaseController {
                     activity.setStatus(CorgiActivity.FULL);
                     corgiActivityService.updateCorgiActivity(activity);
                 }
+                HashMap extra = new HashMap();
+                extra.put("activityId",activityId);
+                extra.put("type",PushMessage.AGREE_MESSAGE_TYPE);
                 pushService.sendMessage(PushMessage.builder()
                         .targetUserId(userId)
                         .message(PushMessage.AGREE_MESSAGE)
+                        .extra(extra)
                         .build());
             }
             return new JsonResult();
