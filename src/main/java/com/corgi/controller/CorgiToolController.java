@@ -246,6 +246,12 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(city);
     }
 
+    @GetMapping("get_user_stay")
+    public JsonResult getUserStay(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate, @RequestParam("stayCount") String stayCount) {
+        List<HashMap> userStays = corgiStatisticService.getUserStay(startDate, endDate, stayCount);
+        return new JsonResult(userStays);
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         return new JsonResult();
