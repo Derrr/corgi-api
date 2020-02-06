@@ -254,7 +254,8 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_user_trace")
     public JsonResult getUserTrace(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
-        return new JsonResult();
+        List<HashMap> traces = corgiStatisticService.getUserTraceSum(startDate,endDate);
+        return new JsonResult(traces);
     }
 
     @GetMapping("test")
