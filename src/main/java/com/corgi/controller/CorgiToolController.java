@@ -137,7 +137,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("get_statistics")
     public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
         List<HashMap> statistics = null;
-        if (CorgiStatistic.ACTIVITY_TYPE.equals(type) || CorgiStatistic.USER_CITY.equals(type)) {
+        if (CorgiStatistic.ACTIVITY_TYPE.equals(type) || CorgiStatistic.USER_CITY.equals(type) || CorgiStatistic.PUBLISH.equals(type)) {
             statistics = corgiStatisticService.getList(type, startDate, endDate);
         } else {
             statistics = corgiStatisticService.getMap(type, startDate, endDate);
@@ -250,6 +250,11 @@ public class CorgiToolController extends BaseController {
     public JsonResult getUserStay(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate, @RequestParam("stayCount") String stayCount) {
         List<HashMap> userStays = corgiStatisticService.getUserStay(startDate, endDate, stayCount);
         return new JsonResult(userStays);
+    }
+
+    @GetMapping("get_user_trace")
+    public JsonResult getUserTrace(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+        return new JsonResult();
     }
 
     @GetMapping("test")
