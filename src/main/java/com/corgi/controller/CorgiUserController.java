@@ -16,12 +16,13 @@ import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.common.messages.TraceFollow;
 import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.StorageToken;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.EasemobService;
-import com.corgi.service.PushService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserFollowService;
@@ -59,7 +60,7 @@ public class CorgiUserController extends BaseController {
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
-    private PushService pushService;
+    private MQService mqService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
@@ -238,9 +239,9 @@ public class CorgiUserController extends BaseController {
             HashMap extra = new HashMap();
             extra.put("lat", userPosition.getLat());
             extra.put("lng", userPosition.getLng());
-            extra.put("type",PushMessage.MATCH_90_MESSAGE_TYPE);
-            extra.put("userId",userPosition.getUserId());
-            pushService.sendMessage(PushMessage.builder()
+            extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+            extra.put("userId", userPosition.getUserId());
+            mqService.sendMessage(PushMessage.builder()
                     .type(PushMessage.MATCH)
                     .message(PushMessage.MATCH_90_MESSAGE)
                     .sourceUserId(userPosition.getUserId())
@@ -248,6 +249,11 @@ public class CorgiUserController extends BaseController {
                     .build());
             redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
         }
+        mqService.sendTrace(TraceFollow.builder()
+                .userId(userPosition.getUserId())
+                .option(TraceFollow.COUNT)
+                .type(TraceFollow.STAY)
+                .build());
         return new JsonResult();
     }
 
@@ -260,6 +266,11 @@ public class CorgiUserController extends BaseController {
 
         corgiUserService.updateUserPosition(userPosition);
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
+        mqService.sendTrace(TraceFollow.builder()
+                .userId(userQuery.getUserId())
+                .option(TraceFollow.CHANGE)
+                .type(TraceFollow.USER)
+                .build());
         return new JsonResult(userProfiles);
     }
 
@@ -303,7 +314,7 @@ public class CorgiUserController extends BaseController {
     @GetMapping("follow")
     public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         corgiUserFollowService.follow(userId, targetUserId);
-        pushService.sendMessage(PushMessage.builder()
+        mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.FOLLOW)
                 .sourceUserId(userId)
                 .targetUserId(targetUserId)
@@ -329,6 +340,11 @@ public class CorgiUserController extends BaseController {
                                     @RequestParam(name = "lng", required = false) Double lng,
                                     @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
+        mqService.sendTrace(TraceFollow.builder()
+                .userId(userId)
+                .option(TraceFollow.CHANGE)
+                .type(TraceFollow.FOLLOW)
+                .build());
         return new JsonResult(userProfiles);
     }
 

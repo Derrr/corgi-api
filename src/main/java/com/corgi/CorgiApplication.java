@@ -37,4 +37,10 @@ public class CorgiApplication {
     public Queue pushMessageQueue() {
         return new Queue(CorgiQueueName.PUSH_MESSAGE_QUEUE);
     }
+
+    @Bean
+    public Queue traceQueue() {
+        return new Queue(CorgiQueueName.TRACE_FOLLOW_QUEUE);
+    }
+
 }

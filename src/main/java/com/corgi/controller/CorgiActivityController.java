@@ -6,13 +6,13 @@ import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.common.messages.TraceFollow;
 import com.corgi.entity.*;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
-import com.corgi.service.PushService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserPic;
 import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class CorgiActivityController extends BaseController {
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
-    private PushService pushService;
+    private MQService mqService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
@@ -70,7 +70,7 @@ public class CorgiActivityController extends BaseController {
         HashMap extra = new HashMap();
         extra.put("activityId",activity.getId());
         extra.put("type",PushMessage.ACTIVITY_MESSAGE_TYPE);
-        pushService.sendMessage(PushMessage.builder()
+        mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.ACTIVITY)
                 .sourceUserId(activity.getUserId())
                 .message(PushMessage.ACTIVITY_MESSAGE)
@@ -130,7 +130,7 @@ public class CorgiActivityController extends BaseController {
             HashMap extra = new HashMap();
             extra.put("activityId",activityId);
             extra.put("type",PushMessage.SIGN_UP_MESSAGE_TYPE);
-            pushService.sendMessage(PushMessage.builder()
+            mqService.sendMessage(PushMessage.builder()
                     .sourceUserId(userId)
                     .targetUserId(corgiActivities.get(0).getUserId())
                     .extra(extra)
@@ -192,7 +192,7 @@ public class CorgiActivityController extends BaseController {
                 HashMap extra = new HashMap();
                 extra.put("activityId",activityId);
                 extra.put("type",PushMessage.AGREE_MESSAGE_TYPE);
-                pushService.sendMessage(PushMessage.builder()
+                mqService.sendMessage(PushMessage.builder()
                         .targetUserId(userId)
                         .message(PushMessage.AGREE_MESSAGE)
                         .extra(extra)
@@ -249,6 +249,11 @@ public class CorgiActivityController extends BaseController {
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
             detailList.sort(detailComparator);
         }
+        mqService.sendTrace(TraceFollow.builder()
+                .userId(userId)
+                .option(TraceFollow.CHANGE)
+                .type(TraceFollow.ACTIVITY)
+                .build());
         return new JsonResult(detailList);
     }
 
@@ -301,6 +306,11 @@ public class CorgiActivityController extends BaseController {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
+        mqService.sendTrace(TraceFollow.builder()
+                .userId(userId)
+                .option(TraceFollow.CHANGE)
+                .type(TraceFollow.FAVOR)
+                .build());
         return new JsonResult(detailList);
     }
 
