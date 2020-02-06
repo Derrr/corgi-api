@@ -314,10 +314,13 @@ public class CorgiUserController extends BaseController {
     @GetMapping("follow")
     public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         corgiUserFollowService.follow(userId, targetUserId);
+        HashMap extra = new HashMap();
+        extra.put("userId", userId);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.FOLLOW)
                 .sourceUserId(userId)
                 .targetUserId(targetUserId)
+                .extra(extra)
                 .build());
         return new JsonResult();
     }
