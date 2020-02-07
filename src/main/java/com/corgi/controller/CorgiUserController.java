@@ -359,8 +359,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("read_follow")
-    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followUserId") String followUserId) {
-        corgiUserFollowService.readFollowUser(userId, followUserId);
+    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followedUserId") String followedUserId) {
+        corgiUserFollowService.readFollowUser(followedUserId, userId);
         return new JsonResult();
     }
 
