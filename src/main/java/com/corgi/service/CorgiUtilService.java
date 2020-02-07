@@ -37,7 +37,7 @@ public class CorgiUtilService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    private ThreadLocal<String> value;
+    private ThreadLocal<String> value = new ThreadLocal<>();
 
     @PostConstruct
     public void init(){
