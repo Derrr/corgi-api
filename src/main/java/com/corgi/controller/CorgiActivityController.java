@@ -159,12 +159,6 @@ public class CorgiActivityController extends BaseController {
             if (activity.getStatus().equals(CorgiActivity.DELETED)) {
                 return new JsonResult(Constants.API_ERROR_CODE, "活动已被删除");
             }
-            if (activity.getStatus().equals(CorgiActivity.ENDED)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
-            }
-            if (activity.getStatus().equals(CorgiActivity.FULL)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
-            }
             int peopleCount = activity.getPeopleCount();
             boolean hasUser = false;
             List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId);
@@ -177,6 +171,15 @@ public class CorgiActivityController extends BaseController {
                 hasUser |= userProfile.getUserId().equals(userId);
                 userStatus = userProfile.getSignUpStatus();
             }
+            if(userStatus == UserSignUp.AGREE){
+                return new JsonResult();
+            }
+            if (activity.getStatus().equals(CorgiActivity.ENDED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
+            }
+            if (activity.getStatus().equals(CorgiActivity.FULL)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+            }
             if (count >= peopleCount) {
                 activity.setStatus(CorgiActivity.FULL);
                 corgiActivityService.updateCorgiActivity(activity);
@@ -187,9 +190,6 @@ public class CorgiActivityController extends BaseController {
                 userSignUp.setStatus(UserSignUp.AGREE);
                 corgiUserActivityService.signUp(userSignUp);
             } else {
-                if(userStatus == UserSignUp.AGREE){
-                    return new JsonResult();
-                }
                 UserSignUp userSignUp = new UserSignUp(userId, activityId);
                 userSignUp.setStatus(UserSignUp.AGREE);
                 corgiUserActivityService.updateSignUp(userSignUp);
