@@ -68,8 +68,8 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
         HashMap extra = new HashMap();
-        extra.put("activityId",activity.getId());
-        extra.put("type",PushMessage.ACTIVITY_MESSAGE_TYPE);
+        extra.put("activityId", activity.getId());
+        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.ACTIVITY)
                 .sourceUserId(activity.getUserId())
@@ -128,8 +128,8 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (!CollectionUtils.isEmpty(corgiActivities)) {
             HashMap extra = new HashMap();
-            extra.put("activityId",activityId);
-            extra.put("type",PushMessage.SIGN_UP_MESSAGE_TYPE);
+            extra.put("activityId", activityId);
+            extra.put("type", PushMessage.SIGN_UP_MESSAGE_TYPE);
             mqService.sendMessage(PushMessage.builder()
                     .sourceUserId(userId)
                     .targetUserId(corgiActivities.get(0).getUserId())
@@ -144,6 +144,76 @@ public class CorgiActivityController extends BaseController {
     public JsonResult signOut(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
         corgiUserActivityService.signOut(new UserSignUp(userId, activityId));
         return new JsonResult();
+    }
+
+    @GetMapping("invite")
+    public JsonResult invite(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        String lockKey = "agree_" + activityId;
+        corgiUtilService.lock(lockKey);
+        try {
+            List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+            if (CollectionUtils.isEmpty(activityList)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+            }
+            CorgiActivity activity = activityList.get(0);
+            if (activity.getStatus().equals(CorgiActivity.DELETED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "活动已被删除");
+            }
+            if (activity.getStatus().equals(CorgiActivity.ENDED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
+            }
+            if (activity.getStatus().equals(CorgiActivity.FULL)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+            }
+            int peopleCount = activity.getPeopleCount();
+            boolean hasUser = false;
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId);
+            int count = 0;
+            int userStatus = 0;
+            for (UserProfile userProfile : userProfiles) {
+                if (userProfile.getSignUpStatus() == UserSignUp.AGREE) {
+                    count++;
+                }
+                hasUser |= userProfile.getUserId().equals(userId);
+                userStatus = userProfile.getSignUpStatus();
+            }
+            if (count >= peopleCount) {
+                activity.setStatus(CorgiActivity.FULL);
+                corgiActivityService.updateCorgiActivity(activity);
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+            }
+            if (!hasUser) {
+                UserSignUp userSignUp = new UserSignUp(userId, activityId);
+                userSignUp.setStatus(UserSignUp.AGREE);
+                corgiUserActivityService.signUp(userSignUp);
+            } else {
+                if(userStatus == UserSignUp.AGREE){
+                    return new JsonResult();
+                }
+                UserSignUp userSignUp = new UserSignUp(userId, activityId);
+                userSignUp.setStatus(UserSignUp.AGREE);
+                corgiUserActivityService.updateSignUp(userSignUp);
+            }
+            count++;
+            if (peopleCount == (count)) {
+                activity.setStatus(CorgiActivity.FULL);
+                corgiActivityService.updateCorgiActivity(activity);
+            }
+            HashMap extra = new HashMap();
+            extra.put("activityId", activityId);
+            extra.put("type", PushMessage.AGREE_MESSAGE_TYPE);
+            mqService.sendMessage(PushMessage.builder()
+                    .targetUserId(userId)
+                    .message(PushMessage.AGREE_MESSAGE)
+                    .extra(extra)
+                    .build());
+            return new JsonResult();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return new JsonResult(Constants.API_ERROR_CODE);
+        } finally {
+            corgiUtilService.unlock(lockKey);
+        }
     }
 
     @GetMapping("agree")
@@ -190,8 +260,8 @@ public class CorgiActivityController extends BaseController {
                     corgiActivityService.updateCorgiActivity(activity);
                 }
                 HashMap extra = new HashMap();
-                extra.put("activityId",activityId);
-                extra.put("type",PushMessage.AGREE_MESSAGE_TYPE);
+                extra.put("activityId", activityId);
+                extra.put("type", PushMessage.AGREE_MESSAGE_TYPE);
                 mqService.sendMessage(PushMessage.builder()
                         .targetUserId(userId)
                         .message(PushMessage.AGREE_MESSAGE)
