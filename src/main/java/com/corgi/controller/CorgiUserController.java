@@ -351,11 +351,17 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(userProfiles);
     }
 
-    @GetMapping("get_be_followed_user")
-    public JsonResult getBeFollowedUser(@RequestParam("userId") String userId,
-                                        @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<UserProfile> userProfiles = corgiUserFollowService.getFollowedUserByPage(userId, 0L, page, pageSize);
+    @GetMapping("get_history_followed_user")
+    public JsonResult getHistoryFollowedUser(@RequestParam("userId") String userId,
+                                             @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserHistoryByPage(userId, page, pageSize);
         return new JsonResult(userProfiles);
+    }
+
+    @GetMapping("read_follow")
+    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followUserId") String followUserId) {
+        corgiUserFollowService.readFollowUser(userId, followUserId);
+        return new JsonResult();
     }
 
     @GetMapping("count_follow_user")
