@@ -171,7 +171,7 @@ public class CorgiActivityController extends BaseController {
                 hasUser |= userProfile.getUserId().equals(userId);
                 userStatus = userProfile.getSignUpStatus();
             }
-            if(userStatus == UserSignUp.AGREE){
+            if (userStatus == UserSignUp.AGREE) {
                 return new JsonResult();
             }
             if (activity.getStatus().equals(CorgiActivity.ENDED)) {
@@ -217,11 +217,12 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("agree")
-    public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId, @RequestParam("peopleCount") Integer peopleCount) {
+    public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
         String lockKey = "agree_" + activityId;
         corgiUtilService.lock(lockKey);
         try {
             List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+
             if (CollectionUtils.isEmpty(activityList)) {
                 return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
             }
@@ -235,6 +236,7 @@ public class CorgiActivityController extends BaseController {
             if (activity.getStatus().equals(CorgiActivity.FULL)) {
                 return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
             }
+            int peopleCount = activity.getPeopleCount();
             boolean hasUser = false;
             List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId);
             int count = 0;
@@ -255,7 +257,7 @@ public class CorgiActivityController extends BaseController {
                 userSignUp.setStatus(UserSignUp.AGREE);
                 corgiUserActivityService.updateSignUp(userSignUp);
                 count++;
-                if (peopleCount.equals(count)) {
+                if (peopleCount == count) {
                     activity.setStatus(CorgiActivity.FULL);
                     corgiActivityService.updateCorgiActivity(activity);
                 }
