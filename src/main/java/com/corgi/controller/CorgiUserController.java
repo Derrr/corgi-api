@@ -395,8 +395,8 @@ public class CorgiUserController extends BaseController {
         return new JsonResult();
     }
 
-    @PostMapping("feedback")
-    public JsonResult feedback(@RequestBody MailMessage mailMessage) {
+    @GetMapping("feedback")
+    public JsonResult feedback( MailMessage mailMessage) {
         try {
             mailService.sendMail(mailMessage);
         } catch (Exception e) {
