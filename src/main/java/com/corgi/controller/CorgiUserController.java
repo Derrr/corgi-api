@@ -19,10 +19,12 @@ import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
 import com.corgi.common.util.CharacterUtils;
 import com.corgi.entity.CheckPic;
+import com.corgi.entity.MailMessage;
 import com.corgi.entity.StorageToken;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.EasemobService;
 import com.corgi.service.MQService;
+import com.corgi.service.MailService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiToolService;
 import com.corgi.user.api.CorgiUserFollowService;
@@ -35,6 +37,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +66,8 @@ public class CorgiUserController extends BaseController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private MailService mailService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
@@ -385,6 +392,16 @@ public class CorgiUserController extends BaseController {
     @GetMapping("update_user_interest")
     public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam("interests") List<String> interests) {
         corgiToolService.updateUserInterest(userId, category, interests);
+        return new JsonResult();
+    }
+
+    @PostMapping("feedback")
+    public JsonResult feedback(@RequestBody MailMessage mailMessage) {
+        try {
+            mailService.sendMail(mailMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
         return new JsonResult();
     }
 
