@@ -15,6 +15,7 @@ import java.util.List;
 public class CorgiActivityDetail extends CorgiActivity {
     private List<CorgiActivityDetail> similarActivity;
     private UserDetail userDetail;
+    private Integer signUpStatus;
     private Double match = 0.0;
     private Integer height = 0;
     private Integer width = 0;
@@ -27,7 +28,15 @@ public class CorgiActivityDetail extends CorgiActivity {
         BeanUtils.copyProperties(activity, this);
     }
 
-    public CorgiActivityDetail initUserDetail(UserDetail userDetail){
+    public CorgiActivityDetail initSignUpStatus(Integer signUpStatus) {
+        if (signUpStatus == null) {
+            signUpStatus = 0;
+        }
+        this.signUpStatus = signUpStatus;
+        return this;
+    }
+
+    public CorgiActivityDetail initUserDetail(UserDetail userDetail) {
         this.userDetail = userDetail;
         return this;
     }
@@ -43,7 +52,7 @@ public class CorgiActivityDetail extends CorgiActivity {
         return this;
     }
 
-    public CorgiActivityDetail initSimilarActivity(List<CorgiActivityDetail> similarActivity){
+    public CorgiActivityDetail initSimilarActivity(List<CorgiActivityDetail> similarActivity) {
         this.similarActivity = similarActivity;
         return this;
     }

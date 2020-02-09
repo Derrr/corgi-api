@@ -25,10 +25,7 @@ import com.corgi.service.AliyunGreenService;
 import com.corgi.service.EasemobService;
 import com.corgi.service.MQService;
 import com.corgi.service.MailService;
-import com.corgi.user.api.CorgiPicService;
-import com.corgi.user.api.CorgiToolService;
-import com.corgi.user.api.CorgiUserFollowService;
-import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +55,8 @@ public class CorgiUserController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiToolService corgiToolService;
+    @Reference
+    private CorgiUserMatchService corgiUserMatchService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired

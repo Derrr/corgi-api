@@ -416,8 +416,13 @@ public class CorgiActivityController extends BaseController {
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
                 }
+                Integer signUp = corgiUserActivityService.getStatus(userId, activity.getId());
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
-                detailList.add(new CorgiActivityDetail(activity).initUserDetail(userDetail).initMatch(match).initSize(height, width));
+                detailList.add(new CorgiActivityDetail(activity)
+                        .initUserDetail(userDetail)
+                        .initMatch(match)
+                        .initSize(height, width)
+                        .initSignUpStatus(signUp));
             }
         }
         return detailList;
