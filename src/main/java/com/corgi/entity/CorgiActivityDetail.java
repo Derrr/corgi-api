@@ -30,7 +30,7 @@ public class CorgiActivityDetail extends CorgiActivity {
 
     public CorgiActivityDetail initSignUpStatus(Integer signUpStatus) {
         if (signUpStatus == null) {
-            signUpStatus = 0;
+            signUpStatus = -1;
         }
         this.signUpStatus = signUpStatus;
         return this;
