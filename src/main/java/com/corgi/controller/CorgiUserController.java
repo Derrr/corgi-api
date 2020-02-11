@@ -406,11 +406,9 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test() {
-        UserLogin userLogin = new UserLogin();
-        userLogin.setUserId("1");
-        userLogin.setTelNo("11111");
-        userLogin.setImId("44444");
-        corgiUserService.updateUserLogin(userLogin);
+        UserDetail userDetail = new UserDetail();
+        userDetail.setAvatar("testtest");
+        this.addUser(userDetail);
         return new JsonResult();
     }
 
