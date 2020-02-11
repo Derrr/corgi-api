@@ -111,10 +111,11 @@ public class CorgiUserController extends BaseController {
         }
         UserPic userPic = aliyunGreenService.checkAvatar(userDetail);
         if (userPic != null) {
+            userPic.setUserId(userDetail.getUserId());
             pics.add(0, userPic);
         }
-        userDetail.setCheckStatus(AliyunGreenService.PASS);
         userDetail.setUserPics(pics);
+        userDetail.setCheckStatus(AliyunGreenService.PASS);
         if (!aliyunGreenService.checkText(userDetail.getNickname())) {
             userDetail.setCheckStatus(AliyunGreenService.CHECK);
         }
@@ -407,7 +408,8 @@ public class CorgiUserController extends BaseController {
     @GetMapping("test")
     public JsonResult test() {
         UserDetail userDetail = new UserDetail();
-        userDetail.setAvatar("testtest");
+        userDetail.setUserId("-1");
+        userDetail.setAvatar("http://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/55/1581399343285");
         this.addUser(userDetail);
         return new JsonResult();
     }
