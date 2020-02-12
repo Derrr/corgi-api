@@ -315,6 +315,16 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(userProfiles);
     }
 
+
+    @GetMapping("get_sign_up_activity")
+    public JsonResult getSignUpActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<String> activityIds = corgiUserActivityService.getSignUpActivity(userId, page, pageSize);
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
+        return new JsonResult(detailList);
+    }
+
+
     @GetMapping("get_range_activity")
     public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);

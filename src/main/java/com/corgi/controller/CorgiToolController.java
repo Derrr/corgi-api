@@ -45,6 +45,8 @@ public class CorgiToolController extends BaseController {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiAreaService corgiAreaService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -230,6 +232,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("remove_activity")
     public JsonResult removeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.removeActivity(activityId);
+        corgiUserActivityService.deleteActivity(activityId);
         return new JsonResult();
     }
 
@@ -254,7 +257,7 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_user_trace")
     public JsonResult getUserTrace(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
-        List<HashMap> traces = corgiStatisticService.getUserTraceSum(startDate,endDate);
+        List<HashMap> traces = corgiStatisticService.getUserTraceSum(startDate, endDate);
         return new JsonResult(traces);
     }
 
