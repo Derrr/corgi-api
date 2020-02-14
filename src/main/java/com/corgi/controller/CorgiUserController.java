@@ -266,12 +266,12 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
-        UserPosition userPosition = new UserPosition();
-        userPosition.setUserId(userQuery.getUserId());
-        userPosition.setLat(userQuery.getLat());
-        userPosition.setLng(userQuery.getLng());
+//        UserPosition userPosition = new UserPosition();
+//        userPosition.setUserId(userQuery.getUserId());
+//        userPosition.setLat(userQuery.getLat());
+//        userPosition.setLng(userQuery.getLng());
 
-        corgiUserService.updateUserPosition(userPosition);
+        //corgiUserService.updateUserPosition(userPosition);
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userQuery.getUserId())
