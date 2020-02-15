@@ -261,6 +261,12 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(traces);
     }
 
+    @GetMapping("add_character")
+    public JsonResult addCharacter(@RequestParam("openId") String openId, @RequestParam("character") String character) {
+        corgiStatisticService.addCharacter(openId, character);
+        return new JsonResult();
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         return new JsonResult();
