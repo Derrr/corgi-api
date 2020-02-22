@@ -200,8 +200,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/get_user_detail")
-    public JsonResult getUserDetail(@RequestParam("userId") String userId) {
-        UserDetail userDetail = corgiUserService.getUserDetail(userId);
+    public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
+        UserDetail userDetail = corgiUserService.getUserDetail(userId, loginUserId);
         return new JsonResult(userDetail);
     }
 
