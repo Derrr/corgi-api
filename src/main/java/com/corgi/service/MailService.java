@@ -34,7 +34,7 @@ public class MailService {
 
 
     public void sendMail(MailMessage mailMessage) throws MessagingException, GeneralSecurityException, UnsupportedEncodingException {
-        UserDetail userDetail = corgiUserService.getUserDetail(mailMessage.getUserId());
+        UserDetail userDetail = corgiUserService.getUserDetail(mailMessage.getUserId(), null);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String emailTitle = "【用户反馈】" + userDetail.getNickname() + "-" + sdf.format(new Date());
         Properties props = new Properties();
