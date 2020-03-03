@@ -125,7 +125,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("sign_up")
     public JsonResult signUp(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
-        corgiFavorActivityService.addFavor(userId, activityId);
+        //corgiFavorActivityService.addFavor(userId, activityId);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (!CollectionUtils.isEmpty(corgiActivities)) {
             HashMap extra = new HashMap();
