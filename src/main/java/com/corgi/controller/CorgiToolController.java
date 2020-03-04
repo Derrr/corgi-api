@@ -252,7 +252,6 @@ public class CorgiToolController extends BaseController {
     @GetMapping("get_user_stay")
     public JsonResult getUserStay(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate, @RequestParam("stayCount") String stayCount) {
         List<HashMap> userStays = corgiStatisticService.getUserStay(startDate, endDate, stayCount);
-        log.info("userStays:{}", userStays);
         return new JsonResult(userStays);
     }
 
