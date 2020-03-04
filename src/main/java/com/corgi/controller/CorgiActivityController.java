@@ -162,7 +162,7 @@ public class CorgiActivityController extends BaseController {
             }
             int peopleCount = activity.getPeopleCount();
             boolean hasUser = false;
-            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId);
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
             int count = 0;
             int userStatus = 0;
             for (UserProfile userProfile : userProfiles) {
@@ -239,7 +239,7 @@ public class CorgiActivityController extends BaseController {
             }
             int peopleCount = activity.getPeopleCount();
             boolean hasUser = false;
-            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId);
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
             int count = 0;
             for (UserProfile userProfile : userProfiles) {
                 if (userProfile.getSignUpStatus() == UserSignUp.AGREE) {
@@ -310,8 +310,8 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_sign_up_users")
-    public JsonResult getSignUpUsers(@RequestParam("activityId") String activityId, @RequestParam("userId") String userId) {
-        List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId);
+    public JsonResult getSignUpUsers(@RequestParam("activityId") String activityId, @RequestParam("userId") String userId, @RequestParam(name = "status", required = false) String status) {
+        List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, status);
         return new JsonResult(userProfiles);
     }
 
