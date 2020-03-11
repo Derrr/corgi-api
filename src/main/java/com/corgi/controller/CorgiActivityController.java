@@ -345,12 +345,12 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_user_activity")
-    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam("status") String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam(name = "status", required = false) String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<CorgiActivity> result = new ArrayList<>();
         if (CorgiActivity.CREATED.equals(status)) {
             result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
-        } else if (CorgiActivity.ENDED.equals(status)) {
-            result = corgiActivityService.getUserEndedActivity(userId, page, pageSize);
+        } else {
+            result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), "", (page - 1) * pageSize, pageSize);
         }
         return new JsonResult(result);
     }
