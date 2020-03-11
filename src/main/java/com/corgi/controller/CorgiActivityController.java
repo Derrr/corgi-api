@@ -56,6 +56,8 @@ public class CorgiActivityController extends BaseController {
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
+    private static Comparator<CorgiActivityDetail> timeComparator = (o1, o2) -> o2.getSignUpTime().compareTo(o1.getSignUpTime());
+
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
         activity.setCheckStatus(AliyunGreenService.PASS);
@@ -331,6 +333,8 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
             detailList.sort(detailComparator);
+        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+            detailList.sort(timeComparator);
         }
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userId)
