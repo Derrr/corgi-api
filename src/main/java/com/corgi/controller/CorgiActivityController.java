@@ -56,7 +56,7 @@ public class CorgiActivityController extends BaseController {
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
-    private static Comparator<CorgiActivityDetail> timeComparator = (o1, o2) -> o2.getSignUpTime().compareTo(o1.getSignUpTime());
+    private static Comparator<CorgiActivityDetail> timeComparator = Comparator.comparing(CorgiActivity::getSignUpTime);
 
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
