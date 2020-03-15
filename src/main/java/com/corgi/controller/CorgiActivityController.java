@@ -237,9 +237,9 @@ public class CorgiActivityController extends BaseController {
                 return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
             }
             if (activity.getStatus().equals(CorgiActivity.FULL)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+                return new JsonResult(Constants.API_ERROR_CODE, "抱歉，该活动已满员");
             }
-            int peopleCount = activity.getPeopleCount();
+            int peopleCount = activity.getPeopleCount() -1;
             boolean hasUser = false;
             List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
             int count = 0;
@@ -253,7 +253,7 @@ public class CorgiActivityController extends BaseController {
             if (count >= peopleCount) {
                 activity.setStatus(CorgiActivity.FULL);
                 corgiActivityService.updateCorgiActivity(activity);
-                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+                return new JsonResult(Constants.API_ERROR_CODE, "抱歉，该活动已满员");
             }
             if (hasUser) {
                 UserSignUp userSignUp = new UserSignUp(userId, activityId);
