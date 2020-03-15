@@ -235,9 +235,6 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user_position")
     public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) {
-        if ("76".compareTo(userPosition.getUserId()) > 0) {
-            return new JsonResult(Constants.API_ERROR_CODE,"用户已失效，请重新注册");
-        }
         corgiUserService.updateUserPosition(userPosition);
         String key = "sentMatch_" + userPosition.getUserId();
         String matchTime = redisTemplate.opsForValue().get(key);
