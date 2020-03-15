@@ -115,6 +115,11 @@ public class CorgiActivityController extends BaseController {
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
         activity = corgiActivityService.updateCorgiActivity(activity);
+        corgiUserActivityService.deleteSignUpByActivity(activity.getId());
+        if(CorgiActivity.FULL.equals(activity.getStatus())){
+            activity.setStatus(CorgiActivity.CREATED);
+            corgiActivityService.updateCorgiActivityStatus(activity);
+        }
         return new JsonResult(activity);
     }
 
@@ -185,7 +190,7 @@ public class CorgiActivityController extends BaseController {
             }
             if (count >= peopleCount) {
                 activity.setStatus(CorgiActivity.FULL);
-                corgiActivityService.updateCorgiActivity(activity);
+                corgiActivityService.updateCorgiActivityStatus(activity);
                 return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
             }
             if (!hasUser) {
@@ -200,7 +205,7 @@ public class CorgiActivityController extends BaseController {
             count++;
             if (peopleCount == (count)) {
                 activity.setStatus(CorgiActivity.FULL);
-                corgiActivityService.updateCorgiActivity(activity);
+                corgiActivityService.updateCorgiActivityStatus(activity);
             }
             HashMap extra = new HashMap();
             extra.put("activityId", activityId);
@@ -252,7 +257,7 @@ public class CorgiActivityController extends BaseController {
             }
             if (count >= peopleCount) {
                 activity.setStatus(CorgiActivity.FULL);
-                corgiActivityService.updateCorgiActivity(activity);
+                corgiActivityService.updateCorgiActivityStatus(activity);
                 return new JsonResult(Constants.API_ERROR_CODE, "抱歉，该活动已满员");
             }
             if (hasUser) {
@@ -262,7 +267,7 @@ public class CorgiActivityController extends BaseController {
                 count++;
                 if (peopleCount == count) {
                     activity.setStatus(CorgiActivity.FULL);
-                    corgiActivityService.updateCorgiActivity(activity);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
                 }
                 HashMap extra = new HashMap();
                 extra.put("activityId", activityId);
