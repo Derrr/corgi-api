@@ -58,6 +58,8 @@ public class CorgiActivityController extends BaseController {
 
     private static Comparator<CorgiActivityDetail> timeComparator = Comparator.comparing(CorgiActivity::getSignUpTime);
 
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
         activity.setCheckStatus(AliyunGreenService.PASS);
@@ -116,7 +118,7 @@ public class CorgiActivityController extends BaseController {
         activity = aliyunGreenService.checkActivity(activity);
         activity = corgiActivityService.updateCorgiActivity(activity);
         corgiUserActivityService.deleteSignUpByActivity(activity.getId());
-        if(CorgiActivity.FULL.equals(activity.getStatus())){
+        if (CorgiActivity.FULL.equals(activity.getStatus())) {
             activity.setStatus(CorgiActivity.CREATED);
             corgiActivityService.updateCorgiActivityStatus(activity);
         }
@@ -244,7 +246,7 @@ public class CorgiActivityController extends BaseController {
             if (activity.getStatus().equals(CorgiActivity.FULL)) {
                 return new JsonResult(Constants.API_ERROR_CODE, "抱歉，该活动已满员");
             }
-            int peopleCount = activity.getPeopleCount() -1;
+            int peopleCount = activity.getPeopleCount() - 1;
             boolean hasUser = false;
             List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
             int count = 0;
@@ -421,8 +423,10 @@ public class CorgiActivityController extends BaseController {
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
+        String now = sdf.format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
+                activity.setCurrentTime(now);
                 UserDetail userDetail = new UserDetail();
                 if (activity.getUserId() != null) {
                     userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
