@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -97,6 +98,17 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+    }
+
+    @PostMapping("/update_push")
+    public JsonResult updatePush(@RequestBody UserLogin userLogin) {
+        corgiUserService.updatePush(userLogin);
+        return new JsonResult();
+    }
+
+    @GetMapping("/get_basic_detail")
+    public JsonResult getBasicDetail(@RequestParam("userId") String userId) {
+        return new JsonResult(corgiUserService.getUserLogin(userId));
     }
 
     @PostMapping("/add_user")
