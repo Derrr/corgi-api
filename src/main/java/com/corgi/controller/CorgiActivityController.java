@@ -188,12 +188,12 @@ public class CorgiActivityController extends BaseController {
                 return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
             }
             if (activity.getStatus().equals(CorgiActivity.FULL)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+                return new JsonResult(Constants.API_ERROR_CODE, "抱歉，该活动已满员");
             }
             if (count >= peopleCount) {
                 activity.setStatus(CorgiActivity.FULL);
                 corgiActivityService.updateCorgiActivityStatus(activity);
-                return new JsonResult(Constants.API_ERROR_CODE, "报名已满员");
+                return new JsonResult(Constants.API_ERROR_CODE, "抱歉，该活动已满员");
             }
             if (!hasUser) {
                 UserSignUp userSignUp = new UserSignUp(userId, activityId);
@@ -312,10 +312,42 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("refuse")
     public JsonResult refuse(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
-        UserSignUp userSignUp = new UserSignUp(userId, activityId);
-        userSignUp.setStatus(UserSignUp.REFUSE);
-        corgiUserActivityService.updateSignUp(userSignUp);
-        return new JsonResult();
+        String lockKey = "agree_" + activityId;
+        corgiUtilService.lock(lockKey);
+        try {
+            List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+
+            if (CollectionUtils.isEmpty(activityList)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+            }
+            CorgiActivity activity = activityList.get(0);
+            if (activity.getStatus().equals(CorgiActivity.DELETED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "活动已被删除");
+            }
+            if (activity.getStatus().equals(CorgiActivity.ENDED)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "报名已结束");
+            }
+            int peopleCount = activity.getPeopleCount() - 1;
+            UserSignUp userSignUp = new UserSignUp(userId, activityId);
+            userSignUp.setStatus(UserSignUp.REFUSE);
+            corgiUserActivityService.updateSignUp(userSignUp);
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
+            int count = 0;
+            for (UserProfile userProfile : userProfiles) {
+                if (userProfile.getSignUpStatus() == UserSignUp.AGREE) {
+                    count++;
+                }
+            }
+            if (count >= peopleCount) {
+                activity.setStatus(CorgiActivity.FULL);
+            } else {
+                activity.setStatus(CorgiActivity.CREATED);
+            }
+            corgiActivityService.updateCorgiActivityStatus(activity);
+            return new JsonResult();
+        } finally {
+            corgiUtilService.unlock(lockKey);
+        }
     }
 
     @GetMapping("get_sign_up_users")
