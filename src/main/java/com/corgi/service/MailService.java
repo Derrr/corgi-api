@@ -85,15 +85,16 @@ public class MailService {
         builder.append("\n " + mailMessage.getContent());
         if (!CollectionUtils.isEmpty(mailMessage.getPics())) {
             builder.append("\n 图片： ");
+            int i = 1;
             for (String pic : mailMessage.getPics()) {
-                builder.append("\n " + pic);
+                builder.append("\n <a href='" + pic + "?x-oss-process=image/format,jpg'>" + i++ + ".jpg</a>");
             }
         }
 
 
         msg.setSentDate(new Date());
 
-        msg.setText(builder.toString());
+        msg.setContent(builder.toString(), "text/html;charset=utf-8");
 
         //设置发件人邮箱
         // InternetAddress 的三个参数分别为: 发件人邮箱, 显示的昵称(只用于显示, 没有特别的要求), 昵称的字符集编码
