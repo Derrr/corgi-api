@@ -169,7 +169,7 @@ public class CorgiActivityController extends BaseController {
             if (activity.getStatus().equals(CorgiActivity.DELETED)) {
                 return new JsonResult(Constants.API_ERROR_CODE, "活动已被删除");
             }
-            int peopleCount = activity.getPeopleCount();
+            int peopleCount = activity.getPeopleCount() - 1;
             boolean hasUser = false;
             List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
             int count = 0;
@@ -179,7 +179,9 @@ public class CorgiActivityController extends BaseController {
                     count++;
                 }
                 hasUser |= userProfile.getUserId().equals(userId);
-                userStatus = userProfile.getSignUpStatus();
+                if (userProfile.getUserId().equals(userId)) {
+                    userStatus = userProfile.getSignUpStatus();
+                }
             }
             if (userStatus == UserSignUp.AGREE) {
                 return new JsonResult();
@@ -331,7 +333,7 @@ public class CorgiActivityController extends BaseController {
             UserSignUp userSignUp = new UserSignUp(userId, activityId);
             userSignUp.setStatus(UserSignUp.REFUSE);
             corgiUserActivityService.updateSignUp(userSignUp);
-            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, UserSignUp.AGREE + "");
             int count = 0;
             for (UserProfile userProfile : userProfiles) {
                 if (userProfile.getSignUpStatus() == UserSignUp.AGREE) {
