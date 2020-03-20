@@ -270,7 +270,7 @@ public class AliyunGreenService {
             HttpResponse httpResponse = managementClient.doAction(textScanRequest);
             if (httpResponse.isSuccess()) {
                 JSONObject scrResponse = JSON.parseObject(new String(httpResponse.getHttpContent(), "UTF-8"));
-                System.out.println(JSON.toJSONString(scrResponse, true));
+                log.info("check text:{}", JSON.toJSONString(scrResponse, true));
                 if (200 == scrResponse.getInteger("code")) {
                     JSONArray taskResults = scrResponse.getJSONArray("data");
                     for (Object taskResult : taskResults) {

@@ -422,11 +422,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("test")
-    public JsonResult test() {
-        UserDetail userDetail = new UserDetail();
-        userDetail.setUserId("-1");
-        userDetail.setAvatar("http://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/55/1581399343285");
-        this.addUser(userDetail);
+    public JsonResult test(@RequestParam("text")String text) {
+        aliyunGreenService.checkText(text);
         return new JsonResult();
     }
 
