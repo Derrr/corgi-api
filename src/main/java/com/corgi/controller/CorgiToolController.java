@@ -178,7 +178,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("agree_nickname")
     public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
         if (!StringUtils.isEmpty(nickname)) {
-            String result = corgiUserService.updateUserNickname(userId, nickname, nickname);
+            String result = corgiUserService.updateUserNickname(userId, nickname, "");
             if (!CorgiConstants.SUCCESS.equals(result)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
             }
