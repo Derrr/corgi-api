@@ -50,6 +50,10 @@ public class CorgiToolController extends BaseController {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    public static final String ACTIVITY_TASK = "activity";
+    public static final String USER_TASK = "user";
+
+
     @GetMapping("query_user")
     public JsonResult queryUser(UserDetail userDetail, @RequestParam(required = false, name = "loginUserId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> profiles = corgiUserService.searchUsers(userDetail, userId, page, pageSize);
@@ -240,6 +244,26 @@ public class CorgiToolController extends BaseController {
     public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.PASS);
         return new JsonResult();
+    }
+
+    @GetMapping("count_task")
+    public JsonResult countTask(@RequestParam("type") String type) {
+        long count = 0;
+        switch (type){
+            case ACTIVITY_TASK:
+                CorgiActivity corgiActivity = new CorgiActivity();
+                corgiActivity.setCheckStatus(AliyunGreenService.CHECK);
+                count = corgiActivityService.countCorgiActivity(corgiActivity);
+                break;
+            case USER_TASK:
+                UserDetail userDetail = new UserDetail();
+                userDetail.setCheckStatus(AliyunGreenService.CHECK);
+                count = corgiUserService.countUsers(userDetail);
+                break;
+            case USER_PIC_TASK:
+
+        }
+        return new JsonResult(count);
     }
 
 
