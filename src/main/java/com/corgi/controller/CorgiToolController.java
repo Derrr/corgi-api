@@ -260,8 +260,6 @@ public class CorgiToolController extends BaseController {
                 userDetail.setCheckStatus(AliyunGreenService.CHECK);
                 count = corgiUserService.countUsers(userDetail);
                 break;
-            case USER_PIC_TASK:
-
         }
         return new JsonResult(count);
     }
