@@ -169,6 +169,8 @@ public class CorgiUserController extends BaseController {
         String result;
         if (aliyunGreenService.checkText(userDetail.getNickname())) {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
+            userDetail.setCheckStatus(AliyunGreenService.PASS);
+            corgiUserService.updateDetail(userDetail);
         } else {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), AliyunGreenService.TEXT_FORBIDDEN, userDetail.getNickname());
             userDetail.setCheckStatus(AliyunGreenService.CHECK);
