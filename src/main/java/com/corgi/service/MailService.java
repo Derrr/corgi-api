@@ -120,11 +120,11 @@ public class MailService {
 
     public void sendCheckMessage(String type, String id) {
         try {
-            if(StringUtils.isNotEmpty(type) && StringUtils.isNotEmpty(id)) {
-                sendMail(MailMessage.builder().content(CHECK_TASK.concat(type).concat(id)).build());
+            if (StringUtils.isNotEmpty(type) && StringUtils.isNotEmpty(id)) {
+                sendMail(MailMessage.builder().customize(CHECK_TASK.concat(type).concat(id)).build());
             }
         } catch (Exception e) {
-            log.error(e.getMessage().concat(": ").concat(type).concat(id), e);
+            log.error(e.getMessage() + ": " + type + id, e);
         }
     }
 }
