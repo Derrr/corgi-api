@@ -120,8 +120,10 @@ public class MailService {
 
     public void sendCheckMessage(String type, String id) {
         try {
-            sendMail(MailMessage.builder().content(CHECK_TASK.concat(type).concat(id)).build());
-        } catch (MessagingException | GeneralSecurityException | UnsupportedEncodingException e) {
+            if(StringUtils.isNotEmpty(type) && StringUtils.isNotEmpty(id)) {
+                sendMail(MailMessage.builder().content(CHECK_TASK.concat(type).concat(id)).build());
+            }
+        } catch (Exception e) {
             log.error(e.getMessage().concat(": ").concat(type).concat(id), e);
         }
     }
