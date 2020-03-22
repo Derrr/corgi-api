@@ -126,6 +126,7 @@ public class CorgiUserController extends BaseController {
         userDetail.setCheckStatus(AliyunGreenService.PASS);
         if (!aliyunGreenService.checkText(userDetail.getNickname())) {
             userDetail.setCheckStatus(AliyunGreenService.CHECK);
+            mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         userDetail = aliyunGreenService.checkDesc(userDetail);
         String result = corgiUserService.addDetail(userDetail);
@@ -175,6 +176,7 @@ public class CorgiUserController extends BaseController {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), AliyunGreenService.TEXT_FORBIDDEN, userDetail.getNickname());
             userDetail.setCheckStatus(AliyunGreenService.CHECK);
             corgiUserService.updateDetail(userDetail);
+            mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         if (!CorgiConstants.SUCCESS.equals(result)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
@@ -424,7 +426,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("test")
-    public JsonResult test(@RequestParam("text")String text) {
+    public JsonResult test(@RequestParam("text") String text) {
         aliyunGreenService.checkText(text);
         return new JsonResult();
     }

@@ -20,6 +20,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.util.CorgiHttpUtil;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiPic;
+import com.corgi.entity.MailMessage;
 import com.corgi.entity.PicInfo;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.UserDetail;
@@ -27,13 +28,16 @@ import com.corgi.user.entity.UserPic;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.*;
 
 /**
@@ -43,6 +47,7 @@ import java.util.*;
 @Service
 public class AliyunGreenService {
     public static final String TEXT_FORBIDDEN = "(内容审核中)";
+
 
     public static String CHECK = "check";
     public static String PASS = "pass";
@@ -62,6 +67,9 @@ public class AliyunGreenService {
     @Reference
     private CorgiPicService corgiPicService;
 
+    @Autowired
+    private MailService mailService;
+
     @PostConstruct
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
@@ -76,6 +84,9 @@ public class AliyunGreenService {
         UserPic corgiPic = new UserPic();
         corgiPic.setPicUrl(userDetail.getAvatar());
         corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), CheckPic.USER).get(0);
+        if (CheckPic.NEED_CHECK.equals(corgiPic.getStatus())) {
+            mailService.sendCheckMessage("用户图片：", userDetail.getUserId());
+        }
         return corgiPic;
     }
 
@@ -85,6 +96,7 @@ public class AliyunGreenService {
             userDetail.setCheckDesc(desc);
             userDetail.setDesc(AliyunGreenService.TEXT_FORBIDDEN);
             userDetail.setCheckStatus(CHECK);
+            mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         return userDetail;
     }
@@ -305,15 +317,21 @@ public class AliyunGreenService {
     public CorgiActivity checkActivity(CorgiActivity activity) {
         String title = activity.getTitle();
         String content = activity.getContent();
+        boolean sendMail = false;
         if (!StringUtils.isEmpty(title) && !checkText(title)) {
             activity.setTitle(TEXT_FORBIDDEN);
             activity.setCheckTitle(title);
             activity.setCheckStatus(CHECK);
+            sendMail = true;
         }
         if (!StringUtils.isEmpty(content) && !checkText(content)) {
             activity.setContent(TEXT_FORBIDDEN);
             activity.setCheckContent(content);
             activity.setCheckStatus(CHECK);
+            sendMail = true;
+        }
+        if (sendMail) {
+            mailService.sendCheckMessage("活动：", activity.getId());
         }
         return activity;
     }

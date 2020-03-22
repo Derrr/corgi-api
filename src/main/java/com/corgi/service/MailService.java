@@ -1,5 +1,6 @@
 package com.corgi.service;
 
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.entity.MailMessage;
 import com.corgi.user.api.CorgiUserService;
@@ -31,6 +32,7 @@ public class MailService {
     private static String mailAccount = "corgiteam_2019@163.com";
     private static String mailPassword = "dasdas11";
     private static String feedbackEmail = "customerfeedback@corgi.org.cn";
+    public static final String CHECK_TASK = "【待审核】平台内容管理-";
 
 
     public void sendMail(MailMessage mailMessage) throws MessagingException, GeneralSecurityException, UnsupportedEncodingException {
@@ -73,28 +75,31 @@ public class MailService {
 
         //设置邮件内容
         //使用StringBuilder，因为StringBuilder加载速度会比String快，而且线程安全性也不错
-        StringBuilder builder = new StringBuilder();
+        if (StringUtils.isEmpty(mailMessage.getCustomize())) {
+            StringBuilder builder = new StringBuilder();
 
-        builder.append("\n user id： " + mailMessage.getUserId());
-        builder.append("\n 昵称： " + userDetail.getNickname());
-        builder.append("\n 手机： " + userDetail.getTelNo());
-        builder.append("\n 联系方式： " + mailMessage.getTelNo());
+            builder.append("\n user id： " + mailMessage.getUserId());
+            builder.append("\n 昵称： " + userDetail.getNickname());
+            builder.append("\n 手机： " + userDetail.getTelNo());
+            builder.append("\n 联系方式： " + mailMessage.getTelNo());
 
-        builder.append("\n");
+            builder.append("\n");
 
-        builder.append("\n " + mailMessage.getContent());
-        if (!CollectionUtils.isEmpty(mailMessage.getPics())) {
-            builder.append("\n 图片： ");
-            int i = 1;
-            for (String pic : mailMessage.getPics()) {
-                builder.append("\n <a href='" + pic + "?x-oss-process=image/format,jpg'>" + i++ + ".jpg</a>");
+            builder.append("\n " + mailMessage.getContent());
+            if (!CollectionUtils.isEmpty(mailMessage.getPics())) {
+                builder.append("\n 图片： ");
+                int i = 1;
+                for (String pic : mailMessage.getPics()) {
+                    builder.append("\n <a href='" + pic + "?x-oss-process=image/format,jpg'>" + i++ + ".jpg</a>");
+                }
             }
+            msg.setContent(builder.toString(), "text/html;charset=utf-8");
+        } else {
+            msg.setContent(mailMessage.getCustomize(), "text/html;charset=utf-8");
         }
-
 
         msg.setSentDate(new Date());
 
-        msg.setContent(builder.toString(), "text/html;charset=utf-8");
 
         //设置发件人邮箱
         // InternetAddress 的三个参数分别为: 发件人邮箱, 显示的昵称(只用于显示, 没有特别的要求), 昵称的字符集编码
@@ -111,5 +116,13 @@ public class MailService {
         //发送邮件
         transport.sendMessage(msg, new Address[]{new InternetAddress(feedbackEmail)});
         transport.close();
+    }
+
+    public void sendCheckMessage(String type, String id) {
+        try {
+            sendMail(MailMessage.builder().content(CHECK_TASK.concat(type).concat(id)).build());
+        } catch (MessagingException | GeneralSecurityException | UnsupportedEncodingException e) {
+            log.error(e.getMessage().concat(": ").concat(type).concat(id), e);
+        }
     }
 }
