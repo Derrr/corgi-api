@@ -18,6 +18,7 @@ import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,10 +49,13 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     public static final String ACTIVITY_TASK = "activity";
     public static final String USER_TASK = "user";
+    public static final String VERSION_KEY = "corgi_version";
 
 
     @GetMapping("query_user")
@@ -249,7 +253,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("count_task")
     public JsonResult countTask(@RequestParam("type") String type) {
         long count = 0;
-        switch (type){
+        switch (type) {
             case ACTIVITY_TASK:
                 CorgiActivity corgiActivity = new CorgiActivity();
                 corgiActivity.setCheckStatus(AliyunGreenService.CHECK);
@@ -286,6 +290,17 @@ public class CorgiToolController extends BaseController {
     @GetMapping("add_character")
     public JsonResult addCharacter(@RequestParam("openId") String openId, @RequestParam("character") String character) {
         corgiStatisticService.addCharacter(openId, character);
+        return new JsonResult();
+    }
+
+    @GetMapping("get_version")
+    public JsonResult getVersion() {
+        return new JsonResult(redisTemplate.opsForValue().get(VERSION_KEY));
+    }
+
+    @GetMapping("update_version")
+    public JsonResult updateVersion(@RequestParam("version") String version) {
+        redisTemplate.opsForValue().set(VERSION_KEY, version);
         return new JsonResult();
     }
 
