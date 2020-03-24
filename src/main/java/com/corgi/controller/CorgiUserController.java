@@ -450,7 +450,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
-        corgiBlacklistService.deleteBlacklist(userId, blockId);
+        corgiBlackActivityService.deleteFavorActivity(userId, blockId);
         return new JsonResult();
     }
 
