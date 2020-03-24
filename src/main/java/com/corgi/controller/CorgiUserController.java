@@ -12,6 +12,7 @@ import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.corgi.activity.api.CorgiBlackActivityService;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
@@ -44,6 +45,8 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("user")
 public class CorgiUserController extends BaseController {
+    @Reference
+    private CorgiBlackActivityService corgiBlackActivityService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
     @Reference
@@ -446,8 +449,8 @@ public class CorgiUserController extends BaseController {
 
 
     @GetMapping("test")
-    public JsonResult test(@RequestParam("text") String text) {
-        aliyunGreenService.checkText(text);
+    public JsonResult test(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
+        corgiBlacklistService.deleteBlacklist(userId, blockId);
         return new JsonResult();
     }
 
