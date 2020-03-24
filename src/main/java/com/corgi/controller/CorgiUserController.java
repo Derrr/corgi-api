@@ -46,8 +46,6 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("user")
 public class CorgiUserController extends BaseController {
     @Reference
-    private CorgiBlackActivityService corgiBlackActivityService;
-    @Reference
     private CorgiBlacklistService corgiBlacklistService;
     @Reference
     private CorgiUserService corgiUserService;
@@ -450,7 +448,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("test")
     public JsonResult test(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
-        corgiBlackActivityService.deleteFavorActivity(userId, blockId);
+        corgiBlacklistService.addBlacklist(userId, blockId);
         return new JsonResult();
     }
 
