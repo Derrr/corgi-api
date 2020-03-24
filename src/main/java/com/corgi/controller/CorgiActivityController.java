@@ -250,7 +250,7 @@ public class CorgiActivityController extends BaseController {
             }
             int peopleCount = activity.getPeopleCount() - 1;
             boolean hasUser = false;
-            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, userId, "");
+            List<UserProfile> userProfiles = corgiUserActivityService.getUsers(activityId, null, "");
             int count = 0;
             for (UserProfile userProfile : userProfiles) {
                 if (userProfile.getSignUpStatus() == UserSignUp.AGREE) {

@@ -45,6 +45,8 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("user")
 public class CorgiUserController extends BaseController {
     @Reference
+    private CorgiBlacklistService corgiBlacklistService;
+    @Reference
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiPicService corgiPicService;
@@ -424,6 +426,24 @@ public class CorgiUserController extends BaseController {
         }
         return new JsonResult();
     }
+
+    @GetMapping("block")
+    public JsonResult block(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
+        corgiBlacklistService.addBlacklist(userId, blockId);
+        return new JsonResult();
+    }
+
+    @GetMapping("unblock")
+    public JsonResult unblock(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
+        corgiBlacklistService.deleteBlacklist(userId, blockId);
+        return new JsonResult();
+    }
+
+    @GetMapping("get_blacklist")
+    public JsonResult getBlacklist(@RequestParam("userId") String userId) {
+        return new JsonResult(corgiBlacklistService.getBlackUser(userId));
+    }
+
 
     @GetMapping("test")
     public JsonResult test(@RequestParam("text") String text) {
