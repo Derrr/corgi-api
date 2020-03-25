@@ -22,6 +22,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -48,6 +49,8 @@ public class CorgiToolController extends BaseController {
     private CorgiAreaService corgiAreaService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -304,14 +307,37 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @PostMapping("report")
+    public JsonResult report(@RequestBody CorgiReport report) {
+        corgiBlacklistService.report(report);
+        return new JsonResult();
+    }
+
+    @GetMapping("get_report")
+    public JsonResult getReport(@RequestParam(required = false, name = "status") String status) {
+        CorgiReport corgiReport = new CorgiReport();
+        corgiReport.setReportStatus(status);
+        return new JsonResult(corgiBlacklistService.getReport(corgiReport));
+    }
+
+    @GetMapping("update_report_status")
+    public JsonResult updateReportStatus(@RequestParam("status") String status, @RequestParam("reportId") String reportId) {
+        corgiBlacklistService.updateStatus(reportId, status);
+        return new JsonResult();
+    }
+
+
     @GetMapping("test")
-    public JsonResult test(@RequestParam("version")String version, @RequestParam("desc")String desc, @RequestParam("force")String force) {
-        HashMap hashMap = new HashMap();
-        hashMap.put("version",version);
-        hashMap.put("desc",desc);
-        hashMap.put("force",force);
-        redisTemplate.delete(VERSION_KEY);
-        redisTemplate.opsForHash().putAll(VERSION_KEY, hashMap);
+    public JsonResult test() {
+        CorgiReport corgiReport = new CorgiReport();
+        corgiReport.setReportUserId("1");
+        corgiReport.setReportUserName("嗷嗷");
+        corgiReport.setAccuseId("77");
+        corgiReport.setAccuseType("用户");
+        corgiReport.setReason("dwaegwg");
+        corgiReport.setDesc("描述");
+        corgiReport.setPics(Arrays.asList("daseg", "gawiego"));
+        corgiBlacklistService.report(corgiReport);
         return new JsonResult();
     }
 }
