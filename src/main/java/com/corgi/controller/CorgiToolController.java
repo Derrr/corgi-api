@@ -310,6 +310,7 @@ public class CorgiToolController extends BaseController {
         hashMap.put("version",version);
         hashMap.put("desc",desc);
         hashMap.put("force",force);
+        redisTemplate.delete(VERSION_KEY);
         redisTemplate.opsForHash().putAll(VERSION_KEY, hashMap);
         return new JsonResult();
     }
