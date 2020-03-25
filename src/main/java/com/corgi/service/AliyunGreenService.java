@@ -41,6 +41,7 @@ import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -249,7 +250,7 @@ public class AliyunGreenService {
                 Integer weight = image.getJSONObject("ImageWidth").getInteger("value");
                 picInfo.setHeight(height);
                 picInfo.setWidth(weight);
-                redisTemplate.opsForValue().set(url, height + "_" + weight);
+                redisTemplate.opsForValue().set(url, height + "_" + weight, 100, TimeUnit.DAYS);
             }
         } catch (Exception e) {
             log.error("get pic info:" + url + " failed", e);
