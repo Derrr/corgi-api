@@ -30,9 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
@@ -69,6 +71,8 @@ public class AliyunGreenService {
 
     @Autowired
     private MailService mailService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @PostConstruct
     void init() {
@@ -226,12 +230,26 @@ public class AliyunGreenService {
 
     public PicInfo getAliyunPicInfo(String url) {
         PicInfo picInfo = new PicInfo();
-        String result = CorgiHttpUtil.doGet(url + IMAGE_INFO, null, null);
+        String result = redisTemplate.opsForValue().get(url);
+        try {
+            if (!StringUtils.isEmpty(result) && result.split("_").length == 2) {
+                String[] hw = result.split("_");
+                picInfo.setHeight(Integer.valueOf(hw[0]));
+                picInfo.setHeight(Integer.valueOf(hw[1]));
+                return picInfo;
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        result = CorgiHttpUtil.doGet(url + IMAGE_INFO, null, null);
         try {
             JSONObject image = JSONObject.parseObject(result);
             if (image != null && image.getJSONObject("ImageHeight") != null && image.getJSONObject("ImageWidth") != null) {
-                picInfo.setHeight(image.getJSONObject("ImageHeight").getInteger("value"));
-                picInfo.setWidth(image.getJSONObject("ImageWidth").getInteger("value"));
+                Integer height = image.getJSONObject("ImageHeight").getInteger("value");
+                Integer weight = image.getJSONObject("ImageWidth").getInteger("value");
+                picInfo.setHeight(height);
+                picInfo.setWidth(weight);
+                redisTemplate.opsForValue().set(url, height + "_" + weight);
             }
         } catch (Exception e) {
             log.error("get pic info:" + url + " failed", e);
