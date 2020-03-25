@@ -295,17 +295,22 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_version")
     public JsonResult getVersion() {
-        return new JsonResult(redisTemplate.opsForValue().get(VERSION_KEY));
+        return new JsonResult(redisTemplate.opsForHash().entries(VERSION_KEY));
     }
 
-    @GetMapping("update_version")
-    public JsonResult updateVersion(@RequestParam("version") String version) {
-        redisTemplate.opsForValue().set(VERSION_KEY, version);
+    @PostMapping("update_version")
+    public JsonResult updateVersion(@RequestBody HashMap version) {
+        redisTemplate.opsForHash().putAll(VERSION_KEY, version);
         return new JsonResult();
     }
 
     @GetMapping("test")
-    public JsonResult test() {
+    public JsonResult test(@RequestParam("version")String version, @RequestParam("desc")String desc, @RequestParam("force")String force) {
+        HashMap hashMap = new HashMap();
+        hashMap.put("version",version);
+        hashMap.put("desc",desc);
+        hashMap.put("force",force);
+        redisTemplate.opsForHash().putAll(VERSION_KEY, hashMap);
         return new JsonResult();
     }
 }
