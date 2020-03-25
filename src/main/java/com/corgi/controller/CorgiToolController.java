@@ -332,7 +332,7 @@ public class CorgiToolController extends BaseController {
         CorgiReport corgiReport = new CorgiReport();
         corgiReport.setReportUserId("1");
         corgiReport.setReportUserName("嗷嗷");
-        corgiReport.setAccuseId("77");
+        corgiReport.setAccuseId("17");
         corgiReport.setAccuseType("用户");
         corgiReport.setReason("dwaegwg");
         corgiReport.setDesc("描述");
