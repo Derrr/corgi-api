@@ -1,5 +1,6 @@
 package com.corgi.common.interceptor;
 
+import com.alibaba.dubbo.rpc.RpcException;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.exception.APIException;
@@ -38,6 +39,20 @@ public class CorgiControllerAdvice {
     public void addAttributes(Model model) {}
 
 
+    @ExceptionHandler(RpcException.class)
+    @ResponseBody
+    public ResponseEntity handleControllerIllegalStateException(HttpServletRequest request, Throwable ex){
+        String errorMsg = ex.getMessage();
+        if (!StringUtils.isEmpty(errorMsg)) {
+            errorMsg = errorMsg.replaceAll(System.getProperty("line.separator"), "");
+        }
+        logger.error(errorMsg, ex);
+        JsonResult jsonResult = new JsonResult("");
+        jsonResult.setCode(Constants.SERVER_ERROR_CODE);
+        jsonResult.setMessage("server fail");
+        jsonResult.setData(request.getParameterMap());
+        return new ResponseEntity(jsonResult, HttpStatus.OK);
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
