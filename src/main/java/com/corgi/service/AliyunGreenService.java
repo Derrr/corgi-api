@@ -236,7 +236,7 @@ public class AliyunGreenService {
             if (!StringUtils.isEmpty(result) && result.split("_").length == 2) {
                 String[] hw = result.split("_");
                 picInfo.setHeight(Integer.valueOf(hw[0]));
-                picInfo.setHeight(Integer.valueOf(hw[1]));
+                picInfo.setWidth(Integer.valueOf(hw[1]));
                 return picInfo;
             }
         } catch (Exception e) {
