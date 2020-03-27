@@ -314,11 +314,15 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_report")
-    public JsonResult getReport(@RequestParam(required = false, name = "status") String status) {
-        CorgiReport corgiReport = new CorgiReport();
-        corgiReport.setReportStatus(status);
-        return new JsonResult(corgiBlacklistService.getReport(corgiReport));
+    public JsonResult getReport(CorgiReport corgiReport, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiBlacklistService.getReport(corgiReport, page, pageSize));
     }
+
+    @GetMapping("count_report")
+    public JsonResult countReport(CorgiReport corgiReport) {
+        return new JsonResult(corgiBlacklistService.countReport(corgiReport));
+    }
+
 
     @GetMapping("update_report_status")
     public JsonResult updateReportStatus(@RequestParam("status") String status, @RequestParam("reportId") String reportId) {
