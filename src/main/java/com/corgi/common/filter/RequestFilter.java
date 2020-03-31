@@ -7,6 +7,7 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @WebFilter(filterName = "myFilter", urlPatterns = "/**")
@@ -24,7 +25,7 @@ public class RequestFilter implements Filter {
             return;
         }
         long time = System.currentTimeMillis();
-        MDC.put("reqId", ((HttpServletRequest) servletRequest).getHeader("dasuan-req-id"));
+        MDC.put("reqId", UUID.randomUUID().toString());
         MDC.put("usrID", "");
         filterChain.doFilter(servletRequest, servletResponse);
         log.info("time spent...{}:{}ms", ((HttpServletRequest) servletRequest).getRequestURI(), (System.currentTimeMillis() - time));
