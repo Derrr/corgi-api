@@ -224,7 +224,7 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("change_type")
+    @GetMapping("agree_type")
     public JsonResult agreeType(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         if (!StringUtils.isEmpty(type)) {
             corgiActivityService.updateByColumnn(activityId, "activityType", type);
@@ -258,6 +258,12 @@ public class CorgiToolController extends BaseController {
     @GetMapping("agree_activity")
     public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.PASS);
+        return new JsonResult();
+    }
+
+    @GetMapping("fail_activity")
+    public JsonResult failActivity(@RequestParam("activityId") String activityId) {
+        corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.FAIL);
         return new JsonResult();
     }
 

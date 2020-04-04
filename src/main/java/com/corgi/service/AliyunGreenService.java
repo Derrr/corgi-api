@@ -54,6 +54,7 @@ public class AliyunGreenService {
 
     public static String CHECK = "check";
     public static String PASS = "pass";
+    public static String FAIL = "fail";
 
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
