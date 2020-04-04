@@ -224,6 +224,14 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("change_type")
+    public JsonResult agreeType(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+        if (!StringUtils.isEmpty(type)) {
+            corgiActivityService.updateByColumnn(activityId, "activityType", type);
+        }
+        return new JsonResult();
+    }
+
     @GetMapping("agree_content")
     public JsonResult agreeContent(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "content", defaultValue = "") String content) {
         if (!StringUtils.isEmpty(content)) {

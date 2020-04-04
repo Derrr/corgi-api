@@ -336,7 +336,14 @@ public class AliyunGreenService {
     public CorgiActivity checkActivity(CorgiActivity activity) {
         String title = activity.getTitle();
         String content = activity.getContent();
+        String type = activity.getActivityType();
         boolean sendMail = false;
+        if (!StringUtils.isEmpty(type) && !checkText(type)) {
+            activity.setActivityType("待审核");
+            activity.setCheckActivityType(type);
+            activity.setCheckStatus(CHECK);
+            sendMail = true;
+        }
         if (!StringUtils.isEmpty(title) && !checkText(title)) {
             activity.setTitle(TEXT_FORBIDDEN);
             activity.setCheckTitle(title);
