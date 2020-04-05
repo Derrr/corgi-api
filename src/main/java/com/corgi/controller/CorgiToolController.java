@@ -216,6 +216,15 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("fail_user")
+    public JsonResult failUser(@RequestParam("userId") String userId) {
+        UserDetail detail = new UserDetail();
+        detail.setUserId(userId);
+        detail.setCheckStatus(AliyunGreenService.FAIL);
+        corgiUserService.updateDetail(detail);
+        return new JsonResult();
+    }
+
     @GetMapping("agree_title")
     public JsonResult agreeTitle(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "title", defaultValue = "") String title) {
         if (!StringUtils.isEmpty(title)) {
