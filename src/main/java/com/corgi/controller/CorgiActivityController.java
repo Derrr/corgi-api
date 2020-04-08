@@ -135,17 +135,19 @@ public class CorgiActivityController extends BaseController {
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
         //corgiFavorActivityService.addFavor(userId, activityId);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
-        if (!CollectionUtils.isEmpty(corgiActivities)) {
-            HashMap extra = new HashMap();
-            extra.put("activityId", activityId);
-            extra.put("type", PushMessage.SIGN_UP_MESSAGE_TYPE);
-            mqService.sendMessage(PushMessage.builder()
-                    .sourceUserId(userId)
-                    .targetUserId(corgiActivities.get(0).getUserId())
-                    .extra(extra)
-                    .message(PushMessage.SIGN_UP_MESSAGE)
-                    .build());
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
+        HashMap extra = new HashMap();
+        extra.put("activityId", activityId);
+        extra.put("type", PushMessage.SIGN_UP_MESSAGE_TYPE);
+        mqService.sendMessage(PushMessage.builder()
+                .sourceUserId(userId)
+                .targetUserId(corgiActivities.get(0).getUserId())
+                .extra(extra)
+                .message(PushMessage.SIGN_UP_MESSAGE)
+                .build());
+
         return new JsonResult();
     }
 
@@ -291,7 +293,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getDetail(@RequestParam("activityId") String activityId, @RequestParam("userId") String userId) {
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (CollectionUtils.isEmpty(corgiActivities)) {
-            return new JsonResult();
+            return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
         CorgiActivity activity = corgiActivities.get(0);
         CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
