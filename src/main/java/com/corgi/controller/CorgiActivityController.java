@@ -64,6 +64,9 @@ public class CorgiActivityController extends BaseController {
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
+        if(checkDuplicateActivity(activity)){
+            return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
+        }
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
@@ -80,6 +83,19 @@ public class CorgiActivityController extends BaseController {
                 .extra(extra)
                 .build());
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
+    }
+
+    private boolean checkDuplicateActivity(CorgiActivity activity) {
+        CorgiActivity queryActivity = new CorgiActivity();
+        queryActivity.setStatus(CorgiActivity.CREATED);
+        queryActivity.setUserId(activity.getUserId());
+        if (AliyunGreenService.TEXT_FORBIDDEN.equals(activity.getTitle())) {
+            queryActivity.setCheckTitle(activity.getCheckTitle());
+        } else {
+            queryActivity.setTitle(activity.getTitle());
+        }
+        long result = corgiActivityService.countCorgiActivity(queryActivity);
+        return result > 0;
     }
 
     @GetMapping("test_add_activity")
