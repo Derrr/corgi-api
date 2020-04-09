@@ -216,7 +216,6 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_user_detail")
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
-        //dd
         UserDetail userDetail = corgiUserService.getUserDetail(userId, loginUserId);
         return new JsonResult(userDetail);
     }
@@ -288,6 +287,9 @@ public class CorgiUserController extends BaseController {
 //        userPosition.setLng(userQuery.getLng());
 
         //corgiUserService.updateUserPosition(userPosition);
+        if (System.currentTimeMillis() % 2 == 0) {
+            return new JsonResult(new ArrayList<>());
+        }
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userQuery.getUserId())
