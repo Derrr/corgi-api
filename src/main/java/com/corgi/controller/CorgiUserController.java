@@ -287,9 +287,6 @@ public class CorgiUserController extends BaseController {
 //        userPosition.setLng(userQuery.getLng());
 
         //corgiUserService.updateUserPosition(userPosition);
-        if (System.currentTimeMillis() % 2 == 0) {
-            return new JsonResult(new ArrayList<>());
-        }
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userQuery.getUserId())
