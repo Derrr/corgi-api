@@ -372,6 +372,20 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(userProfiles);
     }
 
+    @GetMapping("get_match_user")
+    public JsonResult getMatchUser(@RequestParam("userId") String userId, @RequestParam("type") String type,
+                                    @RequestParam(name = "lat", required = false) Double lat,
+                                    @RequestParam(name = "lng", required = false) Double lng,
+                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, type, lat, lng, page, pageSize);
+        mqService.sendTrace(TraceFollow.builder()
+                .userId(userId)
+                .option(TraceFollow.CHANGE)
+                .type(TraceFollow.FOLLOW)
+                .build());
+        return new JsonResult(userProfiles);
+    }
+
     @GetMapping("get_history_followed_user")
     public JsonResult getHistoryFollowedUser(@RequestParam("userId") String userId,
                                              @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
