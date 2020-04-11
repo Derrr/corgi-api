@@ -1,5 +1,6 @@
 package com.corgi.common.util;
 
+import com.corgi.entity.JwtUser;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -23,34 +24,20 @@ public class RequestUtil {
         return request;
     }
 
-    public static String getAppname() {
-        String appname = getRequest().getHeader("appname");
-        if (StringUtils.isEmpty(appname)) {
-            appname = "topsports";
-        }
-        return appname;
+    public static boolean hasUserId() {
+        JwtUser user = (JwtUser) getRequest().getAttribute("jwtUser");
+        return user != null && !StringUtils.isEmpty(user.getUserId());
     }
 
-    public static String getSource(){
-        String source = getRequest().getHeader("package");
-        if(StringUtils.isEmpty(source)){
-            source = getRequest().getHeader("appname");;
+    public static String getUserId() {
+        if (hasUserId()) {
+            JwtUser user = (JwtUser) getRequest().getAttribute("jwtUser");
+            return user.getUserId();
         }
-        if (StringUtils.isEmpty(source)) {
-            source = "topsports";
-        }
-        return source;
+        return "";
     }
 
-    public static String getPackage(){
-        String packageStr = getRequest().getHeader("package");
-        if(StringUtils.isEmpty(packageStr)){
-            return "";
-        }
-        return packageStr;
-    }
-
-    public static String getAPPID() {
-        return (String) getRequest().getAttribute("APP_ID");
+    public static String getJwt(){
+        return getRequest().getHeader("jwt");
     }
 }

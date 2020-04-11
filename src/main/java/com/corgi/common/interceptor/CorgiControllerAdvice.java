@@ -3,7 +3,7 @@ package com.corgi.common.interceptor;
 import com.alibaba.dubbo.rpc.RpcException;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
-import com.corgi.exception.APIException;
+import com.corgi.exception.PermissionException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -26,22 +26,37 @@ public class CorgiControllerAdvice {
 
     /**
      * 应用到所有@RequestMapping注解方法，在其执行之前初始化数据绑定器
+     *
      * @param binder
      */
     @InitBinder
-    public void initBinder(WebDataBinder binder) {}
+    public void initBinder(WebDataBinder binder) {
+    }
 
     /**
      * 把值绑定到Model中，使全局@RequestMapping可以获取到该值
+     *
      * @param model
      */
     @ModelAttribute
-    public void addAttributes(Model model) {}
+    public void addAttributes(Model model) {
+    }
 
+
+    @ExceptionHandler(PermissionException.class)
+    @ResponseBody
+    public ResponseEntity handleControllerPermissionException(HttpServletRequest request, PermissionException ex) {
+        logger.error("Permission exception:" + ex.getMessage(), ex);
+        JsonResult jsonResult = new JsonResult("");
+        jsonResult.setCode(ex.errorCode);
+        jsonResult.setMessage(ex.getMessage());
+        jsonResult.setData(request.getParameterMap());
+        return new ResponseEntity(jsonResult, HttpStatus.OK);
+    }
 
     @ExceptionHandler(RpcException.class)
     @ResponseBody
-    public ResponseEntity handleControllerIllegalStateException(HttpServletRequest request, Throwable ex){
+    public ResponseEntity handleControllerIllegalStateException(HttpServletRequest request, Throwable ex) {
         String errorMsg = ex.getMessage();
         if (!StringUtils.isEmpty(errorMsg)) {
             errorMsg = errorMsg.replaceAll(System.getProperty("line.separator"), "");

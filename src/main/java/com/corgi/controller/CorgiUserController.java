@@ -12,6 +12,7 @@ import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiBlackActivityService;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
@@ -19,9 +20,12 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
 import com.corgi.common.util.CharacterUtils;
+import com.corgi.common.util.JWTUtils;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.MailMessage;
 import com.corgi.entity.StorageToken;
+import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.EasemobService;
 import com.corgi.service.MQService;
@@ -92,6 +96,7 @@ public class CorgiUserController extends BaseController {
                     easemobService.registerUser(userLogin.getUserId());
                     userLogin.setStatus("0");
                 }
+                userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
                 return new JsonResult(userLogin);
             } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
                 return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
@@ -105,6 +110,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_push")
     public JsonResult updatePush(@RequestBody UserLogin userLogin) {
+        if (hasUserId()) {
+            userLogin.setUserId(getUserId());
+        }
         corgiUserService.updatePush(userLogin);
         return new JsonResult();
     }
@@ -116,6 +124,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/add_user")
     public JsonResult addUser(@RequestBody UserDetail userDetail) {
+        if (hasUserId()) {
+            userDetail.setUserId(getUserId());
+        }
         List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), CheckPic.USER);
         if (pics == null) {
             pics = new ArrayList<>();
@@ -138,6 +149,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user")
     public JsonResult updateUser(@RequestBody UserDetail userDetail) {
+        if (hasUserId()) {
+            userDetail.setUserId(getUserId());
+        }
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
@@ -160,6 +174,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_nickname")
     public JsonResult updateNickname(@RequestBody UserDetail userDetail) {
+        if (hasUserId()) {
+            userDetail.setUserId(getUserId());
+        }
         if (StringUtils.isEmpty(userDetail.getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "userId为空");
         }
@@ -189,6 +206,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_prefer_group")
     public JsonResult updatePreferGroup(@RequestBody UserDetail userDetail) {
+        if (hasUserId()) {
+            userDetail.setUserId(getUserId());
+        }
         String result = corgiUserService.updatePreferGroup(userDetail.getUserId(), userDetail.getPreferGroup());
         return getJsonResult(result);
     }
@@ -208,6 +228,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/add_user_pic")
     public JsonResult addUserPic(@RequestBody UserPic userPic) {
+        if (hasUserId()) {
+            userPic.setUserId(getUserId());
+        }
         List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
         String result = corgiPicService.addUserPic(userPics.get(0));
         userPic.setPicId(result);
@@ -252,7 +275,28 @@ public class CorgiUserController extends BaseController {
     }
 
     @PostMapping("/update_user_position")
-    public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) {
+    public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) throws PermissionException {
+        HashMap result = new HashMap();
+        try {
+            String jwt = RequestUtil.getJwt();
+            if (!StringUtils.isEmpty(jwt)) {
+                DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
+                String jwtUserId = decodedJWT.getClaim("userId").asString();
+                if ("-1".equals(jwtUserId)) {
+                    result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
+                } else if (!userPosition.getUserId().equals(jwtUserId)) {
+                    throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "非登录用户");
+                } else {
+                    Date expireDate = decodedJWT.getExpiresAt();
+                    if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {
+                        result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new PermissionException(Constants.PERMISSION_ERROR_CODE, e.getMessage());
+        }
         corgiUserService.updateUserPosition(userPosition);
         String key = "sentMatch_" + userPosition.getUserId();
         String matchTime = redisTemplate.opsForValue().get(key);
@@ -276,17 +320,11 @@ public class CorgiUserController extends BaseController {
                 .option(TraceFollow.COUNT)
                 .type(TraceFollow.STAY)
                 .build());
-        return new JsonResult();
+        return new JsonResult(result);
     }
 
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
-//        UserPosition userPosition = new UserPosition();
-//        userPosition.setUserId(userQuery.getUserId());
-//        userPosition.setLat(userQuery.getLat());
-//        userPosition.setLng(userQuery.getLng());
-
-        //corgiUserService.updateUserPosition(userPosition);
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userQuery.getUserId())
@@ -335,6 +373,9 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("follow")
     public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiUserFollowService.follow(userId, targetUserId);
         HashMap extra = new HashMap();
         mqService.sendMessage(PushMessage.builder()
@@ -348,6 +389,9 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("unfollow")
     public JsonResult unfollow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiUserFollowService.unfollow(userId, targetUserId);
         return new JsonResult();
     }
@@ -374,9 +418,9 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("get_match_user")
     public JsonResult getMatchUser(@RequestParam("userId") String userId, @RequestParam("type") String type,
-                                    @RequestParam(name = "lat", required = false) Double lat,
-                                    @RequestParam(name = "lng", required = false) Double lng,
-                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+                                   @RequestParam(name = "lat", required = false) Double lat,
+                                   @RequestParam(name = "lng", required = false) Double lng,
+                                   @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, type, lat, lng, page, pageSize);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userId)
@@ -420,12 +464,18 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("update_user_tag")
     public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam("tags") List<String> tags) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiToolService.updateUserTag(userId, tags);
         return new JsonResult();
     }
 
     @GetMapping("update_user_interest")
     public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam("interests") List<String> interests) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiToolService.updateUserInterest(userId, category, interests);
         return new JsonResult();
     }
@@ -442,12 +492,18 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("block")
     public JsonResult block(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiBlacklistService.addBlacklist(userId, blockId);
         return new JsonResult();
     }
 
     @GetMapping("unblock")
     public JsonResult unblock(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiBlacklistService.deleteBlacklist(userId, blockId);
         return new JsonResult();
     }

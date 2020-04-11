@@ -8,6 +8,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
 import com.corgi.entity.*;
+import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
@@ -62,9 +63,13 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
+        if (hasUserId()) {
+            log.info("into add_activity..." + getUserId());
+            activity.setUserId(getUserId());
+        }
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
-        if(checkDuplicateActivity(activity)){
+        if (checkDuplicateActivity(activity)) {
             return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
         }
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), CheckPic.ACTIVITY);
@@ -128,7 +133,13 @@ public class CorgiActivityController extends BaseController {
     }
 
     @PostMapping("update_activity")
-    public JsonResult updateActivity(@RequestBody CorgiActivity activity) {
+    public JsonResult updateActivity(@RequestBody CorgiActivity activity) throws PermissionException {
+        if (hasUserId()) {
+            log.info("into update_activity..." + getUserId());
+            if (!checkActivityUser(activity.getId(), getUserId())) {
+                throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            }
+        }
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
         activity = corgiActivityService.updateCorgiActivity(activity);
@@ -141,15 +152,23 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("delete_activity")
-    public JsonResult deleteActivity(@RequestParam("activityId") String activityId) {
+    public JsonResult deleteActivity(@RequestParam("activityId") String activityId) throws PermissionException {
+        if (hasUserId()) {
+            log.info("into delete_activity..." + getUserId());
+            if (!checkActivityUser(activityId, getUserId())) {
+                throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            }
+        }
         corgiActivityService.deleteCorgiActivity(activityId);
         return new JsonResult();
     }
 
     @GetMapping("sign_up")
     public JsonResult signUp(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
-        //corgiFavorActivityService.addFavor(userId, activityId);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (CollectionUtils.isEmpty(corgiActivities)) {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
@@ -169,6 +188,9 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("sign_out")
     public JsonResult signOut(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiUserActivityService.signOut(new UserSignUp(userId, activityId));
         return new JsonResult();
     }
@@ -432,12 +454,18 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("add_favor")
     public JsonResult addFavor(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiFavorActivityService.addFavor(userId, activityId);
         return new JsonResult();
     }
 
     @GetMapping("delete_favor")
     public JsonResult deleteFavor(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         corgiFavorActivityService.deleteFavor(userId, activityId);
         return new JsonResult();
     }
@@ -518,5 +546,17 @@ public class CorgiActivityController extends BaseController {
                     .areaName(corgiActivity.getBusinessArea())
                     .build());
         }
+    }
+
+    private boolean checkActivityUser(String activityId, String userId) {
+        if (userId == null) {
+            return true;
+        }
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+        if (!CollectionUtils.isEmpty(activityList)) {
+            CorgiActivity activity = activityList.get(0);
+            return userId.equals(activity.getUserId());
+        }
+        return true;
     }
 }
