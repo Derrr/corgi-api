@@ -475,9 +475,12 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("update_user_interest")
-    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam("interests") List<String> interests) {
+    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam(required = false, name = "interests") List<String> interests) {
         if (hasUserId()) {
             userId = getUserId();
+        }
+        if (interests == null) {
+            interests = new ArrayList<>();
         }
         corgiToolService.updateUserInterest(userId, category, interests);
         return new JsonResult();
