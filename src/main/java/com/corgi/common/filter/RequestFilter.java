@@ -6,11 +6,9 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.JwtUser;
-import com.corgi.exception.PermissionException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;

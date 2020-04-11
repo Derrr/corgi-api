@@ -4,9 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.corgi.common.constant.Constants;
 import com.corgi.entity.JwtUser;
-import com.corgi.exception.PermissionException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
