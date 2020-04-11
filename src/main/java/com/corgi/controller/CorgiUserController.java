@@ -480,7 +480,7 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         if (interests == null) {
-            interests = new ArrayList<>();
+            return new JsonResult();
         }
         corgiToolService.updateUserInterest(userId, category, interests);
         return new JsonResult();
