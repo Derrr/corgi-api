@@ -18,7 +18,7 @@ public class RequestUtil {
 
     public static boolean hasUserId() {
         JwtUser user = (JwtUser) getRequest().getAttribute("jwtUser");
-        return user != null && !StringUtils.isEmpty(user.getUserId());
+        return user != null && !StringUtils.isEmpty(user.getUserId()) && !"-1".equals(user.getUserId());
     }
 
     public static String getUserId() {
