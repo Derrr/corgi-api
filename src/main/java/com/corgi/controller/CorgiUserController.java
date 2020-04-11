@@ -288,7 +288,7 @@ public class CorgiUserController extends BaseController {
                 if (JWTUtils.ADMIN_ID.equals(jwtUserId)) {
                     result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
-                    throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "非登录用户");
+                    throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "非当前用户");
                 } else {
                     Date expireDate = decodedJWT.getExpiresAt();
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {

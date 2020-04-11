@@ -1,6 +1,8 @@
 package com.corgi.common.filter;
 
+import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.JwtUser;
@@ -33,7 +35,18 @@ public class RequestFilter implements Filter {
         long time = System.currentTimeMillis();
         String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
         if (!StringUtils.isEmpty(jwt)) {
-            DecodedJWT decodedJWT = JWTUtils.verifyToken(jwt);
+            DecodedJWT decodedJWT;
+            try {
+                decodedJWT = JWTUtils.verifyToken(jwt);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                JsonResult jsonResult = new JsonResult("");
+                jsonResult.setCode(Constants.JWT_ERROR_CODE);
+                jsonResult.setMessage(e.getMessage());
+                servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
+                servletResponse.setContentType("application/json;charset=UTF-8");
+                return;
+            }
             JwtUser user = JwtUser.builder()
                     .userId(decodedJWT.getClaim(JwtUser.USER_ID).asString())
                     .version(decodedJWT.getClaim(JwtUser.VERSION).asString())

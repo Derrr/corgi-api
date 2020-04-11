@@ -7,6 +7,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.constant.Constants;
 import com.corgi.entity.JwtUser;
 import com.corgi.exception.PermissionException;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -49,15 +51,11 @@ public class JWTUtils {
      * @param token 加密后的token字符串
      * @return
      */
-    public static DecodedJWT verifyToken(String token) throws PermissionException {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(SECRET);
-            JWTVerifier verifier = JWT.require(algorithm).build();
-            DecodedJWT jwt = verifier.verify(token);
-            return jwt;
-        } catch (Exception e) {
-            throw new PermissionException(Constants.JWT_ERROR_CODE, e.getMessage());
-        }
+    public static DecodedJWT verifyToken(String token) throws UnsupportedEncodingException {
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        DecodedJWT jwt = verifier.verify(token);
+        return jwt;
     }
 
     /**
