@@ -17,19 +17,19 @@ public class RequestUtil {
     }
 
     public static boolean hasUserId() {
-        JwtUser user = (JwtUser) getRequest().getAttribute("jwtUser");
-        return user != null && !StringUtils.isEmpty(user.getUserId()) && !"-1".equals(user.getUserId());
+        JwtUser user = (JwtUser) getRequest().getAttribute(JWTUtils.JWT_USER);
+        return user != null && !StringUtils.isEmpty(user.getUserId()) && !JWTUtils.ADMIN_ID.equals(user.getUserId());
     }
 
     public static String getUserId() {
         if (hasUserId()) {
-            JwtUser user = (JwtUser) getRequest().getAttribute("jwtUser");
+            JwtUser user = (JwtUser) getRequest().getAttribute(JWTUtils.JWT_USER);
             return user.getUserId();
         }
         return "";
     }
 
-    public static String getJwt(){
-        return getRequest().getHeader("jwt");
+    public static String getJwt() {
+        return getRequest().getHeader(JWTUtils.JWT_HEADER);
     }
 }

@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.constant.Constants;
+import com.corgi.entity.JwtUser;
 import com.corgi.exception.PermissionException;
 
 import java.io.UnsupportedEncodingException;
@@ -15,21 +16,28 @@ import java.util.HashMap;
 public class JWTUtils {
     public static long expireTime = 30 * 60 * 1000;
     private static long maxAge = 2 * 60 * 60 * 1000;
-    private static String secret = "Corgi-5DS4kfiL";
+    private static final String SECRET = "Corgi-5DS4kfiL";
+    public static final String JWT_USER = "jwtUser";
+    public static final String JWT_HEADER = "jwt";
+    public static final String ADMIN_ID = "-1";
 
     public static String createJWT(String userId, String version) {
+        return createJWT(userId, version, maxAge);
+    }
+
+    public static String createJWT(String userId, String version, long newMaxAge) {
         long now = System.currentTimeMillis();
         try {
-            final Algorithm signer = Algorithm.HMAC256(secret);
+            final Algorithm signer = Algorithm.HMAC256(SECRET);
             HashMap header = new HashMap<>();
             header.put("alg", "HS256");
             header.put("typ", "JWT");
             String token = JWT.create()
                     .withHeader(header)
-                    .withClaim("userId", userId)
-                    .withClaim("version", version)
+                    .withClaim(JwtUser.USER_ID, userId)
+                    .withClaim(JwtUser.VERSION, version)
                     .withIssuedAt(new Date())
-                    .withExpiresAt(new Date(now + maxAge))
+                    .withExpiresAt(new Date(now + newMaxAge))
                     .sign(signer);
             return token;
         } catch (Exception e) {
@@ -46,7 +54,7 @@ public class JWTUtils {
      */
     public static DecodedJWT verifyToken(String token) throws PermissionException {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
+            Algorithm algorithm = Algorithm.HMAC256(SECRET);
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT jwt = verifier.verify(token);
             return jwt;

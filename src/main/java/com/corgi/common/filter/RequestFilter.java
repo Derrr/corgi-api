@@ -29,14 +29,14 @@ public class RequestFilter implements Filter {
             return;
         }
         long time = System.currentTimeMillis();
-        String jwt = ((HttpServletRequest) servletRequest).getHeader("jwt");
+        String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
         if (!StringUtils.isEmpty(jwt)) {
             DecodedJWT decodedJWT = JWTUtils.verifyToken(jwt);
             JwtUser user = JwtUser.builder()
-                    .userId(decodedJWT.getClaim("userId").asString())
-                    .version(decodedJWT.getClaim("version").asString())
+                    .userId(decodedJWT.getClaim(JwtUser.USER_ID).asString())
+                    .version(decodedJWT.getClaim(JwtUser.VERSION).asString())
                     .build();
-            servletRequest.setAttribute("jwtUser", user);
+            servletRequest.setAttribute(JWTUtils.JWT_USER, user);
         } else if (((HttpServletRequest) servletRequest).getRequestURI().contains("login")
                 || ((HttpServletRequest) servletRequest).getRequestURI().contains("send_code")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());

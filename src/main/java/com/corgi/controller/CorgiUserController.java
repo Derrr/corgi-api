@@ -92,7 +92,7 @@ public class CorgiUserController extends BaseController {
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
             if (StringUtils.isEmpty(userLogin.getUserId())) {
                 userLogin = corgiUserService.login(userLogin);
-                if ("-1".equals(userLogin.getStatus())) {
+                if (JWTUtils.ADMIN_ID.equals(userLogin.getStatus())) {
                     easemobService.registerUser(userLogin.getUserId());
                     userLogin.setStatus("0");
                 }
@@ -285,7 +285,7 @@ public class CorgiUserController extends BaseController {
             if (!StringUtils.isEmpty(jwt)) {
                 DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
                 String jwtUserId = decodedJWT.getClaim("userId").asString();
-                if ("-1".equals(jwtUserId)) {
+                if (JWTUtils.ADMIN_ID.equals(jwtUserId)) {
                     result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
                     throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "非登录用户");
