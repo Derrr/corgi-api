@@ -3,13 +3,10 @@ package com.corgi.common.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.constant.Constants;
 import com.corgi.entity.JwtUser;
 import com.corgi.exception.PermissionException;
-
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -58,11 +55,7 @@ public class JWTUtils {
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT jwt = verifier.verify(token);
             return jwt;
-        } catch (IllegalArgumentException e) {
-            throw new PermissionException(Constants.JWT_ERROR_CODE, e.getMessage());
-        } catch (JWTVerificationException e) {
-            throw new PermissionException(Constants.JWT_ERROR_CODE, e.getMessage());
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             throw new PermissionException(Constants.JWT_ERROR_CODE, e.getMessage());
         }
     }
