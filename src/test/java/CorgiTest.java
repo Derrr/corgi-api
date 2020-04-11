@@ -5,6 +5,6 @@ import org.junit.Test;
 public class CorgiTest {
     @Test
     public void testJWT(){
-        System.out.println(RequestUtil.hasUserId());
+        System.out.println("");
     }
 }
