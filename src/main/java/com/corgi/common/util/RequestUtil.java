@@ -9,14 +9,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 
 public class RequestUtil {
-    public static String BELLETONNE = "belletone";
-
-    public static String FASHION = "fashion";
-
-    public static String TOPSPORTS = "topsports";
-
-    public static String MULTI = "multi";
-
     public static HttpServletRequest getRequest() {
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
