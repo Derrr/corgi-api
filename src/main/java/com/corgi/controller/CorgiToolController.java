@@ -22,6 +22,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -165,7 +166,10 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_city_area")
-    public JsonResult getCityArea(@RequestParam("city") String city) {
+    public JsonResult getCityArea(@RequestParam(required = false, name = "city") String city) {
+        if (StringUtils.isEmpty(city)) {
+            return new JsonResult(new ArrayList<>());
+        }
         List<CorgiArea> corgiAreas = corgiAreaService.getAreaByCity(city);
         return new JsonResult(corgiAreas);
     }
