@@ -32,7 +32,7 @@ public class RequestFilter implements Filter {
         }
         long time = System.currentTimeMillis();
         String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
-        if (!StringUtils.isEmpty(jwt)) {
+        if (!StringUtils.isEmpty(jwt) && !checkURI(servletRequest, "update_user_position")) {
             DecodedJWT decodedJWT;
             try {
                 decodedJWT = JWTUtils.verifyToken(jwt);
@@ -50,8 +50,9 @@ public class RequestFilter implements Filter {
                     .version(decodedJWT.getClaim(JwtUser.VERSION).asString())
                     .build();
             servletRequest.setAttribute(JWTUtils.JWT_USER, user);
-        } else if (((HttpServletRequest) servletRequest).getRequestURI().contains("login")
-                || ((HttpServletRequest) servletRequest).getRequestURI().contains("send_code")) {
+        } else if (checkURI(servletRequest, "login")
+                || checkURI(servletRequest, "send_code")
+                || checkURI(servletRequest, "update_user_position")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         }
         MDC.put("reqId", UUID.randomUUID().toString());
@@ -63,5 +64,9 @@ public class RequestFilter implements Filter {
     @Override
     public void destroy() {
 
+    }
+
+    private boolean checkURI(ServletRequest request, String path) {
+        return ((HttpServletRequest) request).getRequestURI().contains(path);
     }
 }
