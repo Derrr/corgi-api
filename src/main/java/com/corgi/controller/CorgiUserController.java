@@ -221,6 +221,9 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user_pic")
     public JsonResult updateUserPic(@RequestBody UserPic userPic) {
+        if (hasUserId()) {
+            userPic.setUserId(getUserId());
+        }
         List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
         String result = corgiPicService.updateUserPic(userPics.get(0));
         return getJsonResult(result);
