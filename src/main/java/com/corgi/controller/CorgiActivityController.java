@@ -197,6 +197,9 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("invite")
     public JsonResult invite(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         String lockKey = "agree_" + activityId;
         corgiUtilService.lock(lockKey);
         try {
@@ -268,7 +271,13 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("agree")
-    public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+    public JsonResult agree(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) throws PermissionException {
+        if (hasUserId()) {
+            log.info("into agree..." + getUserId());
+            if (!checkActivityUser(activityId, getUserId())) {
+                throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            }
+        }
         String lockKey = "agree_" + activityId;
         corgiUtilService.lock(lockKey);
         try {
@@ -352,7 +361,13 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("refuse")
-    public JsonResult refuse(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) {
+    public JsonResult refuse(@RequestParam("userId") String userId, @RequestParam("activityId") String activityId) throws PermissionException {
+        if (hasUserId()) {
+            log.info("into refuse..." + getUserId());
+            if (!checkActivityUser(activityId, getUserId())) {
+                throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            }
+        }
         String lockKey = "agree_" + activityId;
         corgiUtilService.lock(lockKey);
         try {
@@ -549,7 +564,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     private boolean checkActivityUser(String activityId, String userId) {
-        if (userId == null) {
+        if (StringUtils.isEmpty(userId)) {
             return true;
         }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));

@@ -37,6 +37,9 @@ public class RequestFilter implements Filter {
                     .version(decodedJWT.getClaim("version").asString())
                     .build();
             servletRequest.setAttribute("jwtUser", user);
+        } else if (((HttpServletRequest) servletRequest).getRequestURI().contains("login")
+                || ((HttpServletRequest) servletRequest).getRequestURI().contains("send_code")) {
+            log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         }
         MDC.put("reqId", UUID.randomUUID().toString());
         MDC.put("usrID", "");
