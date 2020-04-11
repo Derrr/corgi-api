@@ -1,12 +1,14 @@
 package com.corgi.common.filter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.corgi.common.constant.Constants;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.JwtUser;
 import com.corgi.exception.PermissionException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -31,12 +33,17 @@ public class RequestFilter implements Filter {
         long time = System.currentTimeMillis();
         String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
         if (!StringUtils.isEmpty(jwt)) {
-            DecodedJWT decodedJWT = JWTUtils.verifyToken(jwt);
-            JwtUser user = JwtUser.builder()
-                    .userId(decodedJWT.getClaim(JwtUser.USER_ID).asString())
-                    .version(decodedJWT.getClaim(JwtUser.VERSION).asString())
-                    .build();
-            servletRequest.setAttribute(JWTUtils.JWT_USER, user);
+            try {
+                DecodedJWT decodedJWT = JWTUtils.verifyToken(jwt);
+                JwtUser user = JwtUser.builder()
+                        .userId(decodedJWT.getClaim(JwtUser.USER_ID).asString())
+                        .version(decodedJWT.getClaim(JwtUser.VERSION).asString())
+                        .build();
+                servletRequest.setAttribute(JWTUtils.JWT_USER, user);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                throw new PermissionException(Constants.JWT_ERROR_CODE, e.getMessage());
+            }
         } else if (((HttpServletRequest) servletRequest).getRequestURI().contains("login")
                 || ((HttpServletRequest) servletRequest).getRequestURI().contains("send_code")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
