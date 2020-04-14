@@ -456,6 +456,12 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(count);
     }
 
+    @GetMapping("count_match_user")
+    public JsonResult countMatchUser(@RequestParam("userId") String userId) {
+        int count = corgiUserFollowService.countMatch(userId);
+        return new JsonResult(count);
+    }
+
     @GetMapping("count_be_followed")
     public JsonResult countBeFollowed(@RequestParam("userId") String userId) {
         int count = corgiUserFollowService.countFollowed(userId);
