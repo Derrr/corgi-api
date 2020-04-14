@@ -561,24 +561,24 @@ public class CorgiUserController extends BaseController {
 
 
     private String changeGroup(String group) {
-        if ("猴子".equals(group)) {
-            return "偏瘦";
-        }
-        if ("野狼".equals(group)) {
-            return "精壮";
-        }
-        if ("奶狗".equals(group)) {
-            return "匀称";
-        }
-        if ("狒狒".equals(group)) {
-            return "肌肉";
-        }
-        if ("壮熊".equals(group)) {
-            return "肉壮";
-        }
-        if ("胖熊".equals(group)) {
-            return "偏胖";
-        }
+//        if ("猴子".equals(group)) {
+//            return "偏瘦";
+//        }
+//        if ("野狼".equals(group)) {
+//            return "精壮";
+//        }
+//        if ("奶狗".equals(group)) {
+//            return "匀称";
+//        }
+//        if ("狒狒".equals(group)) {
+//            return "肌肉";
+//        }
+//        if ("壮熊".equals(group)) {
+//            return "肉壮";
+//        }
+//        if ("胖熊".equals(group)) {
+//            return "偏胖";
+//        }
         return group;
     }
 
