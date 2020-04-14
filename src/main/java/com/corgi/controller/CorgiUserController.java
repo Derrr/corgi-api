@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -146,6 +147,14 @@ public class CorgiUserController extends BaseController {
             mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         userDetail = aliyunGreenService.checkDesc(userDetail);
+        userDetail.setGroup(changeGroup(userDetail.getGroup()));
+        List<String> preferGroup = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(userDetail.getPreferGroup())) {
+            for (String group : userDetail.getPreferGroup()) {
+                preferGroup.add(changeGroup(group));
+            }
+        }
+        userDetail.setPreferGroup(preferGroup);
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
     }
@@ -159,6 +168,7 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
         userDetail = aliyunGreenService.checkDesc(userDetail);
+        userDetail.setGroup(changeGroup(userDetail.getGroup()));
         String result = corgiUserService.updateDetail(userDetail);
         return getJsonResult(result);
     }
@@ -212,7 +222,13 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userDetail.setUserId(getUserId());
         }
-        String result = corgiUserService.updatePreferGroup(userDetail.getUserId(), userDetail.getPreferGroup());
+        List<String> preferGroup = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(userDetail.getPreferGroup())) {
+            for (String group : userDetail.getPreferGroup()) {
+                preferGroup.add(changeGroup(group));
+            }
+        }
+        String result = corgiUserService.updatePreferGroup(userDetail.getUserId(), preferGroup);
         return getJsonResult(result);
     }
 
@@ -541,6 +557,29 @@ public class CorgiUserController extends BaseController {
     public JsonResult test(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
         corgiBlacklistService.addBlacklist(userId, blockId);
         return new JsonResult();
+    }
+
+
+    private String changeGroup(String group) {
+        if ("猴子".equals(group)) {
+            return "偏瘦";
+        }
+        if ("野狼".equals(group)) {
+            return "精壮";
+        }
+        if ("奶狗".equals(group)) {
+            return "匀称";
+        }
+        if ("狒狒".equals(group)) {
+            return "肌肉";
+        }
+        if ("壮熊".equals(group)) {
+            return "肉壮";
+        }
+        if ("胖熊".equals(group)) {
+            return "偏胖";
+        }
+        return group;
     }
 
 }
