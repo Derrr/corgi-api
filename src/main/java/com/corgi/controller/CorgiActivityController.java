@@ -427,6 +427,8 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
         }
+        activityQuery.setGroup(CorgiUserController.changeGroupList(activityQuery.getGroup()));
+        activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {

@@ -17,4 +17,9 @@ public class CorgiTest {
         System.out.println(decodedJWT.getClaim("userId").asString());
         System.out.println(decodedJWT.getClaim("version").asString());
     }
+
+    @Test
+    public void test(){
+
+    }
 }

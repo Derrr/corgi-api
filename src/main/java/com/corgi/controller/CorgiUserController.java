@@ -148,13 +148,7 @@ public class CorgiUserController extends BaseController {
         }
         userDetail = aliyunGreenService.checkDesc(userDetail);
         userDetail.setGroup(changeGroup(userDetail.getGroup()));
-        List<String> preferGroup = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(userDetail.getPreferGroup())) {
-            for (String group : userDetail.getPreferGroup()) {
-                preferGroup.add(changeGroup(group));
-            }
-        }
-        userDetail.setPreferGroup(preferGroup);
+        userDetail.setPreferGroup(changeGroupList(userDetail.getPreferGroup()));
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
     }
@@ -348,6 +342,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
+        userQuery.setGroup(changeGroupList(userQuery.getGroup()));
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userQuery.getUserId())
@@ -560,7 +555,7 @@ public class CorgiUserController extends BaseController {
     }
 
 
-    private String changeGroup(String group) {
+    public static String changeGroup(String group) {
         if ("猴子".equals(group)) {
             return "偏瘦";
         }
@@ -582,4 +577,15 @@ public class CorgiUserController extends BaseController {
         return group;
     }
 
+    public static List<String> changeGroupList(List<String> groups) {
+        if (CollectionUtils.isEmpty(groups)) {
+            return groups;
+        }
+        List<String> result = new ArrayList<>();
+        for (String group : groups) {
+            result.add(changeGroup(group));
+        }
+        return result;
+    }
 }
+
