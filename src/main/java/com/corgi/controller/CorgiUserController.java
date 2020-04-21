@@ -359,19 +359,24 @@ public class CorgiUserController extends BaseController {
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
         }
+        telNo = telNo.replaceAll("\\+", "");
         redisTemplate.opsForValue().set(CODE_PREFIX + telNo, code, 5, TimeUnit.MINUTES);
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         IAcsClient client = new DefaultAcsClient(profile);
 
+        String sign = "SMS_180049529";
+        if(telNo.contains("-")){
+            sign = "SMS_188570616";
+        }
         CommonRequest request = new CommonRequest();
         request.setMethod(MethodType.POST);
         request.setDomain("dysmsapi.aliyuncs.com");
         request.setVersion("2017-05-25");
         request.setAction("SendSms");
         request.putQueryParameter("RegionId", "cn-hangzhou");
-        request.putQueryParameter("PhoneNumbers", telNo);
+        request.putQueryParameter("PhoneNumbers", telNo.replaceAll("-",""));
         request.putQueryParameter("SignName", "Corgi");
-        request.putQueryParameter("TemplateCode", "SMS_180049529");
+        request.putQueryParameter("TemplateCode", sign);
         request.putQueryParameter("TemplateParam", "{\"code\":\"" + code + "\"}");
         try {
             CommonResponse response = client.getCommonResponse(request);
