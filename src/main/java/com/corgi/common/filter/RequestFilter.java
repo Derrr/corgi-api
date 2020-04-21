@@ -37,7 +37,7 @@ public class RequestFilter implements Filter {
             try {
                 decodedJWT = JWTUtils.verifyToken(jwt);
             } catch (Exception e) {
-                log.error(e.getMessage(), e);
+                log.error(e.getMessage());
                 JsonResult jsonResult = new JsonResult("");
                 jsonResult.setCode(Constants.JWT_ERROR_CODE);
                 jsonResult.setMessage(e.getMessage());
