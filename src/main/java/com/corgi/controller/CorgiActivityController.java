@@ -151,6 +151,20 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(activity);
     }
 
+    @PostMapping("update_activity_uncheck")
+    public JsonResult updateActivityUncheck(@RequestBody CorgiActivity activity) throws PermissionException {
+        if (hasUserId()) {
+            log.info("into update_activity..." + getUserId());
+            if (!checkActivityUser(activity.getId(), getUserId())) {
+                throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            }
+        }
+        activity.setCheckStatus(AliyunGreenService.PASS);
+        activity = aliyunGreenService.checkActivity(activity);
+        activity = corgiActivityService.updateCorgiActivity(activity);
+        return new JsonResult(activity);
+    }
+
     @GetMapping("delete_activity")
     public JsonResult deleteActivity(@RequestParam("activityId") String activityId) throws PermissionException {
         if (hasUserId()) {
