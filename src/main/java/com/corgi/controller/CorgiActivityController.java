@@ -72,7 +72,7 @@ public class CorgiActivityController extends BaseController {
         if (checkDuplicateActivity(activity)) {
             return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
         }
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), CheckPic.ACTIVITY);
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
@@ -124,8 +124,6 @@ public class CorgiActivityController extends BaseController {
         pic1.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
         ActivityPic pic2 = new ActivityPic();
         pic2.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs1.com/avatar/2/1577412815326");
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(pic1, pic2), CheckPic.ACTIVITY);
-        activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         activity.setTitle("测试34");
         corgiActivityService.updateCorgiActivity(activity);
@@ -477,7 +475,7 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("/add_activity_pic")
     public JsonResult addUserPic(@RequestBody ActivityPic activityPic) {
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic), CheckPic.ACTIVITY);
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic), activityPic.getActivityId(), CheckPic.ACTIVITY);
         String result = corgiPicService.addActivityPic(activityPics.get(0));
         activityPic.setPicId(result);
         return new JsonResult(activityPic);

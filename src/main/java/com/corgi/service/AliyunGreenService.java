@@ -89,7 +89,7 @@ public class AliyunGreenService {
         }
         UserPic corgiPic = new UserPic();
         corgiPic.setPicUrl(userDetail.getAvatar());
-        corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), CheckPic.USER).get(0);
+        corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), userDetail.getUserId(), CheckPic.USER).get(0);
         if (CheckPic.NEED_CHECK.equals(corgiPic.getStatus())) {
             mailService.sendCheckMessage("用户图片：", userDetail.getUserId());
         }
@@ -107,7 +107,7 @@ public class AliyunGreenService {
         return userDetail;
     }
 
-    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String type) {
+    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type) {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
@@ -196,7 +196,7 @@ public class AliyunGreenService {
                             if (!suggestion.equals("pass")) {
                                 pic.setStatus(CorgiPic.NEED_CHECK);
                                 pic.setResult(suggestion + "-" + scene + "-" + label + "-" + rate);
-                                addCheckPic(pic, type);
+                                addCheckPic(pic, sourceId, type);
                                 needCheck = true;
                                 break;
                             }
@@ -209,7 +209,7 @@ public class AliyunGreenService {
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
                         pic.setStatus(CorgiPic.NEED_CHECK);
                         pic.setResult(result);
-                        addCheckPic(pic, type);
+                        addCheckPic(pic, sourceId, type);
                         //单张图片处理失败, 原因视具体的情况详细分析
                         log.info(result);
                     }
@@ -222,7 +222,7 @@ public class AliyunGreenService {
                     pic.setStatus(CorgiPic.NEED_CHECK);
                     String result = JSON.toJSONString("the whole image scan request failed. response:" + JSON.toJSONString(scrResponse));
                     pic.setResult(result);
-                    addCheckPic(pic, type);
+                    addCheckPic(pic, sourceId, type);
                     log.info(result);
                 }
             }
@@ -260,9 +260,10 @@ public class AliyunGreenService {
     }
 
 
-    private void addCheckPic(CorgiPic corgiPic, String type) {
+    private void addCheckPic(CorgiPic corgiPic, String sourceId, String type) {
         CheckPic checkPic = new CheckPic();
         BeanUtils.copyProperties(corgiPic, checkPic);
+        checkPic.setUserId(sourceId);
         checkPic.setType(type);
         corgiPicService.addCheckPic(checkPic);
     }

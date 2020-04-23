@@ -131,7 +131,7 @@ public class CorgiUserController extends BaseController {
         if (count > 0) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
         }
-        List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), CheckPic.USER);
+        List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), userDetail.getUserId(), CheckPic.USER);
         if (pics == null) {
             pics = new ArrayList<>();
         }
@@ -237,7 +237,7 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userPic.setUserId(getUserId());
         }
-        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
+        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), userPic.getUserId(), CheckPic.USER);
         String result = corgiPicService.updateUserPic(userPics.get(0));
         return getJsonResult(result);
     }
@@ -247,7 +247,7 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userPic.setUserId(getUserId());
         }
-        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), CheckPic.USER);
+        List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), userPic.getUserId(), CheckPic.USER);
         String result = corgiPicService.addUserPic(userPics.get(0));
         userPic.setPicId(result);
         return new JsonResult(userPic);
@@ -365,7 +365,7 @@ public class CorgiUserController extends BaseController {
         IAcsClient client = new DefaultAcsClient(profile);
 
         String sign = "SMS_180049529";
-        if(telNo.contains("-")){
+        if (telNo.contains("-")) {
             sign = "SMS_188570616";
         }
         CommonRequest request = new CommonRequest();
@@ -374,7 +374,7 @@ public class CorgiUserController extends BaseController {
         request.setVersion("2017-05-25");
         request.setAction("SendSms");
         request.putQueryParameter("RegionId", "cn-hangzhou");
-        request.putQueryParameter("PhoneNumbers", telNo.replaceAll("-",""));
+        request.putQueryParameter("PhoneNumbers", telNo.replaceAll("-", ""));
         request.putQueryParameter("SignName", "Corgi");
         request.putQueryParameter("TemplateCode", sign);
         request.putQueryParameter("TemplateParam", "{\"code\":\"" + code + "\"}");
