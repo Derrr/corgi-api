@@ -1,5 +1,6 @@
 package com.corgi.controller;
 
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
@@ -13,6 +14,8 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
@@ -36,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -61,6 +63,8 @@ public class CorgiUserController extends BaseController {
     private CorgiToolService corgiToolService;
     @Reference
     private CorgiUserMatchService corgiUserMatchService;
+    @Reference
+    private CorgiActivityService corgiActivityService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -344,6 +348,24 @@ public class CorgiUserController extends BaseController {
     public JsonResult getNearbyUser(UserQuery userQuery) {
         userQuery.setGroup(changeGroupList(userQuery.getGroup()));
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
+        CorgiActivity corgiActivity = new CorgiActivity();
+        corgiActivity.setStatus(CorgiActivity.CREATED);
+        try {
+            for (UserProfile userProfile : userProfiles) {
+                String key = "activity_count_" + userProfile.getUserId();
+                String count = redisTemplate.opsForValue().get(key);
+                if (StringUtils.isEmpty(count) || !StringUtils.isNumeric(count)) {
+                    corgiActivity.setUserId(userProfile.getUserId());
+                    long finalCount = corgiActivityService.countCorgiActivity(corgiActivity);
+                    userProfile.setActivityCount((int) finalCount);
+                    redisTemplate.opsForValue().set(key, finalCount + "", 1, TimeUnit.HOURS);
+                } else {
+                    userProfile.setActivityCount(Integer.parseInt(count));
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userQuery.getUserId())
                 .option(TraceFollow.CHANGE)

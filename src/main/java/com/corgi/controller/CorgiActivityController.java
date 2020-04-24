@@ -18,6 +18,7 @@ import com.corgi.user.entity.UserProfile;
 import com.corgi.user.entity.UserSignUp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,8 @@ public class CorgiActivityController extends BaseController {
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
     private MQService mqService;
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
@@ -78,6 +81,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
+        redisTemplate.delete("activity_count_" + activity.getUserId());
         HashMap extra = new HashMap();
         extra.put("activityId", activity.getId());
         extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
