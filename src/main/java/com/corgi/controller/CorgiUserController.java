@@ -65,6 +65,8 @@ public class CorgiUserController extends BaseController {
     private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiActivityService corgiActivityService;
+    @Reference
+    private CorgiUserTestService corgiUserTestService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -96,7 +98,7 @@ public class CorgiUserController extends BaseController {
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
             if (StringUtils.isEmpty(userLogin.getUserId())) {
                 userLogin = corgiUserService.login(userLogin);
-                if (JWTUtils.ADMIN_ID.equals(userLogin.getStatus())) {
+                if ("-1".equals(userLogin.getStatus())) {
                     easemobService.registerUser(userLogin.getUserId());
                     userLogin.setStatus("0");
                 }
@@ -106,6 +108,28 @@ public class CorgiUserController extends BaseController {
                 return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
             } else {
                 corgiUserService.updateUserLogin(userLogin);
+                return new JsonResult("更新手机号成功");
+            }
+        }
+        return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+    }
+
+    @PostMapping("/login_test")
+    public JsonResult registerTest(@RequestBody UserLogin userLogin) {
+        String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
+        if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
+            if (StringUtils.isEmpty(userLogin.getUserId())) {
+                userLogin = corgiUserTestService.login(userLogin);
+                if ("-1".equals(userLogin.getStatus())) {
+                    easemobService.registerUser("test" + userLogin.getUserId());
+                    userLogin.setStatus("0");
+                }
+                userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
+                return new JsonResult(userLogin);
+            } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
+                return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
+            } else {
+                corgiUserTestService.updateUserLogin(userLogin);
                 return new JsonResult("更新手机号成功");
             }
         }
@@ -154,6 +178,23 @@ public class CorgiUserController extends BaseController {
         userDetail.setGroup(changeGroup(userDetail.getGroup()));
         userDetail.setPreferGroup(changeGroupList(userDetail.getPreferGroup()));
         String result = corgiUserService.addDetail(userDetail);
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/add_user_test")
+    public JsonResult addUserTest(@RequestBody UserDetail userDetail) {
+        if (hasUserId()) {
+            userDetail.setUserId(getUserId());
+        }
+        int count = corgiUserTestService.countUserNickname(userDetail.getNickname());
+        if (count > 0) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
+        }
+        userDetail.setCheckStatus(AliyunGreenService.PASS);
+        userDetail = aliyunGreenService.checkDesc(userDetail);
+        userDetail.setGroup(changeGroup(userDetail.getGroup()));
+        userDetail.setPreferGroup(changeGroupList(userDetail.getPreferGroup()));
+        String result = corgiUserTestService.addDetail(userDetail);
         return getJsonResult(result);
     }
 
