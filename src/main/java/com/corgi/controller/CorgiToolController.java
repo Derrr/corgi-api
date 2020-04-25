@@ -380,6 +380,7 @@ public class CorgiToolController extends BaseController {
                 if (name.equals(userProfile.getNickname())) {
                     userDetail.setUserId(userProfile.getUserId());
                     corgiUserService.updateDetail(userDetail);
+                    corgiToolService.countUserNumber(name);
                     break;
                 }
             }
@@ -396,6 +397,11 @@ public class CorgiToolController extends BaseController {
         } finally {
             corgiUtilService.unlock(lockKey);
         }
+        return new JsonResult();
+    }
+
+    @GetMapping("get_influencer")
+    public JsonResult getInfluencer() {
         return new JsonResult();
     }
 
