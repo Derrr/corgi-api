@@ -402,7 +402,7 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_influencer")
     public JsonResult getInfluencer() {
-        return new JsonResult();
+        return new JsonResult(corgiToolService.getInfluencer());
     }
 
 
