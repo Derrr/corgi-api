@@ -13,12 +13,14 @@ import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
 import com.corgi.service.AliyunGreenService;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,6 +54,8 @@ public class CorgiToolController extends BaseController {
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
+    @Autowired
+    private CorgiUtilService corgiUtilService;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -361,6 +365,37 @@ public class CorgiToolController extends BaseController {
     @GetMapping("update_report_status")
     public JsonResult updateReportStatus(@RequestParam("status") String status, @RequestParam("reportId") String reportId) {
         corgiBlacklistService.updateStatus(reportId, status);
+        return new JsonResult();
+    }
+
+    @GetMapping("set_influencer")
+    public JsonResult setInfluencer(@RequestParam("name") String name) {
+        UserDetail userDetail = new UserDetail();
+        userDetail.setNickname(name);
+        List<UserProfile> userProfiles = corgiUserService.searchUsers(userDetail, null, 1, 100);
+        if (!CollectionUtils.isEmpty(userProfiles)) {
+            userDetail = new UserDetail();
+            userDetail.setAvatarStatus("influencer");
+            for (UserProfile userProfile : userProfiles) {
+                if (name.equals(userProfile.getNickname())) {
+                    userDetail.setUserId(userProfile.getUserId());
+                    corgiUserService.updateDetail(userDetail);
+                    break;
+                }
+            }
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("count")
+    public JsonResult count(@RequestParam("user") String user) {
+        String lockKey = "count_" + user;
+        corgiUtilService.lock(lockKey);
+        try {
+            corgiToolService.countUserNumber(user);
+        } finally {
+            corgiUtilService.unlock(lockKey);
+        }
         return new JsonResult();
     }
 
