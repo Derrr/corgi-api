@@ -54,6 +54,8 @@ public class CorgiToolController extends BaseController {
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
+    @Reference
+    private CorgiUserMatchService corgiUserMatchService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -403,6 +405,24 @@ public class CorgiToolController extends BaseController {
     @GetMapping("get_influencer")
     public JsonResult getInfluencer() {
         return new JsonResult(corgiToolService.getInfluencer());
+    }
+
+    @GetMapping("get_match_factor")
+    public JsonResult getMatchFactor(@RequestParam("table") String table) {
+        List<HashMap> result = corgiUserMatchService.getMatchFactor(table);
+        return new JsonResult(result);
+    }
+
+    @PostMapping("update_match_factor")
+    public JsonResult updateMatchFactor(@RequestBody HashMap<String, String> result) {
+        String table = result.get("table");
+        String cn1 = result.get("cn1");
+        String cv1 = result.get("cv1");
+        String cn2 = result.get("cn2");
+        String cv2 = result.get("cv2");
+        String match = result.get("match");
+        corgiUserMatchService.updateMatchFactor(table, cn1, cv1, cn2, cv2, Integer.valueOf(match));
+        return new JsonResult();
     }
 
 
