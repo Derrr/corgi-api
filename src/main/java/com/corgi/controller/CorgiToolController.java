@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -423,6 +424,29 @@ public class CorgiToolController extends BaseController {
         String match = result.get("match");
         corgiUserMatchService.updateMatchFactor(table, cn1, cv1, cn2, cv2, Integer.valueOf(match));
         return new JsonResult();
+    }
+
+    @GetMapping("refresh_all_match")
+    public String refreshAllMatch() {
+        int size = 1000;
+        int start = 0;
+        List<UserMatch> userMatchList;
+        do {
+            userMatchList = corgiUserMatchService.getUserMatchByPage(null, start, size);
+            start += size;
+            if (userMatchList != null) {
+                for (UserMatch userMatch : userMatchList) {
+                    String userId1 = userMatch.getUserId1();
+                    String userId2 = userMatch.getUserId2();
+                    Double match = corgiUserMatchService.calculateUserMatch(userId1, userId2);
+                    String matchKey = CorgiConstants.getUserMatchKey(userId1, userId2);
+                    redisTemplate.opsForValue().set(matchKey, match + "", 7, TimeUnit.DAYS);
+                    userMatch.setMatch(match);
+                    corgiUserMatchService.updateMatch(userMatch);
+                }
+            }
+        } while (!CollectionUtils.isEmpty(userMatchList));
+        return "success";
     }
 
 
