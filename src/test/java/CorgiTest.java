@@ -19,7 +19,10 @@ public class CorgiTest {
     }
 
     @Test
-    public void test(){
-
+    public void test() {
+        String test = "2020/05/0115:00";
+        if(!test.contains(" ")){
+            System.out.println(test.substring(0, 10)+" "+test.substring(10));
+        }
     }
 }
