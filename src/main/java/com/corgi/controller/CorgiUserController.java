@@ -434,6 +434,11 @@ public class CorgiUserController extends BaseController {
         String tel = redisTemplate.opsForValue().get(ipKey);
         if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
             log.info("duplicate ip..." + ip);
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return new JsonResult();
         }
         redisTemplate.opsForValue().set(ipKey, telNo, 5, TimeUnit.MINUTES);
