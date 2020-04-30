@@ -22,6 +22,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
 import com.corgi.common.util.CharacterUtils;
+import com.corgi.common.util.IPUtil;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.CheckPic;
@@ -40,7 +41,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -421,6 +426,16 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
         Random random = new Random();
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest hrequest = sra.getRequest();
+        String ip = IPUtil.getIpAddr(hrequest);
+        String ipKey = "ip_tel_" + ip;
+        String tel = redisTemplate.opsForValue().get(ipKey);
+        if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
+            return new JsonResult();
+        }
+        redisTemplate.opsForValue().set(ipKey, telNo, 5, TimeUnit.MINUTES);
         String code = "";
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
