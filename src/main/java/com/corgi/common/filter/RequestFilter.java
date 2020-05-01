@@ -57,14 +57,15 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "send_code")
                 || checkURI(servletRequest, "update_user_position")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
-        } else {
-            JsonResult jsonResult = new JsonResult("");
-            jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
-            jsonResult.setMessage(new String("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！".getBytes(), Charset.forName("UTF-8")));
-            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
-            servletResponse.setContentType("application/json;charset=UTF-8");
-            return;
         }
+//        else {
+//            JsonResult jsonResult = new JsonResult("");
+//            jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
+//            jsonResult.setMessage(new String("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！".getBytes(), Charset.forName("UTF-8")));
+//            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
+//            servletResponse.setContentType("application/json;charset=UTF-8");
+//            return;
+//        }
         MDC.put("reqId", UUID.randomUUID().toString());
         MDC.put("usrID", "");
         filterChain.doFilter(servletRequest, servletResponse);
