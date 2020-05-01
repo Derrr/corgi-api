@@ -9,7 +9,6 @@ public class IPUtil {
     private static final String LOCALHOST = "127.0.0.1";
 
     public static String getIpAddr(HttpServletRequest request) {
-        System.out.println(request);
         String ipAddress;
         try {
             ipAddress = request.getHeader("x-forwarded-for");
@@ -38,9 +37,18 @@ public class IPUtil {
                     ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
                 }
             }
+        } catch (Exception e) {
+            ipAddress = "";
+        }
+        return ipAddress;
+    }
 
-            if (request.getHeader("X-Real-PORT") != null && ipAddress != null) {
-                ipAddress = ipAddress + ":" + request.getHeader("X-Real-PORT");
+    public static String getPort(HttpServletRequest request) {
+        String ipAddress;
+        try {
+            ipAddress = request.getHeader("X-Real-PORT");
+            if (ipAddress == null) {
+                ipAddress = "";
             }
         } catch (Exception e) {
             ipAddress = "";

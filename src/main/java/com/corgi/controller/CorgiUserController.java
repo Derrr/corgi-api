@@ -430,10 +430,11 @@ public class CorgiUserController extends BaseController {
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
         HttpServletRequest hrequest = sra.getRequest();
         String ip = IPUtil.getIpAddr(hrequest);
+        String port = IPUtil.getPort(hrequest);
         String ipKey = "ip_tel_" + ip;
         String tel = redisTemplate.opsForValue().get(ipKey);
         if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
-            log.info("duplicate ip..." + ip);
+            log.info("duplicate ip..." + ip + ":" + port);
             return new JsonResult();
         }
         redisTemplate.opsForValue().set(ipKey, telNo, 1, TimeUnit.DAYS);
