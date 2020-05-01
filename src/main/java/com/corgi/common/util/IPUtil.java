@@ -38,6 +38,10 @@ public class IPUtil {
                     ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
                 }
             }
+
+            if (request.getHeader("X-Real-PORT") != null && ipAddress != null) {
+                ipAddress = ipAddress + ":" + request.getHeader("X-Real-PORT");
+            }
         } catch (Exception e) {
             ipAddress = "";
         }
