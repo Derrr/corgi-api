@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 @Slf4j
@@ -59,7 +60,7 @@ public class RequestFilter implements Filter {
         } else {
             JsonResult jsonResult = new JsonResult("");
             jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
-            jsonResult.setMessage("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！");
+            jsonResult.setMessage(new String("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！".getBytes(), Charset.forName("UTF-8")));
             servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
             servletResponse.setContentType("application/json;charset=UTF-8");
             return;
@@ -70,7 +71,6 @@ public class RequestFilter implements Filter {
         String url = ((HttpServletRequest) servletRequest).getRequestURI();
         log.info("time spent...{}:{}ms", url, (System.currentTimeMillis() - time));
     }
-
 
 
     @Override
