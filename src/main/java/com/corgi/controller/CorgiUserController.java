@@ -436,7 +436,7 @@ public class CorgiUserController extends BaseController {
             log.info("duplicate ip..." + ip);
             return new JsonResult();
         }
-        redisTemplate.opsForValue().set(ipKey, telNo, 5, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(ipKey, telNo, 1, TimeUnit.DAYS);
         String code = "";
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
