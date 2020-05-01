@@ -55,9 +55,14 @@ public class RequestFilter implements Filter {
             servletRequest.setAttribute(JWTUtils.JWT_USER, user);
         } else if (checkURI(servletRequest, "login")
                 || checkURI(servletRequest, "send_code")
-                || checkURI(servletRequest, "update_user_position")
-                || checkURI(servletRequest, "get_user_detail")) {
+                || checkURI(servletRequest, "update_user_position")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
+        } else if (checkURI(servletRequest, "get_user_detail")) {
+            JsonResult jsonResult = new JsonResult("");
+            jsonResult.setCode(Constants.JWT_PERMISSION_ERROR_CODE);
+            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
+            servletResponse.setContentType("application/json;charset=UTF-8");
+            return;
         } else {
             JsonResult jsonResult = new JsonResult("");
             jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);

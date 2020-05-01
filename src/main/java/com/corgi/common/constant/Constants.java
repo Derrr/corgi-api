@@ -8,6 +8,7 @@ public class Constants {
     public static final int PARAMETER_ERROR_CODE = 300;
     public static final int JWT_ERROR_CODE = 401;
     public static final int PERMISSION_ERROR_CODE = 402;
+    public static final int JWT_PERMISSION_ERROR_CODE = 403;
     public static final int SYS_ERROR_CODE = 500;
     public static final int SERVER_ERROR_CODE = 600;
 }
