@@ -57,7 +57,7 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "send_code")
                 || checkURI(servletRequest, "update_user_position")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
-        } 
+        }
 //        else if (checkURI(servletRequest, "get_user_detail")) {
 //            JsonResult jsonResult = new JsonResult("");
 //            jsonResult.setCode(Constants.JWT_PERMISSION_ERROR_CODE);
