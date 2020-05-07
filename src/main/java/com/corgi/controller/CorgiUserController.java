@@ -434,10 +434,10 @@ public class CorgiUserController extends BaseController {
         String ipKey = "ip_tel_" + ip;
         String tel = redisTemplate.opsForValue().get(ipKey);
         if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
-            log.info("duplicate ip..." + ip + ":" + port);
+            log.info("duplicate ip..." + ip+":"+port);
             return new JsonResult();
         }
-        redisTemplate.opsForValue().set(ipKey, telNo, 1, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(ipKey, telNo, 1, TimeUnit.DAYS);
         String code = "";
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
