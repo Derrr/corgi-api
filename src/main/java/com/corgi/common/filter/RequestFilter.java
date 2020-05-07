@@ -61,9 +61,9 @@ public class RequestFilter implements Filter {
             JsonResult jsonResult = new JsonResult("");
             jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
             jsonResult.setMessage("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！");
-            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
             servletResponse.setContentType("application/json;charset=UTF-8");
             servletResponse.setCharacterEncoding("UTF-8");
+            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
             return;
         }
         MDC.put("reqId", UUID.randomUUID().toString());
