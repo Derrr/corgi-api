@@ -70,6 +70,7 @@ public class CorgiActivityController extends BaseController {
             log.info("into add_activity..." + getUserId());
             activity.setUserId(getUserId());
         }
+        log.info("user {} adding activity", activity.getUserId());
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
         if (checkDuplicateActivity(activity)) {
