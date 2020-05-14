@@ -24,10 +24,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -438,8 +437,14 @@ public class CorgiToolController extends BaseController {
                 for (UserMatch userMatch : userMatchList) {
                     String userId1 = userMatch.getUserId1();
                     String userId2 = userMatch.getUserId2();
-                    Double match = corgiUserMatchService.calculateUserMatch(userId1, userId2);
                     String matchKey = CorgiConstants.getUserMatchKey(userId1, userId2);
+                    String matchStr = redisTemplate.opsForValue().get(matchKey);
+                    if (StringUtils.isEmpty(matchStr)) {
+                        userMatch.setMatch(0);
+                        corgiUserMatchService.updateMatch(userMatch);
+                        continue;
+                    }
+                    Double match = corgiUserMatchService.calculateUserMatch(userId1, userId2);
                     redisTemplate.opsForValue().set(matchKey, match + "", 7, TimeUnit.DAYS);
                     userMatch.setMatch(match);
                     corgiUserMatchService.updateMatch(userMatch);
@@ -447,6 +452,18 @@ public class CorgiToolController extends BaseController {
             }
         } while (!CollectionUtils.isEmpty(userMatchList));
         return "success";
+    }
+
+    @GetMapping("get_match_factor")
+    public JsonResult getMatchFactor() {
+        Map result = redisTemplate.opsForHash().entries(CorgiConstants.MATCH_FACTOR);
+        return new JsonResult(result);
+    }
+
+    @PostMapping("set_match_factor")
+    public JsonResult setMatchFactor(@RequestBody HashMap factors) {
+        redisTemplate.opsForHash().putAll(CorgiConstants.MATCH_FACTOR, factors);
+        return new JsonResult();
     }
 
 
