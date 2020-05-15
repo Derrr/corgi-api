@@ -461,7 +461,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("set_match_ratio")
-    public JsonResult setMatchRatio(HashMap factors) {
+    public JsonResult setMatchRatio(@RequestParam Map factors) {
         log.info("factors..." + factors);
         redisTemplate.opsForHash().putAll(CorgiConstants.MATCH_FACTOR, factors);
         return new JsonResult();
