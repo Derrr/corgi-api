@@ -413,8 +413,8 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(result);
     }
 
-    @PostMapping("update_match_factor")
-    public JsonResult updateMatchFactor(@RequestBody HashMap<String, String> result) {
+    @GetMapping("update_match_factor")
+    public JsonResult updateMatchFactor(HashMap<String, String> result) {
         String table = result.get("table");
         String cn1 = result.get("cn1");
         String cv1 = result.get("cv1");
@@ -460,8 +460,8 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(result);
     }
 
-    @PostMapping("set_match_ratio")
-    public JsonResult setMatchRatio(@RequestBody HashMap factors) {
+    @GetMapping("set_match_ratio")
+    public JsonResult setMatchRatio(HashMap factors) {
         redisTemplate.opsForHash().putAll(CorgiConstants.MATCH_FACTOR, factors);
         return new JsonResult();
     }
