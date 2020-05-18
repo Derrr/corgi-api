@@ -13,11 +13,10 @@ import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserProfile;
-import com.corgi.user.entity.UserSignUp;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -48,7 +47,13 @@ public class CorgiActivityController extends BaseController {
     @Reference
     private CorgiAreaService corgiAreaService;
     @Reference
+    private CorgiToolService corgiToolService;
+    @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiCommentService corgiCommentService;
+    @Reference
+    private CorgiLikeService corgiLikeService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -92,6 +97,62 @@ public class CorgiActivityController extends BaseController {
                 .extra(extra)
                 .build());
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
+    }
+
+    @PostMapping("add_comment")
+    public JsonResult addComment(@RequestBody ActivityComment activityComment) {
+        activityComment.setUserId(getUserId());
+        corgiCommentService.addActivityComment(activityComment);
+        return new JsonResult();
+    }
+
+    @PostMapping("like")
+    public JsonResult like(@RequestBody ActivityLike activityLike) {
+        activityLike.setUserId(getUserId());
+        corgiLikeService.addActivityLike(activityLike);
+        return new JsonResult();
+    }
+
+    @GetMapping("get_comment")
+    public JsonResult getComment(@RequestParam("activityId") String activityId) {
+        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId);
+        return new JsonResult(activityComments);
+    }
+
+    @GetMapping("get_like")
+    public JsonResult getLike(@RequestParam("activityId") String activityId) {
+        List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId);
+        return new JsonResult(activityLikes);
+    }
+
+    @GetMapping("count_comment")
+    public JsonResult countComment(@RequestParam("activityId") String activityId) {
+        Long count = corgiCommentService.countActivityComment(activityId);
+        return new JsonResult(count);
+    }
+
+    @GetMapping("count_like")
+    public JsonResult countLike(@RequestParam("activityId") String activityId) {
+        Long count = corgiLikeService.countActivityLike(activityId);
+        return new JsonResult(count);
+    }
+
+    @GetMapping("get_activity_message")
+    public JsonResult getActivityMessage() {
+        List<ActivityMessage> activityMessages = corgiToolService.getActivityMessage(getUserId());
+        return new JsonResult(activityMessages);
+    }
+
+    @GetMapping("count_activity_message")
+    public JsonResult countActivityMessage() {
+        Long count = corgiToolService.countActivityMessage(getUserId());
+        return new JsonResult(count);
+    }
+
+    @GetMapping("delete_activity_message")
+    public JsonResult deleteActivityMessage(@RequestParam("time") Long time) {
+        corgiToolService.deleteActivityMessage(getUserId(), time);
+        return new JsonResult();
     }
 
     private boolean checkDuplicateActivity(CorgiActivity activity) {
