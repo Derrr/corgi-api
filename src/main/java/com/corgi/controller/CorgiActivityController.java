@@ -129,7 +129,7 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(activityComments);
     }
 
-    @GetMapping("get_like")
+    @GetMapping("get_likes")
     public JsonResult getLike(@RequestParam("activityId") String activityId) {
         List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId);
         return new JsonResult(activityLikes);
