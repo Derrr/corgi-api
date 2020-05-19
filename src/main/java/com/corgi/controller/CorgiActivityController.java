@@ -102,6 +102,7 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("add_comment")
     public JsonResult addComment(@RequestBody ActivityComment activityComment) {
         activityComment.setUserId(getUserId());
+        activityComment.setCommentUserId(getUserId());
         corgiCommentService.addActivityComment(activityComment);
         return new JsonResult();
     }
