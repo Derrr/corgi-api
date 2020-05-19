@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("tool")
 public class CorgiToolController extends BaseController {
-    public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png";
+    public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
 
     @Reference
     private CorgiUserService corgiUserService;
