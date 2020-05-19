@@ -415,7 +415,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("update_match_factor")
-    public JsonResult updateMatchFactor(@RequestBody HashMap<String, String> result) {
+    public JsonResult updateMatchFactor(@RequestParam HashMap<String, String> result) {
         log.info("factor " + result);
         String table = result.get("table");
         String cn1 = result.get("cn1");
