@@ -101,7 +101,11 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("add_comment")
     public JsonResult addComment(@RequestBody ActivityComment activityComment) {
-        activityComment.setUserId(getUserId());
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityComment.getActivityId()));
+        if (CollectionUtils.isEmpty(activityList)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论失败，活动不存在");
+        }
+        activityComment.setUserId(activityList.get(0).getUserId());
         activityComment.setCommentUserId(getUserId());
         corgiCommentService.addActivityComment(activityComment);
         return new JsonResult();
@@ -109,12 +113,17 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("like")
     public JsonResult like(@RequestBody ActivityLike activityLike) {
-        activityLike.setUserId(getUserId());
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityLike.getActivityId()));
+        if (CollectionUtils.isEmpty(activityList)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "点赞失败，活动不存在");
+        }
+        activityLike.setUserId(activityList.get(0).getUserId());
+        activityLike.setLikeUserId(getUserId());
         corgiLikeService.addActivityLike(activityLike);
         return new JsonResult();
     }
 
-    @GetMapping("get_comment")
+    @GetMapping("get_comments")
     public JsonResult getComment(@RequestParam("activityId") String activityId) {
         List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId);
         return new JsonResult(activityComments);
