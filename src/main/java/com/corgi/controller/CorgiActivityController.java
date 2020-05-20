@@ -123,6 +123,12 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("unlike")
+    public JsonResult unlike(@RequestParam("activityId") String activityId) {
+        corgiLikeService.deleteActivityLike(getUserId(), activityId);
+        return new JsonResult();
+    }
+
     @GetMapping("get_comments")
     public JsonResult getComment(@RequestParam("activityId") String activityId) {
         List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId);
@@ -144,7 +150,11 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("count_like")
     public JsonResult countLike(@RequestParam("activityId") String activityId) {
         Long count = corgiLikeService.countActivityLike(activityId);
-        return new JsonResult(count);
+        List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activityId);
+        LikeCount likeCount = new LikeCount();
+        likeCount.setCount(count);
+        likeCount.setUsers(users);
+        return new JsonResult(likeCount);
     }
 
     @GetMapping("get_activity_message")
