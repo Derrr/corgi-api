@@ -75,6 +75,7 @@ public class CorgiActivityController extends BaseController {
             log.info("into add_activity..." + getUserId());
             activity.setUserId(getUserId());
         }
+        activity.setCategory(CorgiActivity.CAT_ACTIVITY);
         log.info("user {} adding activity", activity.getUserId());
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
@@ -100,11 +101,40 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
     }
 
+    @PostMapping("add_image_activity")
+    public JsonResult addImageActivity(@RequestBody CorgiActivity activity) {
+        if (hasUserId()) {
+            log.info("into add_activity..." + getUserId());
+            activity.setUserId(getUserId());
+        }
+        activity.setCategory(CorgiActivity.CAT_IMAGE);
+        activity.setCheckStatus(AliyunGreenService.PASS);
+        activity = aliyunGreenService.checkImageActivity(activity);
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
+        activity.setPics(activityPics);
+        activity = corgiActivityService.addCorgiActivity(activity);
+//        redisTemplate.delete("activity_count_" + activity.getUserId());
+//        HashMap extra = new HashMap();
+//        extra.put("activityId", activity.getId());
+//        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+//        mqService.sendMessage(PushMessage.builder()
+//                .type(PushMessage.ACTIVITY)
+//                .sourceUserId(activity.getUserId())
+//                .message(PushMessage.ACTIVITY_MESSAGE)
+//                .extra(extra)
+//                .build());
+        return new JsonResult(AddActivityResult.getResult(activity));
+    }
+
     @PostMapping("add_comment")
     public JsonResult addComment(@RequestBody ActivityComment activityComment) {
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityComment.getActivityId()));
         if (CollectionUtils.isEmpty(activityList)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论失败，活动不存在");
+        }
+        if (!aliyunGreenService.checkText(activityComment.getContent())) {
+            boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
+            activityComment.setContent(noFilterContent ? "***" : AliyunGreenService.Filtered_Content.get());
         }
         activityComment.setUserId(activityList.get(0).getUserId());
         activityComment.setCommentUserId(getUserId());

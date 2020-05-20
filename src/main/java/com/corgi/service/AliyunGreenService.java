@@ -76,6 +76,8 @@ public class AliyunGreenService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    public static ThreadLocal<String> Filtered_Content = new ThreadLocal<>();
+
     @PostConstruct
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
@@ -309,6 +311,10 @@ public class AliyunGreenService {
                     JSONArray taskResults = scrResponse.getJSONArray("data");
                     for (Object taskResult : taskResults) {
                         if (200 == ((JSONObject) taskResult).getInteger("code")) {
+                            String filteredContent = ((JSONObject) taskResult).getString("filteredContent");
+                            if (!StringUtils.isEmpty(filteredContent)) {
+                                Filtered_Content.set(filteredContent);
+                            }
                             JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
                             for (Object sceneResult : sceneResults) {
                                 String suggestion = ((JSONObject) sceneResult).getString("suggestion");
@@ -316,6 +322,7 @@ public class AliyunGreenService {
                                     return false;
                                 }
                             }
+
                         } else {
                             log.error("task process fail:" + ((JSONObject) taskResult).getInteger("code"));
                         }
@@ -334,6 +341,24 @@ public class AliyunGreenService {
             log.error(e.getMessage(), e);
         }
         return true;
+    }
+
+    public CorgiActivity checkImageActivity(CorgiActivity activity) {
+        String title = activity.getTitle();
+        String content = activity.getContent();
+        if (!StringUtils.isEmpty(title) && !checkText(title)) {
+            boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
+            activity.setTitle(noFilterContent ? "***" : AliyunGreenService.Filtered_Content.get());
+            activity.setCheckTitle(title);
+            activity.setCheckStatus(CHECK);
+        }
+        if (!StringUtils.isEmpty(content) && !checkText(content)) {
+            boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
+            activity.setContent(noFilterContent ? "***" : AliyunGreenService.Filtered_Content.get());
+            activity.setCheckContent(content);
+            activity.setCheckStatus(CHECK);
+        }
+        return activity;
     }
 
     public CorgiActivity checkActivity(CorgiActivity activity) {
