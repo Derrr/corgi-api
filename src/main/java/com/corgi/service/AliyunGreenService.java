@@ -348,13 +348,13 @@ public class AliyunGreenService {
         String content = activity.getContent();
         if (!StringUtils.isEmpty(title) && !checkText(title)) {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
-            activity.setTitle(noFilterContent ? "***" : AliyunGreenService.Filtered_Content.get());
+            activity.setTitle(noFilterContent ? content.replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
             activity.setCheckTitle(title);
             activity.setCheckStatus(CHECK);
         }
         if (!StringUtils.isEmpty(content) && !checkText(content)) {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
-            activity.setContent(noFilterContent ? "***" : AliyunGreenService.Filtered_Content.get());
+            activity.setContent(noFilterContent ? content.replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
             activity.setCheckContent(content);
             activity.setCheckStatus(CHECK);
         }
