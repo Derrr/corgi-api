@@ -1,6 +1,8 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.entity.BarProfile;
@@ -20,6 +22,16 @@ import java.util.List;
 public class CorgiBarController extends BaseController {
     @Reference
     private CorgiBarService corgiBarService;
+    @Reference
+    private CorgiActivityService corgiActivityService;
+
+    @PostMapping("add_bar_activity")
+    public JsonResult addBarActivity(@RequestBody CorgiActivity corgiActivity) {
+        corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
+        corgiActivityService.addCorgiActivity(corgiActivity);
+        return new JsonResult();
+    }
+
 
     @PostMapping("add_bar")
     public JsonResult addBar(@RequestBody BarProfile barProfile) {
