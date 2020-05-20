@@ -24,10 +24,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -415,8 +414,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("update_match_factor")
-    public JsonResult updateMatchFactor(@RequestParam HashMap<String, String> result) {
-        log.info("factor " + result);
+    public JsonResult updateMatchFactor(@RequestParam Map<String, String> result) {
         String table = result.get("table");
         String cn1 = result.get("cn1");
         String cv1 = result.get("cv1");
@@ -439,8 +437,14 @@ public class CorgiToolController extends BaseController {
                 for (UserMatch userMatch : userMatchList) {
                     String userId1 = userMatch.getUserId1();
                     String userId2 = userMatch.getUserId2();
-                    Double match = corgiUserMatchService.calculateUserMatch(userId1, userId2);
                     String matchKey = CorgiConstants.getUserMatchKey(userId1, userId2);
+                    String matchStr = redisTemplate.opsForValue().get(matchKey);
+                    if (StringUtils.isEmpty(matchStr)) {
+                        userMatch.setMatch(0);
+                        corgiUserMatchService.updateMatch(userMatch);
+                        continue;
+                    }
+                    Double match = corgiUserMatchService.calculateUserMatch(userId1, userId2);
                     redisTemplate.opsForValue().set(matchKey, match + "", 7, TimeUnit.DAYS);
                     userMatch.setMatch(match);
                     corgiUserMatchService.updateMatch(userMatch);
@@ -448,6 +452,19 @@ public class CorgiToolController extends BaseController {
             }
         } while (!CollectionUtils.isEmpty(userMatchList));
         return "success";
+    }
+
+    @GetMapping("get_match_ratio")
+    public JsonResult getMatchRatio() {
+        Map result = redisTemplate.opsForHash().entries(CorgiConstants.MATCH_FACTOR);
+        return new JsonResult(result);
+    }
+
+    @GetMapping("set_match_ratio")
+    public JsonResult setMatchRatio(@RequestParam Map factors) {
+        log.info("factors..." + factors);
+        redisTemplate.opsForHash().putAll(CorgiConstants.MATCH_FACTOR, factors);
+        return new JsonResult();
     }
 
 

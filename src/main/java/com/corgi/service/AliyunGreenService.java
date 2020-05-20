@@ -232,8 +232,9 @@ public class AliyunGreenService {
 
     public PicInfo getAliyunPicInfo(String url) {
         PicInfo picInfo = new PicInfo();
-        String result = redisTemplate.opsForValue().get(url);
+        String result;
         try {
+            result = redisTemplate.opsForValue().get(url);
             if (!StringUtils.isEmpty(result) && result.split("_").length == 2) {
                 String[] hw = result.split("_");
                 picInfo.setHeight(Integer.valueOf(hw[0]));

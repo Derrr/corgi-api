@@ -434,10 +434,10 @@ public class CorgiUserController extends BaseController {
         String ipKey = "ip_tel_" + ip;
         String tel = redisTemplate.opsForValue().get(ipKey);
         if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
-            log.info("duplicate ip..." + ip+":"+port);
+            log.info("duplicate ip..." + ip + ":" + port);
             return new JsonResult();
         }
-        redisTemplate.opsForValue().set(ipKey, telNo, 1, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(ipKey, telNo, 50, TimeUnit.SECONDS);
         String code = "";
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
@@ -451,6 +451,7 @@ public class CorgiUserController extends BaseController {
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
         }
+        log.info("to {} sending code:{}", telNo, code);
         CommonRequest request = new CommonRequest();
         request.setMethod(MethodType.POST);
         request.setDomain("dysmsapi.aliyuncs.com");
