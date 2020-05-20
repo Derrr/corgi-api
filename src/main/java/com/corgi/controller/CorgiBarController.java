@@ -38,5 +38,12 @@ public class CorgiBarController extends BaseController {
         List<BarProfile> barProfiles = corgiBarService.getBarList(status);
         return new JsonResult(barProfiles);
     }
+
+    @GetMapping("get_bar")
+    public JsonResult getBar(@RequestParam(required = false,name = "barId")String barId){
+        BarProfile barProfiles = corgiBarService.getBarProfile(barId);
+        return new JsonResult(barProfiles);
+    }
+
 }
 
