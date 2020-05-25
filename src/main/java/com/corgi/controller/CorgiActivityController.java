@@ -125,8 +125,20 @@ public class CorgiActivityController extends BaseController {
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
         }
         activityComment.setUserId(activityList.get(0).getUserId());
-        activityComment.setCommentUserId(getUserId());
+        if (hasUserId()) {
+            activityComment.setCommentUserId(getUserId());
+        }
         corgiCommentService.addActivityComment(activityComment);
+        HashMap extra = new HashMap();
+        extra.put("activityId", activityComment.getActivityId());
+        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.DEFAULT)
+                .sourceUserId(activityComment.getCommentUserId())
+                .targetUserId(activityComment.getUserId())
+                .message(PushMessage.NEW_MESSAGE)
+                .extra(extra)
+                .build());
         return new JsonResult();
     }
 
@@ -139,6 +151,16 @@ public class CorgiActivityController extends BaseController {
         activityLike.setUserId(activityList.get(0).getUserId());
         activityLike.setLikeUserId(getUserId());
         corgiLikeService.addActivityLike(activityLike);
+        HashMap extra = new HashMap();
+        extra.put("activityId", activityLike.getActivityId());
+        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.DEFAULT)
+                .sourceUserId(activityLike.getLikeUserId())
+                .targetUserId(activityLike.getUserId())
+                .message(PushMessage.NEW_MESSAGE)
+                .extra(extra)
+                .build());
         return new JsonResult();
     }
 
