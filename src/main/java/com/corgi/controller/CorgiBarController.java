@@ -28,8 +28,8 @@ public class CorgiBarController extends BaseController {
     @PostMapping("add_bar_activity")
     public JsonResult addBarActivity(@RequestBody CorgiActivity corgiActivity) {
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
-        corgiActivityService.addCorgiActivity(corgiActivity);
-        return new JsonResult();
+        CorgiActivity activity = corgiActivityService.addCorgiActivity(corgiActivity);
+        return new JsonResult(activity);
     }
 
     @GetMapping("get_bar_activity")
