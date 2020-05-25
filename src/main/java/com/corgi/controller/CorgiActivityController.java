@@ -72,7 +72,6 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
         if (hasUserId()) {
-            log.info("into add_activity..." + getUserId());
             activity.setUserId(getUserId());
         }
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
@@ -104,7 +103,6 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("add_image_activity")
     public JsonResult addImageActivity(@RequestBody CorgiActivity activity) {
         if (hasUserId()) {
-            log.info("into add_activity..." + getUserId());
             activity.setUserId(getUserId());
         }
         activity.setCategory(CorgiActivity.CAT_IMAGE);
@@ -113,16 +111,6 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-//        redisTemplate.delete("activity_count_" + activity.getUserId());
-//        HashMap extra = new HashMap();
-//        extra.put("activityId", activity.getId());
-//        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
-//        mqService.sendMessage(PushMessage.builder()
-//                .type(PushMessage.ACTIVITY)
-//                .sourceUserId(activity.getUserId())
-//                .message(PushMessage.ACTIVITY_MESSAGE)
-//                .extra(extra)
-//                .build());
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 
@@ -626,7 +614,7 @@ public class CorgiActivityController extends BaseController {
             "20") Integer pageSize) {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
-        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, hasUserId() ? getUserId() : userId);
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userId)
                 .option(TraceFollow.CHANGE)
@@ -668,29 +656,20 @@ public class CorgiActivityController extends BaseController {
                 }
                 Integer signUp = corgiUserActivityService.getStatus(userId, activity.getId());
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
+                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 detailList.add(new CorgiActivityDetail(activity)
                         .initUserDetail(userDetail)
                         .initMatch(match)
                         .initSize(height, width)
-                        .initSignUpStatus(signUp));
+                        .initSignUpStatus(signUp)
+                        .initCommentCount(commentCount)
+                        .initLikeCount(likeCount)
+                        .initLikeUsers(users));
             }
         }
         return detailList;
-    }
-
-    private void addArea(CorgiActivity corgiActivity) {
-        String city = corgiActivity.getCity();
-        String adname = corgiActivity.getAdname();
-        if (StringUtils.isEmpty(city) || StringUtils.isEmpty(adname)) {
-            return;
-        }
-        if (!StringUtils.isEmpty(corgiActivity.getBusinessArea())) {
-            corgiAreaService.addArea(CorgiArea.builder()
-                    .city(city).adname(adname).address("商圈")
-                    .type(CorgiArea.BUSINESS)
-                    .areaName(corgiActivity.getBusinessArea())
-                    .build());
-        }
     }
 
     private boolean checkActivityUser(String activityId, String userId) {

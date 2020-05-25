@@ -1,6 +1,7 @@
 package com.corgi.entity;
 
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
 import lombok.Data;
@@ -19,6 +20,9 @@ public class CorgiActivityDetail extends CorgiActivity {
     private Double match = 0.0;
     private Integer height = 0;
     private Integer width = 0;
+    private Long commentCount;
+    private Long likeCount;
+    private List<ActivityLike> likeUsers;
 
     public CorgiActivityDetail() {
         super();
@@ -35,6 +39,22 @@ public class CorgiActivityDetail extends CorgiActivity {
         this.signUpStatus = signUpStatus;
         return this;
     }
+
+    public CorgiActivityDetail initCommentCount(Long commentCount){
+        this.commentCount = commentCount;
+        return this;
+    }
+
+    public CorgiActivityDetail initLikeCount(Long likeCount){
+        this.likeCount = likeCount;
+        return this;
+    }
+
+    public CorgiActivityDetail initLikeUsers(List<ActivityLike> likeUsers){
+        this.likeUsers = likeUsers;
+        return this;
+    }
+
 
     public CorgiActivityDetail initUserDetail(UserDetail userDetail) {
         this.userDetail = userDetail;
