@@ -1,0 +1,41 @@
+package com.corgi.controller;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.common.JsonResult;
+import com.corgi.user.api.CorgiBarService;
+import com.corgi.user.api.CorgiSystemMessageService;
+import com.corgi.user.entity.BarProfile;
+import com.corgi.user.entity.MessageRule;
+import com.corgi.user.entity.SystemMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+/**
+ * @author tairanliu
+ */
+@Slf4j
+@RestController
+@RequestMapping("system")
+public class CorgiSystemController extends BaseController {
+    @Reference
+    private CorgiSystemMessageService corgiSystemMessageService;
+
+    @PostMapping("add_system_message")
+    public JsonResult addSystemMessage(@RequestBody SystemMessage systemMessage) {
+        String messageId = corgiSystemMessageService.addSystemMessage(systemMessage);
+        return new JsonResult(messageId);
+    }
+
+    @PostMapping("update_system_message")
+    public JsonResult updateSystemMessage(@RequestBody SystemMessage systemMessage) {
+        corgiSystemMessageService.updateSystemMessage(systemMessage);
+        return new JsonResult();
+    }
+
+}
+
