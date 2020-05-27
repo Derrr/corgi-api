@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.user.api.CorgiBarService;
+import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.BarProfile;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,17 +28,30 @@ public class CorgiBarController extends BaseController {
 
     @PostMapping("add_bar_activity")
     public JsonResult addBarActivity(@RequestBody CorgiActivity corgiActivity) {
+        if (hasUserId()) {
+            corgiActivity.setUserId(getUserId());
+        }
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         CorgiActivity activity = corgiActivityService.addCorgiActivity(corgiActivity);
         return new JsonResult(activity);
     }
 
     @GetMapping("get_bar_activity")
-    public JsonResult getBarActivity(@RequestParam("barId") String barId,@RequestParam("page")Integer page, @RequestParam("pageSize")Integer pageSize) {
+    public JsonResult getBarActivity(@RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         CorgiActivity corgiActivity = new CorgiActivity();
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setUserId(barId);
         List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(corgiActivity, page, pageSize);
+        return new JsonResult(corgiActivities);
+    }
+
+    @GetMapping("get_active_bar_activity")
+    public JsonResult getActiveBarActivity(@RequestParam("barId") String barId) {
+        CorgiActivity corgiActivity = new CorgiActivity();
+        corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
+        corgiActivity.setStatus(CorgiActivity.CREATED);
+        corgiActivity.setUserId(barId);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getBarActivity(corgiActivity);
         return new JsonResult(corgiActivities);
     }
 
