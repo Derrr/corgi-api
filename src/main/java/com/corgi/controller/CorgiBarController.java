@@ -58,7 +58,7 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(corgiActivities);
     }
 
-    @PostMapping("update_activity")
+    @PostMapping("update_bar_activity")
     public JsonResult updateActivity(@RequestBody CorgiActivity activity) throws PermissionException {
         if (hasUserId()) {
             throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
