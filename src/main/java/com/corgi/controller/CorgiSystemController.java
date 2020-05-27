@@ -7,6 +7,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiSystemMessageService;
 import com.corgi.user.entity.BarProfile;
+import com.corgi.user.entity.MessageRecord;
 import com.corgi.user.entity.MessageRule;
 import com.corgi.user.entity.SystemMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,19 @@ public class CorgiSystemController extends BaseController {
         corgiSystemMessageService.updateSystemMessage(systemMessage);
         return new JsonResult();
     }
+
+    @GetMapping("get_system_message")
+    public JsonResult getSystemMessage(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<SystemMessage> systemMessages = corgiSystemMessageService.getSystemMessageByPage(page, pageSize);
+        return new JsonResult(systemMessages);
+    }
+
+    @GetMapping("get_message_record")
+    public JsonResult getMessageRecord(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<MessageRecord> messageRecords = corgiSystemMessageService.getMessageRecordByPage(page, pageSize);
+        return new JsonResult(messageRecords);
+    }
+
 
 }
 
