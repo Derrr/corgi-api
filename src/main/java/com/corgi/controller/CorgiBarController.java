@@ -4,6 +4,9 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.Constants;
+import com.corgi.exception.PermissionException;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.BarProfile;
@@ -55,6 +58,14 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(corgiActivities);
     }
 
+    @PostMapping("update_activity")
+    public JsonResult updateActivity(@RequestBody CorgiActivity activity) throws PermissionException {
+        if (hasUserId()) {
+            throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+        }
+        activity = corgiActivityService.updateCorgiActivity(activity);
+        return new JsonResult(activity);
+    }
 
     @PostMapping("add_bar")
     public JsonResult addBar(@RequestBody BarProfile barProfile) {
