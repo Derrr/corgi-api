@@ -11,6 +11,7 @@ import com.corgi.user.entity.MessageRecord;
 import com.corgi.user.entity.MessageRule;
 import com.corgi.user.entity.SystemMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,8 +46,13 @@ public class CorgiSystemController extends BaseController {
     }
 
     @GetMapping("get_message_record")
-    public JsonResult getMessageRecord(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<MessageRecord> messageRecords = corgiSystemMessageService.getMessageRecordByPage(page, pageSize);
+    public JsonResult getMessageRecord(@RequestParam(required = false, name = "messageId") String messageId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<MessageRecord> messageRecords;
+        if (StringUtils.isEmpty(messageId)) {
+            messageRecords = corgiSystemMessageService.getMessageRecordByPage(page, pageSize);
+        } else {
+            messageRecords = corgiSystemMessageService.getMessageRecordByMessageId(page, pageSize, messageId);
+        }
         return new JsonResult(messageRecords);
     }
 
