@@ -29,6 +29,11 @@ public class RequestUtil {
         return "";
     }
 
+    public static boolean hasVersion() {
+        String version = (String) getRequest().getAttribute("version");
+        return !StringUtils.isEmpty(version);
+    }
+
     public static String getJwt() {
         return getRequest().getHeader(JWTUtils.JWT_HEADER);
     }

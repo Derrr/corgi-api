@@ -4,6 +4,7 @@ import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.RequestUtil;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -24,6 +25,10 @@ public class BaseController {
 
     public String getUserId() {
         return RequestUtil.getUserId();
+    }
+
+    public boolean hasVersion() {
+        return RequestUtil.hasVersion();
     }
 
     public boolean hasUserId() {
