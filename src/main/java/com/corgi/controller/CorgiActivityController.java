@@ -692,6 +692,7 @@ public class CorgiActivityController extends BaseController {
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
+                Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 detailList.add(new CorgiActivityDetail(activity)
                         .initUserDetail(userDetail)
                         .initMatch(match)
@@ -699,7 +700,9 @@ public class CorgiActivityController extends BaseController {
                         .initSignUpStatus(signUp)
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
-                        .initLikeUsers(users));
+                        .initLikeUsers(users)
+                        .hasLike(hasLike));
+
             }
         }
         return detailList;

@@ -22,6 +22,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private Integer width = 0;
     private Long commentCount;
     private Long likeCount;
+    private Integer hasLike = 0;
     private List<ActivityLike> likeUsers;
 
     public CorgiActivityDetail() {
@@ -52,6 +53,11 @@ public class CorgiActivityDetail extends CorgiActivity {
 
     public CorgiActivityDetail initLikeUsers(List<ActivityLike> likeUsers){
         this.likeUsers = likeUsers;
+        return this;
+    }
+
+    public CorgiActivityDetail hasLike(Integer hasLike){
+        this.hasLike = hasLike;
         return this;
     }
 
