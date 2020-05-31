@@ -30,7 +30,7 @@ public class RequestUtil {
     }
 
     public static boolean hasVersion() {
-        String version = (String) getRequest().getAttribute("version");
+        String version = getRequest().getHeader("version");
         return !StringUtils.isEmpty(version);
     }
 
