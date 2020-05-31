@@ -663,6 +663,7 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_liked_activity")
     public JsonResult getLikedActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        log.info("into activity....");
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         List<String> activityIds = corgiLikeService.getLikedActivity(userId, page, pageSize);
         log.info("activityIds..." + activityIds);
