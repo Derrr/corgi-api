@@ -666,7 +666,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         List<String> activityIds = corgiLikeService.getLikedActivity(userId, page, pageSize);
         log.info("activityIds..." + activityIds);
-        if (CollectionUtils.isEmpty(activityIds)) {
+        if (!CollectionUtils.isEmpty(activityIds)) {
             corgiActivities = corgiActivityService.getActivityByIds(activityIds);
         }
         return new JsonResult(covertLiked(corgiActivities));
