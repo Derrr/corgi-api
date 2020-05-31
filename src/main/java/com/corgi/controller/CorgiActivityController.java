@@ -494,7 +494,7 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(userIds)) {
             return new JsonResult();
         }
-        List<CorgiActivity> corgiActivities
+        List<CorgiActivity> corgiActivities;
         if (hasVersion()) {
             corgiActivityService.getAllActivityByUserIds(userIds, CorgiActivity.CREATED, page, size);
         } else {
