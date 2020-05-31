@@ -661,6 +661,16 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
+    @GetMapping("get_liked_activity")
+    public JsonResult getLikedActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<CorgiActivity> corgiActivities = new ArrayList<>();
+        List<String> activityIds = corgiLikeService.getLikedActivity(userId, page, pageSize);
+        if (CollectionUtils.isEmpty(activityIds)) {
+            corgiActivities = corgiActivityService.getActivityByIds(activityIds);
+        }
+        return new JsonResult(covertLiked(corgiActivities));
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         corgiFavorActivityService.addFavor("1", "aaaa");
@@ -672,6 +682,26 @@ public class CorgiActivityController extends BaseController {
         corgiActivityService.getUserRunningActivity("1", 1, 20);
         corgiActivityService.getUserRunningActivity("1", 1, 20);
         return new JsonResult();
+    }
+
+    private List<LikedActivity> covertLiked(List<CorgiActivity> activities) {
+        List<LikedActivity> likedActivities = new ArrayList<>();
+        for (CorgiActivity corgiActivity : activities) {
+            LikedActivity likedActivity = new LikedActivity();
+            likedActivity.setActivityId(corgiActivity.getId());
+            likedActivity.setCategory(corgiActivity.getCategory());
+            if (corgiActivity.getPics() != null && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
+                String picUrl = corgiActivity.getPics().get(0).getPicUrl();
+                likedActivity.setPicUrl(picUrl);
+                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                Integer height = picInfo.getHeight();
+                Integer width = picInfo.getWidth();
+                likedActivity.setHeight(height);
+                likedActivity.setWidth(width);
+            }
+            likedActivities.add(likedActivity);
+        }
+        return likedActivities;
     }
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
@@ -698,7 +728,9 @@ public class CorgiActivityController extends BaseController {
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
-                detailList.add(new CorgiActivityDetail(activity)
+                Integer signUpCount = corgiUserActivityService.countUsers(activity.getId(), null);
+                ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
+                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initUserDetail(userDetail)
                         .initMatch(match)
                         .initSize(height, width)
@@ -706,7 +738,10 @@ public class CorgiActivityController extends BaseController {
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
-                        .hasLike(hasLike));
+                        .hasLike(hasLike);
+                detail.setLastComment(activityComment);
+                detail.setSignUpCount(signUpCount);
+                detailList.add(detail);
 
             }
         }

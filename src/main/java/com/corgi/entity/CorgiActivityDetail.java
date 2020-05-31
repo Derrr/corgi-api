@@ -1,6 +1,7 @@
 package com.corgi.entity;
 
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.user.entity.ActivityComment;
 import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
@@ -23,6 +24,8 @@ public class CorgiActivityDetail extends CorgiActivity {
     private Long commentCount;
     private Long likeCount;
     private Integer hasLike = 0;
+    private ActivityComment lastComment;
+    private Integer signUpCount;
     private List<ActivityLike> likeUsers;
 
     public CorgiActivityDetail() {
