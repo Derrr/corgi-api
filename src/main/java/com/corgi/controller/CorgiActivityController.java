@@ -496,7 +496,7 @@ public class CorgiActivityController extends BaseController {
         }
         List<CorgiActivity> corgiActivities;
         if (hasVersion()) {
-            corgiActivities = corgiActivityService.getAllActivityByUserIds(userIds, CorgiActivity.CREATED, page, size);
+            corgiActivities = corgiActivityService.getAllActivityByUserIds(getUserId(), userIds, CorgiActivity.CREATED, page, size);
         } else {
             corgiActivities = corgiActivityService.getActivityByUserIds(userIds, CorgiActivity.CREATED, page, size);
         }
@@ -601,7 +601,7 @@ public class CorgiActivityController extends BaseController {
             }
         } else {
             if (hasVersion()) {
-                result = corgiActivityService.getAllActivityByUserIds(Arrays.asList(userId), "", (page - 1) * pageSize, pageSize);
+                result = corgiActivityService.getAllActivityByUserIds(getUserId(), Arrays.asList(userId), "", (page - 1) * pageSize, pageSize);
             } else {
                 result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), "", (page - 1) * pageSize, pageSize);
             }
