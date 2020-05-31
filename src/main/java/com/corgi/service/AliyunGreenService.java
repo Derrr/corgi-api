@@ -233,6 +233,8 @@ public class AliyunGreenService {
     }
 
     public PicInfo getAliyunPicInfo(String url) {
+        String[] urlArr = url.split("\\?x-oss-process");
+        url = urlArr[0];
         PicInfo picInfo = new PicInfo();
         String result;
         try {
