@@ -54,6 +54,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiCommentService corgiCommentService;
     @Reference
     private CorgiLikeService corgiLikeService;
+    @Reference
+    private CorgiShareService corgiShareService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -673,6 +675,17 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(covertLiked(corgiActivities));
     }
 
+    @PostMapping("share")
+    public JsonResult addShareActivity(@RequestBody ActivityShare activityShare) {
+        activityShare.setShareUserId(getUserId());
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityShare.getActivityId()));
+        if (!CollectionUtils.isEmpty(activityList) && activityList.get(0).getUserId() != null) {
+            activityShare.setUserId(activityList.get(0).getUserId());
+            corgiShareService.addShare(activityShare);
+        }
+        return new JsonResult();
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         corgiFavorActivityService.addFavor("1", "aaaa");
@@ -731,6 +744,7 @@ public class CorgiActivityController extends BaseController {
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 Integer signUpCount = corgiUserActivityService.countUsers(activity.getId(), null);
+                Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initUserDetail(userDetail)
@@ -743,8 +757,8 @@ public class CorgiActivityController extends BaseController {
                         .hasLike(hasLike);
                 detail.setLastComment(activityComment);
                 detail.setSignUpCount(signUpCount);
+                detail.setShareCount(shareCount);
                 detailList.add(detail);
-
             }
         }
         return detailList;
