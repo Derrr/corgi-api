@@ -63,6 +63,7 @@ public class CorgiBarController extends BaseController {
         if (hasUserId()) {
             throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
         }
+        activity.setCategory(CorgiActivity.CAT_BUSINESS);
         activity = corgiActivityService.updateCorgiActivity(activity);
         return new JsonResult(activity);
     }
