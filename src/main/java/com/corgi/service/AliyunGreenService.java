@@ -18,10 +18,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.util.CorgiHttpUtil;
-import com.corgi.entity.CheckPic;
-import com.corgi.entity.CorgiPic;
-import com.corgi.entity.MailMessage;
-import com.corgi.entity.PicInfo;
+import com.corgi.entity.*;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
@@ -390,5 +387,25 @@ public class AliyunGreenService {
             mailService.sendCheckMessage("活动：", activity.getId());
         }
         return activity;
+    }
+
+    public List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList) {
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(activityList)) {
+            for (CorgiActivity activity : activityList) {
+                Integer height = 0;
+                Integer width = 0;
+                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
+                    String picUrl = activity.getPics().get(0).getPicUrl();
+                    PicInfo picInfo = this.getAliyunPicInfo(picUrl);
+                    height = picInfo.getHeight();
+                    width = picInfo.getWidth();
+                }
+                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
+                        .initSize(height, width);
+                detailList.add(detail);
+            }
+        }
+        return detailList;
     }
 }

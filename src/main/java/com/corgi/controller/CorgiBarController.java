@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.CorgiBarService;
@@ -12,6 +13,7 @@ import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.BarProfile;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +30,8 @@ public class CorgiBarController extends BaseController {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiActivityService corgiActivityService;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
 
     @PostMapping("add_bar_activity")
     public JsonResult addBarActivity(@RequestBody CorgiActivity corgiActivity) {
@@ -54,7 +58,7 @@ public class CorgiBarController extends BaseController {
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setStatus(CorgiActivity.CREATED);
         corgiActivity.setUserId(barId);
-        List<CorgiActivity> corgiActivities = corgiActivityService.getBarActivity(corgiActivity);
+        List<CorgiActivityDetail> corgiActivities = aliyunGreenService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity));
         return new JsonResult(corgiActivities);
     }
 

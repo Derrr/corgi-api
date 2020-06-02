@@ -597,7 +597,7 @@ public class CorgiActivityController extends BaseController {
         List<? extends CorgiActivity> result;
         if (CorgiActivity.CREATED.equals(status)) {
             if (hasVersion()) {
-                result = convertUserActivityDetail(corgiActivityService.getUserAllRunningActivity(userId, page, pageSize));
+                result = aliyunGreenService.convertUserActivityDetail(corgiActivityService.getUserAllRunningActivity(userId, page, pageSize));
             } else {
                 result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
             }
@@ -726,25 +726,6 @@ public class CorgiActivityController extends BaseController {
         return likedActivities;
     }
 
-    private List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList) {
-        List<CorgiActivityDetail> detailList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(activityList)) {
-            for (CorgiActivity activity : activityList) {
-                Integer height = 0;
-                Integer width = 0;
-                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
-                    String picUrl = activity.getPics().get(0).getPicUrl();
-                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                    height = picInfo.getHeight();
-                    width = picInfo.getWidth();
-                }
-                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
-                        .initSize(height, width);
-                detailList.add(detail);
-            }
-        }
-        return detailList;
-    }
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
