@@ -368,23 +368,6 @@ public class CorgiUserController extends BaseController {
             throw new PermissionException(Constants.PERMISSION_ERROR_CODE, e.getMessage());
         }
         corgiUserService.updateUserPosition(userPosition);
-//        String key = "sentMatch_" + userPosition.getUserId();
-//        String matchTime = redisTemplate.opsForValue().get(key);
-//        if (StringUtils.isEmpty(matchTime)) {
-//            String nowTime = System.currentTimeMillis() + "";
-//            HashMap extra = new HashMap();
-//            extra.put("lat", userPosition.getLat());
-//            extra.put("lng", userPosition.getLng());
-//            extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
-//            extra.put("userId", userPosition.getUserId());
-//            mqService.sendMessage(PushMessage.builder()
-//                    .type(PushMessage.MATCH)
-//                    .message(PushMessage.MATCH_90_MESSAGE)
-//                    .sourceUserId(userPosition.getUserId())
-//                    .extra(extra)
-//                    .build());
-//            redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
-//        }
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userPosition.getUserId())
                 .option(TraceFollow.COUNT)

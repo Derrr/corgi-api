@@ -1,13 +1,11 @@
 package com.corgi.entity;
 
 import com.corgi.activity.entity.CorgiActivity;
-import com.corgi.user.entity.ActivityComment;
-import com.corgi.user.entity.ActivityLike;
-import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserPic;
+import com.corgi.user.entity.*;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,6 +26,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private ActivityComment lastComment;
     private Integer signUpCount;
     private List<ActivityLike> likeUsers;
+    private List<SignUpUser> signUpUsers;
 
     public CorgiActivityDetail() {
         super();
@@ -45,22 +44,22 @@ public class CorgiActivityDetail extends CorgiActivity {
         return this;
     }
 
-    public CorgiActivityDetail initCommentCount(Long commentCount){
+    public CorgiActivityDetail initCommentCount(Long commentCount) {
         this.commentCount = commentCount;
         return this;
     }
 
-    public CorgiActivityDetail initLikeCount(Long likeCount){
+    public CorgiActivityDetail initLikeCount(Long likeCount) {
         this.likeCount = likeCount;
         return this;
     }
 
-    public CorgiActivityDetail initLikeUsers(List<ActivityLike> likeUsers){
+    public CorgiActivityDetail initLikeUsers(List<ActivityLike> likeUsers) {
         this.likeUsers = likeUsers;
         return this;
     }
 
-    public CorgiActivityDetail hasLike(Integer hasLike){
+    public CorgiActivityDetail hasLike(Integer hasLike) {
         this.hasLike = hasLike;
         return this;
     }
@@ -84,6 +83,18 @@ public class CorgiActivityDetail extends CorgiActivity {
 
     public CorgiActivityDetail initSimilarActivity(List<CorgiActivityDetail> similarActivity) {
         this.similarActivity = similarActivity;
+        return this;
+    }
+
+    public CorgiActivityDetail initSignUpUsers(List<UserProfile> userProfiles) {
+        this.signUpUsers = new ArrayList<>();
+        for (UserProfile userProfile : userProfiles) {
+            signUpUsers.add(SignUpUser.builder()
+                    .signUpUserId(userProfile.getUserId())
+                    .signUpUserName(userProfile.getNickname())
+                    .signUpUserAvatar(userProfile.getPics().get(0).getPicUrl())
+                    .build());
+        }
         return this;
     }
 }

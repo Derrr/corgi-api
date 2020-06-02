@@ -611,6 +611,13 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(result);
     }
 
+    @GetMapping("get_user_running_activity")
+    public JsonResult getUserRunningActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<CorgiActivity> result = corgiActivityService.getUserAllRunningActivity(userId, page, pageSize);
+        return new JsonResult(result);
+    }
+
+
     @GetMapping("/delete_activity_pic")
     public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
         String result = corgiPicService.deleteActivityPic(picId);
@@ -744,6 +751,12 @@ public class CorgiActivityController extends BaseController {
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 Integer signUpCount = corgiUserActivityService.countUsers(activity.getId(), null);
+                List<UserProfile> signUpUsers = new ArrayList<>();
+                if (signUpCount != null && signUpCount > 0 && signUpCount <= 3) {
+                    signUpUsers = corgiUserActivityService.getUsers(activity.getId(), null, null);
+                } else if (signUpCount != null && signUpCount > 3) {
+                    signUpUsers = corgiUserActivityService.getPopularUsers(activity.getId(), null);
+                }
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
@@ -754,6 +767,7 @@ public class CorgiActivityController extends BaseController {
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
+                        .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
                 detail.setLastComment(activityComment);
                 detail.setSignUpCount(signUpCount);
