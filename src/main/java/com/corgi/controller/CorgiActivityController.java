@@ -597,9 +597,9 @@ public class CorgiActivityController extends BaseController {
         List<? extends CorgiActivity> result;
         if (CorgiActivity.CREATED.equals(status)) {
             if (hasVersion()) {
-                result = corgiActivityService.getUserAllRunningActivity(userId, page, pageSize);
+                result = convertUserActivityDetail(corgiActivityService.getUserAllRunningActivity(userId, page, pageSize));
             } else {
-                result = convertUserActivityDetail(corgiActivityService.getUserRunningActivity(userId, page, pageSize));
+                result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
             }
         } else {
             if (hasVersion()) {
