@@ -179,8 +179,8 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_likes")
-    public JsonResult getLike(@RequestParam("activityId") String activityId) {
-        List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId);
+    public JsonResult getLike(@RequestParam("activityId") String activityId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId, page, pageSize);
         return new JsonResult(activityLikes);
     }
 
