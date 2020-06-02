@@ -413,6 +413,19 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(result);
     }
 
+    @GetMapping("get_match_factor2")
+    public JsonResult getMatchFactor2(@RequestParam("table") String table) {
+        List<String> result = redisTemplate.opsForList().range("match_factor_" + table, 0, -1);
+        return new JsonResult(result);
+    }
+
+    @GetMapping("set_match_factor2")
+    public JsonResult setMatchFactor2(@RequestParam("value") List<String> value, @RequestParam("table") String table) {
+        redisTemplate.opsForList().rightPushAll("match_factor_" + table, value);
+        return new JsonResult();
+    }
+
+
     @GetMapping("update_match_factor")
     public JsonResult updateMatchFactor(@RequestParam Map<String, String> result) {
         String table = result.get("table");
