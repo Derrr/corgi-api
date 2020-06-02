@@ -594,12 +594,12 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam(name = "status", required = false) String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<CorgiActivity> result = new ArrayList<>();
+        List<? extends CorgiActivity> result;
         if (CorgiActivity.CREATED.equals(status)) {
             if (hasVersion()) {
                 result = corgiActivityService.getUserAllRunningActivity(userId, page, pageSize);
             } else {
-                result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
+                result = convertUserActivityDetail(corgiActivityService.getUserRunningActivity(userId, page, pageSize));
             }
         } else {
             if (hasVersion()) {
@@ -724,6 +724,26 @@ public class CorgiActivityController extends BaseController {
             likedActivities.add(likedActivity);
         }
         return likedActivities;
+    }
+
+    private List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList) {
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(activityList)) {
+            for (CorgiActivity activity : activityList) {
+                Integer height = 0;
+                Integer width = 0;
+                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
+                    String picUrl = activity.getPics().get(0).getPicUrl();
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    height = picInfo.getHeight();
+                    width = picInfo.getWidth();
+                }
+                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
+                        .initSize(height, width);
+                detailList.add(detail);
+            }
+        }
+        return detailList;
     }
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
