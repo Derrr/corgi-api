@@ -406,6 +406,12 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(userProfiles);
     }
 
+    @GetMapping("/get_all_nearby_user")
+    public JsonResult getAllNearbyUser(UserQuery userQuery) {
+        List<UserProfile> userProfiles = corgiUserService.getAllNearByUserProfile(userQuery);
+        return new JsonResult(userProfiles);
+    }
+
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
         Random random = new Random();
