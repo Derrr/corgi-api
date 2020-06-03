@@ -1,6 +1,11 @@
 package com.corgi.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.entity.PicInfo;
+import com.corgi.user.api.CorgiLikeService;
+import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -16,14 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -36,11 +40,15 @@ public class CorgiUtilService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
+    @Reference
+    private CorgiLikeService corgiLikeService;
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
     @PostConstruct
-    public void init(){
+    public void init() {
         poolConnManager.setMaxTotal(2000);
         poolConnManager.setDefaultMaxPerRoute(1000);
     }
@@ -127,5 +135,29 @@ public class CorgiUtilService {
         if (id != null && value.get().equals(id)) {
             redisTemplate.delete(key);
         }
+    }
+
+    public List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList, String userId) {
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(activityList)) {
+            for (CorgiActivity activity : activityList) {
+                Integer height = 0;
+                Integer width = 0;
+                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
+                    String picUrl = activity.getPics().get(0).getPicUrl();
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    height = picInfo.getHeight();
+                    width = picInfo.getWidth();
+                }
+                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
+                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
+                        .initSize(height, width);
+                detail.setHasLike(hasLike);
+                detail.setLikeCount(likeCount);
+                detailList.add(detail);
+            }
+        }
+        return detailList;
     }
 }

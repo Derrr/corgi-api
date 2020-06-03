@@ -8,6 +8,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.BarProfile;
@@ -31,7 +32,7 @@ public class CorgiBarController extends BaseController {
     @Reference
     private CorgiActivityService corgiActivityService;
     @Autowired
-    private AliyunGreenService aliyunGreenService;
+    private CorgiUtilService corgiUtilService;
 
     @PostMapping("add_bar_activity")
     public JsonResult addBarActivity(@RequestBody CorgiActivity corgiActivity) {
@@ -58,7 +59,7 @@ public class CorgiBarController extends BaseController {
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setStatus(CorgiActivity.CREATED);
         corgiActivity.setUserId(barId);
-        List<CorgiActivityDetail> corgiActivities = aliyunGreenService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity));
+        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
         return new JsonResult(corgiActivities);
     }
 

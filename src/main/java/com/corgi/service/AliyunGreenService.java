@@ -389,23 +389,4 @@ public class AliyunGreenService {
         return activity;
     }
 
-    public List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList) {
-        List<CorgiActivityDetail> detailList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(activityList)) {
-            for (CorgiActivity activity : activityList) {
-                Integer height = 0;
-                Integer width = 0;
-                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
-                    String picUrl = activity.getPics().get(0).getPicUrl();
-                    PicInfo picInfo = this.getAliyunPicInfo(picUrl);
-                    height = picInfo.getHeight();
-                    width = picInfo.getWidth();
-                }
-                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
-                        .initSize(height, width);
-                detailList.add(detail);
-            }
-        }
-        return detailList;
-    }
 }
