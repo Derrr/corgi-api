@@ -1,11 +1,11 @@
 package com.corgi.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.PicInfo;
 import com.corgi.user.api.CorgiLikeService;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
