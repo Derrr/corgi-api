@@ -212,6 +212,12 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(activityMessages);
     }
 
+    @GetMapping("get_is_like")
+    public JsonResult getIsLike(@RequestParam("activityId") String activityId) {
+        Integer isLike = corgiLikeService.countUserLike(activityId, getUserId());
+        return new JsonResult(isLike);
+    }
+
 
     @GetMapping("count_activity_message")
     public JsonResult countActivityMessage() {
