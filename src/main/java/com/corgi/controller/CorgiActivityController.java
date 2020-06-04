@@ -215,8 +215,16 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("count_activity_message")
     public JsonResult countActivityMessage() {
+        ActivityMessageCount messageCount = new ActivityMessageCount();
         Long count = corgiToolService.countActivityMessage(getUserId());
-        return new JsonResult(count);
+        messageCount.setCount(count);
+        if (count != null && count > 0) {
+            ActivityMessage activityMessage = corgiToolService.getLastActivityMessage(getUserId());
+            if (activityMessage != null && activityMessage.getFromUserAvatar() != null) {
+                messageCount.setPicUrl(activityMessage.getFromUserAvatar());
+            }
+        }
+        return new JsonResult(messageCount);
     }
 
     @GetMapping("delete_activity_message")
