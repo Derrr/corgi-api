@@ -133,7 +133,7 @@ public class CorgiActivityController extends BaseController {
         corgiCommentService.addActivityComment(activityComment);
         HashMap extra = new HashMap();
         extra.put("activityId", activityComment.getActivityId());
-        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+        extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.DEFAULT)
                 .sourceUserId(activityComment.getCommentUserId())
@@ -155,7 +155,7 @@ public class CorgiActivityController extends BaseController {
         corgiLikeService.addActivityLike(activityLike);
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
-        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+        extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.DEFAULT)
                 .sourceUserId(activityLike.getLikeUserId())
