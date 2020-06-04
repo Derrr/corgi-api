@@ -403,8 +403,12 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_influencer")
-    public JsonResult getInfluencer() {
-        return new JsonResult(corgiToolService.getInfluencer());
+    public JsonResult getInfluencer(@RequestParam(name = "userId", required = false) String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            return new JsonResult(corgiToolService.getInfluencer());
+        } else {
+            return new JsonResult(corgiToolService.getCountByUser(userId));
+        }
     }
 
     @GetMapping("get_match_factor")
