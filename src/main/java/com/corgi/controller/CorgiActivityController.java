@@ -201,10 +201,17 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_activity_message")
-    public JsonResult getActivityMessage() {
-        List<ActivityMessage> activityMessages = corgiToolService.getActivityMessage(getUserId());
+    public JsonResult getActivityMessage(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<ActivityMessage> activityMessages = corgiToolService.getActivityMessage(getUserId(), page, pageSize);
         return new JsonResult(activityMessages);
     }
+
+    @GetMapping("get_all_activity_message")
+    public JsonResult getAllActivityMessage(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<ActivityMessage> activityMessages = corgiToolService.getAllActivityMessage(getUserId(), page, pageSize);
+        return new JsonResult(activityMessages);
+    }
+
 
     @GetMapping("count_activity_message")
     public JsonResult countActivityMessage() {
