@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.PicInfo;
+import com.corgi.user.api.CorgiCommentService;
 import com.corgi.user.api.CorgiLikeService;
+import com.corgi.user.entity.ActivityComment;
+import com.corgi.user.entity.ActivityLike;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -44,6 +47,8 @@ public class CorgiUtilService {
     private AliyunGreenService aliyunGreenService;
     @Reference
     private CorgiLikeService corgiLikeService;
+    @Reference
+    private CorgiCommentService corgiCommentService;
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -151,10 +156,14 @@ public class CorgiUtilService {
                 }
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
+                List<ActivityLike> activityLikes = corgiLikeService.getFollowUser(userId, activity.getId());
+                ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), userId);
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width);
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
+                detail.setLikeUsers(activityLikes);
+                detail.setLastComment(activityComment);
                 detailList.add(detail);
             }
         }
