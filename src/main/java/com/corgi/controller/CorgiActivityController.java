@@ -634,7 +634,7 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_user_running_activity")
     public JsonResult getUserRunningActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<CorgiActivity> result = corgiActivityService.getUserAllRunningActivity(userId, page, pageSize);
+        List<CorgiActivity> result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
         return new JsonResult(result);
     }
 
