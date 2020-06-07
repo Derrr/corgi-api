@@ -91,7 +91,7 @@ public class CorgiActivityController extends BaseController {
             Iterator<CorgiActivity> it = corgiActivities.iterator();
             while (it.hasNext()) {
                 CorgiActivity corgiActivity = it.next();
-                if(corgiActivity.getId().equals(activity.getId())){
+                if (corgiActivity.getId().equals(activity.getId())) {
                     it.remove();
                 }
             }
@@ -143,13 +143,25 @@ public class CorgiActivityController extends BaseController {
         HashMap extra = new HashMap();
         extra.put("activityId", activityComment.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.DEFAULT)
-                .sourceUserId(activityComment.getCommentUserId())
-                .targetUserId(activityComment.getUserId())
-                .message(PushMessage.NEW_MESSAGE)
-                .extra(extra)
-                .build());
+        if (!activityComment.getUserId().equals(activityComment.getCommentUserId())) {
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.DEFAULT)
+                    .sourceUserId(activityComment.getCommentUserId())
+                    .targetUserId(activityComment.getUserId())
+                    .message(PushMessage.NEW_MESSAGE)
+                    .extra(extra)
+                    .build());
+        }
+        if (!StringUtils.isEmpty(activityComment.getReplyUserId())
+                && !activityComment.getReplyUserId().equals(activityComment.getCommentUserId())) {
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.DEFAULT)
+                    .sourceUserId(activityComment.getCommentUserId())
+                    .targetUserId(activityComment.getReplyUserId())
+                    .message(PushMessage.NEW_MESSAGE)
+                    .extra(extra)
+                    .build());
+        }
         return new JsonResult();
     }
 
@@ -165,19 +177,27 @@ public class CorgiActivityController extends BaseController {
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.DEFAULT)
-                .sourceUserId(activityLike.getLikeUserId())
-                .targetUserId(activityLike.getUserId())
-                .message(PushMessage.NEW_MESSAGE)
-                .extra(extra)
-                .build());
+        if (!activityLike.getUserId().equals(activityLike.getLikeUserId().equals(activityLike.getLikeUserId()))) {
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.DEFAULT)
+                    .sourceUserId(activityLike.getLikeUserId())
+                    .targetUserId(activityLike.getUserId())
+                    .message(PushMessage.NEW_MESSAGE)
+                    .extra(extra)
+                    .build());
+        }
         return new JsonResult();
     }
 
     @GetMapping("unlike")
     public JsonResult unlike(@RequestParam("activityId") String activityId) {
         corgiLikeService.deleteActivityLike(getUserId(), activityId);
+        return new JsonResult();
+    }
+
+    @GetMapping("delete_comment")
+    public JsonResult deleteComment(@RequestParam("commentId") String commentId) {
+        corgiCommentService.deleteActivityComment(commentId);
         return new JsonResult();
     }
 
@@ -519,7 +539,7 @@ public class CorgiActivityController extends BaseController {
             Iterator<CorgiActivity> it = similarActivities.iterator();
             while (it.hasNext()) {
                 CorgiActivity corgiActivity = it.next();
-                if(activityId.equals(corgiActivity.getId())){
+                if (activityId.equals(corgiActivity.getId())) {
                     it.remove();
                 }
             }
