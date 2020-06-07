@@ -87,6 +87,15 @@ public class CorgiActivityController extends BaseController {
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            Iterator<CorgiActivity> it = corgiActivities.iterator();
+            while (it.hasNext()) {
+                CorgiActivity corgiActivity = it.next();
+                if(corgiActivity.getId().equals(activity.getId())){
+                    it.remove();
+                }
+            }
+        }
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
@@ -506,6 +515,15 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity activity = corgiActivities.get(0);
         CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
         List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
+        if (CollectionUtils.isEmpty(similarActivities)) {
+            Iterator<CorgiActivity> it = similarActivities.iterator();
+            while (it.hasNext()) {
+                CorgiActivity corgiActivity = it.next();
+                if(activityId.equals(corgiActivity.getId())){
+                    it.remove();
+                }
+            }
+        }
         List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
         detail.setSimilarActivity(similarActivity);
         return new JsonResult(detail);
