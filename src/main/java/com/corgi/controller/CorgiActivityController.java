@@ -602,7 +602,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
             detailList.sort(detailComparator);
-        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort()) || StringUtils.isEmpty(activityQuery.getSort())) {
             detailList.sort(timeComparator);
         }
         mqService.sendTrace(TraceFollow.builder()
