@@ -67,7 +67,11 @@ public class CorgiActivityController extends BaseController {
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
-    private static Comparator<CorgiActivityDetail> timeComparator = Comparator.comparing(CorgiActivity::getSignUpTime);
+    private static Comparator<CorgiActivityDetail> timeComparator = (a1, a2) -> {
+        String c1 = a1.getCreateTime() == null ? "" : a1.getCreateTime();
+        String c2 = a2.getCreateTime() == null ? "" : a2.getCreateTime();
+        return c2.compareTo(c1);
+    };
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
