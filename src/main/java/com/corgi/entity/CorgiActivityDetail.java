@@ -1,5 +1,6 @@
 package com.corgi.entity;
 
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.*;
 import lombok.Data;
@@ -92,7 +93,7 @@ public class CorgiActivityDetail extends CorgiActivity {
             signUpUsers.add(SignUpUser.builder()
                     .signUpUserId(userProfile.getUserId())
                     .signUpUserName(userProfile.getNickname())
-                    .signUpUserAvatar(userProfile.getPics().get(0).getPicUrl())
+                    .signUpUserAvatar(CollectionUtils.isEmpty(userProfile.getPics()) ? "" : userProfile.getPics().get(0).getPicUrl())
                     .build());
         }
         return this;
