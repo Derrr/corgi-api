@@ -91,7 +91,7 @@ public class CorgiActivityController extends BaseController {
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
-        if (CollectionUtils.isEmpty(corgiActivities)) {
+        if (!CollectionUtils.isEmpty(corgiActivities)) {
             Iterator<CorgiActivity> it = corgiActivities.iterator();
             while (it.hasNext()) {
                 CorgiActivity corgiActivity = it.next();
@@ -539,7 +539,7 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity activity = corgiActivities.get(0);
         CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
         List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
-        if (CollectionUtils.isEmpty(similarActivities)) {
+        if (!CollectionUtils.isEmpty(similarActivities)) {
             Iterator<CorgiActivity> it = similarActivities.iterator();
             while (it.hasNext()) {
                 CorgiActivity corgiActivity = it.next();
