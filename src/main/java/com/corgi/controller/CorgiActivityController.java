@@ -67,7 +67,11 @@ public class CorgiActivityController extends BaseController {
 
     private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 
-    private static Comparator<CorgiActivityDetail> timeComparator = Comparator.comparing(CorgiActivity::getSignUpTime);
+    private static Comparator<CorgiActivityDetail> timeComparator = (a1, a2) -> {
+        String c1 = a1.getCreateTime() == null ? "" : a1.getCreateTime();
+        String c2 = a2.getCreateTime() == null ? "" : a2.getCreateTime();
+        return c2.compareTo(c1);
+    };
 
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
@@ -87,6 +91,15 @@ public class CorgiActivityController extends BaseController {
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            Iterator<CorgiActivity> it = corgiActivities.iterator();
+            while (it.hasNext()) {
+                CorgiActivity corgiActivity = it.next();
+                if (corgiActivity.getId().equals(activity.getId())) {
+                    it.remove();
+                }
+            }
+        }
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
@@ -506,6 +519,15 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity activity = corgiActivities.get(0);
         CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
         List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
+        if (CollectionUtils.isEmpty(similarActivities)) {
+            Iterator<CorgiActivity> it = similarActivities.iterator();
+            while (it.hasNext()) {
+                CorgiActivity corgiActivity = it.next();
+                if (activityId.equals(corgiActivity.getId())) {
+                    it.remove();
+                }
+            }
+        }
         List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
         detail.setSimilarActivity(similarActivity);
         return new JsonResult(detail);
@@ -602,7 +624,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
             detailList.sort(detailComparator);
-        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort())) {
+        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort()) || StringUtils.isEmpty(activityQuery.getSort())) {
             detailList.sort(timeComparator);
         }
         mqService.sendTrace(TraceFollow.builder()
@@ -634,7 +656,7 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_user_running_activity")
     public JsonResult getUserRunningActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<CorgiActivity> result = corgiActivityService.getUserAllRunningActivity(userId, page, pageSize);
+        List<CorgiActivity> result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
         return new JsonResult(result);
     }
 
