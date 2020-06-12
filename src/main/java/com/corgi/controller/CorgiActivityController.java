@@ -124,13 +124,13 @@ public class CorgiActivityController extends BaseController {
         if (redisTemplate.hasKey("activity_sent_" + activity.getUserId())) {
             return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
         }
+        redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 2L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkImageActivity(activity);
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 1L, TimeUnit.SECONDS);
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 
