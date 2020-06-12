@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -120,12 +121,16 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
+        if (redisTemplate.hasKey("activity_sent_" + activity.getUserId())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
+        }
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkImageActivity(activity);
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
+        redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 1L, TimeUnit.SECONDS);
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 
