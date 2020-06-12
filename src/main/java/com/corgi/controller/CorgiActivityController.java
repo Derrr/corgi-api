@@ -148,7 +148,7 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activityComment.setCommentUserId(getUserId());
         }
-        corgiCommentService.addActivityComment(activityComment);
+        activityComment = corgiCommentService.addActivityComment(activityComment);
         HashMap extra = new HashMap();
         extra.put("activityId", activityComment.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
@@ -171,7 +171,7 @@ public class CorgiActivityController extends BaseController {
                     .extra(extra)
                     .build());
         }
-        return new JsonResult();
+        return new JsonResult(activityComment);
     }
 
     @PostMapping("like")
