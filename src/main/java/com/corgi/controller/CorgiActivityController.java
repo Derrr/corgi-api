@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -73,7 +74,8 @@ public class CorgiActivityController extends BaseController {
         return c2.compareTo(c1);
     };
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    //private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    //private static SimpleDateFormat sdf_simple = new SimpleDateFormat("yyyy/MM/dd");
 
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
@@ -115,6 +117,54 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
     }
 
+    @PostMapping("attend")
+    public JsonResult attend(@RequestBody CorgiActivity activity) {
+        if (hasUserId()) {
+            activity.setUserId(getUserId());
+        }
+        if (redisTemplate.hasKey("activity_attended_" + activity.getUserId())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
+        }
+        String now = System.currentTimeMillis() + "";
+        redisTemplate.opsForValue().set("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS);
+        corgiUtilService.lock("attending_" + activity.getUserId());
+        try {
+
+            CorgiActivity searchActivity = new CorgiActivity();
+            searchActivity.setUserId(activity.getUserId());
+            searchActivity.setBarId(activity.getBarId());
+            searchActivity.setCreateTime(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
+            searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+            List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, 1, 1);
+            if (!CollectionUtils.isEmpty(result)) {
+                return new JsonResult(AddActivityResult.getResult(result.get(0)), Constants.API_ERROR_CODE, "今天已经打过卡啦");
+            }
+
+            activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+            activity.setCheckStatus(AliyunGreenService.PASS);
+            activity = aliyunGreenService.checkImageActivity(activity);
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
+            if (!checkActivityPic(activityPics)) {
+                activity.setCheckStatus(AliyunGreenService.CHECK);
+            }
+            activity.setPics(activityPics);
+            activity = corgiActivityService.addCorgiActivity(activity);
+        } finally {
+            corgiUtilService.unlock("attending_" + activity.getUserId());
+        }
+        return new JsonResult(AddActivityResult.getResult(activity));
+    }
+
+    @GetMapping("get_attendances")
+    public JsonResult getAttendance(@RequestParam("date") String date, @RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        CorgiActivity search = new CorgiActivity();
+        search.setBarId(barId);
+        search.setCreateTime(date);
+        List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, page, pageSize);
+        return new JsonResult(corgiActivities);
+    }
+
+
     @PostMapping("add_image_activity")
     public JsonResult addImageActivity(@RequestBody CorgiActivity activity) {
         if (hasUserId()) {
@@ -124,6 +174,9 @@ public class CorgiActivityController extends BaseController {
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkImageActivity(activity);
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
+        if (!checkActivityPic(activityPics)) {
+            activity.setCheckStatus(AliyunGreenService.CHECK);
+        }
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         return new JsonResult(AddActivityResult.getResult(activity));
@@ -792,7 +845,7 @@ public class CorgiActivityController extends BaseController {
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
-        String now = sdf.format(new Date());
+        String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 activity.setCurrentTime(now);
@@ -850,6 +903,18 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityList)) {
             CorgiActivity activity = activityList.get(0);
             return userId.equals(activity.getUserId());
+        }
+        return true;
+    }
+
+    private boolean checkActivityPic(List<ActivityPic> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return true;
+        }
+        for (CorgiPic pic : list) {
+            if ("check".equals(pic.getStatus())) {
+                return false;
+            }
         }
         return true;
     }
