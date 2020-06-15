@@ -421,13 +421,18 @@ public class CorgiUserController extends BaseController {
         HttpServletRequest hrequest = sra.getRequest();
         String ip = IPUtil.getIpAddr(hrequest);
         String port = IPUtil.getPort(hrequest);
+        String telKey = "tel_" + telNo;
+        if(redisTemplate.hasKey(telKey)){
+            return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁");
+        }
         String ipKey = "ip_tel_" + ip;
         String tel = redisTemplate.opsForValue().get(ipKey);
         if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
             log.info("duplicate ip...{}:{} tel:{}   ", ip, port, telNo);
-            return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁了");
+            return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁了哦");
         }
-        redisTemplate.opsForValue().set(ipKey, telNo, 50, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(ipKey, telNo, 5, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set("tel_" + telNo, telNo, 50, TimeUnit.SECONDS);
         String code = "";
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
