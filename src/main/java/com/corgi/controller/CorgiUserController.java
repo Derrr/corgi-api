@@ -414,7 +414,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
-        log.info("sending code to: {}", telNo);
+        log.info("sending code to: {}  ", telNo);
         Random random = new Random();
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
