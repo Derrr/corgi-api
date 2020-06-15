@@ -170,6 +170,10 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
+        if (redisTemplate.hasKey("activity_sent_" + activity.getUserId())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
+        }
+        redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 2L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkImageActivity(activity);
@@ -196,7 +200,7 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activityComment.setCommentUserId(getUserId());
         }
-        corgiCommentService.addActivityComment(activityComment);
+        activityComment = corgiCommentService.addActivityComment(activityComment);
         HashMap extra = new HashMap();
         extra.put("activityId", activityComment.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
@@ -219,7 +223,7 @@ public class CorgiActivityController extends BaseController {
                     .extra(extra)
                     .build());
         }
-        return new JsonResult();
+        return new JsonResult(activityComment);
     }
 
     @PostMapping("like")
