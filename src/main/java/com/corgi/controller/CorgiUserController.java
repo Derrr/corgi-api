@@ -414,12 +414,17 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
+        log.info("sending code to: {}  ", telNo);
         Random random = new Random();
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
         HttpServletRequest hrequest = sra.getRequest();
         String ip = IPUtil.getIpAddr(hrequest);
         String port = IPUtil.getPort(hrequest);
+        String telKey = "tel_" + telNo;
+        if(redisTemplate.hasKey(telKey)){
+            return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁");
+        }
         String ipKey = "ip_tel_" + ip;
         String lastTel = redisTemplate.opsForValue().get("tel_" + telNo);
         if (StringUtils.isNotEmpty(lastTel)) {
@@ -431,7 +436,7 @@ public class CorgiUserController extends BaseController {
             log.info("duplicate ip...{}:{} tel:{}   ", ip, port, telNo);
             return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁");
         }
-        redisTemplate.opsForValue().set(ipKey, telNo, 50, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(ipKey, telNo, 5, TimeUnit.SECONDS);
         redisTemplate.opsForValue().set("tel_" + telNo, telNo, 50, TimeUnit.SECONDS);
         String code = "";
         for (int i = 0; i < 4; i++) {
