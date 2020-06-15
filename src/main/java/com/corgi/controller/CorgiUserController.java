@@ -425,13 +425,14 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isNotEmpty(lastTel)) {
             return new JsonResult(Constants.API_ERROR_CODE, "不要发送太频繁了哦");
         }
-        redisTemplate.opsForValue().set("tel_" + telNo, telNo, 50, TimeUnit.SECONDS);
+
         String tel = redisTemplate.opsForValue().get(ipKey);
         if (StringUtils.isNotEmpty(tel) && !tel.equals(telNo)) {
             log.info("duplicate ip...{}:{} tel:{}   ", ip, port, telNo);
             return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁");
         }
         redisTemplate.opsForValue().set(ipKey, telNo, 50, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set("tel_" + telNo, telNo, 50, TimeUnit.SECONDS);
         String code = "";
         for (int i = 0; i < 4; i++) {
             code += random.nextInt(10);
