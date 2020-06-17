@@ -25,7 +25,7 @@ public class AddActivityResult extends CorgiActivity {
         return this;
     }
 
-    public AddActivityResult setCount(long count){
+    public AddActivityResult setCount(long count) {
         this.activityCount = count;
         return this;
     }

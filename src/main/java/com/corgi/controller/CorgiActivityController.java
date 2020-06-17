@@ -8,6 +8,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
 import com.corgi.entity.*;
+import com.corgi.entity.tool.AddAttendResult;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
@@ -125,34 +126,34 @@ public class CorgiActivityController extends BaseController {
         if (redisTemplate.hasKey("activity_attended_" + activity.getUserId())) {
             return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
         }
+        Integer addResult = -1;
         String now = System.currentTimeMillis() + "";
         redisTemplate.opsForValue().set("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS);
         corgiUtilService.lock("attending_" + activity.getUserId());
         try {
-
             CorgiActivity searchActivity = new CorgiActivity();
             searchActivity.setUserId(activity.getUserId());
             searchActivity.setBarId(activity.getBarId());
             searchActivity.setCreateTime(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
             searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
             List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, 1, 1);
-            if (!CollectionUtils.isEmpty(result)) {
-                return new JsonResult(AddActivityResult.getResult(result.get(0)), Constants.API_ERROR_CODE, "今天已经打过卡啦");
+            if (CollectionUtils.isEmpty(result)) {
+                activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+                activity.setCheckStatus(AliyunGreenService.PASS);
+                activity = aliyunGreenService.checkImageActivity(activity);
+                activity = corgiActivityService.addCorgiActivity(activity);
+                addResult = 0;
+            } else {
+                CorgiActivity corgiActivity = result.get(0);
+                addResult = 1;
+                if (!CollectionUtils.isEmpty(corgiActivity.getPics())) {
+                    addResult = 2;
+                }
             }
-
-            activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
-            activity.setCheckStatus(AliyunGreenService.PASS);
-            activity = aliyunGreenService.checkImageActivity(activity);
-            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
-            if (!checkActivityPic(activityPics)) {
-                activity.setCheckStatus(AliyunGreenService.CHECK);
-            }
-            activity.setPics(activityPics);
-            activity = corgiActivityService.addCorgiActivity(activity);
         } finally {
             corgiUtilService.unlock("attending_" + activity.getUserId());
         }
-        return new JsonResult(AddActivityResult.getResult(activity));
+        return new JsonResult(AddAttendResult.getResult(activity, addResult));
     }
 
     @GetMapping("get_attendances")
@@ -747,8 +748,12 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("/add_activity_pic")
     public JsonResult addUserPic(@RequestBody ActivityPic activityPic) {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic), activityPic.getActivityId(), CheckPic.ACTIVITY);
-        String result = corgiPicService.addActivityPic(activityPics.get(0));
+        ActivityPic pic = activityPics.get(0);
+        String result = corgiPicService.addActivityPic(pic);
         activityPic.setPicId(result);
+        CorgiActivity updateActivity = new CorgiActivity();
+        updateActivity.setId(pic.getActivityId());
+        updateActivity.setCheckStatus(pic.getStatus());
         return new JsonResult(activityPic);
     }
 
