@@ -12,12 +12,12 @@ import java.util.List;
  */
 @Data
 public class AddAttendResult extends CorgiActivity {
-    private Integer addResult;
+    private Integer attendResult;
 
     public static AddAttendResult getResult(CorgiActivity corgiActivity, Integer addResult) {
         AddAttendResult result = new AddAttendResult();
         BeanUtils.copyProperties(corgiActivity, result);
-        result.setAddResult(addResult);
+        result.setAttendResult(addResult);
         return result;
     }
 }

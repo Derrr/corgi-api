@@ -157,12 +157,25 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_attendances")
-    public JsonResult getAttendance(@RequestParam("date") String date, @RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getAttendance(@RequestParam(name = "date", required = false) String date, @RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         CorgiActivity search = new CorgiActivity();
         search.setBarId(barId);
-        search.setCreateTime(date);
+        if (!StringUtils.isEmpty(date)) {
+            search.setCreateTime(date);
+        }
         List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, page, pageSize);
         return new JsonResult(corgiActivities);
+    }
+
+    @GetMapping("get_heat_attendances")
+    public JsonResult getHeatAttendance(@RequestParam("barId") String barId) {
+        CorgiActivity search = new CorgiActivity();
+        search.setBarId(barId);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -7);
+        search.setCreateTime(new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
+        List<String> activityIds = corgiUserActivityService.getHeatActivity(search, 1, 18);
+        return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
     }
 
 
