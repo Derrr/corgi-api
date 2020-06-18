@@ -144,9 +144,9 @@ public class CorgiActivityController extends BaseController {
                 activity = corgiActivityService.addCorgiActivity(activity);
                 addResult = 0;
             } else {
-                CorgiActivity corgiActivity = result.get(0);
+                activity = result.get(0);
                 addResult = 1;
-                if (!CollectionUtils.isEmpty(corgiActivity.getPics())) {
+                if (!CollectionUtils.isEmpty(activity.getPics())) {
                     addResult = 2;
                 }
             }
