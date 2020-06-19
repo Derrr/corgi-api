@@ -58,6 +58,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiShareService corgiShareService;
+    @Reference
+    private CorgiBarService corgiBarService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -871,10 +873,7 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 activity.setCurrentTime(now);
-                UserDetail userDetail = new UserDetail();
-                if (activity.getUserId() != null) {
-                    userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
-                }
+
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
@@ -899,7 +898,6 @@ public class CorgiActivityController extends BaseController {
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
-                        .initUserDetail(userDetail)
                         .initMatch(match)
                         .initSize(height, width)
                         .initSignUpStatus(signUp)
@@ -911,7 +909,17 @@ public class CorgiActivityController extends BaseController {
                 detail.setLastComment(activityComment);
                 detail.setSignUpCount(signUpCount);
                 detail.setShareCount(shareCount);
+                if (!StringUtils.isEmpty(detail.getBarId() != null)) {
+                    BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
+                    detail.setBarDetail(profile);
+                }
+                if (!StringUtils.isEmpty(activity.getUserId())) {
+                    UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
+                    detail.setUserDetail(userDetail);
+                }
+
                 detailList.add(detail);
+
             }
         }
         return detailList;

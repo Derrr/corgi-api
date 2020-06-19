@@ -16,6 +16,7 @@ import java.util.List;
 public class CorgiActivityDetail extends CorgiActivity {
     private List<CorgiActivityDetail> similarActivity;
     private UserDetail userDetail;
+    private BarProfile barDetail;
     private Integer signUpStatus;
     private Double match = 0.0;
     private Integer height = 0;
