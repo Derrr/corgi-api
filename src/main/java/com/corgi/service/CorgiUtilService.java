@@ -166,10 +166,6 @@ public class CorgiUtilService {
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width);
-                if (!StringUtils.isEmpty(detail.getBarId() != null)) {
-                    BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
-                    detail.setBarDetail(profile);
-                }
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
                 detail.setLikeUsers(activityLikes);
