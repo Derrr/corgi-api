@@ -5,10 +5,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.PicInfo;
+import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiCommentService;
 import com.corgi.user.api.CorgiLikeService;
 import com.corgi.user.entity.ActivityComment;
 import com.corgi.user.entity.ActivityLike;
+import com.corgi.user.entity.BarProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -25,6 +27,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -49,6 +52,8 @@ public class CorgiUtilService {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiCommentService corgiCommentService;
+    @Reference
+    private CorgiBarService corgiBarService;
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -161,6 +166,10 @@ public class CorgiUtilService {
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width);
+                if (!StringUtils.isEmpty(detail.getBarId() != null)) {
+                    BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
+                    detail.setBarDetail(profile);
+                }
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
                 detail.setLikeUsers(activityLikes);
