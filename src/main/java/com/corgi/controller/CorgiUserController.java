@@ -422,7 +422,7 @@ public class CorgiUserController extends BaseController {
         String ip = IPUtil.getIpAddr(hrequest);
         String port = IPUtil.getPort(hrequest);
         String telKey = "tel_" + telNo;
-        if(redisTemplate.hasKey(telKey)){
+        if (redisTemplate.hasKey(telKey)) {
             return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁");
         }
         String ipKey = "ip_tel_" + ip;
@@ -459,7 +459,7 @@ public class CorgiUserController extends BaseController {
         request.putQueryParameter("TemplateParam", "{\"code\":\"" + code + "\"}");
         try {
             CommonResponse response = client.getCommonResponse(request);
-            log.info(response.getData());
+            log.info(telNo + "-result:" + response.getData());
         } catch (ServerException e) {
             e.printStackTrace();
         } catch (ClientException e) {
