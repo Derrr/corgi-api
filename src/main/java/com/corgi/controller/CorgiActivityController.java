@@ -128,9 +128,9 @@ public class CorgiActivityController extends BaseController {
         if (redisTemplate.hasKey("activity_attended_" + activity.getUserId())) {
             return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
         }
-        Integer addResult = -1;
         String now = System.currentTimeMillis() + "";
         redisTemplate.opsForValue().set("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS);
+        Integer addResult = -1;
         corgiUtilService.lock("attending_" + activity.getUserId());
         try {
             CorgiActivity searchActivity = new CorgiActivity();
