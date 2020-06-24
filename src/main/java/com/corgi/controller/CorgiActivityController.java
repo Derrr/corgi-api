@@ -138,9 +138,7 @@ public class CorgiActivityController extends BaseController {
             searchActivity.setBarId(activity.getBarId());
             searchActivity.setCreateTime(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
             searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
-            List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, 1, 1);
-            long count = corgiActivityService.countCorgiActivity(searchActivity);
-            log.info("count attend... {},{} ", count,result.size());
+            List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, -1, 1);
             if (CollectionUtils.isEmpty(result)) {
                 activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
                 activity.setCheckStatus(AliyunGreenService.PASS);
