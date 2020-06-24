@@ -140,7 +140,7 @@ public class CorgiActivityController extends BaseController {
             searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
             List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, 1, 1);
             long count = corgiActivityService.countCorgiActivity(searchActivity);
-            log.info("count attend... {} ", count);
+            log.info("count attend... {},{} ", count,result.size());
             if (CollectionUtils.isEmpty(result)) {
                 activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
                 activity.setCheckStatus(AliyunGreenService.PASS);
