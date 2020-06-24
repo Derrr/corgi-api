@@ -35,6 +35,7 @@ public class CorgiSystemController extends BaseController {
 
     @PostMapping("update_system_message")
     public JsonResult updateSystemMessage(@RequestBody SystemMessage systemMessage) {
+        log.info("sent time...{} ", systemMessage.getSentTime());
         corgiSystemMessageService.updateSystemMessage(systemMessage);
         return new JsonResult();
     }
