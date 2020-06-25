@@ -852,7 +852,7 @@ public class CorgiActivityController extends BaseController {
             LikedActivity likedActivity = new LikedActivity();
             likedActivity.setActivityId(corgiActivity.getId());
             likedActivity.setCategory(corgiActivity.getCategory());
-            if (corgiActivity.getPics() != null && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
+            if (!CollectionUtils.isEmpty(corgiActivity.getPics()) && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
                 String picUrl = corgiActivity.getPics().get(0).getPicUrl();
                 likedActivity.setPicUrl(picUrl);
                 PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
