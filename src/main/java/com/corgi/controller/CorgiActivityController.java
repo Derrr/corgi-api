@@ -715,11 +715,6 @@ public class CorgiActivityController extends BaseController {
         activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-        if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
-            detailList.sort(detailComparator);
-        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort()) || StringUtils.isEmpty(activityQuery.getSort())) {
-            detailList.sort(timeComparator);
-        }
         mqService.sendTrace(TraceFollow.builder()
                 .userId(userId)
                 .option(TraceFollow.CHANGE)
