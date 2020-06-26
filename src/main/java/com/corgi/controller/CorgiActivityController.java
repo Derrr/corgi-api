@@ -761,15 +761,27 @@ public class CorgiActivityController extends BaseController {
     }
 
     @PostMapping("/add_activity_pic")
-    public JsonResult addUserPic(@RequestBody ActivityPic activityPic) {
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic), activityPic.getActivityId(), CheckPic.ACTIVITY);
-        ActivityPic pic = activityPics.get(0);
-        String result = corgiPicService.addActivityPic(pic);
-        activityPic.setPicId(result);
-        CorgiActivity updateActivity = new CorgiActivity();
-        updateActivity.setId(pic.getActivityId());
-        updateActivity.setCheckStatus(pic.getStatus());
-        return new JsonResult(activityPic);
+    public JsonResult addUserPic(@RequestBody List<ActivityPic> activityPics) {
+        if(CollectionUtils.isEmpty(activityPics) || activityPics.get(0) == null){
+            return new JsonResult();
+        }
+        String activityId = activityPics.get(0).getActivityId();
+        List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics , activityId, CheckPic.ACTIVITY);
+        String status = AliyunGreenService.PASS;
+        for(ActivityPic pic: activityPicList) {
+            String result = corgiPicService.addActivityPic(pic);
+            pic.setPicId(result);
+            if(AliyunGreenService.CHECK.equals(pic.getStatus())){
+                status = pic.getStatus();
+            }
+        }
+        if(AliyunGreenService.CHECK.equals(status)) {
+            CorgiActivity updateActivity = new CorgiActivity();
+            updateActivity.setId(activityId);
+            updateActivity.setCheckStatus(status);
+            corgiActivityService.updateCorgiActivityStatus(updateActivity);
+        }
+        return new JsonResult(activityPicList);
     }
 
     @GetMapping("add_favor")
