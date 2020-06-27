@@ -166,7 +166,15 @@ public class CorgiActivityController extends BaseController {
             search.setCreateTime(date);
         }
         List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, page, pageSize);
-        return new JsonResult(corgiActivities);
+        List<CorgiActivityDetail> details = new ArrayList<>();
+        for (CorgiActivity activity : corgiActivities) {
+            CorgiActivityDetail detail = new CorgiActivityDetail(activity);
+            if (activity.getUserId() != null) {
+                detail.setUserDetail(corgiUserService.getUserDetail(activity.getUserId(), null));
+            }
+            details.add(detail);
+        }
+        return new JsonResult(details);
     }
 
     @GetMapping("get_heat_attendances")
@@ -757,20 +765,20 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("/add_activity_pic")
     public JsonResult addUserPic(@RequestBody List<ActivityPic> activityPics) {
-        if(CollectionUtils.isEmpty(activityPics) || activityPics.get(0) == null){
+        if (CollectionUtils.isEmpty(activityPics) || activityPics.get(0) == null) {
             return new JsonResult();
         }
         String activityId = activityPics.get(0).getActivityId();
-        List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics , activityId, CheckPic.ACTIVITY);
+        List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics, activityId, CheckPic.ACTIVITY);
         String status = AliyunGreenService.PASS;
-        for(ActivityPic pic: activityPicList) {
+        for (ActivityPic pic : activityPicList) {
             String result = corgiPicService.addActivityPic(pic);
             pic.setPicId(result);
-            if(AliyunGreenService.CHECK.equals(pic.getStatus())){
+            if (AliyunGreenService.CHECK.equals(pic.getStatus())) {
                 status = pic.getStatus();
             }
         }
-        if(AliyunGreenService.CHECK.equals(status)) {
+        if (AliyunGreenService.CHECK.equals(status)) {
             CorgiActivity updateActivity = new CorgiActivity();
             updateActivity.setId(activityId);
             updateActivity.setCheckStatus(status);
