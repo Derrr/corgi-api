@@ -29,10 +29,7 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.MailMessage;
 import com.corgi.entity.StorageToken;
 import com.corgi.exception.PermissionException;
-import com.corgi.service.AliyunGreenService;
-import com.corgi.service.EasemobService;
-import com.corgi.service.MQService;
-import com.corgi.service.MailService;
+import com.corgi.service.*;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +79,8 @@ public class CorgiUserController extends BaseController {
     private MQService mqService;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private CorgiUtilService corgiUtilService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
@@ -99,24 +98,32 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
+        String lockKey = "login_" + userLogin.getTelNo();
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
-            if (StringUtils.isEmpty(userLogin.getUserId())) {
-                userLogin = corgiUserService.login(userLogin);
-                if ("-1".equals(userLogin.getStatus())) {
-                    easemobService.registerUser(userLogin.getUserId());
-                    userLogin.setStatus("0");
+            try {
+                corgiUtilService.tryLock(lockKey, code);
+                if (StringUtils.isEmpty(userLogin.getUserId())) {
+                    userLogin = corgiUserService.login(userLogin);
+                    if ("-1".equals(userLogin.getStatus())) {
+                        easemobService.registerUser(userLogin.getUserId());
+                        userLogin.setStatus("0");
+                    }
+                    userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
+                    return new JsonResult(userLogin);
+                } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
+                    return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
+                } else {
+                    corgiUserService.updateUserLogin(userLogin);
+                    return new JsonResult("更新手机号成功");
                 }
-                userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
-                return new JsonResult(userLogin);
-            } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
-                return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
-            } else {
-                corgiUserService.updateUserLogin(userLogin);
-                return new JsonResult("更新手机号成功");
+            } finally {
+                corgiUtilService.unlock(lockKey);
             }
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+
+
     }
 
     @PostMapping("/login_test")
@@ -422,7 +429,7 @@ public class CorgiUserController extends BaseController {
         String ip = IPUtil.getIpAddr(hrequest);
         String port = IPUtil.getPort(hrequest);
         String telKey = "tel_" + telNo;
-        if(redisTemplate.hasKey(telKey)){
+        if (redisTemplate.hasKey(telKey)) {
             return new JsonResult(Constants.API_ERROR_CODE, "请求太频繁");
         }
         String ipKey = "ip_tel_" + ip;
