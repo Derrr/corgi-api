@@ -102,7 +102,7 @@ public class CorgiUserController extends BaseController {
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
             try {
-                corgiUtilService.tryLock(lockKey, code);
+                corgiUtilService.lock(lockKey);
                 if (StringUtils.isEmpty(userLogin.getUserId())) {
                     userLogin = corgiUserService.login(userLogin);
                     if ("-1".equals(userLogin.getStatus())) {
