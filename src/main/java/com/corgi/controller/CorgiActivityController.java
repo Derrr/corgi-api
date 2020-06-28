@@ -183,6 +183,7 @@ public class CorgiActivityController extends BaseController {
         search.setBarId(barId);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -7);
+        search.setCategory(CorgiActivity.CAT_ATTENDANCE);
         search.setCreateTime(new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
         List<String> activityIds = corgiUserActivityService.getHeatActivity(search, 1, 18);
         return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
