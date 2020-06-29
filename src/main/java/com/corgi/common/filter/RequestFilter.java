@@ -33,6 +33,7 @@ public class RequestFilter implements Filter {
             servletResponse.setContentType("application/json;charset=UTF-8");
             return;
         }
+        MDC.put("usrID", "-1");
         long time = System.currentTimeMillis();
         String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
         if (!StringUtils.isEmpty(jwt) && !checkURI(servletRequest, "update_user_position")) {
@@ -52,26 +53,20 @@ public class RequestFilter implements Filter {
                     .userId(decodedJWT.getClaim(JwtUser.USER_ID).asString())
                     .version(decodedJWT.getClaim(JwtUser.VERSION).asString())
                     .build();
+            if (user != null) {
+                MDC.put("usrID", user.getUserId());
+            }
             servletRequest.setAttribute(JWTUtils.JWT_USER, user);
         } else if (checkURI(servletRequest, "login")
                 || checkURI(servletRequest, "send_code")
                 || checkURI(servletRequest, "update_user_position")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         }
-//        else {
-//            JsonResult jsonResult = new JsonResult("");
-//            jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
-//            jsonResult.setMessage("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！");
-//            servletResponse.setContentType("application/json;charset=UTF-8");
-//            servletResponse.setCharacterEncoding("UTF-8");
-//            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
-//            return;
-//        }
         MDC.put("reqId", UUID.randomUUID().toString());
-        MDC.put("usrID", "");
+
         filterChain.doFilter(servletRequest, servletResponse);
         String url = ((HttpServletRequest) servletRequest).getRequestURI();
-        log.info("time spent...{}:{}ms", url, (System.currentTimeMillis() - time));
+        log.info("time spent...{}:{}ms:{} ", url, (System.currentTimeMillis() - time));
     }
 
 
