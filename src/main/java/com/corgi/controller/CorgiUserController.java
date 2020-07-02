@@ -449,7 +449,7 @@ public class CorgiUserController extends BaseController {
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", accessKeyId, accessKeySecret);
         IAcsClient client = new DefaultAcsClient(profile);
 
-        String sign = "SMS_180049529";
+        String sign = "SMS_194910660";
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
         }
