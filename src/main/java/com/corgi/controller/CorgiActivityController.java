@@ -724,11 +724,11 @@ public class CorgiActivityController extends BaseController {
         activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-        mqService.sendTrace(TraceFollow.builder()
-                .userId(userId)
-                .option(TraceFollow.CHANGE)
-                .type(TraceFollow.ACTIVITY)
-                .build());
+//        mqService.sendTrace(TraceFollow.builder()
+//                .userId(userId)
+//                .option(TraceFollow.CHANGE)
+//                .type(TraceFollow.ACTIVITY)
+//                .build());
         return new JsonResult(detailList);
     }
 
@@ -818,11 +818,11 @@ public class CorgiActivityController extends BaseController {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, hasUserId() ? getUserId() : userId);
-        mqService.sendTrace(TraceFollow.builder()
-                .userId(userId)
-                .option(TraceFollow.CHANGE)
-                .type(TraceFollow.FAVOR)
-                .build());
+//        mqService.sendTrace(TraceFollow.builder()
+//                .userId(userId)
+//                .option(TraceFollow.CHANGE)
+//                .type(TraceFollow.FAVOR)
+//                .build());
         return new JsonResult(detailList);
     }
 
