@@ -462,7 +462,7 @@ public class CorgiUserController extends BaseController {
         request.setAction("SendSms");
         request.putQueryParameter("RegionId", "cn-hangzhou");
         request.putQueryParameter("PhoneNumbers", telNo.replaceAll("-", ""));
-        request.putQueryParameter("SignName", "Corgi");
+        request.putQueryParameter("SignName", "可基");
         request.putQueryParameter("TemplateCode", sign);
         request.putQueryParameter("TemplateParam", "{\"code\":\"" + code + "\"}");
         try {
