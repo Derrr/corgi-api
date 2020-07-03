@@ -8,6 +8,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
 import com.corgi.entity.*;
+import com.corgi.entity.tool.AddAttendResult;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
@@ -57,6 +58,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiShareService corgiShareService;
+    @Reference
+    private CorgiBarService corgiBarService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -74,7 +77,8 @@ public class CorgiActivityController extends BaseController {
         return c2.compareTo(c1);
     };
 
-    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    //private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    //private static SimpleDateFormat sdf_simple = new SimpleDateFormat("yyyy/MM/dd");
 
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
@@ -116,6 +120,76 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
     }
 
+    @PostMapping("attend")
+    public JsonResult attend(@RequestBody CorgiActivity activity) {
+        if (hasUserId()) {
+            activity.setUserId(getUserId());
+        }
+        if (redisTemplate.hasKey("activity_attended_" + activity.getUserId())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
+        }
+        String now = System.currentTimeMillis() + "";
+        redisTemplate.opsForValue().set("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS);
+        Integer addResult = -1;
+        corgiUtilService.lock("attending_" + activity.getUserId());
+        try {
+            CorgiActivity searchActivity = new CorgiActivity();
+            searchActivity.setUserId(activity.getUserId());
+            searchActivity.setBarId(activity.getBarId());
+            searchActivity.setCreateTime(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
+            searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+            List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, -1, 1);
+            if (CollectionUtils.isEmpty(result)) {
+                activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+                activity.setCheckStatus(AliyunGreenService.PASS);
+                activity = aliyunGreenService.checkImageActivity(activity);
+                activity = corgiActivityService.addCorgiActivity(activity);
+                addResult = 0;
+            } else {
+                activity = result.get(0);
+                addResult = 1;
+                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                    addResult = 2;
+                }
+            }
+        } finally {
+            corgiUtilService.unlock("attending_" + activity.getUserId());
+        }
+        return new JsonResult(AddAttendResult.getResult(activity, addResult));
+    }
+
+    @GetMapping("get_attendances")
+    public JsonResult getAttendance(@RequestParam(name = "date", required = false) String date, @RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        CorgiActivity search = new CorgiActivity();
+        search.setBarId(barId);
+        if (!StringUtils.isEmpty(date)) {
+            search.setCreateTime(date);
+        }
+        List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, page, pageSize);
+        List<CorgiActivityDetail> details = new ArrayList<>();
+        for (CorgiActivity activity : corgiActivities) {
+            CorgiActivityDetail detail = new CorgiActivityDetail(activity);
+            if (activity.getUserId() != null) {
+                detail.setUserDetail(corgiUserService.getUserDetail(activity.getUserId(), null));
+            }
+            details.add(detail);
+        }
+        return new JsonResult(details);
+    }
+
+    @GetMapping("get_heat_attendances")
+    public JsonResult getHeatAttendance(@RequestParam("barId") String barId) {
+        CorgiActivity search = new CorgiActivity();
+        search.setBarId(barId);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -7);
+        search.setCategory(CorgiActivity.CAT_ATTENDANCE);
+        search.setCreateTime(new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
+        List<String> activityIds = corgiUserActivityService.getHeatActivity(search, 1, 18);
+        return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
+    }
+
+
     @PostMapping("add_image_activity")
     public JsonResult addImageActivity(@RequestBody CorgiActivity activity) {
         if (hasUserId()) {
@@ -129,6 +203,9 @@ public class CorgiActivityController extends BaseController {
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkImageActivity(activity);
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
+        if (!checkActivityPic(activityPics)) {
+            activity.setCheckStatus(AliyunGreenService.CHECK);
+        }
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         return new JsonResult(AddActivityResult.getResult(activity));
@@ -647,16 +724,11 @@ public class CorgiActivityController extends BaseController {
         activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-        if (ActivityQuery.SORT_MATCH.equals(activityQuery.getSort())) {
-            detailList.sort(detailComparator);
-        } else if (ActivityQuery.SORT_TIME.equals(activityQuery.getSort()) || StringUtils.isEmpty(activityQuery.getSort())) {
-            detailList.sort(timeComparator);
-        }
-        mqService.sendTrace(TraceFollow.builder()
-                .userId(userId)
-                .option(TraceFollow.CHANGE)
-                .type(TraceFollow.ACTIVITY)
-                .build());
+//        mqService.sendTrace(TraceFollow.builder()
+//                .userId(userId)
+//                .option(TraceFollow.CHANGE)
+//                .type(TraceFollow.ACTIVITY)
+//                .build());
         return new JsonResult(detailList);
     }
 
@@ -665,7 +737,7 @@ public class CorgiActivityController extends BaseController {
         List<? extends CorgiActivity> result;
         if (CorgiActivity.CREATED.equals(status)) {
             if (hasVersion()) {
-                result = corgiUtilService.convertUserActivityDetail(corgiActivityService.getUserAllRunningActivity(userId, page, pageSize), getUserId());
+                result = convertDetail(corgiActivityService.getUserAllRunningActivity(userId, page, pageSize), getUserId());
             } else {
                 result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
             }
@@ -693,11 +765,27 @@ public class CorgiActivityController extends BaseController {
     }
 
     @PostMapping("/add_activity_pic")
-    public JsonResult addUserPic(@RequestBody ActivityPic activityPic) {
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(Arrays.asList(activityPic), activityPic.getActivityId(), CheckPic.ACTIVITY);
-        String result = corgiPicService.addActivityPic(activityPics.get(0));
-        activityPic.setPicId(result);
-        return new JsonResult(activityPic);
+    public JsonResult addUserPic(@RequestBody List<ActivityPic> activityPics) {
+        if (CollectionUtils.isEmpty(activityPics) || activityPics.get(0) == null) {
+            return new JsonResult();
+        }
+        String activityId = activityPics.get(0).getActivityId();
+        List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics, activityId, CheckPic.ACTIVITY);
+        String status = AliyunGreenService.PASS;
+        for (ActivityPic pic : activityPicList) {
+            String result = corgiPicService.addActivityPic(pic);
+            pic.setPicId(result);
+            if (AliyunGreenService.CHECK.equals(pic.getStatus())) {
+                status = pic.getStatus();
+            }
+        }
+        if (AliyunGreenService.CHECK.equals(status)) {
+            CorgiActivity updateActivity = new CorgiActivity();
+            updateActivity.setId(activityId);
+            updateActivity.setCheckStatus(status);
+            corgiActivityService.updateCorgiActivityStatus(updateActivity);
+        }
+        return new JsonResult(activityPicList);
     }
 
     @GetMapping("add_favor")
@@ -730,11 +818,11 @@ public class CorgiActivityController extends BaseController {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, hasUserId() ? getUserId() : userId);
-        mqService.sendTrace(TraceFollow.builder()
-                .userId(userId)
-                .option(TraceFollow.CHANGE)
-                .type(TraceFollow.FAVOR)
-                .build());
+//        mqService.sendTrace(TraceFollow.builder()
+//                .userId(userId)
+//                .option(TraceFollow.CHANGE)
+//                .type(TraceFollow.FAVOR)
+//                .build());
         return new JsonResult(detailList);
     }
 
@@ -780,7 +868,7 @@ public class CorgiActivityController extends BaseController {
             LikedActivity likedActivity = new LikedActivity();
             likedActivity.setActivityId(corgiActivity.getId());
             likedActivity.setCategory(corgiActivity.getCategory());
-            if (corgiActivity.getPics() != null && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
+            if (!CollectionUtils.isEmpty(corgiActivity.getPics()) && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
                 String picUrl = corgiActivity.getPics().get(0).getPicUrl();
                 likedActivity.setPicUrl(picUrl);
                 PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
@@ -797,14 +885,11 @@ public class CorgiActivityController extends BaseController {
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
-        String now = sdf.format(new Date());
+        String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 activity.setCurrentTime(now);
-                UserDetail userDetail = new UserDetail();
-                if (activity.getUserId() != null) {
-                    userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
-                }
+
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
@@ -829,7 +914,6 @@ public class CorgiActivityController extends BaseController {
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
-                        .initUserDetail(userDetail)
                         .initMatch(match)
                         .initSize(height, width)
                         .initSignUpStatus(signUp)
@@ -841,7 +925,17 @@ public class CorgiActivityController extends BaseController {
                 detail.setLastComment(activityComment);
                 detail.setSignUpCount(signUpCount);
                 detail.setShareCount(shareCount);
+                if (!StringUtils.isEmpty(detail.getBarId() != null)) {
+                    BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
+                    detail.setBarDetail(profile);
+                }
+                if (!StringUtils.isEmpty(activity.getUserId())) {
+                    UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
+                    detail.setUserDetail(userDetail);
+                }
+
                 detailList.add(detail);
+
             }
         }
         return detailList;
@@ -855,6 +949,18 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityList)) {
             CorgiActivity activity = activityList.get(0);
             return userId.equals(activity.getUserId());
+        }
+        return true;
+    }
+
+    private boolean checkActivityPic(List<ActivityPic> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return true;
+        }
+        for (CorgiPic pic : list) {
+            if ("check".equals(pic.getStatus())) {
+                return false;
+            }
         }
         return true;
     }

@@ -29,8 +29,8 @@ public class CorgiSystemController extends BaseController {
 
     @PostMapping("add_system_message")
     public JsonResult addSystemMessage(@RequestBody SystemMessage systemMessage) {
-        String messageId = corgiSystemMessageService.addSystemMessage(systemMessage);
-        return new JsonResult(messageId);
+        corgiSystemMessageService.addSystemMessage(systemMessage);
+        return new JsonResult();
     }
 
     @PostMapping("update_system_message")

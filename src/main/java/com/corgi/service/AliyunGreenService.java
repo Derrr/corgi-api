@@ -249,8 +249,19 @@ public class AliyunGreenService {
         try {
             JSONObject image = JSONObject.parseObject(result);
             if (image != null && image.getJSONObject("ImageHeight") != null && image.getJSONObject("ImageWidth") != null) {
+                boolean revert = false;
+                JSONObject orientObject = image.getJSONObject("Orientation");
+                if (orientObject != null) {
+                    Integer orientation = orientObject.getInteger("value");
+                    revert = orientation != null && orientation > 4;
+                }
                 Integer height = image.getJSONObject("ImageHeight").getInteger("value");
                 Integer weight = image.getJSONObject("ImageWidth").getInteger("value");
+                if (revert) {
+                    Integer tmp = height;
+                    height = weight;
+                    weight = tmp;
+                }
                 picInfo.setHeight(height);
                 picInfo.setWidth(weight);
                 redisTemplate.opsForValue().set(url, height + "_" + weight, 100, TimeUnit.DAYS);

@@ -61,10 +61,14 @@ public class CorgiBarController extends BaseController {
 
     @GetMapping("get_active_bar_activity")
     public JsonResult getActiveBarActivity(@RequestParam("barId") String barId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date nowDate = new Date();
         CorgiActivity corgiActivity = new CorgiActivity();
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setStatus(CorgiActivity.CREATED);
         corgiActivity.setUserId(barId);
+        corgiActivity.setEndTime(sdf.format(nowDate));
+        corgiActivity.setStartTime(sdf.format(nowDate));
         List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
         return new JsonResult(corgiActivities);
     }
