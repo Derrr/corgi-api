@@ -162,6 +162,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getAttendance(@RequestParam(name = "date", required = false) String date, @RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         CorgiActivity search = new CorgiActivity();
         search.setBarId(barId);
+        search.setStatus(CorgiActivity.NOT_DELETED);
         if (!StringUtils.isEmpty(date)) {
             search.setCreateTime(date);
         }
@@ -435,6 +436,7 @@ public class CorgiActivityController extends BaseController {
                 throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
             }
         }
+        corgiUserActivityService.deleteActivityCreator(activityId);
         corgiActivityService.deleteCorgiActivity(activityId);
         return new JsonResult();
     }
