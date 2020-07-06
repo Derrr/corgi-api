@@ -43,6 +43,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -69,6 +70,9 @@ public class CorgiUserController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserTestService corgiUserTestService;
+    @Reference
+    private CorgiBillboardService corgiBillboardService;
+
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -130,14 +134,14 @@ public class CorgiUserController extends BaseController {
     public JsonResult registerTest(@RequestBody UserLogin userLogin) {
 //        String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
 //        if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
-            //if (StringUtils.isEmpty(userLogin.getUserId())) {
-                //userLogin = corgiUserTestService.login(userLogin);
-                if ("-1".equals(userLogin.getStatus())) {
-                    easemobService.registerUser("test" + userLogin.getUserId());
-                    userLogin.setStatus("0");
-                }
-                userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
-                return new JsonResult(userLogin);
+        //if (StringUtils.isEmpty(userLogin.getUserId())) {
+        //userLogin = corgiUserTestService.login(userLogin);
+        if ("-1".equals(userLogin.getStatus())) {
+            easemobService.registerUser("test" + userLogin.getUserId());
+            userLogin.setStatus("0");
+        }
+        userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
+        return new JsonResult(userLogin);
 //            } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
 //                return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
 //            } else {
@@ -651,6 +655,14 @@ public class CorgiUserController extends BaseController {
     public JsonResult test(@RequestParam("userId") String userId, @RequestParam("blockId") String blockId) {
         corgiBlacklistService.addBlacklist(userId, blockId);
         return new JsonResult();
+    }
+
+    @GetMapping("get_billboard")
+    public JsonResult getBillboard() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(new Date());
+        List<UserProfile> userProfiles = corgiBillboardService.getBillboard(date);
+        return new JsonResult(userProfiles);
     }
 
 
