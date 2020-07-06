@@ -662,6 +662,13 @@ public class CorgiUserController extends BaseController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
         List<UserProfile> userProfiles = corgiBillboardService.getBillboard(date);
+        if (hasUserId()) {
+            String userId = getUserId();
+            for (UserProfile userProfile : userProfiles) {
+                int count = corgiUserFollowService.isFollowed(userId, userProfile.getUserId());
+                userProfile.setIsFollowed(count);
+            }
+        }
         return new JsonResult(userProfiles);
     }
 
