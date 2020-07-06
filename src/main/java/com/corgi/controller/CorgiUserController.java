@@ -128,24 +128,24 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/login_test")
     public JsonResult registerTest(@RequestBody UserLogin userLogin) {
-        String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
-        if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
-            if (StringUtils.isEmpty(userLogin.getUserId())) {
-                userLogin = corgiUserTestService.login(userLogin);
+//        String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
+//        if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
+            //if (StringUtils.isEmpty(userLogin.getUserId())) {
+                //userLogin = corgiUserTestService.login(userLogin);
                 if ("-1".equals(userLogin.getStatus())) {
                     easemobService.registerUser("test" + userLogin.getUserId());
                     userLogin.setStatus("0");
                 }
                 userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
                 return new JsonResult(userLogin);
-            } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
-                return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
-            } else {
-                corgiUserTestService.updateUserLogin(userLogin);
-                return new JsonResult("更新手机号成功");
-            }
-        }
-        return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+//            } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
+//                return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
+//            } else {
+//                corgiUserTestService.updateUserLogin(userLogin);
+//                return new JsonResult("更新手机号成功");
+//            }
+        //}
+        //return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
     }
 
     @PostMapping("/update_push")
