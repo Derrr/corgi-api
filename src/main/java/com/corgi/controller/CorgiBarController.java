@@ -48,13 +48,9 @@ public class CorgiBarController extends BaseController {
 
     @GetMapping("get_bar_activity")
     public JsonResult getBarActivity(@RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        Date nowDate = new Date();
         CorgiActivity corgiActivity = new CorgiActivity();
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setUserId(barId);
-        corgiActivity.setEndTime(sdf.format(nowDate));
-        corgiActivity.setStartTime(sdf.format(nowDate));
         List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(corgiActivity, page, pageSize);
         return new JsonResult(corgiActivities);
     }
