@@ -137,7 +137,7 @@ public class CorgiUserController extends BaseController {
         //if (StringUtils.isEmpty(userLogin.getUserId())) {
         //userLogin = corgiUserTestService.login(userLogin);
         if ("-1".equals(userLogin.getStatus())) {
-            easemobService.registerUser("test" + userLogin.getUserId());
+            easemobService.registerUser(userLogin.getUserId());
             userLogin.setStatus("0");
         }
         userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
