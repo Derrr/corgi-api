@@ -1,8 +1,12 @@
 package com.corgi.controller;
 
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.UserDate;
+import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
@@ -29,6 +33,8 @@ public class CorgiDateController extends BaseController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Reference
+    private CorgiUserService corgiUserService;
 
     @PostMapping("hunt")
     public JsonResult searchDate(@RequestBody UserDate userDate) {
@@ -45,7 +51,7 @@ public class CorgiDateController extends BaseController {
                 String takenId = checkTaken(userDate.getUserId());
                 if (StringUtils.isNotEmpty(takenId)) {
                     if (hasTicket(userDate.getUserId()) && hitBack(takenId, userDate)) {
-                        return match(takenId);
+                        return match(takenId, userDate.getUserId());
                     } else {
                         clearTaken(userDate.getUserId());
                     }
@@ -58,7 +64,7 @@ public class CorgiDateController extends BaseController {
                 if (flirt(quarry, userDate.getUserId())) {
                     takenId = waitTaken(userDate.getUserId());
                     if (quarry.equals(takenId)) {
-                        return match(takenId);
+                        return match(takenId, userDate.getUserId());
                     }
                     clearTaken(userDate.getUserId());
                 }
@@ -196,8 +202,15 @@ public class CorgiDateController extends BaseController {
         return null;
     }
 
-    private JsonResult match(String takenId) {
-        return new JsonResult(takenId);
+    private JsonResult match(String takenId, String loginUserId) {
+        UserDetail userDetail = corgiUserService.getUserDetail(takenId, loginUserId);
+        List<Point> points = redisTemplate.opsForGeo().position(PARK, takenId);
+        if (CollectionUtils.isNotEmpty(points)) {
+            Point point = points.get(0);
+            userDetail.setLat(point.getY());
+            userDetail.setLng(point.getX());
+        }
+        return new JsonResult(userDetail);
     }
 
 }
