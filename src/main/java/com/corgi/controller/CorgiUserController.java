@@ -417,11 +417,6 @@ public class CorgiUserController extends BaseController {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userQuery.getUserId())
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.USER)
-//                .build());
         return new JsonResult(userProfiles);
     }
 
