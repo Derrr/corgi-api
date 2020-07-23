@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class CorgiDateController extends BaseController {
     private static final String DATE_USER_OF = "date_user_of_";
     private static final String DATE_RESPONSE = "date_response_";
+    private static final String DATED_USERS = "dated_users_";
     private static final String TICKET = "ticket_";
     private static final String PARK = "date_park";
 
@@ -145,9 +146,22 @@ public class CorgiDateController extends BaseController {
             if (!hasTicket(userDate.getUserId())) {
                 return null;
             }
-            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(100, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().limit(1).sortAscending());
-            if (geoResults.getContent().size() > 0) {
-                return geoResults.getContent().get(0).getContent().getName();
+            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(100, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
+            List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
+            if (results.size() > 0) {
+                Map datedMap = redisTemplate.opsForHash().entries(DATED_USERS.concat(userDate.getUserId()));
+                Long now = System.currentTimeMillis();
+                for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : results) {
+                    String pickId = geoResult.getContent().getName();
+                    if (datedMap != null) {
+                        Long time = (Long) datedMap.get(pickId);
+                        if (time != null && now - time > 3 * 24 * 3600 * 1000) {
+                            continue;
+                        }
+                        redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
+                    }
+                    return pickId;
+                }
             }
             try {
                 Thread.sleep(1000L);
@@ -210,6 +224,8 @@ public class CorgiDateController extends BaseController {
             userDetail.setLat(point.getY());
             userDetail.setLng(point.getX());
         }
+        redisTemplate.opsForHash().put(DATED_USERS.concat(loginUserId), takenId, System.currentTimeMillis());
+        redisTemplate.expire(DATED_USERS.concat(loginUserId), 3, TimeUnit.DAYS);
         return new JsonResult(userDetail);
     }
 
