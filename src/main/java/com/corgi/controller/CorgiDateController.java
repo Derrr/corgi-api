@@ -153,6 +153,9 @@ public class CorgiDateController extends BaseController {
                 Long now = System.currentTimeMillis();
                 for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : results) {
                     String pickId = geoResult.getContent().getName();
+                    if (userDate.getUserId().equals(pickId)) {
+                        continue;
+                    }
                     if (datedMap != null) {
                         String time = (String) datedMap.get(pickId);
                         if (time != null && now - Long.parseLong(time) < 3 * 24 * 3600 * 1000) {
