@@ -155,7 +155,7 @@ public class CorgiDateController extends BaseController {
                     String pickId = geoResult.getContent().getName();
                     if (datedMap != null) {
                         String time = (String) datedMap.get(pickId);
-                        if (time != null && now - Long.parseLong(time) > 3 * 24 * 3600 * 1000) {
+                        if (time != null && now - Long.parseLong(time) < 3 * 24 * 3600 * 1000) {
                             continue;
                         }
                         redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
