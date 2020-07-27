@@ -154,7 +154,7 @@ public class CorgiDateController extends BaseController {
                 for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : results) {
                     String pickId = geoResult.getContent().getName();
                     if (datedMap != null) {
-                        Long time = (Long) datedMap.get(pickId);
+                        Long time = Long.parseLong((String) datedMap.get(pickId));
                         if (time != null && now - time > 3 * 24 * 3600 * 1000) {
                             continue;
                         }
@@ -224,7 +224,7 @@ public class CorgiDateController extends BaseController {
             userDetail.setLat(point.getY());
             userDetail.setLng(point.getX());
         }
-        redisTemplate.opsForHash().put(DATED_USERS.concat(loginUserId), takenId, System.currentTimeMillis());
+        redisTemplate.opsForHash().put(DATED_USERS.concat(loginUserId), takenId, System.currentTimeMillis() + "");
         redisTemplate.expire(DATED_USERS.concat(loginUserId), 3, TimeUnit.DAYS);
         return new JsonResult(userDetail);
     }
