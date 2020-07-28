@@ -146,7 +146,7 @@ public class CorgiDateController extends BaseController {
             if (!hasTicket(userDate.getUserId())) {
                 return null;
             }
-            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(100, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
+            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(10000, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
             List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
             if (results.size() > 0) {
                 Map datedMap = redisTemplate.opsForHash().entries(DATED_USERS.concat(userDate.getUserId()));
@@ -156,14 +156,14 @@ public class CorgiDateController extends BaseController {
                     if (userDate.getUserId().equals(pickId)) {
                         continue;
                     }
-                    if (datedMap != null) {
-                        String time = (String) datedMap.get(pickId);
-                        if (time != null && now - Long.parseLong(time) < 3 * 24 * 3600 * 1000) {
-                            continue;
-                        } else if (time != null) {
-                            redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
-                        }
-                    }
+//                    if (datedMap != null) {
+//                        String time = (String) datedMap.get(pickId);
+//                        if (time != null && now - Long.parseLong(time) < 3 * 24 * 3600 * 1000) {
+//                            continue;
+//                        } else if (time != null) {
+//                            redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
+//                        }
+//                    }
                     return pickId;
                 }
             }
