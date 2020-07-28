@@ -66,6 +66,8 @@ public class CorgiDateController extends BaseController {
                     takenId = waitTaken(userDate.getUserId());
                     if (quarry.equals(takenId)) {
                         return match(takenId, userDate.getUserId());
+                    } else if (!hasTicket(userDate.getUserId())) {
+                        return new JsonResult();
                     }
                     clearTaken(userDate.getUserId());
                 }
