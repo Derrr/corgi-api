@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("bar")
+@RequestMapping("banner")
 public class CorgiBannerController extends BaseController {
 
     @Reference
