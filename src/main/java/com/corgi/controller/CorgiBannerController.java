@@ -21,18 +21,27 @@ public class CorgiBannerController extends BaseController {
 
     @PostMapping("add_banner")
     public JsonResult addBanner(@RequestBody CorgiBanner corgiBanner) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
         corgiBannerService.addBanner(corgiBanner);
         return new JsonResult();
     }
 
     @PostMapping("update_banner")
     public JsonResult updateBanner(@RequestBody CorgiBanner corgiBanner) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
         corgiBannerService.updateBanner(corgiBanner);
         return new JsonResult();
     }
 
     @GetMapping("delete_banner")
     public JsonResult deleteBanner(@RequestParam("bannerId") Integer bannerId) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
         corgiBannerService.deleteBanner(bannerId);
         return new JsonResult();
     }
@@ -41,5 +50,12 @@ public class CorgiBannerController extends BaseController {
     public JsonResult listBanner(CorgiBanner corgiBanner) {
         return new JsonResult(corgiBannerService.listBanner(corgiBanner));
     }
+
+    @GetMapping("get_banner")
+    public JsonResult getBanner(CorgiBanner corgiBanner) {
+        corgiBanner.setStatus(CorgiBanner.STATUS_ENABLE);
+        return new JsonResult(corgiBannerService.listBanner(corgiBanner));
+    }
+
 }
 
