@@ -5,6 +5,8 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.entity.ActivityQuery;
+import com.corgi.entity.BarActivityDetail;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -79,6 +82,48 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(activity);
     }
 
+    @GetMapping("get_hot_activity")
+    public JsonResult getHotActivity(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer size) {
+        Integer start = (page - 1) * size;
+        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city);
+        if (barProfiles.size() == 0) {
+            barProfiles = corgiBarService.getBarListByCity(null);
+        }
+
+        ActivityQuery query = new ActivityQuery();
+        query.setSort(ActivityQuery.SORT_TIME);
+
+
+        List<BarActivityDetail> total = new ArrayList<>();
+        for (BarProfile bar : barProfiles) {
+            query.setUserId(bar.getBarId());
+            List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(0, 0, 0, query);
+            for (CorgiActivity activity : activityList) {
+                BarActivityDetail detail = new BarActivityDetail(activity);
+                detail.setBarDetail(bar);
+                total.add(detail);
+            }
+            if (total.size() >= start + size) {
+                return new JsonResult(total.subList(start, start + size));
+            }
+        }
+
+        if (size >= total.size()) {
+            return new JsonResult(total);
+        }
+
+        int totalSize = total.size();
+        int begin = start % totalSize;
+        if (begin + size <= totalSize) {
+            return new JsonResult(total.subList(begin, begin + size));
+        }
+
+        List<BarActivityDetail> result = new ArrayList<>();
+        result.addAll(total.subList(begin, totalSize));
+        result.addAll(total.subList(0, begin + size - totalSize));
+        return new JsonResult(result);
+    }
+
     @PostMapping("add_bar")
     public JsonResult addBar(@RequestBody BarProfile barProfile) {
         if (hasUserId()) {
@@ -106,7 +151,6 @@ public class CorgiBarController extends BaseController {
         List<BarProfile> barProfiles = corgiBarService.searchBar(barProfile);
         return new JsonResult(barProfiles);
     }
-
 
     @GetMapping("get_bar_list")
     public JsonResult getBarList(@RequestParam(required = false, name = "status") String status) {

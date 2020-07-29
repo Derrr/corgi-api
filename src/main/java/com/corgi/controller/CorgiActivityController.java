@@ -712,25 +712,45 @@ public class CorgiActivityController extends BaseController {
     }
 
 
-    @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+    @GetMapping("get_range_image")
+    public JsonResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+        activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
-        }
-        if (hasVersion()) {
-            activityQuery.setVersion("1.4.0");
         }
         activityQuery.setGroup(CorgiUserController.changeGroupList(activityQuery.getGroup()));
         activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userId)
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.ACTIVITY)
-//                .build());
         return new JsonResult(detailList);
     }
+
+    @GetMapping("get_range_activity")
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+        if (StringUtils.isEmpty(activityQuery.getUserId())) {
+            activityQuery.setUserId(userId);
+        }
+        activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+
+        if (activityList.size() == 0 && businessList.size() == 0) {
+            activityQuery.setCity(null);
+            range = 0;
+            activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+            activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+            activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+            businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        }
+        int mergeSize = activityList.size() / 10;
+        mergeSize = mergeSize * 2 > businessList.size() ? businessList.size() : mergeSize * 2;
+        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
+        result.addAll(businessList.subList(mergeSize, businessList.size() - mergeSize));
+        List<CorgiActivityDetail> detailList = convertDetail(result, userId);
+        return new JsonResult(detailList);
+    }
+
 
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam(name = "status", required = false) String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -818,11 +838,6 @@ public class CorgiActivityController extends BaseController {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, hasUserId() ? getUserId() : userId);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userId)
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.FAVOR)
-//                .build());
         return new JsonResult(detailList);
     }
 
@@ -963,5 +978,38 @@ public class CorgiActivityController extends BaseController {
             }
         }
         return true;
+    }
+
+    private List<CorgiActivity> mergeActivity(List<CorgiActivity> activityList, List<CorgiActivity> businessList) {
+        List<Integer> takenPositions = new ArrayList<>();
+        Random random = new Random();
+        int bound = activityList.size();
+        for (CorgiActivity business : businessList) {
+            int position = random.nextInt(bound);
+            int index = findPosition(position, bound, takenPositions);
+            activityList.add(index,business);
+        }
+        return activityList;
+    }
+
+    //将商户活动随机混入人员活动中，商户活动不能连续
+    private int findPosition(int oldPosition, int bound, List<Integer> takenPositions) {
+        int step = oldPosition <= bound / 2 ? 1 : -1;
+        for (int i = 0; i < takenPositions.size(); i++) {
+            if (takenPositions.contains(oldPosition)) {
+                oldPosition += step;
+            } else {
+                break;
+            }
+        }
+        takenPositions.add(oldPosition);
+
+        int offset = 0;
+        for (Integer takenPosition : takenPositions) {
+            if (takenPosition < oldPosition) {
+                offset++;
+            }
+        }
+        return oldPosition + offset;
     }
 }
