@@ -81,7 +81,7 @@ public class CorgiBarController extends BaseController {
 
     @PostMapping("add_bar")
     public JsonResult addBar(@RequestBody BarProfile barProfile) {
-        if(hasUserId()){
+        if (hasUserId()) {
             return new JsonResult();
         }
         corgiBarService.addBarProfile(barProfile);
@@ -90,7 +90,7 @@ public class CorgiBarController extends BaseController {
 
     @PostMapping("update_bar")
     public JsonResult updateBar(@RequestBody BarProfile barProfile) {
-        if(hasUserId()){
+        if (hasUserId()) {
             return new JsonResult();
         }
         corgiBarService.updateBarProfile(barProfile);
@@ -100,6 +100,9 @@ public class CorgiBarController extends BaseController {
     @GetMapping("search_bar")
     public JsonResult search(BarProfile barProfile) {
         barProfile.setStatus(BarProfile.STATUS_ENABLE);
+        if (barProfile.getAddress() == null) {
+            barProfile.setAddress(barProfile.getBarName());
+        }
         List<BarProfile> barProfiles = corgiBarService.searchBar(barProfile);
         return new JsonResult(barProfiles);
     }
