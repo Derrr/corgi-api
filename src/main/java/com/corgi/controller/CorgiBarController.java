@@ -92,9 +92,7 @@ public class CorgiBarController extends BaseController {
     }
 
     @GetMapping("search_bar")
-    public JsonResult search(@RequestParam("barName") String barName) {
-        BarProfile barProfile = new BarProfile();
-        barProfile.setBarName(barName);
+    public JsonResult search(BarProfile barProfile) {
         barProfile.setStatus(BarProfile.STATUS_ENABLE);
         List<BarProfile> barProfiles = corgiBarService.searchBar(barProfile);
         return new JsonResult(barProfiles);
