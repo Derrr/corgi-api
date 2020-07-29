@@ -99,9 +99,6 @@ public class CorgiBarController extends BaseController {
 
     @GetMapping("search_bar")
     public JsonResult search(BarProfile barProfile) {
-        if(hasUserId()){
-            return new JsonResult();
-        }
         barProfile.setStatus(BarProfile.STATUS_ENABLE);
         List<BarProfile> barProfiles = corgiBarService.searchBar(barProfile);
         return new JsonResult(barProfiles);
