@@ -121,7 +121,7 @@ public class CorgiDateController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
-        String dateId = result.get("dateUserId");
+        String dateId = result.get("dateId");
         redisTemplate.opsForHash().putAll(DATE_RESPONSE.concat(userId).concat(dateId), result);
         redisTemplate.expire(DATE_RESPONSE.concat(userId).concat(dateId), 10, TimeUnit.SECONDS);
         return new JsonResult();
