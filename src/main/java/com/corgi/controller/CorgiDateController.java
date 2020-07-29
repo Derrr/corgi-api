@@ -225,7 +225,7 @@ public class CorgiDateController extends BaseController {
     private JsonResult match(String takenId, String loginUserId) {
         UserDetail userDetail = corgiUserService.getUserDetail(takenId, loginUserId);
         List<Point> points = redisTemplate.opsForGeo().position(PARK, takenId);
-        if (CollectionUtils.isNotEmpty(points)) {
+        if (CollectionUtils.isNotEmpty(points) && points.get(0) != null) {
             Point point = points.get(0);
             userDetail.setLat(point.getY());
             userDetail.setLng(point.getX());
