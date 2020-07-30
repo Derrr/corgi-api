@@ -4,7 +4,9 @@ import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
+import com.corgi.entity.DateDetail;
 import com.corgi.entity.UserDate;
+import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,8 @@ public class CorgiDateController extends BaseController {
     private StringRedisTemplate redisTemplate;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
 
     @PostMapping("hunt")
     public JsonResult searchDate(@RequestBody UserDate userDate) {
@@ -223,16 +227,28 @@ public class CorgiDateController extends BaseController {
     }
 
     private JsonResult match(String takenId, String loginUserId) {
+
         UserDetail userDetail = corgiUserService.getUserDetail(takenId, loginUserId);
+        DateDetail dateDetail = new DateDetail();
+        dateDetail.setImId(userDetail.getImId());
+        dateDetail.setLat(userDetail.getLat());
+        dateDetail.setLng(userDetail.getLng());
+        dateDetail.setMatch(userDetail.getMatch());
+        dateDetail.setNickname(userDetail.getNickname());
+        dateDetail.setUserId(userDetail.getUserId());
+        dateDetail.setUserPics(userDetail.getUserPics());
+
         List<Point> points = redisTemplate.opsForGeo().position(PARK, takenId);
         if (CollectionUtils.isNotEmpty(points) && points.get(0) != null) {
             Point point = points.get(0);
-            userDetail.setLat(point.getY());
-            userDetail.setLng(point.getX());
+            dateDetail.setLat(point.getY());
+            dateDetail.setLng(point.getX());
         }
+
+        dateDetail.setIsFollowed(corgiUserFollowService.isFollowed(loginUserId, takenId));
         redisTemplate.opsForHash().put(DATED_USERS.concat(loginUserId), takenId, System.currentTimeMillis() + "");
         redisTemplate.expire(DATED_USERS.concat(loginUserId), 3, TimeUnit.DAYS);
-        return new JsonResult(userDetail);
+        return new JsonResult(dateDetail);
     }
 
 }

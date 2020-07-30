@@ -529,11 +529,6 @@ public class CorgiUserController extends BaseController {
                                     @RequestParam(name = "lng", required = false) Double lng,
                                     @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userId)
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.FOLLOW)
-//                .build());
         return new JsonResult(userProfiles);
     }
 
@@ -543,11 +538,6 @@ public class CorgiUserController extends BaseController {
                                    @RequestParam(name = "lng", required = false) Double lng,
                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, type, lat, lng, page, pageSize);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userId)
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.FOLLOW)
-//                .build());
         return new JsonResult(userProfiles);
     }
 
