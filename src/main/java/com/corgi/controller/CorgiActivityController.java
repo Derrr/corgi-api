@@ -732,9 +732,10 @@ public class CorgiActivityController extends BaseController {
         }
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        log.info("activity ... {} ", activityList);
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
         List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-
+        log.info("business ... {} ", businessList);
         if (activityList.size() == 0 && businessList.size() == 0) {
             activityQuery.setCity(null);
             range = 0;
