@@ -92,7 +92,7 @@ public class CorgiBarController extends BaseController {
         }
 
         CorgiActivity query = new CorgiActivity();
-
+        query.setStatus(CorgiActivity.NOT_DELETED);
 
         List<BarActivityDetail> total = new ArrayList<>();
         for (BarProfile bar : barProfiles) {
