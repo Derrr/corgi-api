@@ -11,6 +11,7 @@ import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
+import com.corgi.user.api.CorgiAreaService;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.BarProfile;
@@ -90,14 +91,13 @@ public class CorgiBarController extends BaseController {
             barProfiles = corgiBarService.getBarListByCity(null);
         }
 
-        ActivityQuery query = new ActivityQuery();
-        query.setSort(ActivityQuery.SORT_TIME);
+        CorgiActivity query = new CorgiActivity();
 
 
         List<BarActivityDetail> total = new ArrayList<>();
         for (BarProfile bar : barProfiles) {
             query.setUserId(bar.getBarId());
-            List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(0, 0, 0, query);
+            List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(query, 1, 300);
             for (CorgiActivity activity : activityList) {
                 BarActivityDetail detail = new BarActivityDetail(activity);
                 detail.setBarDetail(bar);
