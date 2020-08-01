@@ -116,8 +116,8 @@ public class CorgiUserController extends BaseController {
                     }
                     userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
                     return new JsonResult(userLogin);
-                } else if (StringUtils.isEmpty(userLogin.getTelNo()) || StringUtils.isEmpty(userLogin.getImId())) {
-                    return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号/推送ID");
+                } else if (StringUtils.isEmpty(userLogin.getTelNo())) {
+                    return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号");
                 } else {
                     corgiUserService.updateUserLogin(userLogin);
                     return new JsonResult("更新手机号成功");
