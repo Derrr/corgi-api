@@ -369,29 +369,22 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("test_add_activity")
     public JsonResult testAddActivity() {
-        CorgiActivity activity = new CorgiActivity();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        Random random = new Random();
-        activity.setCreateTime(sdf.format(new Date()));
-        activity.setStatus(CorgiActivity.CREATED);
-        activity.setLat(random.nextDouble());
-        activity.setLng(random.nextDouble());
-        activity.setActivityType("test");
-        activity.setAddress("阿维机构啊叫，给皮卡金额");
-        activity.setBudget(124);
-        activity.setContent("阿我诶咕叽咕叽哦可刺激噶我");
-        activity.setPayType("AA");
-        activity.setTitle("测试");
-        activity.setPeopleCount(341);
-        activity.setSignUpTime("2020/11/11 00:00");
-        ActivityPic pic1 = new ActivityPic();
-        pic1.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
-        ActivityPic pic2 = new ActivityPic();
-        pic2.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs1.com/avatar/2/1577412815326");
-        activity = corgiActivityService.addCorgiActivity(activity);
-        activity.setTitle("测试34");
-        corgiActivityService.updateCorgiActivity(activity);
-        return new JsonResult(activity);
+        CorgiActivity query = new CorgiActivity();
+        query.setCategory(CorgiActivity.CAT_BUSINESS);
+        query.setStatus(CorgiActivity.NOT_DELETED);
+        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(query, 1, 1000);
+        for (CorgiActivity business : activityList) {
+            log.info("business .. {} ", business);
+            if (StringUtils.isEmpty(business.getCity())) {
+                BarProfile barProfile = corgiBarService.getBarProfile(business.getUserId());
+                log.info(" bar ... {} ", barProfile);
+                if (barProfile != null && !StringUtils.isEmpty(barProfile.getCity())) {
+                    business.setCity(barProfile.getCity());
+                    corgiActivityService.updateCorgiActivity(business);
+                }
+            }
+        }
+        return new JsonResult();
     }
 
     @PostMapping("update_activity")
