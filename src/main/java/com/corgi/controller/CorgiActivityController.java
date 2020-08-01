@@ -736,7 +736,7 @@ public class CorgiActivityController extends BaseController {
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
         List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         log.info("business ... {} ", businessList);
-        if (activityList.size() == 0 && businessList.size() == 0) {
+        if (activityList.size() == 0 && businessList.size() == 0 && (activityQuery.getPage() == null || activityQuery.getPage() <= 1)) {
             activityQuery.setCity(null);
             range = 0;
             activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
@@ -988,7 +988,7 @@ public class CorgiActivityController extends BaseController {
         for (CorgiActivity business : businessList) {
             int position = random.nextInt(bound);
             int index = findPosition(position, bound, takenPositions);
-            activityList.add(index,business);
+            activityList.add(index, business);
         }
         return activityList;
     }
