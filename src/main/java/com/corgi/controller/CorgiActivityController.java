@@ -737,8 +737,8 @@ public class CorgiActivityController extends BaseController {
 //            activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
 //            businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
 //        }
-        int mergeSize = activityList.size() / 10;
-        mergeSize = mergeSize * 2 > businessList.size() ? businessList.size() : mergeSize * 2;
+        int mergeSize = activityList.size() / 5;
+        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
         List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
         result.addAll(businessList.subList(mergeSize, businessList.size() - mergeSize));
         List<CorgiActivityDetail> detailList = convertDetail(result, userId);
