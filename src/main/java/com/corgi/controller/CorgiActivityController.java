@@ -708,9 +708,9 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_range_image")
     public JsonResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
         activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
-        if (StringUtils.isEmpty(activityQuery.getUserId())) {
-            activityQuery.setUserId(userId);
-        }
+//        if (StringUtils.isEmpty(activityQuery.getUserId())) {
+//            activityQuery.setUserId(userId);
+//        }
         activityQuery.setGroup(CorgiUserController.changeGroupList(activityQuery.getGroup()));
         activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
@@ -720,9 +720,9 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_range_activity")
     public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
-//        if (StringUtils.isEmpty(activityQuery.getUserId())) {
-//            activityQuery.setUserId(userId);
-//        }
+        if (StringUtils.isEmpty(activityQuery.getUserId())) {
+            activityQuery.setUserId(userId);
+        }
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         log.info("activity ... {} ", activityList);
