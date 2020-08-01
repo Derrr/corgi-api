@@ -319,10 +319,10 @@ public class CorgiUserController extends BaseController {
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
         try {
             UserDetail userDetail = corgiUserService.getUserDetail(userId, loginUserId);
-            List<UserPic> corgiPics = userDetail.getUserPics();
-            for (UserPic pic : corgiPics) {
-                log.info("pic url... {} ", pic.getPicUrl());
-            }
+//            List<UserPic> corgiPics = userDetail.getUserPics();
+//            for (UserPic pic : corgiPics) {
+//                log.info("pic url... {} ", pic.getPicUrl());
+//            }
             if (userDetail == null) {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
