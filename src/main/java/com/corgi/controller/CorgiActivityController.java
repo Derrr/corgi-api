@@ -704,6 +704,18 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
+    @GetMapping("search_activity")
+    public JsonResult searchActivity(CorgiActivity activity, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
+            activity.setStatus(CorgiActivity.CREATED);
+        } else {
+            activity.setStatus(CorgiActivity.NOT_DELETED);
+        }
+        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
+        return new JsonResult(detailList);
+    }
+
 
     @GetMapping("get_range_image")
     public JsonResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
