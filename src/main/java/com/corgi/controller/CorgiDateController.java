@@ -111,7 +111,7 @@ public class CorgiDateController extends BaseController {
                 if (response.get("response").equals("refuse")) {
                     response.put("message", "阿欧～有时候换个头像更容易遇到天菜哦，快去试试吧！");
                 }
-                new JsonResult(response);
+                return new JsonResult(response);
             }
             try {
                 Thread.sleep(100);
