@@ -731,15 +731,17 @@ public class CorgiActivityController extends BaseController {
         log.info("business ... {} ", businessList);
         if (activityList.size() == 0 && businessList.size() == 0) {
             Integer page = activityQuery.getPage();
+            List<CorgiActivity> tmpActivityList = new ArrayList<>();
+            List<CorgiActivity> tmpBusinessList = new ArrayList<>();
             //如果不是第一页，则查询该城市第一页活动，看是否也为空
             if (page > 1) {
                 activityQuery.setPage(1);
                 activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
-                activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+                tmpActivityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
                 activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-                businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+                tmpBusinessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
             }
-            if (activityList.size() == 0 && businessList.size() == 0) {
+            if (tmpActivityList.size() == 0 && tmpBusinessList.size() == 0) {
                 activityQuery.setCity(null);
                 activityQuery.setPage(page);
                 range = 0;
