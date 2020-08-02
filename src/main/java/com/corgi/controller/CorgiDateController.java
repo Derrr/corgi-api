@@ -109,7 +109,7 @@ public class CorgiDateController extends BaseController {
             response = redisTemplate.opsForHash().entries(DATE_RESPONSE.concat(dateId).concat(userId));
             if (response != null && StringUtils.isNotEmpty((String) response.get("response"))) {
                 if (response.get("response").equals("refuse")) {
-                    response.put("message", "（小哥哥可能在忙哦 再换一个试试吧！）");
+                    response.put("message", "阿欧～有时候换个头像更容易遇到天菜哦，快去试试吧！");
                 }
                 new JsonResult(response);
             }
@@ -119,7 +119,7 @@ public class CorgiDateController extends BaseController {
                 log.error(e.getMessage(), e);
             }
         }
-        response.put("message", "（小哥哥可能在忙哦 再换一个试试吧！）");
+        response.put("message", "小哥哥可能在忙哦 再换一个试试吧！");
         return new JsonResult(response);
     }
 
