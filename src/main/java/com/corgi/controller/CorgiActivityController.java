@@ -720,23 +720,35 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_range_activity")
     public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
-//        if (StringUtils.isEmpty(activityQuery.getUserId())) {
-//            activityQuery.setUserId(userId);
-//        }
+        if (activityQuery.getPage() == null) {
+            activityQuery.setPage(1);
+        }
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         log.info("activity ... {} ", activityList);
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
         List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         log.info("business ... {} ", businessList);
-//        if (activityList.size() == 0 && businessList.size() == 0 && (activityQuery.getPage() == null || activityQuery.getPage() <= 1)) {
-//            activityQuery.setCity(null);
-//            range = 0;
-//            activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
-//            activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-//            activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-//            businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-//        }
+        if (activityList.size() == 0 && businessList.size() == 0) {
+            Integer page = activityQuery.getPage();
+            //如果不是第一页，则查询该城市第一页活动，看是否也为空
+            if (page > 1) {
+                activityQuery.setPage(1);
+                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+                activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+                businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+            }
+            if (activityList.size() == 0 && businessList.size() == 0) {
+                activityQuery.setCity(null);
+                activityQuery.setPage(page);
+                range = 0;
+                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+                activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+                businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+            }
+        }
         int mergeSize = activityList.size() / 5;
         mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
         List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
@@ -898,7 +910,6 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 activity.setCurrentTime(now);
-
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
@@ -931,9 +942,14 @@ public class CorgiActivityController extends BaseController {
                         .initLikeUsers(users)
                         .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
+
                 detail.setLastComment(activityComment);
                 detail.setSignUpCount(signUpCount);
                 detail.setShareCount(shareCount);
+                if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
+                    detail.setBarId(detail.getUserId());
+                    detail.setUserId(null);
+                }
                 if (!StringUtils.isEmpty(detail.getBarId() != null)) {
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
