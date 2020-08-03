@@ -31,6 +31,11 @@ public class BaseController {
         return RequestUtil.hasVersion();
     }
 
+    public String getVersion() {
+        return RequestUtil.getVersion();
+    }
+
+
     public boolean hasUserId() {
         return RequestUtil.hasUserId();
     }

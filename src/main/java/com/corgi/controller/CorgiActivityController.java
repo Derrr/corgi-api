@@ -69,13 +69,13 @@ public class CorgiActivityController extends BaseController {
     @Autowired
     private MQService mqService;
 
-    private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
-
-    private static Comparator<CorgiActivityDetail> timeComparator = (a1, a2) -> {
-        String c1 = a1.getCreateTime() == null ? "" : a1.getCreateTime();
-        String c2 = a2.getCreateTime() == null ? "" : a2.getCreateTime();
-        return c2.compareTo(c1);
-    };
+//    private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
+//
+//    private static Comparator<CorgiActivityDetail> timeComparator = (a1, a2) -> {
+//        String c1 = a1.getCreateTime() == null ? "" : a1.getCreateTime();
+//        String c2 = a2.getCreateTime() == null ? "" : a2.getCreateTime();
+//        return c2.compareTo(c1);
+//    };
 
     //private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
     //private static SimpleDateFormat sdf_simple = new SimpleDateFormat("yyyy/MM/dd");
@@ -370,29 +370,22 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("test_add_activity")
     public JsonResult testAddActivity() {
-        CorgiActivity activity = new CorgiActivity();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-        Random random = new Random();
-        activity.setCreateTime(sdf.format(new Date()));
-        activity.setStatus(CorgiActivity.CREATED);
-        activity.setLat(random.nextDouble());
-        activity.setLng(random.nextDouble());
-        activity.setActivityType("test");
-        activity.setAddress("阿维机构啊叫，给皮卡金额");
-        activity.setBudget(124);
-        activity.setContent("阿我诶咕叽咕叽哦可刺激噶我");
-        activity.setPayType("AA");
-        activity.setTitle("测试");
-        activity.setPeopleCount(341);
-        activity.setSignUpTime("2020/11/11 00:00");
-        ActivityPic pic1 = new ActivityPic();
-        pic1.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/2/1577412815326");
-        ActivityPic pic2 = new ActivityPic();
-        pic2.setPicUrl("https://corgi-pic.oss-cn-beijing.aliyuncs1.com/avatar/2/1577412815326");
-        activity = corgiActivityService.addCorgiActivity(activity);
-        activity.setTitle("测试34");
-        corgiActivityService.updateCorgiActivity(activity);
-        return new JsonResult(activity);
+        CorgiActivity query = new CorgiActivity();
+        query.setCategory(CorgiActivity.CAT_BUSINESS);
+        query.setStatus(CorgiActivity.NOT_DELETED);
+        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(query, 1, 1000);
+        for (CorgiActivity business : activityList) {
+            log.info("business .. {} ", business);
+            if (StringUtils.isEmpty(business.getCity())) {
+                BarProfile barProfile = corgiBarService.getBarProfile(business.getUserId());
+                log.info(" bar ... {} ", barProfile);
+                if (barProfile != null && !StringUtils.isEmpty(barProfile.getCity())) {
+                    business.setCity(barProfile.getCity());
+                    corgiActivityService.updateCorgiActivity(business);
+                }
+            }
+        }
+        return new JsonResult();
     }
 
     @PostMapping("update_activity")
@@ -713,26 +706,78 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
+    @GetMapping("search_activity")
+    public JsonResult searchActivity(CorgiActivity activity, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
+            activity.setStatus(CorgiActivity.CREATED);
+        } else {
+            activity.setStatus(CorgiActivity.NOT_DELETED);
+        }
+        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
+        return new JsonResult(detailList);
+    }
 
-    @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+
+    @GetMapping("get_range_image")
+    public JsonResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+        activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
-        }
-        if (hasVersion()) {
-            activityQuery.setVersion("1.4.0");
         }
         activityQuery.setGroup(CorgiUserController.changeGroupList(activityQuery.getGroup()));
         activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userId)
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.ACTIVITY)
-//                .build());
         return new JsonResult(detailList);
     }
+
+    @GetMapping("get_range_activity")
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+        if (activityQuery.getPage() == null) {
+            activityQuery.setPage(1);
+        }
+        if (hasVersion() && "1.5.0".compareTo(getVersion()) > 0) {
+            activityQuery.setCategory(null);
+            List<CorgiActivityDetail> detailList = convertDetail(corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery), userId);
+            return new JsonResult(detailList);
+        }
+        activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        log.info("activity ... {} ", activityList);
+        activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        log.info("business ... {} ", businessList);
+        if (activityList.size() == 0 && businessList.size() == 0) {
+            Integer page = activityQuery.getPage();
+            List<CorgiActivity> tmpActivityList = new ArrayList<>();
+            List<CorgiActivity> tmpBusinessList = new ArrayList<>();
+            //如果不是第一页，则查询该城市第一页活动，看是否也为空
+            if (page > 1) {
+                activityQuery.setPage(1);
+                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+                tmpActivityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+                tmpBusinessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+            }
+            if (tmpActivityList.size() == 0 && tmpBusinessList.size() == 0) {
+                activityQuery.setCity(null);
+                activityQuery.setPage(page);
+                range = 0;
+                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+                activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+                businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+            }
+        }
+        int mergeSize = activityList.size() / 5;
+        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
+        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
+        result.addAll(businessList.subList(mergeSize, businessList.size() - mergeSize));
+        List<CorgiActivityDetail> detailList = convertDetail(result, userId);
+        return new JsonResult(detailList);
+    }
+
 
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam(name = "status", required = false) String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -820,11 +865,6 @@ public class CorgiActivityController extends BaseController {
         List<String> activityIds = corgiFavorActivityService.getActivity(userId, (page - 1) * pageSize, pageSize);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, hasUserId() ? getUserId() : userId);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userId)
-//                .option(TraceFollow.CHANGE)
-//                .type(TraceFollow.FAVOR)
-//                .build());
         return new JsonResult(detailList);
     }
 
@@ -891,7 +931,6 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
                 activity.setCurrentTime(now);
-
                 Integer height = 0;
                 Integer width = 0;
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
@@ -924,9 +963,14 @@ public class CorgiActivityController extends BaseController {
                         .initLikeUsers(users)
                         .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
+
                 detail.setLastComment(activityComment);
                 detail.setSignUpCount(signUpCount);
                 detail.setShareCount(shareCount);
+                if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
+                    detail.setBarId(detail.getUserId());
+                    detail.setUserId(null);
+                }
                 if (!StringUtils.isEmpty(detail.getBarId() != null)) {
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
@@ -965,5 +1009,38 @@ public class CorgiActivityController extends BaseController {
             }
         }
         return true;
+    }
+
+    private List<CorgiActivity> mergeActivity(List<CorgiActivity> activityList, List<CorgiActivity> businessList) {
+        List<Integer> takenPositions = new ArrayList<>();
+        Random random = new Random();
+        int bound = activityList.size();
+        for (CorgiActivity business : businessList) {
+            int position = random.nextInt(bound);
+            int index = findPosition(position, bound, takenPositions);
+            activityList.add(index, business);
+        }
+        return activityList;
+    }
+
+    //将商户活动随机混入人员活动中，商户活动不能连续
+    private int findPosition(int oldPosition, int bound, List<Integer> takenPositions) {
+        int step = oldPosition <= bound / 2 ? 1 : -1;
+        for (int i = 0; i < takenPositions.size(); i++) {
+            if (takenPositions.contains(oldPosition)) {
+                oldPosition += step;
+            } else {
+                break;
+            }
+        }
+        takenPositions.add(oldPosition);
+
+        int offset = 0;
+        for (Integer takenPosition : takenPositions) {
+            if (takenPosition < oldPosition) {
+                offset++;
+            }
+        }
+        return oldPosition + offset;
     }
 }
