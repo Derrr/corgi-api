@@ -34,6 +34,11 @@ public class RequestUtil {
         return !StringUtils.isEmpty(version);
     }
 
+    public static String getVersion() {
+        return getRequest().getHeader("version");
+    }
+
+
     public static String getJwt() {
         return getRequest().getHeader(JWTUtils.JWT_HEADER);
     }
