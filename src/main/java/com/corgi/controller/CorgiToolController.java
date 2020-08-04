@@ -56,6 +56,8 @@ public class CorgiToolController extends BaseController {
     private CorgiBlacklistService corgiBlacklistService;
     @Reference
     private CorgiUserMatchService corgiUserMatchService;
+    @Reference
+    private CorgiBillboardService corgiBillboardService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -389,6 +391,17 @@ public class CorgiToolController extends BaseController {
         }
         return new JsonResult();
     }
+
+    @GetMapping("update_billboard")
+    public JsonResult updateBillboard(@RequestParam(required = false, name = "from") String from, @RequestParam(required = false, name = "to") String to) {
+        if (StringUtils.isEmpty(from) || StringUtils.isEmpty(to)) {
+            return new JsonResult();
+        }
+        String date =  new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        corgiBillboardService.updateBillboardByNickname(from, to, date);
+        return new JsonResult();
+    }
+
 
     @GetMapping("count")
     public JsonResult count(@RequestParam("user") String user) {

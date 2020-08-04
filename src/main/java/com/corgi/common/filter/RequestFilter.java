@@ -59,7 +59,8 @@ public class RequestFilter implements Filter {
             servletRequest.setAttribute(JWTUtils.JWT_USER, user);
         } else if (checkURI(servletRequest, "login")
                 || checkURI(servletRequest, "send_code")
-                || checkURI(servletRequest, "update_user_position")) {
+                || checkURI(servletRequest, "update_user_position")
+                || checkURI(servletRequest, "update_billboard")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         }
         MDC.put("reqId", UUID.randomUUID().toString());
