@@ -92,8 +92,12 @@ public class CorgiBarController extends BaseController {
         }
 
         CorgiActivity query = new CorgiActivity();
-        query.setStatus(CorgiActivity.NOT_DELETED);
-
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date nowDate = new Date();
+        query.setCategory(CorgiActivity.CAT_BUSINESS);
+        query.setStatus(CorgiActivity.CREATED);
+        query.setEndTime(sdf.format(nowDate));
+        query.setStartTime(sdf.format(nowDate));
         List<BarActivityDetail> total = new ArrayList<>();
         for (BarProfile bar : barProfiles) {
             query.setUserId(bar.getBarId());
