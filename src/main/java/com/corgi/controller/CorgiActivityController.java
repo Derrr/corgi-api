@@ -713,7 +713,7 @@ public class CorgiActivityController extends BaseController {
         } else {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
-        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
+        List<CorgiActivity> activityList = corgiActivityService.searchActivity(activity, page, pageSize);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
         return new JsonResult(detailList);
     }
