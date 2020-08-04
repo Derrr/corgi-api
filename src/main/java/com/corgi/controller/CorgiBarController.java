@@ -99,7 +99,7 @@ public class CorgiBarController extends BaseController {
         List<BarActivityDetail> total = new ArrayList<>();
         for (BarProfile bar : barProfiles) {
             query.setUserId(bar.getBarId());
-            List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(query, 1, 300);
+            List<CorgiActivity> activityList = corgiActivityService.getBarActivity(query);
             for (CorgiActivity activity : activityList) {
                 BarActivityDetail detail = new BarActivityDetail(activity);
                 detail.setBarDetail(bar);
