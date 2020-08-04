@@ -72,6 +72,9 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("query_user")
     public JsonResult queryUser(UserDetail userDetail, @RequestParam(required = false, name = "loginUserId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         List<UserProfile> profiles = corgiUserService.searchUsers(userDetail, userId, page, pageSize);
         return new JsonResult(profiles);
     }
@@ -397,7 +400,7 @@ public class CorgiToolController extends BaseController {
         if (StringUtils.isEmpty(from) || StringUtils.isEmpty(to)) {
             return new JsonResult();
         }
-        String date =  new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         corgiBillboardService.updateBillboardByNickname(from, to, date);
         return new JsonResult();
     }
