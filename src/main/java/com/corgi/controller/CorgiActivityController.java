@@ -173,6 +173,14 @@ public class CorgiActivityController extends BaseController {
             if (activity.getUserId() != null) {
                 detail.setUserDetail(corgiUserService.getUserDetail(activity.getUserId(), null));
             }
+            if (!CollectionUtils.isEmpty(detail.getPics()) && !StringUtils.isEmpty(detail.getPics().get(0).getPicUrl())) {
+                String picUrl = detail.getPics().get(0).getPicUrl();
+                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                Integer height = picInfo.getHeight();
+                Integer width = picInfo.getWidth();
+                detail.setHeight(height);
+                detail.setWidth(width);
+            }
             details.add(detail);
         }
         return new JsonResult(details);
