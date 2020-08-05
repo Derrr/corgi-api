@@ -158,7 +158,7 @@ public class CorgiDateController extends BaseController {
             if (!hasTicket(userDate.getUserId())) {
                 return null;
             }
-            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(100, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
+            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(10000, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
             List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
             if (results.size() > 0) {
                 Map datedMap = redisTemplate.opsForHash().entries(DATED_USERS.concat(userDate.getUserId()));
@@ -170,7 +170,7 @@ public class CorgiDateController extends BaseController {
                     }
                     if (datedMap != null) {
                         String time = (String) datedMap.get(pickId);
-                        if (time != null && now - Long.parseLong(time) < 3 * 24 * 3600 * 1000) {
+                        if (time != null && now - Long.parseLong(time) < 4 * 3600 * 1000) {
                             continue;
                         } else if (time != null) {
                             redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
@@ -253,7 +253,7 @@ public class CorgiDateController extends BaseController {
 
         dateDetail.setIsFollowed(corgiUserFollowService.isFollowed(loginUserId, takenId));
         redisTemplate.opsForHash().put(DATED_USERS.concat(loginUserId), takenId, System.currentTimeMillis() + "");
-        redisTemplate.expire(DATED_USERS.concat(loginUserId), 3, TimeUnit.DAYS);
+        redisTemplate.expire(DATED_USERS.concat(loginUserId), 4, TimeUnit.HOURS);
         return new JsonResult(dateDetail);
     }
 
