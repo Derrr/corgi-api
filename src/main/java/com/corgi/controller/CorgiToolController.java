@@ -395,6 +395,27 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("clear_influencer")
+    public JsonResult clearInfluencer(@RequestParam("name") String name) {
+        UserDetail userDetail = new UserDetail();
+        userDetail.setNickname(name);
+        List<UserProfile> userProfiles = corgiUserService.searchUsers(userDetail, null, 1, 100);
+        if (!CollectionUtils.isEmpty(userProfiles)) {
+            userDetail = new UserDetail();
+            userDetail.setAvatarStatus("");
+            for (UserProfile userProfile : userProfiles) {
+                if (name.equals(userProfile.getNickname())) {
+                    userDetail.setUserId(userProfile.getUserId());
+                    corgiUserService.updateDetail(userDetail);
+                    corgiToolService.countUserNumber(name);
+                    break;
+                }
+            }
+        }
+        return new JsonResult();
+    }
+
+
     @GetMapping("update_billboard")
     public JsonResult updateBillboard(@RequestParam(required = false, name = "from") String from, @RequestParam(required = false, name = "to") String to) {
         if (StringUtils.isEmpty(from) || StringUtils.isEmpty(to)) {
