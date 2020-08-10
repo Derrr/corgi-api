@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
+import com.corgi.common.PageResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
@@ -728,16 +729,14 @@ public class CorgiActivityController extends BaseController {
 
 
     @GetMapping("get_range_image")
-    public JsonResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+    public PageResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
         activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
         }
-        activityQuery.setGroup(CorgiUserController.changeGroupList(activityQuery.getGroup()));
-        activityQuery.setPreferGroup(CorgiUserController.changeGroupList(activityQuery.getPreferGroup()));
-        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
-        return new JsonResult(detailList);
+        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
+        List<CorgiActivityDetail> detailList = convertDetail(page.getCorgiActivityList(), userId);
+        return new PageResult(detailList, page.getTPage(), page.getDPage());
     }
 
     @GetMapping("get_range_activity")
