@@ -734,9 +734,14 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
         }
-        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
-        List<CorgiActivityDetail> detailList = convertDetail(page.getCorgiActivityList(), userId);
-        return new PageResult(detailList, page.getTPage(), page.getDPage());
+        if (activityQuery.getPage() == null) {
+            ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
+            List<CorgiActivityDetail> detailList = convertDetail(page.getCorgiActivityList(), userId);
+            return new PageResult(detailList, page.getTPage(), page.getDPage());
+        } else {
+            List<CorgiActivityDetail> detailList = convertDetail(corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery), userId);
+            return new PageResult(detailList, null, null);
+        }
     }
 
     @GetMapping("get_range_activity")
