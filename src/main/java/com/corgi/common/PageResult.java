@@ -12,6 +12,15 @@ public class PageResult<T> implements Serializable {
     private static final long serialVersionUID = -4699713095477152084L;
 
     private Integer tPage;
+
+    public Integer getTPage() {
+        return tPage;
+    }
+
+    public Integer getDPage() {
+        return dPage;
+    }
+
     private Integer dPage;
     private T data;
     private int code;
@@ -48,7 +57,7 @@ public class PageResult<T> implements Serializable {
 
     @Override
     public String toString() {
-        return "JsonResult{" +
+        return "PageResult{" +
                 "data=" + data +
                 ", tPage=" + tPage +
                 ", dPage=" + dPage +
