@@ -744,47 +744,30 @@ public class CorgiActivityController extends BaseController {
         }
     }
 
-    @GetMapping("get_range_nationwide")
-    public JsonResult getRangeNationwide(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
-        Integer pageSize = activityQuery.getPageSize();
-        activityQuery.setNotCity(activityQuery.getCity());
+    @GetMapping("get_city_activity")
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
+        Integer orgPageSize = activityQuery.getPageSize();
+        Integer orgPage = activityQuery.getPage();
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
         Integer activitySize = activityList.size();
         log.info("activity ... {} ", activityList);
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-        if (activitySize >= pageSize) {
+        if (activitySize >= orgPageSize) {
             activityQuery.setPageSize(activityList.size() / 5);
         } else if (activitySize > 0 && activityQuery.getPage() > 1) {
-            activityQuery.setPageSize(pageSize / 5 * activityQuery.getPage());
-            activityQuery.setPage(2);
+            activityQuery.setOffset((orgPage - 1) * orgPageSize / 5);
+            activityQuery.setPageSize(orgPage * orgPageSize - activityQuery.getOffset());
         }
         List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
-        Integer businessSize = businessList.size();
-        if (businessList.size() > 0 && (businessSize + activitySize) < pageSize) {
-            if (pageSize - activitySize - businessSize < activityQuery.getPageSize()) {
-                activityQuery.setPage(3);
-                List<CorgiActivity> tmpBusinessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
-                businessList.addAll(tmpBusinessList);
-            } else {
-                Integer tmpSize;
-                do {
-                    activityQuery.setPageSize(activityQuery.getPageSize() * 2);
-                    List<CorgiActivity> tmpBusinessList =
-                            corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
-                    tmpSize = tmpBusinessList.size();
-                    businessList.addAll(tmpBusinessList);
-                    if (businessList.size() + activitySize > pageSize) {
-                        break;
-                    }
-                } while (tmpSize > 0);
-            }
-        }
         log.info("business ... {} ", businessList);
         int mergeSize = activityList.size() / 5;
         mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
         List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
-        result.addAll(businessList.subList(mergeSize, businessList.size() - mergeSize));
+        result.addAll(businessList.subList(mergeSize, businessList.size()));
         List<CorgiActivityDetail> detailList = convertDetail(result, userId);
         return new JsonResult(detailList);
     }
@@ -799,6 +782,7 @@ public class CorgiActivityController extends BaseController {
             List<CorgiActivityDetail> detailList = convertDetail(corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery), userId);
             return new JsonResult(detailList);
         }
+
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         log.info("activity ... {} ", activityList);
@@ -830,7 +814,7 @@ public class CorgiActivityController extends BaseController {
         int mergeSize = activityList.size() / 5;
         mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
         List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
-        result.addAll(businessList.subList(mergeSize, businessList.size() - mergeSize));
+        result.addAll(businessList.subList(mergeSize, businessList.size()));
         List<CorgiActivityDetail> detailList = convertDetail(result, userId);
         return new JsonResult(detailList);
     }
@@ -986,7 +970,9 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
-            for (CorgiActivity activity : activityList) {
+            Iterator<CorgiActivity> it = activityList.iterator();
+            while (it.hasNext()) {
+                CorgiActivity activity = it.next();
                 activity.setCurrentTime(now);
                 Integer height = 0;
                 Integer width = 0;
@@ -995,6 +981,9 @@ public class CorgiActivityController extends BaseController {
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
+                } else {
+                    it.remove();
+                    continue;
                 }
                 Integer signUp = corgiUserActivityService.getStatus(userId, activity.getId());
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
