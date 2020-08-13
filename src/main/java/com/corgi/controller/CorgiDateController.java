@@ -52,13 +52,15 @@ public class CorgiDateController extends BaseController {
         try {
             enterPark(userDate);
             Random random = new Random();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 String takenId = checkTaken(userDate.getUserId());
                 if (StringUtils.isNotEmpty(takenId)) {
                     if (hasTicket(userDate.getUserId()) && hitBack(takenId, userDate)) {
                         return match(takenId, userDate.getUserId());
-                    } else {
-                        clearTaken(userDate.getUserId());
+                    }
+                    clearTaken(userDate.getUserId());
+                    if (!hasTicket(userDate.getUserId())) {
+                        return new JsonResult();
                     }
                 }
 
@@ -68,15 +70,15 @@ public class CorgiDateController extends BaseController {
                 }
                 if (flirt(quarry, userDate.getUserId())) {
                     takenId = waitTaken(userDate.getUserId());
-                    if (quarry.equals(takenId)) {
+                    if (!hasTicket(userDate.getUserId())) {
+                        return reject(userDate.getUserId(), takenId);
+                    } else if (quarry.equals(takenId)) {
                         return match(takenId, userDate.getUserId());
-                    } else if (!hasTicket(userDate.getUserId())) {
-                        return new JsonResult();
                     }
                     clearTaken(userDate.getUserId());
                 }
                 try {
-                    Thread.sleep(random.nextInt(1000));
+                    Thread.sleep(random.nextInt(100));
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -137,6 +139,18 @@ public class CorgiDateController extends BaseController {
         return new JsonResult(result);
     }
 
+    private JsonResult reject(String userId, String dateId) {
+        if (StringUtils.isNotEmpty(dateId)) {
+            Map response = new HashMap();
+            response.put("response", "refuse");
+            response.put("message", "阿欧～有时候换个头像更容易遇到天菜哦，快去试试吧！");
+            response.put("userId", userId);
+            response.put("dateId", dateId);
+            redisTemplate.expire(DATE_RESPONSE.concat(userId).concat(dateId), 10, TimeUnit.SECONDS);
+        }
+        return new JsonResult();
+    }
+
     private void enterPark(UserDate userDate) {
         redisTemplate.opsForGeo().remove(PARK, userDate.getUserId());
         redisTemplate.opsForGeo().add(PARK, new Point(userDate.getLng(), userDate.getLat()), userDate.getUserId());
@@ -154,7 +168,7 @@ public class CorgiDateController extends BaseController {
     }
 
     private String pick(UserDate userDate) {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             if (!hasTicket(userDate.getUserId())) {
                 return null;
             }
@@ -180,7 +194,7 @@ public class CorgiDateController extends BaseController {
                 }
             }
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(100L);
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
@@ -212,7 +226,7 @@ public class CorgiDateController extends BaseController {
         String takenId = null;
         for (int i = 0; i < 10; i++) {
             //若已经匹配，此时即使没有ticket也会立即返回匹配值，因为对方有可能已经显示匹配成功，这边需先匹配成功再取消
-            if (StringUtils.isEmpty(takenId = checkTaken(userId)) && hasTicket(userId)) {
+            if (hasTicket(userId) && StringUtils.isEmpty(takenId = checkTaken(userId))) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
