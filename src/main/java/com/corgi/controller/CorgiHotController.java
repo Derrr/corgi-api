@@ -71,8 +71,8 @@ public class CorgiHotController extends BaseController {
 
     @GetMapping("search_hot_activity")
     public JsonResult search(HotActivity hotActivity) {
-        //List<HotActivity> hotActivities = corgiHotActivityService.searchHotActivity(hotActivity);
-        return new JsonResult();
+        List<HotActivity> hotActivities = corgiHotActivityService.searchHotActivity(hotActivity);
+        return new JsonResult(hotActivities);
     }
 
 }
