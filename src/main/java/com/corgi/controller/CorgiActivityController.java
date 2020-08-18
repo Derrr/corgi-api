@@ -973,9 +973,14 @@ public class CorgiActivityController extends BaseController {
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
+                if (!activity.getUserId().equals(userId) && "fail".equals(activity.getCheckStatus())) {
+                    it.remove();
+                    continue;
+                }
                 activity.setCurrentTime(now);
                 Integer height = 0;
                 Integer width = 0;
+
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
