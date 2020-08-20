@@ -156,7 +156,7 @@ public class CorgiBarController extends BaseController {
     public JsonResult recommand(@RequestParam(required = false, name = "activityId") String activityId) {
         CorgiActivity activity = new CorgiActivity();
         activity.setId(activityId);
-        activity.setRStatus("enable");
+        activity.setRecommend("enable");
         corgiActivityService.updateCorgiActivityStatus(activity);
         return new JsonResult();
     }
@@ -165,7 +165,7 @@ public class CorgiBarController extends BaseController {
     public JsonResult unrecommand(@RequestParam(required = false, name = "activityId") String activityId) {
         CorgiActivity activity = new CorgiActivity();
         activity.setId(activityId);
-        activity.setRStatus("disable");
+        activity.setRecommend("disable");
         corgiActivityService.updateCorgiActivityStatus(activity);
         return new JsonResult();
     }
