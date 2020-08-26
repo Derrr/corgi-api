@@ -130,35 +130,41 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_check_sound")
+    public JsonResult getCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size) {
+        List<CorgiSound> checkSound = corgiSoundService.getCheckSound(status, page, size);
+        return new JsonResult(checkSound);
+    }
+
+    @GetMapping("count_check_sound")
+    public JsonResult countCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String status) {
+        long count = corgiSoundService.countCheckSound(status);
+        return new JsonResult(count);
+    }
+
+    @GetMapping("pass_sound")
+    public JsonResult passSound(CorgiSound corgiSound) {
+        corgiSoundService.passCheckSound(corgiSound);
+        return new JsonResult();
+    }
+
+    @GetMapping("refuse_sound")
+    public JsonResult refuseSound(CorgiSound corgiSound) {
+        corgiSoundService.failCheckSound(corgiSound);
+        return new JsonResult();
+    }
+
     @GetMapping("count_check_pic")
-    public JsonResult countCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status,
+    public JsonResult countCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String status,
                                  @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         long count = corgiPicService.countCheckPic(status, type);
         return new JsonResult(count);
     }
 
     @GetMapping("get_check_pic")
-    public JsonResult getCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+    public JsonResult getCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         List<CheckPic> checkPics = corgiPicService.getCheckPic(status, type, page, size);
         return new JsonResult(checkPics);
-    }
-
-    @GetMapping("pass_sound")
-    public JsonResult passSound(CorgiSound corgiSound) {
-        String result = corgiSoundService.passCheckSound(corgiSound);
-        if (!CorgiConstants.SUCCESS.equals(result)) {
-            new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
-        }
-        return new JsonResult();
-    }
-
-    @GetMapping("refuse_sound")
-    public JsonResult refuseSound(CorgiSound corgiSound) {
-        String result = corgiSoundService.failCheckSound(corgiSound);
-        if (!CorgiConstants.SUCCESS.equals(result)) {
-            new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
-        }
-        return new JsonResult();
     }
 
     @GetMapping("pass_pic")
