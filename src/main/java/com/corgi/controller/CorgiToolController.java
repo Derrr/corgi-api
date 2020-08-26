@@ -58,6 +58,8 @@ public class CorgiToolController extends BaseController {
     private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiBillboardService corgiBillboardService;
+    @Reference
+    private CorgiSoundService corgiSoundService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -139,6 +141,24 @@ public class CorgiToolController extends BaseController {
     public JsonResult getCheck(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         List<CheckPic> checkPics = corgiPicService.getCheckPic(status, type, page, size);
         return new JsonResult(checkPics);
+    }
+
+    @GetMapping("pass_sound")
+    public JsonResult passSound(CorgiSound corgiSound) {
+        String result = corgiSoundService.passCheckSound(corgiSound);
+        if (!CorgiConstants.SUCCESS.equals(result)) {
+            new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("refuse_sound")
+    public JsonResult refuseSound(CorgiSound corgiSound) {
+        String result = corgiSoundService.failCheckSound(corgiSound);
+        if (!CorgiConstants.SUCCESS.equals(result)) {
+            new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
+        }
+        return new JsonResult();
     }
 
     @GetMapping("pass_pic")
@@ -281,6 +301,8 @@ public class CorgiToolController extends BaseController {
         corgiUserActivityService.deleteActivity(activityId);
         return new JsonResult();
     }
+
+
 
     @GetMapping("agree_activity")
     public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {

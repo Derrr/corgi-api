@@ -73,6 +73,8 @@ public class CorgiUserController extends BaseController {
     private CorgiUserTestService corgiUserTestService;
     @Reference
     private CorgiBillboardService corgiBillboardService;
+    @Reference
+    private CorgiSoundService corgiSoundService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -286,6 +288,20 @@ public class CorgiUserController extends BaseController {
         }
         String result = corgiUserService.updatePreferGroup(userDetail.getUserId(), preferGroup);
         return getJsonResult(result);
+    }
+
+    @GetMapping("/delete_user_sound")
+    public JsonResult deleteUserSound() {
+        corgiSoundService.deleteCorgiSound(getUserId());
+        return new JsonResult();
+    }
+
+    @GetMapping("/add_user_sound")
+    public JsonResult addUserSound(@RequestParam("soundUrl")String url) {
+        CorgiSound sound = aliyunGreenService.checkSound(url,getUserId());
+        corgiSoundService.deleteCorgiSound(getUserId());
+        corgiSoundService.addCorgiSound(sound);
+        return getJsonResult();
     }
 
     @GetMapping("/delete_user_pic")
