@@ -156,7 +156,7 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("count_check_pic")
     public JsonResult countCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String status,
-                                 @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+                                    @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         long count = corgiPicService.countCheckPic(status, type);
         return new JsonResult(count);
     }
@@ -309,7 +309,6 @@ public class CorgiToolController extends BaseController {
     }
 
 
-
     @GetMapping("agree_activity")
     public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.PASS);
@@ -450,6 +449,7 @@ public class CorgiToolController extends BaseController {
             return new JsonResult();
         }
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        redisTemplate.opsForValue().set("billboard_block_" + from, System.currentTimeMillis() + "", 30, TimeUnit.DAYS);
         corgiBillboardService.updateBillboardByNickname(from, to, date);
         return new JsonResult();
     }
