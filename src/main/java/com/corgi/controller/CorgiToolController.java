@@ -449,7 +449,6 @@ public class CorgiToolController extends BaseController {
             return new JsonResult();
         }
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        redisTemplate.opsForValue().set("billboard_block_" + from, System.currentTimeMillis() + "", 30, TimeUnit.DAYS);
         corgiBillboardService.updateBillboardByNickname(from, to, date);
         return new JsonResult();
     }
