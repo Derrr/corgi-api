@@ -250,14 +250,14 @@ public class AliyunGreenService {
                         }
                     } else {
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
-                        sound.setStatus(CorgiPic.NEED_CHECK);
+                        sound.setStatus(CorgiPic.NORMAL);
                         sound.setResult(result);
                         //单张图片处理失败, 原因视具体的情况详细分析
                         log.info(result);
                     }
                 }
             } else {
-                sound.setStatus(CorgiPic.NEED_CHECK);
+                sound.setStatus(CorgiPic.NORMAL);
                 String result = JSON.toJSONString("the whole sound scan request failed. response:" + JSON.toJSONString(scrResponse));
                 sound.setResult(result);
                 log.info(result);

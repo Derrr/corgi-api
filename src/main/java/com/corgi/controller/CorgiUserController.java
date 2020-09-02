@@ -297,8 +297,10 @@ public class CorgiUserController extends BaseController {
     public JsonResult addUserSound(@RequestParam("soundUrl") String url) {
         CorgiSound sound = aliyunGreenService.checkSound(url, getUserId());
         corgiSoundService.deleteCorgiSound(getUserId());
-        corgiSoundService.addCorgiSound(sound);
-        return new JsonResult();
+        if (CorgiSound.NORMAL.equals(sound.getStatus())) {
+            corgiSoundService.addCorgiSound(sound);
+        }
+        return new JsonResult(sound);
     }
 
     @GetMapping("/delete_user_pic")
