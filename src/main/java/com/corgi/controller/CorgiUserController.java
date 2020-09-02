@@ -293,6 +293,12 @@ public class CorgiUserController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("/get_user_sound")
+    public JsonResult getUserSound(){
+        return new JsonResult(corgiSoundService.getCorgiSound(getUserId()));
+
+    }
+
     @GetMapping("/add_user_sound")
     public JsonResult addUserSound(@RequestParam("soundUrl") String url) {
         CorgiSound sound = aliyunGreenService.checkSound(url, getUserId());

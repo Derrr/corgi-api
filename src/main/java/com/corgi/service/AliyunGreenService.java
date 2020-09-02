@@ -161,6 +161,7 @@ public class AliyunGreenService {
         log.info("sound = " + url);
 
         ImageSyncScanRequest imageSyncScanRequest = new ImageSyncScanRequest();
+        imageSyncScanRequest.setUriPattern("http://green.cn-shanghai.aliyuncs.com");
         // 指定api返回格式
         imageSyncScanRequest.setAcceptFormat(FormatType.JSON);
         // 指定请求方法
