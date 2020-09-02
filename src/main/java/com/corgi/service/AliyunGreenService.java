@@ -101,8 +101,9 @@ public class AliyunGreenService {
             userDetail.setAvatarDataId(corgiPic.getDataId());
             return userDetail;
         }
-
-
+        checkFace(corgiPic, userDetail.getUserId());
+        userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+        userDetail.setAvatarDataId(corgiPic.getDataId());
         return userDetail;
     }
 
@@ -123,6 +124,7 @@ public class AliyunGreenService {
         DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
         request.setRegionId("cn-hangzhou");
         request.setMaterialValue(pic.getPicUrl());
+        pic.setDataId(UUID.randomUUID().toString());
         try {
             DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
             DetectFaceAttributesResponse.Data data = response.getData();
