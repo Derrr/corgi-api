@@ -176,6 +176,16 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("no_face_pic")
+    public JsonResult noFacePic(CheckPic checkPic) {
+        String result = corgiPicService.noFaceCheckPic(checkPic);
+        if (!CorgiConstants.SUCCESS.equals(result)) {
+            new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
+        }
+        return new JsonResult();
+    }
+
+
     @GetMapping("refuse_pic")
     public JsonResult refusePic(CheckPic checkPic) {
         String result = corgiPicService.failCheckPic(checkPic);
