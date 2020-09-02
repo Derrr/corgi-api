@@ -183,10 +183,6 @@ public class CorgiUserController extends BaseController {
             pics = new ArrayList<>();
         }
         UserPic userPic = aliyunGreenService.checkAvatar(userDetail);
-        if (userPic != null) {
-            userPic.setUserId(userDetail.getUserId());
-            pics.add(0, userPic);
-        }
         userDetail.setUserPics(pics);
         userDetail.setCheckStatus(AliyunGreenService.PASS);
         if (!aliyunGreenService.checkText(userDetail.getNickname())) {
@@ -225,6 +221,7 @@ public class CorgiUserController extends BaseController {
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
+        aliyunGreenService.checkAvatar(userDetail);
         userDetail = aliyunGreenService.checkDesc(userDetail);
         userDetail.setGroup(changeGroup(userDetail.getGroup()));
         String result = corgiUserService.updateDetail(userDetail);
@@ -297,8 +294,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/add_user_sound")
-    public JsonResult addUserSound(@RequestParam("soundUrl")String url) {
-        CorgiSound sound = aliyunGreenService.checkSound(url,getUserId());
+    public JsonResult addUserSound(@RequestParam("soundUrl") String url) {
+        CorgiSound sound = aliyunGreenService.checkSound(url, getUserId());
         corgiSoundService.deleteCorgiSound(getUserId());
         corgiSoundService.addCorgiSound(sound);
         return new JsonResult();
@@ -401,6 +398,23 @@ public class CorgiUserController extends BaseController {
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
                     }
+                }
+                String key = "sentMatch_" + userPosition.getUserId();
+                String matchTime = redisTemplate.opsForValue().get(key);
+                if (org.springframework.util.StringUtils.isEmpty(matchTime)) {
+                    String nowTime = System.currentTimeMillis() + "";
+                    HashMap extra = new HashMap();
+                    extra.put("lat", userPosition.getLat());
+                    extra.put("lng", userPosition.getLng());
+                    extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+                    extra.put("userId", userPosition.getUserId());
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.MATCH)
+                            .message(PushMessage.MATCH_90_MESSAGE)
+                            .sourceUserId(userPosition.getUserId())
+                            .extra(extra)
+                            .build());
+                    redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
                 }
             }
         } catch (Exception e) {

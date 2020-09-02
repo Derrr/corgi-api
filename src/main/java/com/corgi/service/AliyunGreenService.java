@@ -24,7 +24,8 @@ import com.corgi.user.api.CorgiSoundService;
 import com.corgi.user.entity.CorgiSound;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
-import com.google.gson.JsonObject;
+import com.aliyuncs.cloudauth.model.v20190307.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -86,17 +83,22 @@ public class AliyunGreenService {
 
     }
 
-    public UserPic checkAvatar(UserDetail userDetail) {
+    public UserDetail checkAvatar(UserDetail userDetail) {
         if (StringUtils.isEmpty(userDetail.getAvatar())) {
             return null;
         }
         UserPic corgiPic = new UserPic();
         corgiPic.setPicUrl(userDetail.getAvatar());
-        corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), userDetail.getUserId(), CheckPic.USER).get(0);
+        corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), userDetail.getUserId(), CheckPic.AVATAR).get(0);
         if (CheckPic.NEED_CHECK.equals(corgiPic.getStatus())) {
-            mailService.sendCheckMessage("用户图片：", userDetail.getUserId());
+            mailService.sendCheckMessage("用户头像：", userDetail.getUserId());
+            userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+            userDetail.setAvatarDataId(corgiPic.getDataId());
+            return userDetail;
         }
-        return corgiPic;
+
+
+        return userDetail;
     }
 
     public UserDetail checkDesc(UserDetail userDetail) {
@@ -108,6 +110,26 @@ public class AliyunGreenService {
             mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         return userDetail;
+    }
+
+    public CorgiPic checkFace(CorgiPic pic, String sourceId) {
+        log.info("pics = " + pic.getPicUrl());
+
+        DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
+        request.setRegionId("cn-hangzhou");
+        request.setMaterialValue("http://image-demo.img-cn-hangzhou.aliyuncs.com/example.jpg");
+
+        try {
+            DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
+
+        } catch (ServerException e) {
+            e.printStackTrace();
+        } catch (ClientException e) {
+            log.error("ErrCode:" + e.getErrCode());
+            log.error("ErrMsg:" + e.getErrMsg());
+            log.error("RequestId:" + e.getRequestId());
+        }
+        return pic;
     }
 
     public CorgiSound checkSound(String url, String sourceId) {
