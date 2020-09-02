@@ -182,7 +182,7 @@ public class CorgiUserController extends BaseController {
         if (pics == null) {
             pics = new ArrayList<>();
         }
-        UserPic userPic = aliyunGreenService.checkAvatar(userDetail);
+        userDetail = aliyunGreenService.checkAvatar(userDetail);
         userDetail.setUserPics(pics);
         userDetail.setCheckStatus(AliyunGreenService.PASS);
         if (!aliyunGreenService.checkText(userDetail.getNickname())) {
