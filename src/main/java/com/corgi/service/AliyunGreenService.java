@@ -6,6 +6,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
+import com.aliyuncs.cloudauth.model.v20190307.DetectFaceAttributesRequest;
+import com.aliyuncs.cloudauth.model.v20190307.DetectFaceAttributesResponse;
+
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.green.model.v20180509.ImageSyncScanRequest;
@@ -24,7 +27,7 @@ import com.corgi.user.api.CorgiSoundService;
 import com.corgi.user.entity.CorgiSound;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
-import com.aliyuncs.cloudauth.model.v20190307.*;
+
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -36,6 +39,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -88,6 +92,7 @@ public class AliyunGreenService {
             return null;
         }
         UserPic corgiPic = new UserPic();
+        corgiPic.setStatus(CorgiPic.NORMAL);
         corgiPic.setPicUrl(userDetail.getAvatar());
         corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), userDetail.getUserId(), CheckPic.AVATAR).get(0);
         if (CheckPic.NEED_CHECK.equals(corgiPic.getStatus())) {
@@ -117,17 +122,32 @@ public class AliyunGreenService {
 
         DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
         request.setRegionId("cn-hangzhou");
-        request.setMaterialValue("http://image-demo.img-cn-hangzhou.aliyuncs.com/example.jpg");
-
+        request.setMaterialValue(pic.getPicUrl());
         try {
             DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
-
+            DetectFaceAttributesResponse.Data data = response.getData();
+            if (CollectionUtils.isEmpty(data.getFaceInfos())) {
+                pic.setStatus(UserDetail.NO_FACE);
+                addCheckPic(pic, sourceId, CheckPic.AVATAR);
+                return pic;
+            }
+            for (DetectFaceAttributesResponse.Data.FaceAttributesDetectInfo detectInfo : data.getFaceInfos()) {
+                if (!"None".equals(detectInfo.getFaceAttributes().getFacetype())) {
+                    return pic;
+                }
+            }
+            pic.setStatus(UserDetail.NO_FACE);
+            addCheckPic(pic, sourceId, CheckPic.AVATAR);
         } catch (ServerException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
+            pic.setStatus(UserDetail.NO_FACE);
+            addCheckPic(pic, sourceId, CheckPic.AVATAR);
         } catch (ClientException e) {
             log.error("ErrCode:" + e.getErrCode());
             log.error("ErrMsg:" + e.getErrMsg());
             log.error("RequestId:" + e.getRequestId());
+            pic.setStatus(UserDetail.NO_FACE);
+            addCheckPic(pic, sourceId, CheckPic.AVATAR);
         }
         return pic;
     }

@@ -161,7 +161,7 @@ public class CorgiBarController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("uncommend")
+    @GetMapping("unrecommend")
     public JsonResult unrecommand(@RequestParam(required = false, name = "activityId") String activityId) {
         CorgiActivity activity = new CorgiActivity();
         activity.setId(activityId);
