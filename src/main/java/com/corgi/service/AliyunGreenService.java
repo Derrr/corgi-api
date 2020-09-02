@@ -89,7 +89,7 @@ public class AliyunGreenService {
 
     public UserDetail checkAvatar(UserDetail userDetail) {
         if (StringUtils.isEmpty(userDetail.getAvatar())) {
-            return null;
+            return userDetail;
         }
         UserPic corgiPic = new UserPic();
         corgiPic.setStatus(CorgiPic.NORMAL);
