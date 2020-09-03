@@ -429,6 +429,10 @@ public class CorgiUserController extends BaseController {
             log.error(e.getMessage(), e);
             throw new PermissionException(Constants.PERMISSION_ERROR_CODE, e.getMessage());
         }
+        UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
+        if (oldPosition != null) {
+            result.put("city", oldPosition.getCity());
+        }
         corgiUserService.updateUserPosition(userPosition);
 //        mqService.sendTrace(TraceFollow.builder()
 //                .userId(userPosition.getUserId())
