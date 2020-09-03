@@ -1,8 +1,8 @@
 package com.corgi.controller;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.user.api.CorgiBillboardService;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
