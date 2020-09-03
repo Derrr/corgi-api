@@ -294,7 +294,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/get_user_sound")
-    public JsonResult getUserSound(){
+    public JsonResult getUserSound() {
         return new JsonResult(corgiSoundService.getCorgiSound(getUserId()));
 
     }
@@ -437,6 +437,22 @@ public class CorgiUserController extends BaseController {
 //                .build());
         return new JsonResult(result);
     }
+
+    @GetMapping("/call_city")
+    public JsonResult callCity(@RequestParam("city") String city) {
+        String nowTime = System.currentTimeMillis() + "";
+        HashMap extra = new HashMap();
+        extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+        extra.put("city", city);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.CITY)
+                .message(PushMessage.CITY_MESSAGE)
+                .sourceUserId(getUserId())
+                .extra(extra)
+                .build());
+        return new JsonResult();
+    }
+
 
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
