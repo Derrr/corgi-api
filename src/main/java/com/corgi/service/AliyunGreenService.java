@@ -13,6 +13,7 @@ import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.green.model.v20180509.ImageSyncScanRequest;
 import com.aliyuncs.green.model.v20180509.TextScanRequest;
+import com.aliyuncs.green.model.v20180509.VoiceSyncScanRequest;
 import com.aliyuncs.http.FormatType;
 import com.aliyuncs.http.HttpResponse;
 import com.aliyuncs.http.MethodType;
@@ -67,6 +68,7 @@ public class AliyunGreenService {
     private IAcsClient managementClient;
 
     private static final String IMAGE_INFO = "?x-oss-process=image/info";
+    private Random random = new Random(System.currentTimeMillis());
 
     @Reference
     private CorgiPicService corgiPicService;
@@ -124,7 +126,7 @@ public class AliyunGreenService {
         DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
         request.setRegionId("cn-hangzhou");
         request.setMaterialValue(pic.getPicUrl());
-        pic.setDataId(UUID.randomUUID().toString());
+        pic.setDataId(getDataId());
         try {
             DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
             DetectFaceAttributesResponse.Data data = response.getData();
@@ -160,108 +162,71 @@ public class AliyunGreenService {
         }
         log.info("sound = " + url);
 
-        ImageSyncScanRequest imageSyncScanRequest = new ImageSyncScanRequest();
-
-        // 指定api返回格式
-        imageSyncScanRequest.setAcceptFormat(FormatType.JSON);
-        // 指定请求方法
-        imageSyncScanRequest.setMethod(MethodType.POST);
-        imageSyncScanRequest.setEncoding("utf-8");
-        //支持http和https
-        imageSyncScanRequest.setProtocol(ProtocolType.HTTP);
-
-
-        JSONObject httpBody = new JSONObject();
-        /**
-         * 设置要检测的场景, 计费是按照该处传递的场景进行
-         * 一次请求中可以同时检测多张图片，每张图片可以同时检测多个风险场景，计费按照场景计算
-         * 例如：检测2张图片，场景传递porn、terrorism，计费会按照2张图片鉴黄，2张图片暴恐检测计算
-         * porn: porn表示色情场景检测
-         */
-        httpBody.put("scenes", "antispam");
-
-        /**
-         * 设置待检测图片， 一张图片一个task
-         * 多张图片同时检测时，处理的时间由最后一个处理完的图片决定
-         * 通常情况下批量检测的平均rt比单张检测的要长, 一次批量提交的图片数越多，rt被拉长的概率越高
-         * 这里以单张图片检测作为示例, 如果是批量图片检测，请自行构建多个task
-         */
-        List<JSONObject> tasks = new ArrayList<>();
-        Date now = new Date();
-        JSONObject task = new JSONObject();
-        String id = UUID.randomUUID().toString();
-        task.put("dataId", id);
         CorgiSound sound = new CorgiSound();
-        sound.setDataId(id);
-        sound.setUserId(sourceId);
         sound.setSoundUrl(url);
+        sound.setDataId(getDataId());
         sound.setStatus(CorgiPic.NORMAL);
-        //设置图片链接
-        task.put("url", url);
-        task.put("time", now);
-        tasks.add(task);
-        httpBody.put("tasks", tasks);
-        httpBody.put("bizType", "sexy_pic");
+        sound.setUserId(sourceId);
 
-        imageSyncScanRequest.setHttpContent(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(httpBody.toJSONString()),
-                "UTF-8", FormatType.JSON);
-        /**
-         * 请设置超时时间, 服务端全链路处理超时时间为10秒，请做相应设置
-         * 如果您设置的ReadTimeout小于服务端处理的时间，程序中会获得一个read timeout异常
-         */
-        imageSyncScanRequest.setConnectTimeout(3000);
-        imageSyncScanRequest.setReadTimeout(10000);
-        HttpResponse httpResponse = null;
+        VoiceSyncScanRequest asyncScanRequest = new VoiceSyncScanRequest();
+        // 指定API返回格式。
+        asyncScanRequest.setAcceptFormat(FormatType.JSON);
+        // 指定请求方法。
+        asyncScanRequest.setMethod(com.aliyuncs.http.MethodType.POST);
+        asyncScanRequest.setRegionId("cn-shanghai");
+        asyncScanRequest.setConnectTimeout(3000);
+        // 由于同步语音检测比较耗时，因此建议将超时时间设置在15秒以上。
+        asyncScanRequest.setReadTimeout(15000);
+
+        List<Map<String, Object>> tasks = new ArrayList<>();
+        Map<String, Object> task1 = new LinkedHashMap<>();
+        // 请将下面的地址修改为要检测的语音文件的地址。
+        task1.put("url", url);
+        tasks.add(task1);
+        JSONObject data = new JSONObject();
+
+        System.out.println("==========Task count:" + tasks.size());
+        data.put("scenes", Arrays.asList("antispam"));
+        data.put("tasks", tasks);
+
+        System.out.println(JSON.toJSONString(data, true));
         try {
-            httpResponse = managementClient.doAction(imageSyncScanRequest);
+            asyncScanRequest.setHttpContent(data.toJSONString().getBytes("UTF-8"), "UTF-8", FormatType.JSON);
+            HttpResponse httpResponse = managementClient.doAction(asyncScanRequest);
+
+            if (httpResponse.isSuccess()) {
+                JSONObject scrResponse = JSON.parseObject(new String(httpResponse.getHttpContent(), "UTF-8"));
+                System.out.println(JSON.toJSONString(scrResponse, true));
+                if (200 == scrResponse.getInteger("code")) {
+                    JSONArray taskResults = scrResponse.getJSONArray("data");
+                    for (Object taskResult : taskResults) {
+                        Integer code = ((JSONObject) taskResult).getInteger("code");
+                        JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
+                        if (200 == code) {
+                            for (Object sceneResult : sceneResults) {
+                                String details = ((JSONObject) sceneResult).getString("details");
+                                sound.setResult(details);
+                                String suggestion = ((JSONObject) sceneResult).getString("suggestion");
+                                if (!suggestion.equals("pass")) {
+                                    sound.setStatus(CorgiPic.NEED_CHECK);
+                                    break;
+                                }
+                            }
+                        } else {
+                            sound.setResult("task process fail: " + JSON.toJSONString(taskResult));
+                        }
+                    }
+                } else {
+                    sound.setResult("detect not success. code: " + scrResponse.getInteger("code"));
+                }
+            } else {
+                sound.setResult("response fail:" + new String(httpResponse.getHttpContent(), "UTF-8"));
+            }
         } catch (Exception e) {
+            sound.setResult(e.getMessage());
             log.error(e.getMessage(), e);
         }
 
-        //服务端接收到请求，并完成处理返回的结果
-        if (httpResponse != null && httpResponse.isSuccess()) {
-            JSONObject scrResponse = JSON.parseObject(org.apache.commons.codec.binary.StringUtils.newStringUtf8(httpResponse.getHttpContent()));
-            System.out.println(JSON.toJSONString(scrResponse, true));
-            int requestCode = scrResponse.getIntValue("code");
-            //每一张图片的检测结果
-            JSONArray taskResults = scrResponse.getJSONArray("data");
-            if (200 == requestCode) {
-                for (Object taskResult : taskResults) {
-                    log.info(((JSONObject) taskResult).toJSONString());
-                    //单张图片的处理结果
-                    int taskCode = ((JSONObject) taskResult).getIntValue("code");
-                    //图片要检测的场景的处理结果, 如果是多个场景，则会有每个场景的结果
-                    JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
-                    if (200 == taskCode) {
-                        boolean needCheck = false;
-                        for (Object sceneResult : sceneResults) {
-                            String scene = ((JSONObject) sceneResult).getString("scene");
-                            String label = ((JSONObject) sceneResult).getString("label");
-                            Double rate = ((JSONObject) sceneResult).getDouble("rate");
-                            String suggestion = ((JSONObject) sceneResult).getString("suggestion");
-                            if (!suggestion.equals("pass")) {
-                                sound.setStatus(CorgiPic.NEED_CHECK);
-                                sound.setResult(suggestion + "-" + scene + "-" + label + "-" + rate);
-                                needCheck = true;
-                                break;
-                            }
-                        }
-                        if (!needCheck) {
-                            sound.setResult("pass");
-                        }
-                    } else {
-                        String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
-                        sound.setResult(result);
-                        //单张图片处理失败, 原因视具体的情况详细分析
-                        log.info(result);
-                    }
-                }
-            } else {
-                String result = JSON.toJSONString("the whole sound scan request failed. response:" + JSON.toJSONString(scrResponse));
-                sound.setResult(result);
-                log.info(result);
-            }
-        }
         return sound;
     }
 
@@ -301,7 +266,7 @@ public class AliyunGreenService {
         Map<String, CorgiPic> picMap = new HashMap<>();
         for (CorgiPic pic : urls) {
             JSONObject task = new JSONObject();
-            String id = UUID.randomUUID().toString();
+            String id = getDataId();
             task.put("dataId", id);
             pic.setDataId(id);
             picMap.put(id, pic);
@@ -451,7 +416,7 @@ public class AliyunGreenService {
         textScanRequest.setRegionId("cn-shanghai");
         List<Map<String, Object>> tasks = new ArrayList<>();
         Map<String, Object> task1 = new LinkedHashMap<>();
-        task1.put("dataId", UUID.randomUUID().toString());
+        task1.put("dataId", getDataId());
         /**
          * 待检测的文本，长度不超过10000个字符
          */
@@ -556,6 +521,10 @@ public class AliyunGreenService {
             mailService.sendCheckMessage("活动：", activity.getId());
         }
         return activity;
+    }
+
+    private String getDataId() {
+        return UUID.randomUUID().toString() + random.nextInt(100);
     }
 
 }
