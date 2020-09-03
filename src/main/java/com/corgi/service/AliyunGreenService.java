@@ -103,7 +103,7 @@ public class AliyunGreenService {
             userDetail.setAvatarDataId(corgiPic.getDataId());
             return userDetail;
         }
-        checkFace(corgiPic, userDetail.getUserId());
+        corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
         userDetail.setAvatarCheckStatus(corgiPic.getStatus());
         userDetail.setAvatarDataId(corgiPic.getDataId());
         return userDetail;
@@ -130,6 +130,7 @@ public class AliyunGreenService {
         try {
             DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
             DetectFaceAttributesResponse.Data data = response.getData();
+            log.info(JSONObject.toJSONString(data));
             if (CollectionUtils.isEmpty(data.getFaceInfos())) {
                 pic.setStatus(UserDetail.NO_FACE);
                 addCheckPic(pic, sourceId, CheckPic.AVATAR);
@@ -185,7 +186,6 @@ public class AliyunGreenService {
         tasks.add(task1);
         JSONObject data = new JSONObject();
 
-        System.out.println("==========Task count:" + tasks.size());
         data.put("scenes", Arrays.asList("antispam"));
         data.put("tasks", tasks);
 
