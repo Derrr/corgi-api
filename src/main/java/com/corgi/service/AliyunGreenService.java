@@ -161,7 +161,7 @@ public class AliyunGreenService {
         log.info("sound = " + url);
 
         ImageSyncScanRequest imageSyncScanRequest = new ImageSyncScanRequest();
-        imageSyncScanRequest.setUriPattern("http://green.cn-shanghai.aliyuncs.com");
+
         // 指定api返回格式
         imageSyncScanRequest.setAcceptFormat(FormatType.JSON);
         // 指定请求方法
@@ -195,6 +195,7 @@ public class AliyunGreenService {
         sound.setDataId(id);
         sound.setUserId(sourceId);
         sound.setSoundUrl(url);
+        sound.setStatus(CorgiPic.NORMAL);
         //设置图片链接
         task.put("url", url);
         task.put("time", now);
@@ -246,19 +247,16 @@ public class AliyunGreenService {
                             }
                         }
                         if (!needCheck) {
-                            sound.setStatus(CorgiPic.NORMAL);
                             sound.setResult("pass");
                         }
                     } else {
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
-                        sound.setStatus(CorgiPic.NORMAL);
                         sound.setResult(result);
                         //单张图片处理失败, 原因视具体的情况详细分析
                         log.info(result);
                     }
                 }
             } else {
-                sound.setStatus(CorgiPic.NORMAL);
                 String result = JSON.toJSONString("the whole sound scan request failed. response:" + JSON.toJSONString(scrResponse));
                 sound.setResult(result);
                 log.info(result);
