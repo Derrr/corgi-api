@@ -196,7 +196,6 @@ public class AliyunGreenService {
 
             if (httpResponse.isSuccess()) {
                 JSONObject scrResponse = JSON.parseObject(new String(httpResponse.getHttpContent(), "UTF-8"));
-                System.out.println(JSON.toJSONString(scrResponse, true));
                 if (200 == scrResponse.getInteger("code")) {
                     JSONArray taskResults = scrResponse.getJSONArray("data");
                     for (Object taskResult : taskResults) {
@@ -204,8 +203,7 @@ public class AliyunGreenService {
                         JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
                         if (200 == code) {
                             for (Object sceneResult : sceneResults) {
-                                String details = ((JSONObject) sceneResult).getString("details");
-                                sound.setResult(details);
+                                sound.setResult(getText((JSONObject) sceneResult));
                                 String suggestion = ((JSONObject) sceneResult).getString("suggestion");
                                 if (!suggestion.equals("pass")) {
                                     sound.setStatus(CorgiPic.NEED_CHECK);
@@ -525,6 +523,15 @@ public class AliyunGreenService {
 
     private String getDataId() {
         return UUID.randomUUID().toString() + random.nextInt(100);
+    }
+
+    private String getText(JSONObject sceneResult) {
+        JSONArray details = sceneResult.getJSONArray("details");
+        StringBuilder sb = new StringBuilder();
+        for (Object detail : details) {
+            sb.append(((JSONObject) detail).getString("text"));
+        }
+        return sb.toString();
     }
 
 }
