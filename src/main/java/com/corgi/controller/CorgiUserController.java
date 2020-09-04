@@ -407,9 +407,9 @@ public class CorgiUserController extends BaseController {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
                     }
                 }
-                String key = "sentMatch_" + userPosition.getUserId();
-                String matchTime = redisTemplate.opsForValue().get(key);
-                if (org.springframework.util.StringUtils.isEmpty(matchTime)) {
+                //String key = "sentMatch_" + userPosition.getUserId();
+                //String matchTime = redisTemplate.opsForValue().get(key);
+                //if (org.springframework.util.StringUtils.isEmpty(matchTime)) {
                     String nowTime = System.currentTimeMillis() + "";
                     HashMap extra = new HashMap();
                     extra.put("lat", userPosition.getLat());
@@ -422,8 +422,8 @@ public class CorgiUserController extends BaseController {
                             .sourceUserId(userPosition.getUserId())
                             .extra(extra)
                             .build());
-                    redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
-                }
+                    //redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
+                //}
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
