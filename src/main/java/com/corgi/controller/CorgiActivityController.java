@@ -326,14 +326,26 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_activity_message")
-    public JsonResult getActivityMessage(@RequestParam("pageSize") Integer pageSize) {
-        List<ActivityMessage> activityMessages = corgiToolService.getActivityMessage(getUserId(), pageSize);
+    public JsonResult getActivityMessage(@RequestParam("pageSize") Integer pageSize, @RequestParam(required = false, name = "type") String type) {
+        List<ActivityMessage> activityMessages;
+        if (StringUtils.isEmpty(type)) {
+            activityMessages = corgiToolService.getActivityMessage(getUserId(), pageSize);
+        } else {
+            activityMessages = corgiToolService.getActivityMessageByType(getUserId(), pageSize, type);
+        }
         return new JsonResult(activityMessages);
     }
 
     @GetMapping("get_all_activity_message")
-    public JsonResult getAllActivityMessage(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<ActivityMessage> activityMessages = corgiToolService.getAllActivityMessage(getUserId(), page, pageSize);
+    public JsonResult getAllActivityMessage(@RequestParam("page") Integer page
+            , @RequestParam("pageSize") Integer pageSize
+            , @RequestParam(required = false, name = "type") String type) {
+        List<ActivityMessage> activityMessages;
+        if (StringUtils.isEmpty(type)) {
+            activityMessages = corgiToolService.getAllActivityMessage(getUserId(), page, pageSize);
+        } else {
+            activityMessages = corgiToolService.getAllActivityMessageByType(getUserId(), page, pageSize, type);
+        }
         return new JsonResult(activityMessages);
     }
 
@@ -345,12 +357,22 @@ public class CorgiActivityController extends BaseController {
 
 
     @GetMapping("count_activity_message")
-    public JsonResult countActivityMessage() {
+    public JsonResult countActivityMessage(@RequestParam(required = false, name = "type") String type) {
         ActivityMessageCount messageCount = new ActivityMessageCount();
-        Long count = corgiToolService.countActivityMessage(getUserId());
+        Long count = 0L;
+        if (StringUtils.isEmpty(type)) {
+            count = corgiToolService.countActivityMessage(getUserId());
+        } else {
+            count = corgiToolService.countActivityMessageByType(getUserId(), type);
+        }
         messageCount.setCount(count);
         if (count != null && count > 0) {
-            ActivityMessage activityMessage = corgiToolService.getLastActivityMessage(getUserId());
+            ActivityMessage activityMessage;
+            if (StringUtils.isEmpty(type)) {
+                activityMessage = corgiToolService.getLastActivityMessage(getUserId());
+            } else {
+                activityMessage = corgiToolService.getLastActivityMessageByType(getUserId(), type);
+            }
             if (activityMessage != null && activityMessage.getFromUserAvatar() != null) {
                 messageCount.setPicUrl(activityMessage.getFromUserAvatar());
             }
