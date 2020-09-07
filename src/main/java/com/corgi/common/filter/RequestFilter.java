@@ -63,6 +63,14 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "update_billboard")
                 || checkURI(servletRequest, "clear_influencer")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
+        } else {
+            log.error("没有jwt");
+            JsonResult jsonResult = new JsonResult("");
+            jsonResult.setCode(Constants.PERMISSION_ERROR_CODE);
+            jsonResult.setMessage("版本太低咯，请小哥哥下载最新版本呢");
+            servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
+            servletResponse.setContentType("application/json;charset=UTF-8");
+            return;
         }
         MDC.put("reqId", UUID.randomUUID().toString());
 
