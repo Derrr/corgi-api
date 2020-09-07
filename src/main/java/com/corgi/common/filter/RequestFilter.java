@@ -64,12 +64,12 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "clear_influencer")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         } else {
-            log.error("没有jwt");
             JsonResult jsonResult = new JsonResult("");
-            jsonResult.setCode(Constants.PERMISSION_ERROR_CODE);
-            jsonResult.setMessage("版本太低咯，请小哥哥下载最新版本呢");
+            jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
+            jsonResult.setMessage("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！");
             servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
             servletResponse.setContentType("application/json;charset=UTF-8");
+            servletResponse.setCharacterEncoding("UTF-8");
             return;
         }
         MDC.put("reqId", UUID.randomUUID().toString());
