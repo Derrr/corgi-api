@@ -60,7 +60,7 @@ public class RequestFilter implements Filter {
         } else if (checkURI(servletRequest, "login")
                 || checkURI(servletRequest, "send_code")
                 || checkURI(servletRequest, "update_user_position")
-                || checkURI(servletRequest, "update_billboard")
+                || checkURI(servletRequest, "get_nearby_user")
                 || checkURI(servletRequest, "clear_influencer")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         } else {
