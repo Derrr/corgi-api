@@ -294,8 +294,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/get_user_sound")
-    public JsonResult getUserSound() {
-        return new JsonResult(corgiSoundService.getCorgiSound(getUserId()));
+    public JsonResult getUserSound(@RequestParam("user_id") String userId) {
+        return new JsonResult(corgiSoundService.getCorgiSound(userId));
 
     }
 
@@ -410,19 +410,19 @@ public class CorgiUserController extends BaseController {
                 //String key = "sentMatch_" + userPosition.getUserId();
                 //String matchTime = redisTemplate.opsForValue().get(key);
                 //if (org.springframework.util.StringUtils.isEmpty(matchTime)) {
-                    String nowTime = System.currentTimeMillis() + "";
-                    HashMap extra = new HashMap();
-                    extra.put("lat", userPosition.getLat());
-                    extra.put("lng", userPosition.getLng());
-                    extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
-                    extra.put("userId", userPosition.getUserId());
-                    mqService.sendMessage(PushMessage.builder()
-                            .type(PushMessage.MATCH)
-                            .message(PushMessage.MATCH_90_MESSAGE)
-                            .sourceUserId(userPosition.getUserId())
-                            .extra(extra)
-                            .build());
-                    //redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
+                String nowTime = System.currentTimeMillis() + "";
+                HashMap extra = new HashMap();
+                extra.put("lat", userPosition.getLat());
+                extra.put("lng", userPosition.getLng());
+                extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+                extra.put("userId", userPosition.getUserId());
+                mqService.sendMessage(PushMessage.builder()
+                        .type(PushMessage.MATCH)
+                        .message(PushMessage.MATCH_90_MESSAGE)
+                        .sourceUserId(userPosition.getUserId())
+                        .extra(extra)
+                        .build());
+                //redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
                 //}
             }
         } catch (Exception e) {
@@ -476,6 +476,7 @@ public class CorgiUserController extends BaseController {
                 } else {
                     userProfile.setActivityCount(Integer.parseInt(count));
                 }
+                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
