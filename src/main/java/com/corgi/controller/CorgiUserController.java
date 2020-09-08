@@ -294,7 +294,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/get_user_sound")
-    public JsonResult getUserSound(@RequestParam("user_id") String userId) {
+    public JsonResult getUserSound(@RequestParam("userId") String userId) {
         return new JsonResult(corgiSoundService.getCorgiSound(userId));
 
     }
