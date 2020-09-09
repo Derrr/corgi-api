@@ -256,6 +256,8 @@ public class CorgiDateController extends BaseController {
         dateDetail.setMatch(userDetail.getMatch());
         dateDetail.setNickname(userDetail.getNickname());
         dateDetail.setUserId(userDetail.getUserId());
+        dateDetail.setAvatar(userDetail.getAvatar());
+        dateDetail.setAvatarCheckStatus(userDetail.getAvatarCheckStatus());
         dateDetail.setUserPics(userDetail.getUserPics());
 
         List<Point> points = redisTemplate.opsForGeo().position(PARK, takenId);
