@@ -61,7 +61,8 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "send_code")
                 || checkURI(servletRequest, "update_user_position")
                 || checkURI(servletRequest, "get_nearby_user")
-                || checkURI(servletRequest, "clear_influencer")) {
+                || checkURI(servletRequest, "clear_influencer")
+                || checkURI(servletRequest, "set_influencer")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         } else {
             JsonResult jsonResult = new JsonResult("");
