@@ -87,16 +87,27 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(activity);
     }
 
+    private Map<String, String> getMap(List<HotActivity> hotActivities) {
+        Map hotMap = new HashMap();
+        for (HotActivity hotActivity : hotActivities) {
+            hotMap.put(hotActivity.getActivityId(), hotActivity.getBarId());
+        }
+        return hotMap;
+    }
+
     @GetMapping("get_hot_activity")
     public JsonResult getHotActivity(@RequestParam("city") String city) {
         List<HotActivity> hotActivities = corgiHotActivityService.getListByCity(city);
+        Map<String, String> hotMap = getMap(hotActivities);
+
         List<String> activityIds = hotActivities.stream().map(HotActivity::getActivityId).collect(Collectors.toList());
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(activityIds);
         List<BarActivityDetail> barActivityDetails = new ArrayList<>();
         Map<String, BarProfile> barProfileMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(corgiActivities)) {
             for (CorgiActivity corgiActivity : corgiActivities) {
-                String barId = corgiActivity.getBarId();
+                String barId = hotMap.get(corgiActivity.getId());
+                corgiActivity.setBarId(barId);
                 BarActivityDetail detail = new BarActivityDetail(corgiActivity);
                 if (barProfileMap.get(barId) != null) {
                     detail.setBarDetail(barProfileMap.get(barId));
