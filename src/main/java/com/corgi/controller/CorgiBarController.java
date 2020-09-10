@@ -89,27 +89,68 @@ public class CorgiBarController extends BaseController {
 
     @GetMapping("get_hot_activity")
     public JsonResult getHotActivity(@RequestParam("city") String city) {
-        List<HotActivity> hotActivities = corgiHotActivityService.getListByCity(city);
-        List<String> activityIds = hotActivities.stream().map(HotActivity::getActivityId).collect(Collectors.toList());
-        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(activityIds);
-        List<BarActivityDetail> barActivityDetails = new ArrayList<>();
-        Map<String, BarProfile> barProfileMap = new HashMap<>();
-        if (!CollectionUtils.isEmpty(corgiActivities)) {
-            for (CorgiActivity corgiActivity : corgiActivities) {
-                String barId = corgiActivity.getBarId();
-                BarActivityDetail detail = new BarActivityDetail(corgiActivity);
-                if (barProfileMap.get(barId) != null) {
-                    detail.setBarDetail(barProfileMap.get(barId));
-                    barActivityDetails.add(detail);
-                    continue;
-                }
-                BarProfile barProfile = corgiBarService.getBarProfile(barId);
-                barProfileMap.put(barId, barProfile);
-                detail.setBarDetail(barProfile);
-                barActivityDetails.add(detail);
+//        List<HotActivity> hotActivities = corgiHotActivityService.getListByCity(city);
+//        List<String> activityIds = hotActivities.stream().map(HotActivity::getActivityId).collect(Collectors.toList());
+//        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(activityIds);
+//        List<BarActivityDetail> barActivityDetails = new ArrayList<>();
+//        Map<String, BarProfile> barProfileMap = new HashMap<>();
+//        if (!CollectionUtils.isEmpty(corgiActivities)) {
+//            for (CorgiActivity corgiActivity : corgiActivities) {
+//                String barId = corgiActivity.getBarId();
+//                BarActivityDetail detail = new BarActivityDetail(corgiActivity);
+//                if (barProfileMap.get(barId) != null) {
+//                    detail.setBarDetail(barProfileMap.get(barId));
+//                    barActivityDetails.add(detail);
+//                    continue;
+//                }
+//                BarProfile barProfile = corgiBarService.getBarProfile(barId);
+//                barProfileMap.put(barId, barProfile);
+//                detail.setBarDetail(barProfile);
+//                barActivityDetails.add(detail);
+//            }
+//        }
+//        return new JsonResult(barActivityDetails);
+        Integer start = 0;
+        Integer size = 6;
+        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city);
+        if (barProfiles.size() == 0) {
+            barProfiles = corgiBarService.getBarListByCity(null);
+        }
+
+        CorgiActivity query = new CorgiActivity();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date nowDate = new Date();
+        query.setCategory(CorgiActivity.CAT_BUSINESS);
+        query.setStatus(CorgiActivity.CREATED);
+        query.setEndTime(sdf.format(nowDate));
+        List<BarActivityDetail> total = new ArrayList<>();
+        for (BarProfile bar : barProfiles) {
+            query.setUserId(bar.getBarId());
+            List<CorgiActivity> activityList = corgiActivityService.getBarActivity(query);
+            for (CorgiActivity activity : activityList) {
+                BarActivityDetail detail = new BarActivityDetail(activity);
+                detail.setBarDetail(bar);
+                total.add(detail);
+            }
+            if (total.size() >= start + size) {
+                return new JsonResult(total.subList(start, start + size));
             }
         }
-        return new JsonResult(barActivityDetails);
+
+        if (size >= total.size()) {
+            return new JsonResult(total);
+        }
+
+        int totalSize = total.size();
+        int begin = start % totalSize;
+        if (begin + size <= totalSize) {
+            return new JsonResult(total.subList(begin, begin + size));
+        }
+
+        List<BarActivityDetail> result = new ArrayList<>();
+        result.addAll(total.subList(begin, totalSize));
+        result.addAll(total.subList(0, begin + size - totalSize));
+        return new JsonResult(result);
     }
 
     @PostMapping("add_bar")
