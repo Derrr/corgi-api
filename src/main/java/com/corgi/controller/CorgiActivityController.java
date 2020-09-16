@@ -86,6 +86,7 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
+        UserDetail user = corgiUserService.getUserDetail(activity.getUserId(),null);
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
         log.info("user {} adding activity", activity.getUserId());
         activity.setCheckStatus(AliyunGreenService.PASS);
@@ -116,7 +117,7 @@ public class CorgiActivityController extends BaseController {
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.ACTIVITY)
                 .sourceUserId(activity.getUserId())
-                .message(PushMessage.ACTIVITY_MESSAGE)
+                .message(user.getNickname().concat("发起了一个活动，快去看看吧"))
                 .extra(extra)
                 .build());
         return new JsonResult(AddActivityResult.getResult(activity).setRecommend(recommendUser).setCount(count));
