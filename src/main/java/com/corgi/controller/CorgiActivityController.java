@@ -96,17 +96,18 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
-        if (!CollectionUtils.isEmpty(corgiActivities)) {
-            Iterator<CorgiActivity> it = corgiActivities.iterator();
-            while (it.hasNext()) {
-                CorgiActivity corgiActivity = it.next();
-                if (corgiActivity.getId().equals(activity.getId())) {
-                    it.remove();
-                }
-            }
-        }
-        List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
+        //List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
+//        if (!CollectionUtils.isEmpty(corgiActivities)) {
+//            Iterator<CorgiActivity> it = corgiActivities.iterator();
+//            while (it.hasNext()) {
+//                CorgiActivity corgiActivity = it.next();
+//                if (corgiActivity.getId().equals(activity.getId())) {
+//                    it.remove();
+//                }
+//            }
+//        }
+        //List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
+        List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
         HashMap extra = new HashMap();
@@ -118,7 +119,7 @@ public class CorgiActivityController extends BaseController {
                 .message(PushMessage.ACTIVITY_MESSAGE)
                 .extra(extra)
                 .build());
-        return new JsonResult(AddActivityResult.getResult(activity).setSimilar(details).setCount(count));
+        return new JsonResult(AddActivityResult.getResult(activity).setRecommend(recommendUser).setCount(count));
     }
 
     @PostMapping("attend")
