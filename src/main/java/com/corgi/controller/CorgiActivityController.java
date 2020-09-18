@@ -962,7 +962,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("/call_city")
-    public JsonResult callCity(@RequestParam("city") String city) {
+    public JsonResult callCity(@RequestParam("city") String city, @RequestParam("activityId") String activityId) {
         String key = getCallCityKey(getUserId());
         if (key == null) {
             return new JsonResult();
@@ -972,6 +972,7 @@ public class CorgiActivityController extends BaseController {
         UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
         extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
         extra.put("city", city);
+        extra.put("activityId", activityId);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.CITY)
                 .message(userDetail.getNickname().concat("正在召集本地小伙伴参加活动！"))
