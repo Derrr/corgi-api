@@ -15,6 +15,7 @@ public class AddActivityResult extends CorgiActivity {
     private long activityCount;
     private List<CorgiActivityDetail> similarActivity;
     private List<UserProfile> recommendUser;
+    private boolean canCallCity;
 
     public static AddActivityResult getResult(CorgiActivity corgiActivity) {
         AddActivityResult result = new AddActivityResult();
@@ -34,6 +35,11 @@ public class AddActivityResult extends CorgiActivity {
 
     public AddActivityResult setCount(long count) {
         this.activityCount = count;
+        return this;
+    }
+
+    public AddActivityResult setCanCallCity(boolean canCallCity) {
+        this.canCallCity = canCallCity;
         return this;
     }
 }

@@ -450,34 +450,6 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(result);
     }
 
-    @GetMapping("/call_city")
-    public JsonResult callCity(@RequestParam("city") String city) {
-        HashMap extra = new HashMap();
-        extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
-        extra.put("city", city);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.CITY)
-                .message(PushMessage.CITY_MESSAGE)
-                .sourceUserId(getUserId())
-                .extra(extra)
-                .build());
-        return new JsonResult();
-    }
-
-    @GetMapping("/call_activity_test")
-    public JsonResult callActivityTest(@RequestParam("activityId") String activityId, @RequestParam("userName")String userName) {
-        HashMap extra = new HashMap();
-        extra.put("activityId", activityId);
-        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.ACTIVITY)
-                .sourceUserId(getUserId())
-                .message(userName.concat("发起了一个活动，快去看看吧"))
-                .extra(extra)
-                .build());
-        return new JsonResult();
-    }
-
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
         userQuery.setGroup(changeGroupList(userQuery.getGroup()));

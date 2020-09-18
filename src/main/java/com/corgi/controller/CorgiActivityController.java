@@ -70,6 +70,8 @@ public class CorgiActivityController extends BaseController {
     @Autowired
     private MQService mqService;
 
+    public static final String CALL_CITY_PREFIX = "call_city_";
+
 //    private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
 //
 //    private static Comparator<CorgiActivityDetail> timeComparator = (a1, a2) -> {
@@ -86,7 +88,7 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
-        UserDetail user = corgiUserService.getUserDetail(activity.getUserId(),null);
+        UserDetail user = corgiUserService.getUserDetail(activity.getUserId(), null);
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
         log.info("user {} adding activity", activity.getUserId());
         activity.setCheckStatus(AliyunGreenService.PASS);
@@ -120,7 +122,10 @@ public class CorgiActivityController extends BaseController {
                 .message(user.getNickname().concat("发起了一个活动，快去看看吧"))
                 .extra(extra)
                 .build());
-        return new JsonResult(AddActivityResult.getResult(activity).setRecommend(recommendUser).setCount(count));
+        return new JsonResult(AddActivityResult.getResult(activity)
+                .setRecommend(recommendUser)
+                .setCount(count)
+                .setCanCallCity(getCallCityKey(activity.getUserId()) != null));
     }
 
     @PostMapping("attend")
@@ -956,6 +961,40 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("/call_city")
+    public JsonResult callCity(@RequestParam("city") String city) {
+        String key = getCallCityKey(getUserId());
+        if (key == null) {
+            return new JsonResult();
+        }
+        redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
+        HashMap extra = new HashMap();
+        UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
+        extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+        extra.put("city", city);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.CITY)
+                .message(userDetail.getNickname().concat("正在召集本地小伙伴参加活动！"))
+                .sourceUserId(getUserId())
+                .extra(extra)
+                .build());
+        return new JsonResult();
+    }
+
+    @GetMapping("/call_activity_test")
+    public JsonResult callActivityTest(@RequestParam("activityId") String activityId, @RequestParam("userName") String userName) {
+        HashMap extra = new HashMap();
+        extra.put("activityId", activityId);
+        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.ACTIVITY)
+                .sourceUserId(getUserId())
+                .message(userName.concat("发起了一个活动，快去看看吧"))
+                .extra(extra)
+                .build());
+        return new JsonResult();
+    }
+
     @GetMapping("test")
     public JsonResult test() {
         corgiFavorActivityService.addFavor("1", "aaaa");
@@ -1117,5 +1156,15 @@ public class CorgiActivityController extends BaseController {
             }
         }
         return oldPosition + offset;
+    }
+
+    private String getCallCityKey(String userId) {
+        for (int i = 1; i <= 3; i++) {
+            String key = CALL_CITY_PREFIX.concat(i + "_").concat(userId);
+            if (!redisTemplate.hasKey(key)) {
+                return key;
+            }
+        }
+        return null;
     }
 }
