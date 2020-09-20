@@ -52,6 +52,7 @@ public class BillboardController extends BaseController {
     public JsonResult getActivityBillboard() {
         List<String> activityIds = corgiBillboardService.getActivityBillboard();
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        log.info(activities.toString());
         return new JsonResult(buildActivityBillboard(activities));
     }
 
