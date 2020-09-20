@@ -52,8 +52,31 @@ public class BillboardController extends BaseController {
     public JsonResult getActivityBillboard() {
         List<String> activityIds = corgiBillboardService.getActivityBillboard();
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        log.info(activities.toString());
-        return new JsonResult(buildActivityBillboard(activities));
+        return new JsonResult(buildActivityBillboard(activities, false));
+    }
+
+    @GetMapping("get_all_activity_billboard")
+    public JsonResult getAllActivityBillboard() {
+        List<String> activityIds = corgiBillboardService.getActivityBillboard();
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        List<ActivityBillboard> activityBillboards = buildActivityBillboard(activities, true);
+        if (activityIds.size() > activityBillboards.size()) {
+            for (String activityId : activityIds) {
+                boolean hasId = false;
+                for (ActivityBillboard billboard : activityBillboards) {
+                    if (activityId.equals(billboard.getId())) {
+                        hasId = true;
+                        break;
+                    }
+                }
+                if (!hasId) {
+                    ActivityBillboard billboard = new ActivityBillboard();
+                    billboard.setId(activityId);
+                    activityBillboards.add(billboard);
+                }
+            }
+        }
+        return new JsonResult();
     }
 
     @GetMapping("add_activity_billboard")
@@ -72,7 +95,7 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
-    private List<ActivityBillboard> buildActivityBillboard(List<CorgiActivity> activities) {
+    private List<ActivityBillboard> buildActivityBillboard(List<CorgiActivity> activities, boolean all) {
         List<ActivityBillboard> billboards = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         String nowTime = sdf.format(new Date());
@@ -81,8 +104,7 @@ public class BillboardController extends BaseController {
                 continue;
             }
             ActivityBillboard billboard = ActivityBillboard.getResult(corgiActivity);
-            log.info(billboard.getSignUpTime() + " nowTime = " + nowTime + " " + nowTime.compareTo(billboard.getSignUpTime()));
-            if (!StringUtils.isEmpty(billboard.getSignUpTime()) && nowTime.compareTo(billboard.getSignUpTime()) > 0) {
+            if (!all && !StringUtils.isEmpty(billboard.getSignUpTime()) && nowTime.compareTo(billboard.getSignUpTime()) > 0) {
                 continue;
             }
             billboard.setPics(corgiPicService.getActivityPic(billboard.getId()));
@@ -97,6 +119,7 @@ public class BillboardController extends BaseController {
             }
             billboard.setSignUpUsers(signUpUsers);
             billboard.setSignUpCount(userProfiles.size());
+            billboards.add(billboard);
         }
         return billboards;
     }
