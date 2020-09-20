@@ -89,6 +89,9 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("query_activity")
     public JsonResult queryActivity(CorgiActivity activity, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (StringUtils.isEmpty(activity.getStatus())) {
+            activity.setStatus(CorgiActivity.NOT_DELETED);
+        }
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
         return new JsonResult(activityList);
     }
