@@ -81,7 +81,7 @@ public class BillboardController extends BaseController {
                 continue;
             }
             ActivityBillboard billboard = ActivityBillboard.getResult(corgiActivity);
-            log.info(billboard.getSignUpTime() + " nowTime = " + nowTime);
+            log.info(billboard.getSignUpTime() + " nowTime = " + nowTime + " " + nowTime.compareTo(billboard.getSignUpTime()));
             if (!StringUtils.isEmpty(billboard.getSignUpTime()) && nowTime.compareTo(billboard.getSignUpTime()) > 0) {
                 continue;
             }
