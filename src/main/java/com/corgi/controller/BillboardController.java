@@ -76,7 +76,7 @@ public class BillboardController extends BaseController {
                 }
             }
         }
-        return new JsonResult();
+        return new JsonResult(activityBillboards);
     }
 
     @GetMapping("add_activity_billboard")
