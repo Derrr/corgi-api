@@ -98,6 +98,9 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("count_activity")
     public JsonResult countActivity(CorgiActivity activity) {
+        if (StringUtils.isEmpty(activity.getStatus())) {
+            activity.setStatus(CorgiActivity.NOT_DELETED);
+        }
         long count = corgiActivityService.countCorgiActivity(activity);
         return new JsonResult(count);
     }
