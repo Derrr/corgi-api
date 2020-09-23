@@ -294,7 +294,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/play_user_sound")
-    public JsonResult deleteUserSound(@RequestParam("userId")String userId) {
+    public JsonResult deleteUserSound(@RequestParam("userId") String userId) {
         CorgiSound corgiSound = new CorgiSound();
         corgiSound.setUserId(userId);
         corgiSoundService.updateCorgiSound(corgiSound);
@@ -711,6 +711,11 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(userProfiles);
+    }
+
+    @GetMapping("get_influencer")
+    public JsonResult getInfluencer(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiUserService.searchInfluencer(null, null, page, pageSize));
     }
 
 
