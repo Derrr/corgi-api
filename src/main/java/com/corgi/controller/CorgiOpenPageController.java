@@ -7,10 +7,12 @@ import com.corgi.user.api.CorgiOpenPageService;
 import com.corgi.user.entity.CorgiBanner;
 import com.corgi.user.entity.CorgiOpenPage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -61,7 +63,12 @@ public class CorgiOpenPageController extends BaseController {
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
-        return new JsonResult(corgiOpenPageService.listOpenPage(corgiOpenPage));
+        List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
+        if(CollectionUtils.isEmpty(openPages)){
+            corgiOpenPage.setCity("全国");
+            openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
+        }
+        return new JsonResult(openPages);
     }
 
 }
