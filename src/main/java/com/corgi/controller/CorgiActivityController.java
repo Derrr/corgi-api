@@ -113,15 +113,15 @@ public class CorgiActivityController extends BaseController {
         List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity());
         long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
-        HashMap extra = new HashMap();
-        extra.put("activityId", activity.getId());
-        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.ACTIVITY)
-                .sourceUserId(activity.getUserId())
-                .message(user.getNickname().concat("发起了一个活动，快去看看吧"))
-                .extra(extra)
-                .build());
+//        HashMap extra = new HashMap();
+//        extra.put("activityId", activity.getId());
+//        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+//        mqService.sendMessage(PushMessage.builder()
+//                .type(PushMessage.ACTIVITY)
+//                .sourceUserId(activity.getUserId())
+//                .message(user.getNickname().concat("发起了一个活动，快去看看吧"))
+//                .extra(extra)
+//                .build());
         return new JsonResult(AddActivityResult.getResult(activity)
                 .setRecommend(recommendUser)
                 .setCount(count)
