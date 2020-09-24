@@ -982,15 +982,15 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("/call_activity_test")
-    public JsonResult callActivityTest(@RequestParam("activityId") String activityId, @RequestParam("userName") String userName) {
+    @GetMapping("/call_activity_city")
+    public JsonResult callActivityTest(@RequestParam("activityId") String activityId, @RequestParam("city") String city) {
         HashMap extra = new HashMap();
         extra.put("activityId", activityId);
+        extra.put("city", city);
         extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
         mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.ACTIVITY)
+                .type(PushMessage.ACTIVITY + "_city")
                 .sourceUserId(getUserId())
-                .message(userName.concat("发起了一个活动，快去看看吧"))
                 .extra(extra)
                 .build());
         return new JsonResult();
