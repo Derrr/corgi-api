@@ -874,6 +874,23 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(result);
     }
 
+    @GetMapping("get_participate_activity")
+    public JsonResult getUserParticipateActivity(@RequestParam(required = false, name = "userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (StringUtils.isEmpty(userId)) {
+            userId = getUserId();
+        }
+        List<String> activityIds = corgiUserActivityService.getParticipateActivity(userId, page, pageSize);
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
+        List<CorgiActivity> result = new ArrayList<>();
+        for (CorgiActivity activity : activityList) {
+            if (!CorgiActivity.DELETED.equals(activity.getStatus())) {
+                activity.setPics(corgiPicService.getActivityPic(activity.getId()));
+                result.add(activity);
+            }
+        }
+        return new JsonResult(result);
+    }
+
 
     @GetMapping("/delete_activity_pic")
     public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
@@ -992,7 +1009,7 @@ public class CorgiActivityController extends BaseController {
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.ACTIVITY + "_city")
                 .sourceUserId(getUserId())
-                .message(userDetail.getNickname()+"发起了一个活动，快去看看吧")
+                .message(userDetail.getNickname() + "发起了一个活动，快去看看吧")
                 .extra(extra)
                 .build());
         return new JsonResult();
