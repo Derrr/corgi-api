@@ -110,7 +110,7 @@ public class CorgiActivityController extends BaseController {
 //            }
 //        }
         //List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
-        List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity());
+        List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
         if (CollectionUtils.isEmpty(recommendUser)) {
             recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
         }
