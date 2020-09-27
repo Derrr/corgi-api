@@ -436,6 +436,7 @@ public class CorgiActivityController extends BaseController {
             if (!checkActivityUser(activity.getId(), getUserId())) {
                 throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
             }
+            activity.setUserId(getUserId());
         }
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
@@ -445,7 +446,17 @@ public class CorgiActivityController extends BaseController {
             activity.setStatus(CorgiActivity.CREATED);
             corgiActivityService.updateCorgiActivityStatus(activity);
         }
-        return new JsonResult(activity);
+        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
+            List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
+            if (CollectionUtils.isEmpty(recommendUser)) {
+                recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
+            }
+            return new JsonResult(AddActivityResult.getResult(activity)
+                    .setRecommend(recommendUser)
+                    .setCanCallCity(getCallCityKey(activity.getUserId()) != null));
+        } else {
+            return new JsonResult(activity);
+        }
     }
 
     @PostMapping("update_activity_uncheck")
