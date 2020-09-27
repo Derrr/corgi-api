@@ -111,6 +111,9 @@ public class CorgiActivityController extends BaseController {
 //        }
         //List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity());
+        if (CollectionUtils.isEmpty(recommendUser)) {
+            recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
+        }
         long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
 //        HashMap extra = new HashMap();
