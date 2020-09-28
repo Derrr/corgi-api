@@ -1002,9 +1002,10 @@ public class CorgiActivityController extends BaseController {
         redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         HashMap extra = new HashMap();
         UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
-        extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+        extra.put("type", 902);
         extra.put("city", city);
         extra.put("activityId", activityId);
+        populateExtra(extra, activityId);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.CITY)
                 .message(userDetail.getNickname().concat("正在召集本地小伙伴参加活动！"))
@@ -1020,7 +1021,8 @@ public class CorgiActivityController extends BaseController {
         UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
         extra.put("activityId", activityId);
         extra.put("city", city);
-        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
+        extra.put("type", 902);
+        populateExtra(extra, activityId);
         mqService.sendMessage(PushMessage.builder()
                 .type(PushMessage.ACTIVITY + "_city")
                 .sourceUserId(getUserId())
@@ -1028,6 +1030,18 @@ public class CorgiActivityController extends BaseController {
                 .extra(extra)
                 .build());
         return new JsonResult();
+    }
+
+    private void populateExtra(HashMap extra, String activityId) {
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
+        if (corgiActivities != null && corgiActivities.size() > 0 && corgiActivities.get(0) != null) {
+            CorgiActivity activity = corgiActivities.get(0);
+            extra.put("title", activity.getTitle());
+            List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
+            if (!CollectionUtils.isEmpty(pics) && pics.get(0) != null) {
+                extra.put("picUrl", activity.getPics().get(0).getPicUrl());
+            }
+        }
     }
 
     @GetMapping("test")
