@@ -1033,6 +1033,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     private void populateExtra(HashMap extra, String activityId) {
+        extra.put("aId", activityId);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (corgiActivities != null && corgiActivities.size() > 0 && corgiActivities.get(0) != null) {
             CorgiActivity activity = corgiActivities.get(0);
