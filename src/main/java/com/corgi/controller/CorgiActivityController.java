@@ -679,6 +679,7 @@ public class CorgiActivityController extends BaseController {
         }
         List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
         detail.setSimilarActivity(similarActivity);
+        detail.setCanCallCity(!StringUtils.isEmpty(getCallCityKey(getUserId())));
         return new JsonResult(detail);
     }
 
