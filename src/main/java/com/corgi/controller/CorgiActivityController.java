@@ -453,7 +453,8 @@ public class CorgiActivityController extends BaseController {
             }
             return new JsonResult(AddActivityResult.getResult(activity)
                     .setRecommend(recommendUser)
-                    .setCanCallCity(getCallCityKey(activity.getUserId()) != null));
+                    .setCanCallCity(getCallCityKey(activity.getUserId()) != null)
+                    .setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activity.getId()))));
         } else {
             return new JsonResult(activity);
         }
@@ -683,6 +684,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
         detail.setSimilarActivity(similarActivity);
         detail.setCanCallCity(!StringUtils.isEmpty(getCallCityKey(getUserId())));
+        detail.setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activityId)));
         return new JsonResult(detail);
     }
 
@@ -1000,7 +1002,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult callCity(@RequestParam("city") String city, @RequestParam("activityId") String activityId) {
         String key = getCallCityKey(getUserId());
         if (key == null) {
-            return new JsonResult(Constants.API_ERROR_CODE,"这周一呼百应次数已超过三次");
+            return new JsonResult(Constants.API_ERROR_CODE, "这周一呼百应次数已超过三次");
         }
         redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         HashMap extra = new HashMap();
@@ -1015,6 +1017,7 @@ public class CorgiActivityController extends BaseController {
                 .sourceUserId(getUserId())
                 .extra(extra)
                 .build());
+        redisTemplate.opsForValue().set(CALL_CITY_PREFIX.concat(activityId), System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         return new JsonResult();
     }
 
