@@ -496,14 +496,17 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(corgiActivities)) {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
+        UserDetail userDetail = corgiUserService.getUserDetail(userId, null);
         HashMap extra = new HashMap();
         extra.put("activityId", activityId);
-        extra.put("type", PushMessage.SIGN_UP_MESSAGE_TYPE);
+        extra.put("type", 902);
+        populateExtra(extra, activityId);
         mqService.sendMessage(PushMessage.builder()
                 .sourceUserId(userId)
+                .type(PushMessage.ACTIVITY + "_city")
                 .targetUserId(corgiActivities.get(0).getUserId())
                 .extra(extra)
-                .message(PushMessage.SIGN_UP_MESSAGE)
+                .message(userDetail.getNickname().concat("刚刚报名了一个本地活动！"))
                 .build());
 
         return new JsonResult();
@@ -1038,6 +1041,10 @@ public class CorgiActivityController extends BaseController {
         if (corgiActivities != null && corgiActivities.size() > 0 && corgiActivities.get(0) != null) {
             CorgiActivity activity = corgiActivities.get(0);
             extra.put("title", activity.getTitle());
+            extra.put("desc", activity.getContent());
+            if (!StringUtils.isEmpty(activity.getCity())) {
+                extra.put("city", activity.getCity());
+            }
             List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
             if (!CollectionUtils.isEmpty(pics) && pics.get(0) != null) {
                 extra.put("picUrl", activity.getPics().get(0).getPicUrl());
