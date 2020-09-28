@@ -1000,7 +1000,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult callCity(@RequestParam("city") String city, @RequestParam("activityId") String activityId) {
         String key = getCallCityKey(getUserId());
         if (key == null) {
-            return new JsonResult();
+            return new JsonResult(Constants.API_ERROR_CODE,"这周一呼百应次数已超过三次");
         }
         redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         HashMap extra = new HashMap();
