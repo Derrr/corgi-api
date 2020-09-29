@@ -501,7 +501,7 @@ public class CorgiActivityController extends BaseController {
         HashMap extra = new HashMap();
         extra.put("activityId", activityId);
         extra.put("type", 902);
-        populateExtra(extra, activityId);
+        populateExtra(extra, activityId, null);
         mqService.sendMessage(PushMessage.builder()
                 .sourceUserId(userId)
                 .type(PushMessage.ACTIVITY + "_city")
@@ -1010,15 +1010,17 @@ public class CorgiActivityController extends BaseController {
         extra.put("type", 902);
         extra.put("city", city);
         extra.put("activityId", activityId);
-        populateExtra(extra, activityId);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.CITY)
-                .message(userDetail.getNickname().concat("正在召集本地小伙伴参加活动！"))
-                .sourceUserId(getUserId())
-                .extra(extra)
-                .build());
-        redisTemplate.opsForValue().set(CALL_CITY_PREFIX.concat(activityId), System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
+        if (populateExtra(extra, activityId, getUserId())) {
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.CITY)
+                    .message(userDetail.getNickname().concat("正在召集本地小伙伴参加活动！"))
+                    .sourceUserId(getUserId())
+                    .extra(extra)
+                    .build());
+            redisTemplate.opsForValue().set(CALL_CITY_PREFIX.concat(activityId), System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
+        }
         return new JsonResult();
+
     }
 
     @GetMapping("/call_activity_city")
@@ -1028,21 +1030,25 @@ public class CorgiActivityController extends BaseController {
         extra.put("activityId", activityId);
         extra.put("city", city);
         extra.put("type", 902);
-        populateExtra(extra, activityId);
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.ACTIVITY + "_city")
-                .sourceUserId(getUserId())
-                .message(userDetail.getNickname() + "发起了一个活动，快去看看吧")
-                .extra(extra)
-                .build());
+        if (populateExtra(extra, activityId, getUserId())) {
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.ACTIVITY + "_city")
+                    .sourceUserId(getUserId())
+                    .message(userDetail.getNickname() + "发起了一个活动，快去看看吧")
+                    .extra(extra)
+                    .build());
+        }
         return new JsonResult();
     }
 
-    private void populateExtra(HashMap extra, String activityId) {
+    private boolean populateExtra(HashMap extra, String activityId, String userId) {
         extra.put("aId", activityId);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (corgiActivities != null && corgiActivities.size() > 0 && corgiActivities.get(0) != null) {
             CorgiActivity activity = corgiActivities.get(0);
+            if (userId != null && !userId.equals(activity.getUserId())) {
+                return false;
+            }
             extra.put("title", activity.getTitle());
             extra.put("desc", activity.getContent());
             if (!StringUtils.isEmpty(activity.getCity())) {
@@ -1052,7 +1058,9 @@ public class CorgiActivityController extends BaseController {
             if (!CollectionUtils.isEmpty(pics) && pics.get(0) != null) {
                 extra.put("picUrl", activity.getPics().get(0).getPicUrl());
             }
+            return true;
         }
+        return false;
     }
 
     @GetMapping("test")
