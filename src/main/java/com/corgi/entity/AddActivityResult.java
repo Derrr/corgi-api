@@ -1,5 +1,6 @@
 package com.corgi.entity;
 
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.UserProfile;
 import lombok.Data;
@@ -46,6 +47,11 @@ public class AddActivityResult extends CorgiActivity {
 
     public AddActivityResult setHasCallCity(boolean hasCallCity) {
         this.hasCallCity = hasCallCity;
+        return this;
+    }
+
+    public AddActivityResult setActivityPics(List<ActivityPic> activityPics){
+        super.setPics(activityPics);
         return this;
     }
 }

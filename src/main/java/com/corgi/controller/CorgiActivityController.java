@@ -126,6 +126,7 @@ public class CorgiActivityController extends BaseController {
 //                .extra(extra)
 //                .build());
         return new JsonResult(AddActivityResult.getResult(activity)
+                .setActivityPics(activityPics)
                 .setRecommend(recommendUser)
                 .setCount(count)
                 .setCanCallCity(getCallCityKey(activity.getUserId()) != null));
