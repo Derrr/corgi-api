@@ -88,7 +88,6 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
-        UserDetail user = corgiUserService.getUserDetail(activity.getUserId(), null);
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
         log.info("user {} adding activity", activity.getUserId());
         activity.setCheckStatus(AliyunGreenService.PASS);
@@ -99,17 +98,6 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        //List<CorgiActivity> corgiActivities = corgiActivityService.getSimilarActivity(activity);
-//        if (!CollectionUtils.isEmpty(corgiActivities)) {
-//            Iterator<CorgiActivity> it = corgiActivities.iterator();
-//            while (it.hasNext()) {
-//                CorgiActivity corgiActivity = it.next();
-//                if (corgiActivity.getId().equals(activity.getId())) {
-//                    it.remove();
-//                }
-//            }
-//        }
-        //List<CorgiActivityDetail> details = convertDetail(corgiActivities, activity.getUserId());
         List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
         if (CollectionUtils.isEmpty(recommendUser)) {
             recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
