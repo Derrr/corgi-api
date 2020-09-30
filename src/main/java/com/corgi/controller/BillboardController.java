@@ -107,6 +107,9 @@ public class BillboardController extends BaseController {
             if (!all && !StringUtils.isEmpty(billboard.getSignUpTime()) && nowTime.compareTo(billboard.getSignUpTime()) > 0) {
                 continue;
             }
+            if (!all && CorgiActivity.DELETED.equals(billboard.getStatus())) {
+                continue;
+            }
             billboard.setPics(corgiPicService.getActivityPic(billboard.getId()));
             List<UserProfile> userProfiles = corgiUserActivityService.getUsers(billboard.getId(), null, null);
             List<UserProfile> signUpUsers = new ArrayList<>();
