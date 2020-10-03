@@ -20,6 +20,15 @@ public class CorgiTest {
     }
 
     @Test
+    public void testProjectCJWTPayload() {
+        String jwt = JWTUtils.createJWT("-2", "V1.0", 1000 * 60 * 60 * 24 * 365 * 100L);
+        System.out.println(jwt);
+        DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
+        System.out.println(decodedJWT.getExpiresAt());
+        System.out.println(decodedJWT.getClaim("version").asString());
+    }
+
+    @Test
     public void test() {
         String test = "2020/05/0115:00";
         if (!test.contains(" ")) {
