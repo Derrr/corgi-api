@@ -47,7 +47,7 @@ public class WechatController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "用户不存在");
         }
         corgiToolService.bindWechat(wechatId, profiles.get(0).getUserId());
-        return new JsonResult();
+        return new JsonResult(profiles.get(0).getUserId());
     }
 
     @GetMapping("getCorgiId")
