@@ -37,6 +37,9 @@ public class WechatController extends BaseController {
 
     @GetMapping("bind")
     public JsonResult bind(@RequestParam("wechatId") String wechatId, @RequestParam("corgiTel") String corgiTel) {
+        if (!"-2".equals(getUserId())) {
+            return new JsonResult();
+        }
         UserDetail detail = new UserDetail();
         detail.setTelNo(corgiTel);
         List<UserProfile> profiles = corgiUserService.searchUsers(detail, null, 1, 1);
