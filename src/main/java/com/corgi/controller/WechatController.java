@@ -43,13 +43,14 @@ public class WechatController extends BaseController {
         if (CollectionUtils.isEmpty(profiles) || profiles.get(0) == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "用户不存在");
         }
-        corgiToolService.bindWechat(wechatId, profiles.get(0).getUserId());
+        //corgiToolService.bindWechat(wechatId, profiles.get(0).getUserId());
         return new JsonResult();
     }
 
     @GetMapping("getCorgiId")
     public JsonResult getCorgi(@RequestParam("wechatId") String wechatId) {
-        return new JsonResult(corgiToolService.getIdByWechatId(wechatId));
+        //corgiToolService.getIdByWechatId(wechatId)
+        return new JsonResult();
     }
 
 }
