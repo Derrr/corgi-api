@@ -415,23 +415,19 @@ public class CorgiUserController extends BaseController {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
                     }
                 }
-                //String key = "sentMatch_" + userPosition.getUserId();
-                //String matchTime = redisTemplate.opsForValue().get(key);
-                //if (org.springframework.util.StringUtils.isEmpty(matchTime)) {
-                String nowTime = System.currentTimeMillis() + "";
-                HashMap extra = new HashMap();
-                extra.put("lat", userPosition.getLat());
-                extra.put("lng", userPosition.getLng());
-                extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
-                extra.put("userId", userPosition.getUserId());
-                mqService.sendMessage(PushMessage.builder()
-                        .type(PushMessage.MATCH)
-                        .message(PushMessage.MATCH_90_MESSAGE)
-                        .sourceUserId(userPosition.getUserId())
-                        .extra(extra)
-                        .build());
-                //redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
-                //}
+                if (userPosition.getLat() < 200 && userPosition.getLng() < 200) {
+                    HashMap extra = new HashMap();
+                    extra.put("lat", userPosition.getLat());
+                    extra.put("lng", userPosition.getLng());
+                    extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+                    extra.put("userId", userPosition.getUserId());
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.MATCH)
+                            .message(PushMessage.MATCH_90_MESSAGE)
+                            .sourceUserId(userPosition.getUserId())
+                            .extra(extra)
+                            .build());
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

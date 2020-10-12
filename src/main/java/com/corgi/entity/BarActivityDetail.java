@@ -16,6 +16,8 @@ import java.util.List;
 public class BarActivityDetail extends CorgiActivity {
     private BarProfile barDetail;
 
+    private List<CorgiCoupon> coupons;
+
     public BarActivityDetail() {
         super();
     }

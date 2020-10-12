@@ -5,8 +5,10 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.BarActivityDetail;
+import com.corgi.entity.BarLogin;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
@@ -19,8 +21,10 @@ import com.corgi.user.entity.BarProfile;
 import com.corgi.user.entity.HotActivity;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -121,47 +125,6 @@ public class CorgiBarController extends BaseController {
             }
         }
         return new JsonResult(barActivityDetails);
-//        Integer start = 0;
-//        Integer size = 6;
-//        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city);
-//        if (barProfiles.size() == 0) {
-//            barProfiles = corgiBarService.getBarListByCity(null);
-//        }
-//
-//        CorgiActivity query = new CorgiActivity();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        Date nowDate = new Date();
-//        query.setCategory(CorgiActivity.CAT_BUSINESS);
-//        query.setStatus(CorgiActivity.CREATED);
-//        query.setEndTime(sdf.format(nowDate));
-//        List<BarActivityDetail> total = new ArrayList<>();
-//        for (BarProfile bar : barProfiles) {
-//            query.setUserId(bar.getBarId());
-//            List<CorgiActivity> activityList = corgiActivityService.getBarActivity(query);
-//            for (CorgiActivity activity : activityList) {
-//                BarActivityDetail detail = new BarActivityDetail(activity);
-//                detail.setBarDetail(bar);
-//                total.add(detail);
-//            }
-//            if (total.size() >= start + size) {
-//                return new JsonResult(total.subList(start, start + size));
-//            }
-//        }
-//
-//        if (size >= total.size()) {
-//            return new JsonResult(total);
-//        }
-//
-//        int totalSize = total.size();
-//        int begin = start % totalSize;
-//        if (begin + size <= totalSize) {
-//            return new JsonResult(total.subList(begin, begin + size));
-//        }
-//
-//        List<BarActivityDetail> result = new ArrayList<>();
-//        result.addAll(total.subList(begin, totalSize));
-//        result.addAll(total.subList(0, begin + size - totalSize));
-//        return new JsonResult(result);
     }
 
     @PostMapping("add_bar")
@@ -176,7 +139,7 @@ public class CorgiBarController extends BaseController {
     @PostMapping("update_bar")
     public JsonResult updateBar(@RequestBody BarProfile barProfile) {
         if (hasUserId()) {
-            return new JsonResult();
+            barProfile.setBarId(getUserId());
         }
         corgiBarService.updateBarProfile(barProfile);
         return new JsonResult();
@@ -195,6 +158,15 @@ public class CorgiBarController extends BaseController {
     @GetMapping("get_bar_list")
     public JsonResult getBarList(@RequestParam(required = false, name = "status") String status) {
         List<BarProfile> barProfiles = corgiBarService.getBarList(status);
+        return new JsonResult(barProfiles);
+    }
+
+    @GetMapping("get_bar_account_list")
+    public JsonResult getBarAccountList(@RequestParam(required = false, name = "status") String status) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        List<BarProfile> barProfiles = corgiBarService.getBarAccountList(status);
         return new JsonResult(barProfiles);
     }
 
@@ -219,6 +191,28 @@ public class CorgiBarController extends BaseController {
         activity.setId(activityId);
         activity.setRecommend("disable");
         corgiActivityService.updateCorgiActivityStatus(activity);
+        return new JsonResult();
+    }
+
+    @GetMapping("login")
+    public JsonResult login(@RequestParam("account") String account, @RequestParam("password") String password) throws PermissionException {
+        BarProfile profile = corgiBarService.getBarByAccount(account, password);
+        BarLogin login = new BarLogin();
+        if (profile != null && !StringUtils.isEmpty(profile.getBarId())) {
+            BeanUtils.copyProperties(profile, login);
+            login.setJwt(JWTUtils.createJWT(profile.getBarId(), "1.0.0"));
+        } else {
+            throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "账号密码错误");
+        }
+        return new JsonResult(login);
+    }
+
+    @PostMapping("set_account")
+    public JsonResult setAccount(@RequestParam("bar") BarProfile barProfile) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        corgiBarService.setBarAccount(barProfile.getBarId(), barProfile.getAccount(), barProfile.getPassword());
         return new JsonResult();
     }
 
