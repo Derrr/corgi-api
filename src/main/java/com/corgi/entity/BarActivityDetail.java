@@ -17,6 +17,7 @@ public class BarActivityDetail extends CorgiActivity {
     private BarProfile barDetail;
 
     private List<CorgiCoupon> coupons;
+    private String video;
 
     public BarActivityDetail() {
         super();

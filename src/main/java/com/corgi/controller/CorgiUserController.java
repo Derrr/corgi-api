@@ -319,7 +319,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/delete_user_pic")
     public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
-        String result = corgiPicService.deleteUserPic(picId);
+        String result = corgiPicService.deleteUserPic(picId, getUserId());
         return getJsonResult(result);
     }
 

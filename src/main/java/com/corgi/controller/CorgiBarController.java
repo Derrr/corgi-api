@@ -13,12 +13,8 @@ import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
-import com.corgi.user.api.CorgiAreaService;
-import com.corgi.user.api.CorgiBarService;
-import com.corgi.user.api.CorgiHotActivityService;
-import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.BarProfile;
-import com.corgi.user.entity.HotActivity;
+import com.corgi.user.api.*;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.BeanUtils;
@@ -45,6 +41,10 @@ public class CorgiBarController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiHotActivityService corgiHotActivityService;
+    @Reference
+    private CorgiPicService corgiPicService;
+    @Reference
+    private CorgiVideoService corgiVideoService;
     @Autowired
     private CorgiUtilService corgiUtilService;
 
@@ -173,6 +173,23 @@ public class CorgiBarController extends BaseController {
     @GetMapping("get_bar")
     public JsonResult getBar(@RequestParam(required = false, name = "barId") String barId) {
         BarProfile barProfiles = corgiBarService.getBarProfile(barId);
+        List<UserPic> userPics = corgiPicService.getUserPic(barId);
+        List<BarPic> barPics = new ArrayList<>();
+        if (userPics != null) {
+            for (UserPic userPic : userPics) {
+                BarPic barPic = new BarPic();
+                barPic.setBarId(barId);
+                barPic.setPicId(userPic.getPicId());
+                barPic.setPicUrl(userPic.getPicUrl());
+                barPics.add(barPic);
+            }
+        }
+        barProfiles.setBarPics(barPics);
+        List<UserVideo> videos = corgiVideoService.getVideo(getUserId());
+        if (!CollectionUtils.isEmpty(videos)) {
+            UserVideo video = videos.get(0);
+            barProfiles.setVideo(video.getVideoUrl());
+        }
         return new JsonResult(barProfiles);
     }
 
@@ -214,6 +231,46 @@ public class CorgiBarController extends BaseController {
         }
         corgiBarService.setBarAccount(barProfile.getBarId(), barProfile.getAccount(), barProfile.getPassword());
         return new JsonResult();
+    }
+
+    @GetMapping("/delete_bar_pic")
+    public JsonResult deleteBarPic(@RequestParam("picId") String picId) {
+        String result = corgiPicService.deleteUserPic(picId, getUserId());
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/update_bar_pic")
+    public JsonResult updateBarPic(@RequestBody UserPic userPic) {
+        if (hasUserId()) {
+            userPic.setUserId(getUserId());
+        }
+        String result = corgiPicService.updateUserPic(userPic);
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/add_bar_pic")
+    public JsonResult addBarPic(@RequestBody UserPic userPic) {
+        if (hasUserId()) {
+            userPic.setUserId(getUserId());
+        }
+        String result = corgiPicService.addUserPic(userPic);
+        userPic.setPicId(result);
+        return new JsonResult(userPic);
+    }
+
+    @GetMapping("/delete_bar_video")
+    public JsonResult deleteBarVideo() {
+        corgiVideoService.deleteVideo(getUserId());
+        return new JsonResult();
+    }
+
+    @PostMapping("/add_bar_video")
+    public JsonResult addBarVideo(@RequestBody UserVideo userVideo) {
+        if (hasUserId()) {
+            userVideo.setUserId(getUserId());
+        }
+        corgiVideoService.addVideo(userVideo);
+        return new JsonResult(userVideo);
     }
 
 }
