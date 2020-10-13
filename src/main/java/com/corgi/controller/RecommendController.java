@@ -47,4 +47,10 @@ public class RecommendController extends BaseController {
         return new JsonResult(corgiUserRecommendService.getCityPopulate(getUserId(), city, page, pageSize));
     }
 
+    @GetMapping("dislike")
+    public JsonResult disLike(@RequestParam("userId") String userId) {
+        corgiUserRecommendService.distLikeUser(getUserId(), userId);
+        return new JsonResult();
+    }
+
 }
