@@ -52,7 +52,8 @@ public class WechatController extends BaseController {
 
     @GetMapping("getCorgiId")
     public JsonResult getCorgi(@RequestParam("wechatId") String wechatId) {
-        return new JsonResult(corgiToolService.getIdByWechatId(wechatId));
+        //corgiToolService.getIdByWechatId(wechatId)
+        return new JsonResult();
     }
 
 }

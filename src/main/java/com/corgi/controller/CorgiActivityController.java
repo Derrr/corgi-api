@@ -802,13 +802,13 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setOffset((orgPage - 1) * orgPageSize / 5);
             activityQuery.setPageSize(orgPage * orgPageSize - activityQuery.getOffset());
         }
-        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
-        log.info("business ... {} ", businessList);
-        int mergeSize = activityList.size() / 5;
-        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
-        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
-        result.addAll(businessList.subList(mergeSize, businessList.size()));
-        List<CorgiActivityDetail> detailList = convertDetail(result, userId);
+        //List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
+//        log.info("business ... {} ", businessList);
+//        int mergeSize = activityList.size() / 5;
+//        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
+//        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
+//        result.addAll(businessList.subList(mergeSize, businessList.size()));
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         return new JsonResult(detailList);
     }
 
@@ -827,35 +827,35 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         log.info("activity ... {} ", activityList);
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-        log.info("business ... {} ", businessList);
-        if (activityList.size() == 0 && businessList.size() == 0) {
-            Integer page = activityQuery.getPage();
-            List<CorgiActivity> tmpActivityList = new ArrayList<>();
-            List<CorgiActivity> tmpBusinessList = new ArrayList<>();
-            //如果不是第一页，则查询该城市第一页活动，看是否也为空
-            if (page > 1) {
-                activityQuery.setPage(1);
-                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
-                tmpActivityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-                tmpBusinessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-            }
-            if (tmpActivityList.size() == 0 && tmpBusinessList.size() == 0) {
-                activityQuery.setCity(null);
-                activityQuery.setPage(page);
-                range = 0;
-                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
-                activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-                businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-            }
-        }
-        int mergeSize = activityList.size() / 5;
-        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
-        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
-        result.addAll(businessList.subList(mergeSize, businessList.size()));
-        List<CorgiActivityDetail> detailList = convertDetail(result, userId);
+        //List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+//        log.info("business ... {} ", businessList);
+//        if (activityList.size() == 0 && businessList.size() == 0) {
+//            Integer page = activityQuery.getPage();
+//            List<CorgiActivity> tmpActivityList = new ArrayList<>();
+//            List<CorgiActivity> tmpBusinessList = new ArrayList<>();
+//            //如果不是第一页，则查询该城市第一页活动，看是否也为空
+//            if (page > 1) {
+//                activityQuery.setPage(1);
+//                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+//                tmpActivityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+//                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+//                tmpBusinessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+//            }
+//            if (tmpActivityList.size() == 0 && tmpBusinessList.size() == 0) {
+//                activityQuery.setCity(null);
+//                activityQuery.setPage(page);
+//                range = 0;
+//                activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
+//                activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+//                activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+//                businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+//            }
+//        }
+//        int mergeSize = activityList.size() / 5;
+//        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
+//        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
+//        result.addAll(businessList.subList(mergeSize, businessList.size()));
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         return new JsonResult(detailList);
     }
 
