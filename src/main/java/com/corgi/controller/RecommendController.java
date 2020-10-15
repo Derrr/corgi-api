@@ -36,7 +36,7 @@ public class RecommendController extends BaseController {
     public JsonResult getUser(@RequestParam("city") String city, @RequestParam("size") Integer size) {
         List<UserProfile> result = corgiUserRecommendService.getRecUser(getUserId(), size);
         if (result.size() < size) {
-            List<UserProfile> extraResult = corgiUserRecommendService.getInfluencerByCity(city,getUserId(),size - result.size());
+            List<UserProfile> extraResult = corgiUserRecommendService.getInfluencerByCity(getUserId(),city,size - result.size());
             result.addAll(extraResult);
         }
         return new JsonResult(result);
