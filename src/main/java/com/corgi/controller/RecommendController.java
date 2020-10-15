@@ -33,19 +33,15 @@ public class RecommendController extends BaseController {
     private CorgiUserRecommendService corgiUserRecommendService;
 
     @GetMapping("get_user")
-    public JsonResult getUser(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiUserRecommendService.getRecUser(getUserId(), page, pageSize));
+    public JsonResult getUser(@RequestParam("city") String city, @RequestParam("size") Integer size) {
+        List<UserProfile> result = corgiUserRecommendService.getRecUser(getUserId(), size);
+        if (result.size() < size) {
+            List<UserProfile> extraResult = corgiUserRecommendService.getInfluencerByCity(city,getUserId(),size - result.size());
+            result.addAll(extraResult);
+        }
+        return new JsonResult(result);
     }
 
-    @GetMapping("get_influencer")
-    public JsonResult getInfluencer(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiUserRecommendService.getInfluencerByCity(getUserId(), city, page, pageSize));
-    }
-
-    @GetMapping("get_populate")
-    public JsonResult getPopulate(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiUserRecommendService.getCityPopulate(getUserId(), city, page, pageSize));
-    }
 
     @GetMapping("dislike")
     public JsonResult disLike(@RequestParam("userId") String userId) {
