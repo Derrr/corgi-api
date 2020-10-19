@@ -144,7 +144,6 @@ public class CorgiBarController extends BaseController {
         if (hasUserId()) {
             barProfile.setBarId(getUserId());
         }
-        log.info("spending...{} detail... {}", barProfile.getSpending(), barProfile.getDetail());
         corgiBarService.updateBarProfile(barProfile);
         return new JsonResult();
     }
