@@ -272,6 +272,7 @@ public class CorgiBarController extends BaseController {
         if (hasUserId()) {
             userVideo.setUserId(getUserId());
         }
+        corgiVideoService.deleteVideo(userVideo.getUserId());
         corgiVideoService.addVideo(userVideo);
         return new JsonResult(userVideo);
     }
