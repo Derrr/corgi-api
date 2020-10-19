@@ -1143,12 +1143,9 @@ public class CorgiActivityController extends BaseController {
                 if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
-                }
-                if (!StringUtils.isEmpty(detail.getBarId() != null)) {
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
-                }
-                if (!StringUtils.isEmpty(activity.getUserId())) {
+                }else if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
                 }
