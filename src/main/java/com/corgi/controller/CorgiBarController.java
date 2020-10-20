@@ -79,10 +79,23 @@ public class CorgiBarController extends BaseController {
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setStatus(CorgiActivity.CREATED);
         corgiActivity.setUserId(barId);
+        corgiActivity.setStartTime(sdf.format(nowDate));
+        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
+        return new JsonResult(corgiActivities);
+    }
+
+    @GetMapping("get_ended_bar_activity")
+    public JsonResult getEndedBarActivity(@RequestParam("barId") String barId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date nowDate = new Date();
+        CorgiActivity corgiActivity = new CorgiActivity();
+        corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
+        corgiActivity.setUserId(barId);
         corgiActivity.setEndTime(sdf.format(nowDate));
         List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
         return new JsonResult(corgiActivities);
     }
+
 
     @PostMapping("update_bar_activity")
     public JsonResult updateActivity(@RequestBody CorgiActivity activity) throws PermissionException {
