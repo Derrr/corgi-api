@@ -44,7 +44,9 @@ public class CouponController extends BaseController {
 
     @PostMapping("update_coupon")
     public JsonResult updateCoupon(@RequestBody CorgiCoupon coupon) {
-        coupon.setBarId(getUserId());
+        if (hasUserId()) {
+            coupon.setBarId(getUserId());
+        }
         corgiCouponService.updateCoupon(coupon);
         return new JsonResult();
     }
