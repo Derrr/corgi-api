@@ -64,6 +64,7 @@ public class CorgiBarController extends BaseController {
         CorgiActivity corgiActivity = new CorgiActivity();
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setUserId(barId);
+        corgiActivity.setStatus(CorgiActivity.CREATED);
         if (!StringUtils.isEmpty(status)) {
             corgiActivity.setStatus(status);
         }
@@ -100,7 +101,7 @@ public class CorgiBarController extends BaseController {
     @PostMapping("update_bar_activity")
     public JsonResult updateActivity(@RequestBody CorgiActivity activity) throws PermissionException {
         if (hasUserId()) {
-            throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            activity.setUserId(getUserId());
         }
         activity.setCategory(CorgiActivity.CAT_BUSINESS);
         activity = corgiActivityService.updateCorgiActivity(activity);
