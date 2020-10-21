@@ -210,6 +210,18 @@ public class CorgiActivityController extends BaseController {
         redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 2L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         activity.setCheckStatus(AliyunGreenService.PASS);
+        if (activity.getLat() == 0 && activity.getLng() == 0) {
+            UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
+            if (userPosition != null) {
+                if (userPosition.getLng() != null && userPosition.getLng() < 200 && userPosition.getLat() != null && userPosition.getLat() < 200) {
+                    activity.setLng(userPosition.getLng());
+                    activity.setLat(userPosition.getLat());
+                } else if (userPosition.getRealLng() != null && userPosition.getRealLng() < 200 && userPosition.getRealLat() != null && userPosition.getRealLat() < 200) {
+                    activity.setLng(userPosition.getRealLng());
+                    activity.setLat(userPosition.getRealLat());
+                }
+            }
+        }
         activity = aliyunGreenService.checkImageActivity(activity);
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
         if (!checkActivityPic(activityPics)) {
