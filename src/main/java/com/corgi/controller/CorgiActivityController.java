@@ -1019,10 +1019,8 @@ public class CorgiActivityController extends BaseController {
                     .sourceUserId(getUserId())
                     .extra(extra)
                     .build());
-            redisTemplate.opsForValue().set(CALL_CITY_PREFIX.concat(activityId), System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         }
         return new JsonResult();
-
     }
 
     @GetMapping("/call_activity_city")

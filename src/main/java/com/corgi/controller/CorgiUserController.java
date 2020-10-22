@@ -102,6 +102,7 @@ public class CorgiUserController extends BaseController {
     @Value("${aliyun.role.arn}")
     private String roleArn;
     private static String CODE_PREFIX = "telCode_";
+    public static final String CALL_USER_CITY_PREFIX = "call_user_city_";
 
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
@@ -712,6 +713,39 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_influencer")
     public JsonResult getInfluencer(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         return new JsonResult(corgiUserService.searchInfluencer(null, null, page, pageSize));
+    }
+
+    @GetMapping("/call_user_city")
+    public JsonResult callCity(@RequestParam("city") String city, @RequestParam(required = false, name = "userId") String userId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
+        String key = getCallUserCityKey(userId);
+        if (key == null) {
+            return new JsonResult(Constants.API_ERROR_CODE, "这周新人新城次数已超过两次");
+        }
+        redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
+        HashMap extra = new HashMap();
+        UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
+        extra.put("type", 302);
+        extra.put("city", city);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.CITY+"_user")
+                .message(userDetail.getNickname().concat("到达了你的城市"))
+                .sourceUserId(userId)
+                .extra(extra)
+                .build());
+        return new JsonResult();
+    }
+
+    public String getCallUserCityKey(String userId) {
+        for (int i = 1; i <= 2; i++) {
+            String key = CALL_USER_CITY_PREFIX.concat(i + "_").concat(userId);
+            if (!redisTemplate.hasKey(key)) {
+                return key;
+            }
+        }
+        return null;
     }
 
 
