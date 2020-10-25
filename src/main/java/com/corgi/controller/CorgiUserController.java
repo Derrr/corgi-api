@@ -727,11 +727,15 @@ public class CorgiUserController extends BaseController {
         redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         HashMap extra = new HashMap();
         UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
-        extra.put("type", 302);
+        extra.put("type", 904);
+        extra.put("title", userDetail.getNickname().concat("到达了你的城市"));
+        extra.put("picUrl", userDetail.getAvatar());
+        extra.put("desc", "快去打个招呼吧！");
+        extra.put("userId", userDetail.getUserId());
         extra.put("city", city);
         mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.CITY+"_user")
-                .message(userDetail.getNickname().concat("到达了你的城市"))
+                .type(PushMessage.CITY + "_user")
+                .message("一位小伙伴到达了你的城市")
                 .sourceUserId(userId)
                 .extra(extra)
                 .build());
