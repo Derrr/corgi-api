@@ -52,8 +52,11 @@ public class CouponController extends BaseController {
     }
 
     @GetMapping("get_coupon")
-    public JsonResult getCoupon(@RequestParam(required = false, name = "status") String status) {
-        return new JsonResult(corgiCouponService.getCoupon(getUserId(), status));
+    public JsonResult getCoupon(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false,name = "barId")String barId) {
+        if(StringUtils.isEmpty(barId)){
+            barId = getUserId();
+        }
+        return new JsonResult(corgiCouponService.getCoupon(barId, status));
     }
 
     @GetMapping("delete_coupon")
