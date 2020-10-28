@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.ActivityBillboard;
+import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.PicInfo;
 import com.corgi.user.api.*;
@@ -18,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author tairanliu
@@ -33,6 +31,8 @@ public class RecommendController extends BaseController {
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
     @Reference
+    private CorgiUserActivityService corgiUserActivityService;
+    @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiCommentService corgiCommentService;
@@ -42,6 +42,15 @@ public class RecommendController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiUserService corgiUserService;
+
+    private Comparator<CorgiActivityDetail> activityComparator = new Comparator<CorgiActivityDetail>() {
+        @Override
+        public int compare(CorgiActivityDetail o1, CorgiActivityDetail o2) {
+            Long o1Long = o1.getLikeCount() + o1.getSignUpCount();
+            Long o2Long = o2.getLikeCount() + o2.getSignUpCount();
+            return -Long.compare(o1Long, o2Long);
+        }
+    };
 
     @GetMapping("get_user")
     public JsonResult getUser(@RequestParam("city") String city, @RequestParam("size") Integer size) {
@@ -67,6 +76,24 @@ public class RecommendController extends BaseController {
         return new JsonResult(convertDetail(activityList));
     }
 
+    @GetMapping("get_city_user")
+    public JsonResult getCityUser(@RequestParam("city") String city) {
+        List<UserProfile> result = corgiUserRecommendService.getInfluencerByCity(null, city, 12);
+        if (result.size() < 12) {
+            List<UserProfile> cityResult = corgiUserRecommendService.getCityPopulate(null, city, 1, 12 - result.size());
+            result.addAll(cityResult);
+        }
+        return new JsonResult(result);
+    }
+
+    @GetMapping("get_city_activity")
+    public JsonResult getCityActivity(@RequestParam("city") String city) {
+        List<CorgiActivity> result = corgiActivityService.getCityRecommendActivity(city, new ActivityQuery());
+        List<CorgiActivityDetail> details = convertDetail(result);
+        details.sort(activityComparator);
+        return new JsonResult(details);
+    }
+
 
     @GetMapping("dislike")
     public JsonResult disLike(@RequestParam("userId") String userId) {
@@ -89,6 +116,7 @@ public class RecommendController extends BaseController {
 
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Integer signUpCount = Math.toIntExact(corgiUserActivityService.countSignUpUser(activity.getId()));
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 Integer shareCount = corgiShareService.countShare(activity.getId());
@@ -97,7 +125,7 @@ public class RecommendController extends BaseController {
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
                         .hasLike(hasLike);
-
+                detail.setSignUpCount(signUpCount);
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
