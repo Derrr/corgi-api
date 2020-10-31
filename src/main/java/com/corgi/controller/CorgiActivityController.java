@@ -317,6 +317,9 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_likes")
     public JsonResult getLike(@RequestParam("activityId") String activityId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId, page, pageSize);
+        for (ActivityLike like : activityLikes) {
+            like.setIsFollow(corgiUserFollowService.isFollowed(getUserId(),like.getLikeUserId()));
+        }
         return new JsonResult(activityLikes);
     }
 
