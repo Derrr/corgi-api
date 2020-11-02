@@ -439,6 +439,10 @@ public class CorgiActivityController extends BaseController {
             }
             activity.setUserId(getUserId());
         }
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activity.getId()));
+        if (!CollectionUtils.isEmpty(activityList)) {
+            activity.setCategory(activityList.get(0).getCategory());
+        }
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
         activity = corgiActivityService.updateCorgiActivity(activity);
