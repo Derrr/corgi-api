@@ -71,7 +71,7 @@ public class CouponController extends BaseController {
     }
 
     @PostMapping("update_activity_coupon")
-    public JsonResult updateActivityCoupon(@RequestParam BarActivityDetail barActivityDetail) {
+    public JsonResult updateActivityCoupon(@RequestBody BarActivityDetail barActivityDetail) {
         String activityId = barActivityDetail.getId();
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (CollectionUtils.isEmpty(activityList)) {

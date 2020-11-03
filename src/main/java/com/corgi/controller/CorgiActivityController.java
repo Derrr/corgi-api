@@ -318,7 +318,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getLike(@RequestParam("activityId") String activityId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId, page, pageSize);
         for (ActivityLike like : activityLikes) {
-            like.setIsFollow(corgiUserFollowService.isFollowed(getUserId(),like.getLikeUserId()));
+            like.setIsFollow(corgiUserFollowService.isFollowed(getUserId(), like.getLikeUserId()));
         }
         return new JsonResult(activityLikes);
     }
@@ -1027,7 +1027,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("/call_activity_city")
-    public JsonResult callActivityTest(@RequestParam("activityId") String activityId, @RequestParam("city") String city) {
+    public JsonResult callActivityCity(@RequestParam("activityId") String activityId, @RequestParam("city") String city) {
         HashMap extra = new HashMap();
         UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
         extra.put("activityId", activityId);
@@ -1038,6 +1038,23 @@ public class CorgiActivityController extends BaseController {
                     .type(PushMessage.ACTIVITY + "_city")
                     .sourceUserId(getUserId())
                     .message(userDetail.getNickname() + "发起了一个活动，快去看看吧")
+                    .extra(extra)
+                    .build());
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("/call_activity_end")
+    public JsonResult callActivityEnd(@RequestParam("activityId") String activityId) {
+        HashMap extra = new HashMap();
+        extra.put("activityId", activityId);
+        extra.put("type", 903);
+        if (populateExtra(extra, activityId, getUserId())) {
+            extra.put("content", "被官方评为精品内容将享受高曝光");
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.ACTIVITY + "_end")
+                    .sourceUserId(getUserId())
+                    .message("活动结束了，快分享没好瞬间吧！")
                     .extra(extra)
                     .build());
         }
