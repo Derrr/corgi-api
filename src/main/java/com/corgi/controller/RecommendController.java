@@ -132,7 +132,7 @@ public class RecommendController extends BaseController {
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
-                    detail.setIsFollow(corgiUserFollowService.isFollowed(getUserId(), activity.getUserId()));
+                    detail.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), activity.getUserId()));
                 }
 
                 detailList.add(detail);
