@@ -42,6 +42,8 @@ public class RecommendController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
 
     private Comparator<CorgiActivityDetail> activityComparator = new Comparator<CorgiActivityDetail>() {
         @Override
@@ -130,6 +132,7 @@ public class RecommendController extends BaseController {
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
+                    detail.setIsFollow(corgiUserFollowService.isFollowed(getUserId(), activity.getUserId()));
                 }
 
                 detailList.add(detail);

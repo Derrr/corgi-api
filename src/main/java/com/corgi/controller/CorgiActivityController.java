@@ -1178,6 +1178,7 @@ public class CorgiActivityController extends BaseController {
                 } else if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
+                    detail.setIsFollow(corgiUserFollowService.isFollowed(userId,activity.getUserId()));
                 }
 
                 detailList.add(detail);
