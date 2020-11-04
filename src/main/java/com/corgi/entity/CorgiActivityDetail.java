@@ -31,7 +31,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private List<SignUpUser> signUpUsers;
     private boolean hasCallCity;
     private boolean canCallCity;
-    private Integer isFollow;
+    private Integer isFollowed;
 
     public CorgiActivityDetail() {
         super();
