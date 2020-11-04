@@ -241,7 +241,7 @@ public class CorgiBarController extends BaseController {
     }
 
     @PostMapping("set_account")
-    public JsonResult setAccount(@RequestParam("bar") BarProfile barProfile) {
+    public JsonResult setAccount(@RequestBody BarProfile barProfile) {
         if (hasUserId()) {
             return new JsonResult();
         }
