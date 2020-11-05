@@ -59,23 +59,23 @@ public class BillboardController extends BaseController {
     public JsonResult getAllActivityBillboard() {
         List<String> activityIds = corgiBillboardService.getActivityBillboard();
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        List<ActivityBillboard> activityBillboards = buildActivityBillboard(activities, true);
-        if (activityIds.size() > activityBillboards.size()) {
-            for (String activityId : activityIds) {
-                boolean hasId = false;
-                for (ActivityBillboard billboard : activityBillboards) {
-                    if (activityId.equals(billboard.getId())) {
-                        hasId = true;
-                        break;
-                    }
-                }
-                if (!hasId) {
-                    ActivityBillboard billboard = new ActivityBillboard();
-                    billboard.setId(activityId);
-                    activityBillboards.add(billboard);
-                }
-            }
-        }
+        List<ActivityBillboard> activityBillboards = buildActivityBillboard(activities, false);
+//        if (activityIds.size() > activityBillboards.size()) {
+//            for (String activityId : activityIds) {
+//                boolean hasId = false;
+//                for (ActivityBillboard billboard : activityBillboards) {
+//                    if (activityId.equals(billboard.getId())) {
+//                        hasId = true;
+//                        break;
+//                    }
+//                }
+//                if (!hasId) {
+//                    ActivityBillboard billboard = new ActivityBillboard();
+//                    billboard.setId(activityId);
+//                    activityBillboards.add(billboard);
+//                }
+//            }
+//        }
         return new JsonResult(activityBillboards);
     }
 
