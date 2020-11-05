@@ -5,22 +5,22 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.BarActivityDetail;
+import com.corgi.entity.BarLogin;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
-import com.corgi.user.api.CorgiAreaService;
-import com.corgi.user.api.CorgiBarService;
-import com.corgi.user.api.CorgiHotActivityService;
-import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.BarProfile;
-import com.corgi.user.entity.HotActivity;
+import com.corgi.user.api.*;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -41,6 +41,10 @@ public class CorgiBarController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiHotActivityService corgiHotActivityService;
+    @Reference
+    private CorgiPicService corgiPicService;
+    @Reference
+    private CorgiVideoService corgiVideoService;
     @Autowired
     private CorgiUtilService corgiUtilService;
 
@@ -56,10 +60,13 @@ public class CorgiBarController extends BaseController {
     }
 
     @GetMapping("get_bar_activity")
-    public JsonResult getBarActivity(@RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getBarActivity(@RequestParam("barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize, @RequestParam(required = false, name = "status") String status) {
         CorgiActivity corgiActivity = new CorgiActivity();
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setUserId(barId);
+        if (!StringUtils.isEmpty(status)) {
+            corgiActivity.setStatus(status);
+        }
         List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(corgiActivity, page, pageSize);
         return new JsonResult(corgiActivities);
     }
@@ -72,15 +79,28 @@ public class CorgiBarController extends BaseController {
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setStatus(CorgiActivity.CREATED);
         corgiActivity.setUserId(barId);
+        corgiActivity.setStartTime(sdf.format(nowDate));
+        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
+        return new JsonResult(corgiActivities);
+    }
+
+    @GetMapping("get_ended_bar_activity")
+    public JsonResult getEndedBarActivity(@RequestParam("barId") String barId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date nowDate = new Date();
+        CorgiActivity corgiActivity = new CorgiActivity();
+        corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
+        corgiActivity.setUserId(barId);
         corgiActivity.setEndTime(sdf.format(nowDate));
         List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
         return new JsonResult(corgiActivities);
     }
 
+
     @PostMapping("update_bar_activity")
     public JsonResult updateActivity(@RequestBody CorgiActivity activity) throws PermissionException {
         if (hasUserId()) {
-            throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            activity.setUserId(getUserId());
         }
         activity.setCategory(CorgiActivity.CAT_BUSINESS);
         activity = corgiActivityService.updateCorgiActivity(activity);
@@ -121,47 +141,6 @@ public class CorgiBarController extends BaseController {
             }
         }
         return new JsonResult(barActivityDetails);
-//        Integer start = 0;
-//        Integer size = 6;
-//        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city);
-//        if (barProfiles.size() == 0) {
-//            barProfiles = corgiBarService.getBarListByCity(null);
-//        }
-//
-//        CorgiActivity query = new CorgiActivity();
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        Date nowDate = new Date();
-//        query.setCategory(CorgiActivity.CAT_BUSINESS);
-//        query.setStatus(CorgiActivity.CREATED);
-//        query.setEndTime(sdf.format(nowDate));
-//        List<BarActivityDetail> total = new ArrayList<>();
-//        for (BarProfile bar : barProfiles) {
-//            query.setUserId(bar.getBarId());
-//            List<CorgiActivity> activityList = corgiActivityService.getBarActivity(query);
-//            for (CorgiActivity activity : activityList) {
-//                BarActivityDetail detail = new BarActivityDetail(activity);
-//                detail.setBarDetail(bar);
-//                total.add(detail);
-//            }
-//            if (total.size() >= start + size) {
-//                return new JsonResult(total.subList(start, start + size));
-//            }
-//        }
-//
-//        if (size >= total.size()) {
-//            return new JsonResult(total);
-//        }
-//
-//        int totalSize = total.size();
-//        int begin = start % totalSize;
-//        if (begin + size <= totalSize) {
-//            return new JsonResult(total.subList(begin, begin + size));
-//        }
-//
-//        List<BarActivityDetail> result = new ArrayList<>();
-//        result.addAll(total.subList(begin, totalSize));
-//        result.addAll(total.subList(0, begin + size - totalSize));
-//        return new JsonResult(result);
     }
 
     @PostMapping("add_bar")
@@ -176,7 +155,7 @@ public class CorgiBarController extends BaseController {
     @PostMapping("update_bar")
     public JsonResult updateBar(@RequestBody BarProfile barProfile) {
         if (hasUserId()) {
-            return new JsonResult();
+            barProfile.setBarId(getUserId());
         }
         corgiBarService.updateBarProfile(barProfile);
         return new JsonResult();
@@ -198,9 +177,35 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(barProfiles);
     }
 
+    @GetMapping("get_bar_account_list")
+    public JsonResult getBarAccountList(@RequestParam(required = false, name = "status") String status) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        List<BarProfile> barProfiles = corgiBarService.getBarAccountList(status);
+        return new JsonResult(barProfiles);
+    }
+
     @GetMapping("get_bar")
     public JsonResult getBar(@RequestParam(required = false, name = "barId") String barId) {
         BarProfile barProfiles = corgiBarService.getBarProfile(barId);
+        List<UserPic> userPics = corgiPicService.getUserPic(barId);
+        List<BarPic> barPics = new ArrayList<>();
+        if (userPics != null) {
+            for (UserPic userPic : userPics) {
+                BarPic barPic = new BarPic();
+                barPic.setBarId(barId);
+                barPic.setPicId(userPic.getPicId());
+                barPic.setPicUrl(userPic.getPicUrl());
+                barPics.add(barPic);
+            }
+        }
+        barProfiles.setBarPics(barPics);
+        List<UserVideo> videos = corgiVideoService.getVideo(getUserId());
+        if (!CollectionUtils.isEmpty(videos)) {
+            UserVideo video = videos.get(0);
+            barProfiles.setVideo(video.getVideoUrl());
+        }
         return new JsonResult(barProfiles);
     }
 
@@ -220,6 +225,69 @@ public class CorgiBarController extends BaseController {
         activity.setRecommend("disable");
         corgiActivityService.updateCorgiActivityStatus(activity);
         return new JsonResult();
+    }
+
+    @GetMapping("login")
+    public JsonResult login(@RequestParam("account") String account, @RequestParam("password") String password) throws PermissionException {
+        BarProfile profile = corgiBarService.getBarByAccount(account, password);
+        BarLogin login = new BarLogin();
+        if (profile != null && !StringUtils.isEmpty(profile.getBarId())) {
+            BeanUtils.copyProperties(profile, login);
+            login.setJwt(JWTUtils.createJWT(profile.getBarId(), "1.0.0"));
+        } else {
+            throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "账号密码错误");
+        }
+        return new JsonResult(login);
+    }
+
+    @PostMapping("set_account")
+    public JsonResult setAccount(@RequestBody BarProfile barProfile) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        corgiBarService.setBarAccount(barProfile.getBarId(), barProfile.getAccount(), barProfile.getPassword());
+        return new JsonResult();
+    }
+
+    @GetMapping("/delete_bar_pic")
+    public JsonResult deleteBarPic(@RequestParam("picId") String picId) {
+        String result = corgiPicService.deleteUserPic(picId, getUserId());
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/update_bar_pic")
+    public JsonResult updateBarPic(@RequestBody UserPic userPic) {
+        if (hasUserId()) {
+            userPic.setUserId(getUserId());
+        }
+        String result = corgiPicService.updateUserPic(userPic);
+        return getJsonResult(result);
+    }
+
+    @PostMapping("/add_bar_pic")
+    public JsonResult addBarPic(@RequestBody UserPic userPic) {
+        if (hasUserId()) {
+            userPic.setUserId(getUserId());
+        }
+        String result = corgiPicService.addUserPic(userPic);
+        userPic.setPicId(result);
+        return new JsonResult(userPic);
+    }
+
+    @GetMapping("/delete_bar_video")
+    public JsonResult deleteBarVideo() {
+        corgiVideoService.deleteVideo(getUserId());
+        return new JsonResult();
+    }
+
+    @PostMapping("/add_bar_video")
+    public JsonResult addBarVideo(@RequestBody UserVideo userVideo) {
+        if (hasUserId()) {
+            userVideo.setUserId(getUserId());
+        }
+        corgiVideoService.deleteVideo(userVideo.getUserId());
+        corgiVideoService.addVideo(userVideo);
+        return new JsonResult(userVideo);
     }
 
 }

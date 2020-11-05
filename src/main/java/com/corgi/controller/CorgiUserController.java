@@ -102,6 +102,7 @@ public class CorgiUserController extends BaseController {
     @Value("${aliyun.role.arn}")
     private String roleArn;
     private static String CODE_PREFIX = "telCode_";
+    public static final String CALL_USER_CITY_PREFIX = "call_user_city_";
 
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
@@ -319,7 +320,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/delete_user_pic")
     public JsonResult deleteUserPic(@RequestParam("picId") String picId) {
-        String result = corgiPicService.deleteUserPic(picId);
+        String result = corgiPicService.deleteUserPic(picId, getUserId());
         return getJsonResult(result);
     }
 
@@ -415,23 +416,19 @@ public class CorgiUserController extends BaseController {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
                     }
                 }
-                //String key = "sentMatch_" + userPosition.getUserId();
-                //String matchTime = redisTemplate.opsForValue().get(key);
-                //if (org.springframework.util.StringUtils.isEmpty(matchTime)) {
-                String nowTime = System.currentTimeMillis() + "";
-                HashMap extra = new HashMap();
-                extra.put("lat", userPosition.getLat());
-                extra.put("lng", userPosition.getLng());
-                extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
-                extra.put("userId", userPosition.getUserId());
-                mqService.sendMessage(PushMessage.builder()
-                        .type(PushMessage.MATCH)
-                        .message(PushMessage.MATCH_90_MESSAGE)
-                        .sourceUserId(userPosition.getUserId())
-                        .extra(extra)
-                        .build());
-                //redisTemplate.opsForValue().set(key, nowTime, 60L, TimeUnit.MINUTES);
-                //}
+                if (userPosition.getLat() < 200 && userPosition.getLng() < 200) {
+                    HashMap extra = new HashMap();
+                    extra.put("lat", userPosition.getLat());
+                    extra.put("lng", userPosition.getLng());
+                    extra.put("type", PushMessage.MATCH_90_MESSAGE_TYPE);
+                    extra.put("userId", userPosition.getUserId());
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.MATCH)
+                            .message(PushMessage.MATCH_90_MESSAGE)
+                            .sourceUserId(userPosition.getUserId())
+                            .extra(extra)
+                            .build());
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -716,6 +713,43 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_influencer")
     public JsonResult getInfluencer(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         return new JsonResult(corgiUserService.searchInfluencer(null, null, page, pageSize));
+    }
+
+    @GetMapping("/call_user_city")
+    public JsonResult callCity(@RequestParam("city") String city, @RequestParam(required = false, name = "userId") String userId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
+        String key = getCallUserCityKey(userId);
+        if (key == null) {
+            return new JsonResult(Constants.API_ERROR_CODE, "这周新人新城次数已超过两次");
+        }
+        redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
+        HashMap extra = new HashMap();
+        UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
+        extra.put("type", 904);
+        extra.put("title", userDetail.getNickname().concat("到达了你的城市"));
+        extra.put("picUrl", userDetail.getAvatar());
+        extra.put("desc", "快去打个招呼吧！");
+        extra.put("userId", userDetail.getUserId());
+        extra.put("city", city);
+        mqService.sendMessage(PushMessage.builder()
+                .type(PushMessage.CITY + "_user")
+                .message("一位小伙伴到达了你的城市")
+                .sourceUserId(userId)
+                .extra(extra)
+                .build());
+        return new JsonResult();
+    }
+
+    public String getCallUserCityKey(String userId) {
+        for (int i = 1; i <= 2; i++) {
+            String key = CALL_USER_CITY_PREFIX.concat(i + "_").concat(userId);
+            if (!redisTemplate.hasKey(key)) {
+                return key;
+            }
+        }
+        return null;
     }
 
 

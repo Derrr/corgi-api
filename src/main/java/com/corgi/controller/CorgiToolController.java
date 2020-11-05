@@ -124,6 +124,13 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(topics);
     }
 
+    @GetMapping("get_activity_types")
+    public JsonResult getActivityTypes() {
+        List<String> types = corgiToolService.getActivityTypes();
+        types.add("其他");
+        return new JsonResult(types);
+    }
+
     @GetMapping("add_topic")
     public JsonResult addTopic(CorgiTopic topic) {
         corgiToolService.addTopic(topic);
