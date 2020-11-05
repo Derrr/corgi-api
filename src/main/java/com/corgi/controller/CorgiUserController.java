@@ -722,7 +722,7 @@ public class CorgiUserController extends BaseController {
         }
         String key = getCallUserCityKey(userId);
         if (key == null) {
-            return new JsonResult(Constants.API_ERROR_CODE, "这周新人新城次数已超过两次");
+            return new JsonResult(Constants.API_ERROR_CODE, "这周新人新城次数已超过五次");
         }
         redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 7, TimeUnit.DAYS);
         HashMap extra = new HashMap();
@@ -743,7 +743,7 @@ public class CorgiUserController extends BaseController {
     }
 
     public String getCallUserCityKey(String userId) {
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= 5; i++) {
             String key = CALL_USER_CITY_PREFIX.concat(i + "_").concat(userId);
             if (!redisTemplate.hasKey(key)) {
                 return key;
