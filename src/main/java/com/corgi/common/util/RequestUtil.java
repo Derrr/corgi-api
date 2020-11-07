@@ -22,11 +22,11 @@ public class RequestUtil {
     }
 
     public static String getUserId() {
-        if (hasUserId()) {
-            JwtUser user = (JwtUser) getRequest().getAttribute(JWTUtils.JWT_USER);
-            return user.getUserId();
+        JwtUser user = (JwtUser) getRequest().getAttribute(JWTUtils.JWT_USER);
+        if (user == null || user.getUserId() == null) {
+            return "";
         }
-        return "";
+        return user.getUserId();
     }
 
     public static boolean hasVersion() {
