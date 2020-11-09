@@ -11,8 +11,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -64,11 +66,13 @@ public class CorgiOpenPageController extends BaseController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
         List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
-        if(CollectionUtils.isEmpty(openPages)){
-            corgiOpenPage.setCity("全国");
-            openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
+        corgiOpenPage.setCity("全国");
+        openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+        List<CorgiOpenPage> result = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(openPages)) {
+            result.add(openPages.get(new Random().nextInt(openPages.size())));
         }
-        return new JsonResult(openPages);
+        return new JsonResult(result);
     }
 
 }
