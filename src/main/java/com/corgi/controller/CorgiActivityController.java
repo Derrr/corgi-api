@@ -792,14 +792,9 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
         }
-        if (activityQuery.getPage() == null) {
-            ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
-            List<CorgiActivityDetail> detailList = convertDetail(page.getCorgiActivityList(), userId);
-            return new PageResult(detailList, page.getTPage(), page.getDPage());
-        } else {
-            List<CorgiActivityDetail> detailList = convertDetail(corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery), userId);
-            return new PageResult(detailList, null, null);
-        }
+        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
+        List<CorgiActivityDetail> detailList = convertDetail(page.getCorgiActivityList(), userId);
+        return new PageResult(detailList, page.getTPage(), page.getDPage());
     }
 
     @GetMapping("get_city_activity")
@@ -1182,7 +1177,7 @@ public class CorgiActivityController extends BaseController {
                 } else if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
-                    detail.setIsFollowed(corgiUserFollowService.isFollowed(userId,activity.getUserId()));
+                    detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, activity.getUserId()));
                 }
 
                 detailList.add(detail);
