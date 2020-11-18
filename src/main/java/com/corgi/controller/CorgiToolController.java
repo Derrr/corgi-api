@@ -211,7 +211,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("get_statistics")
     public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
         List<HashMap> statistics = null;
-        if (CorgiStatistic.ACTIVITY_TYPE.equals(type)) {
+        if (CorgiStatistic.ACTIVITY_TYPE.equals(type) || CorgiStatistic.PUBLISH.equals(type) || CorgiStatistic.USER_CITY.equals(type)) {
             statistics = corgiStatisticService.getList(type, startDate, endDate);
         } else {
             statistics = corgiStatisticService.getMap(type, startDate, endDate);
