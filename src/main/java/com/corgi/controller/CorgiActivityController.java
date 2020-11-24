@@ -830,11 +830,11 @@ public class CorgiActivityController extends BaseController {
         if (activityQuery.getPage() == null) {
             activityQuery.setPage(1);
         }
-        if (hasVersion() && "1.5.0".compareTo(getVersion()) > 0) {
-            activityQuery.setCategory(null);
-            List<CorgiActivityDetail> detailList = convertDetail(corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery), userId);
-            return new JsonResult(detailList);
-        }
+//        if (hasVersion() && "1.5.0".compareTo(getVersion()) > 0) {
+//            activityQuery.setCategory(null);
+//            List<CorgiActivityDetail> detailList = convertDetail(corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery), userId);
+//            return new JsonResult(detailList);
+//        }
 
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
