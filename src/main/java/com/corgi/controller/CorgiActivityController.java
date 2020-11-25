@@ -1004,6 +1004,10 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("/call_city")
     public JsonResult callCity(@RequestParam("city") String city, @RequestParam("activityId") String activityId) {
+        String LockKey = "call_city_lock_" + getUserId();
+        if(!corgiUtilService.tryLock(LockKey, "1", 2L)){
+            return new JsonResult();
+        }
         String key = getCallCityKey(getUserId());
         if (key == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "这周一呼百应次数已超过三次");
@@ -1027,6 +1031,10 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("/call_activity_city")
     public JsonResult callActivityCity(@RequestParam("activityId") String activityId, @RequestParam("city") String city) {
+        String LockKey = "call_activity_city_lock_" + getUserId();
+        if(!corgiUtilService.tryLock(LockKey, "1", 2L)){
+            return new JsonResult();
+        }
         HashMap extra = new HashMap();
         UserDetail userDetail = corgiUserService.getUserDetail(getUserId(), null);
         extra.put("activityId", activityId);

@@ -723,6 +723,10 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        String LockKey = "call_user_city_lock_" + userId;
+        if(!corgiUtilService.tryLock(LockKey, "1", 2L)){
+            return new JsonResult();
+        }
         String key = getCallUserCityKey(userId);
         if (key == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "这周新人新城次数已超过五次");

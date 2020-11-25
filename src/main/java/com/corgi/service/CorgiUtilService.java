@@ -133,8 +133,12 @@ public class CorgiUtilService {
     }
 
     public boolean tryLock(String key, String value) {
+        return tryLock(key, value, 30L);
+    }
+
+    public boolean tryLock(String key, String value, Long time) {
         ValueOperations operations = redisTemplate.opsForValue();
-        if (operations.setIfAbsent(key, value, 30, TimeUnit.SECONDS)) {
+        if (operations.setIfAbsent(key, value, time, TimeUnit.SECONDS)) {
             return true;
         }
         return false;
