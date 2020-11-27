@@ -237,7 +237,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("get_character_pic")
     public JsonResult getPic(@RequestParam(required = false, name = "answer") String character) {
         if (StringUtils.isEmpty(character) || character.length() < 4) {
-            new JsonResult(String.format(URL, character));
+            return new JsonResult(String.format(URL, character+""));
         }
         String type = character.substring(0, 4);
         return new JsonResult(String.format(URL, type));
