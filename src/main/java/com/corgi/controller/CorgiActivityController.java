@@ -1069,7 +1069,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_ref_activity")
-    public JsonResult getRefActivity(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "page", defaultValue = "1") Integer page, @RequestParam(required = false, name = "size", defaultValue = "20") Integer size) {
+    public JsonResult getRefActivity(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "page", defaultValue = "1") Integer page, @RequestParam(required = false, name = "pageSize", defaultValue = "20") Integer size) {
         CorgiActivity search = new CorgiActivity();
         search.setRefActivityId(activityId);
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(search, page, size);
