@@ -1005,7 +1005,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("/call_city")
     public JsonResult callCity(@RequestParam("city") String city, @RequestParam("activityId") String activityId) {
         String LockKey = "call_city_lock_" + getUserId();
-        if(!corgiUtilService.tryLock(LockKey, "1", 2L)){
+        if (!corgiUtilService.tryLock(LockKey, "1", 2L)) {
             return new JsonResult();
         }
         String key = getCallCityKey(getUserId());
@@ -1032,7 +1032,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("/call_activity_city")
     public JsonResult callActivityCity(@RequestParam("activityId") String activityId, @RequestParam("city") String city) {
         String LockKey = "call_activity_city_lock_" + getUserId();
-        if(!corgiUtilService.tryLock(LockKey, "1", 2L)){
+        if (!corgiUtilService.tryLock(LockKey, "1", 2L)) {
             return new JsonResult();
         }
         HashMap extra = new HashMap();
@@ -1066,6 +1066,14 @@ public class CorgiActivityController extends BaseController {
                     .build());
         }
         return new JsonResult();
+    }
+
+    @GetMapping("get_ref_activity")
+    public JsonResult getRefActivity(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "page", defaultValue = "1") Integer page, @RequestParam(required = false, name = "size", defaultValue = "20") Integer size) {
+        CorgiActivity search = new CorgiActivity();
+        search.setRefActivityId(activityId);
+        List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(search, page, size);
+        return new JsonResult(activityList);
     }
 
     private boolean populateExtra(HashMap extra, String activityId, String userId) {
