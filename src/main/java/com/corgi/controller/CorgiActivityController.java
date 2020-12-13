@@ -1073,11 +1073,6 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity search = new CorgiActivity();
         search.setRefActivityId(activityId);
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(search, page, size);
-        if (getUserId() == null) {
-            log.info("userId is null");
-        } else {
-            log.info("userId: {}", getUserId());
-        }
         return new JsonResult(convertDetail(activityList, getUserId()));
     }
 
