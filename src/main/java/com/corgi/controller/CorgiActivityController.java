@@ -1073,7 +1073,7 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity search = new CorgiActivity();
         search.setRefActivityId(activityId);
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(search, page, size);
-        return new JsonResult(activityList);
+        return new JsonResult(convertDetail(activityList, null));
     }
 
     private boolean populateExtra(HashMap extra, String activityId, String userId) {
