@@ -151,7 +151,7 @@ public class CorgiUtilService {
         }
     }
 
-    public List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList, String userId) {
+    public List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList, String userId, BarProfile barProfile) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
@@ -174,6 +174,7 @@ public class CorgiUtilService {
                 detail.setLikeCount(likeCount);
                 detail.setLikeUsers(activityLikes);
                 detail.setCommentCount(commentCount);
+                detail.setBarDetail(barProfile);
                 detailList.add(detail);
             }
         }

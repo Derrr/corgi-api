@@ -80,7 +80,7 @@ public class CorgiBarController extends BaseController {
         corgiActivity.setStatus(CorgiActivity.CREATED);
         corgiActivity.setUserId(barId);
         corgiActivity.setStartTime(sdf.format(nowDate));
-        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
+        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId(), corgiBarService.getBarProfile(barId));
         return new JsonResult(corgiActivities);
     }
 
@@ -92,7 +92,7 @@ public class CorgiBarController extends BaseController {
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setUserId(barId);
         corgiActivity.setEndTime(sdf.format(nowDate));
-        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId());
+        List<CorgiActivityDetail> corgiActivities = corgiUtilService.convertUserActivityDetail(corgiActivityService.getBarActivity(corgiActivity), getUserId(), null);
         return new JsonResult(corgiActivities);
     }
 
