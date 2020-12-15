@@ -386,7 +386,7 @@ public class AliyunGreenService {
                 }
                 picInfo.setHeight(height);
                 picInfo.setWidth(weight);
-                redisTemplate.opsForValue().set(url, height + "_" + weight, 100, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(url, height + "_" + weight, 3, TimeUnit.DAYS);
             }
         } catch (Exception e) {
             log.error("get pic info:" + url + " failed", e);

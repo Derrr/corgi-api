@@ -133,7 +133,7 @@ public class CorgiDateController extends BaseController {
             userId = getUserId();
         }
         String dateId = result.get("dateId");
-        result.put("message", "刚刚决绝了一名小可爱");
+        result.put("message", "刚刚拒绝了一名小可爱");
         redisTemplate.opsForHash().putAll(DATE_RESPONSE.concat(userId).concat(dateId), result);
         redisTemplate.expire(DATE_RESPONSE.concat(userId).concat(dateId), 10, TimeUnit.SECONDS);
         return new JsonResult(result);
