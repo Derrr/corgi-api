@@ -146,7 +146,7 @@ public class CorgiUtilService {
 
     public void unlock(String key) {
         String id = redisTemplate.opsForValue().get(key);
-        if (id != null && value.get().equals(id)) {
+        if (id != null && value.get().equals(id) && !"user".equals(key)) {
             redisTemplate.delete(key);
         }
     }
