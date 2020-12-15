@@ -1187,7 +1187,9 @@ public class CorgiActivityController extends BaseController {
                 if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
-                    log.info("barId... {} ", detail.getBarId());
+                    BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
+                    detail.setBarDetail(profile);
+                }else if(CorgiActivity.CAT_ATTENDANCE.equals(detail.getCategory()) && !StringUtils.isEmpty(detail.getBarId())){
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
                 } else if (!StringUtils.isEmpty(activity.getUserId())) {
@@ -1195,9 +1197,7 @@ public class CorgiActivityController extends BaseController {
                     detail.setUserDetail(userDetail);
                     detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, activity.getUserId()));
                 }
-
                 detailList.add(detail);
-
             }
         }
         return detailList;
