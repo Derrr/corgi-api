@@ -680,18 +680,20 @@ public class CorgiActivityController extends BaseController {
         }
         CorgiActivity activity = corgiActivities.get(0);
         CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
-        List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
-        if (!CollectionUtils.isEmpty(similarActivities)) {
-            Iterator<CorgiActivity> it = similarActivities.iterator();
-            while (it.hasNext()) {
-                CorgiActivity corgiActivity = it.next();
-                if (activityId.equals(corgiActivity.getId())) {
-                    it.remove();
+        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory()) || CorgiActivity.CAT_BUSINESS.equals(activity.getCategory())) {
+            List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
+            if (!CollectionUtils.isEmpty(similarActivities)) {
+                Iterator<CorgiActivity> it = similarActivities.iterator();
+                while (it.hasNext()) {
+                    CorgiActivity corgiActivity = it.next();
+                    if (activityId.equals(corgiActivity.getId())) {
+                        it.remove();
+                    }
                 }
             }
+            List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
+            detail.setSimilarActivity(similarActivity);
         }
-        List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
-        detail.setSimilarActivity(similarActivity);
         detail.setCanCallCity(activity.getUserId().equals(getUserId()) && !StringUtils.isEmpty(getCallCityKey(getUserId())));
         detail.setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activityId)));
         return new JsonResult(detail);
@@ -1189,9 +1191,10 @@ public class CorgiActivityController extends BaseController {
                     detail.setUserId(null);
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
-                }else if(CorgiActivity.CAT_ATTENDANCE.equals(detail.getCategory()) && !StringUtils.isEmpty(detail.getBarId())){
+                } else if (CorgiActivity.CAT_ATTENDANCE.equals(detail.getCategory()) && !StringUtils.isEmpty(detail.getBarId())) {
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
+                    detail.setUserDetail(corgiUserService.getUserDetail(detail.getUserId(), null));
                 } else if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
