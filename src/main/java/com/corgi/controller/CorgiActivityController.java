@@ -680,7 +680,7 @@ public class CorgiActivityController extends BaseController {
         }
         CorgiActivity activity = corgiActivities.get(0);
         CorgiActivityDetail detail = convertDetail(Arrays.asList(activity), userId).get(0);
-        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory()) || CorgiActivity.CAT_BUSINESS.equals(activity.getCategory())) {
+        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
             List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
             if (!CollectionUtils.isEmpty(similarActivities)) {
                 Iterator<CorgiActivity> it = similarActivities.iterator();
