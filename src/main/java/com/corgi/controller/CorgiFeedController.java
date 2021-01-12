@@ -68,19 +68,22 @@ public class CorgiFeedController extends BaseController {
 
     @PostMapping("add_view")
     public JsonResult addView(@RequestBody CorgiActivity corgiActivity) {
-        corgiActivity.setCategory(CorgiActivity.CAT_VIDEO);
-        CorgiActivity result = corgiActivityFeedService.addFeedActivity(corgiActivity);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         CorgiVlog corgiVlog = new CorgiVlog();
-        corgiVlog.setActivityId(result.getId());
-        corgiVlog.setUserId(corgiActivity.getUserId());
-        corgiVlog.setType(CorgiVlog.TYPE.USER);
-        corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (StringUtils.isEmpty(corgiActivity.getCurrentTime())) {
             corgiVlog.setCtime(sdf.format(new Date()));
         } else {
             corgiVlog.setCtime(corgiActivity.getCurrentTime());
+            corgiActivity.setCurrentTime(null);
         }
+        corgiActivity.setCategory(CorgiActivity.CAT_VIDEO);
+        CorgiActivity result = corgiActivityFeedService.addFeedActivity(corgiActivity);
+        corgiVlog.setActivityId(result.getId());
+        corgiVlog.setUserId(corgiActivity.getUserId());
+        corgiVlog.setType(CorgiVlog.TYPE.USER);
+        corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
+
         corgiVlogService.addVlog(corgiVlog);
         return new JsonResult(result.getId());
     }
