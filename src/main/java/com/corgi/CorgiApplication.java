@@ -43,4 +43,10 @@ public class CorgiApplication {
         return new Queue(CorgiQueueName.TRACE_FOLLOW_QUEUE);
     }
 
+    @Bean
+    public Queue feedQueue() {
+        return new Queue(CorgiQueueName.FEED_REFRESH);
+    }
+
+
 }
