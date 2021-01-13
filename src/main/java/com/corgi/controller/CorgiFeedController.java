@@ -8,11 +8,9 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.BarActivityDetail;
 import com.corgi.entity.VlogDetail;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
-import com.corgi.user.api.CorgiCouponService;
-import com.corgi.user.api.CorgiFeedService;
-import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.api.CorgiVlogService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiCoupon;
 import com.corgi.user.entity.CorgiFeed;
 import com.corgi.user.entity.CorgiVlog;
@@ -46,6 +44,10 @@ public class CorgiFeedController extends BaseController {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiActivityService corgiActivityService;
+    @Reference
+    private CorgiLikeService corgiLikeService;
+    @Autowired
+    private CorgiUtilService corgiUtilService;
     @Autowired
     private MQService mqService;
 
@@ -54,19 +56,51 @@ public class CorgiFeedController extends BaseController {
         List<String> feedIds = corgiFeedService.getUnviewFeed(getUserId());
         List<VlogDetail> details = new ArrayList<>();
         for (String feed : feedIds) {
-            CorgiVlog vlog = corgiVlogService.getVlog(feed);
-            VlogDetail vlogDetail = VlogDetail.createDetail(vlog);
-            String userId = vlog.getUserId();
-            vlogDetail.setUserDetail(corgiUserService.getUserDetail(userId, null));
-            vlogDetail.setActivityDetail(corgiActivityFeedService.getActivityById(feed));
-            details.add(vlogDetail);
+            VlogDetail detail = getVlogDetail(feed, getUserId());
+            if (detail != null) {
+                details.add(detail);
+            }
             corgiFeedService.viewFeed(feed, getUserId());
         }
         mqService.refreshFeed(getUserId());
         return new JsonResult(details);
     }
 
-    @PostMapping("add_view")
+    @GetMapping("get_follow_vlog")
+    public JsonResult getFollowVlog(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<CorgiVlog> corgiVlogs = corgiVlogService.getFollowVlog(getUserId(), page, pageSize);
+        List<VlogDetail> vlogDetails = new ArrayList<>();
+        for (CorgiVlog vlog : corgiVlogs) {
+            VlogDetail detail = buildVlogDetail(vlog, getUserId());
+            if (detail != null) {
+                vlogDetails.add(detail);
+            }
+        }
+        return new JsonResult(vlogDetails);
+    }
+
+    @GetMapping("vlog_detail")
+    public JsonResult vlogDetail(@RequestParam("activityId") String activityId) {
+        return new JsonResult(getVlogDetail(activityId, getUserId()));
+    }
+
+    @GetMapping("browse")
+    public JsonResult viewVideo(@RequestParam("activityId") String activityId) {
+        if (corgiUtilService.lock("view_" + activityId)) {
+            try {
+                corgiFeedService.viewFeed(activityId, getUserId());
+                CorgiVlog corgiVlog = new CorgiVlog();
+                corgiVlog.setActivityId(activityId);
+                corgiVlog.setViewCount(1);
+                corgiVlogService.addVlogCount(corgiVlog);
+            } finally {
+                corgiUtilService.unlock("view_" + activityId);
+            }
+        }
+        return new JsonResult();
+    }
+
+    @PostMapping("add_vlog")
     public JsonResult addView(@RequestBody CorgiActivity corgiActivity) {
 
         CorgiVlog corgiVlog = new CorgiVlog();
@@ -87,4 +121,21 @@ public class CorgiFeedController extends BaseController {
         corgiVlogService.addVlog(corgiVlog);
         return new JsonResult(result.getId());
     }
+
+    private VlogDetail getVlogDetail(String activityId, String userId) {
+        CorgiVlog vlog = corgiVlogService.getVlog(activityId);
+        if (vlog != null) {
+            return buildVlogDetail(vlog, userId);
+        }
+        return null;
+    }
+
+    private VlogDetail buildVlogDetail(CorgiVlog vlog, String userId) {
+        VlogDetail vlogDetail = VlogDetail.createDetail(vlog);
+        vlogDetail.setUserDetail(corgiUserService.getUserDetailBasic(vlog.getUserId()));
+        vlogDetail.setActivityDetail(corgiActivityFeedService.getActivityById(vlog.getActivityId()));
+        vlogDetail.setHasLike(corgiLikeService.countUserLike(vlog.getActivityId(), userId));
+        return vlogDetail;
+    }
+
 }

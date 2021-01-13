@@ -61,6 +61,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiBarService corgiBarService;
+    @Reference
+    private CorgiVlogService corgiVlogService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -281,6 +283,10 @@ public class CorgiActivityController extends BaseController {
         activityLike.setUserId(activityList.get(0).getUserId());
         activityLike.setLikeUserId(getUserId());
         corgiLikeService.addActivityLike(activityLike);
+        CorgiVlog corgiVlog = new CorgiVlog();
+        corgiVlog.setActivityId(activityLike.getActivityId());
+        corgiVlog.setLikeCount(1);
+        corgiVlogService.addVlogCount(corgiVlog);
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
@@ -299,6 +305,10 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("unlike")
     public JsonResult unlike(@RequestParam("activityId") String activityId) {
         corgiLikeService.deleteActivityLike(getUserId(), activityId);
+        CorgiVlog corgiVlog = new CorgiVlog();
+        corgiVlog.setActivityId(activityId);
+        corgiVlog.setLikeCount(-1);
+        corgiVlogService.addVlogCount(corgiVlog);
         return new JsonResult();
     }
 
