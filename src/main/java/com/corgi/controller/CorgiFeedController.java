@@ -79,6 +79,19 @@ public class CorgiFeedController extends BaseController {
         return new JsonResult(vlogDetails);
     }
 
+    @GetMapping("get_user_vlog")
+    public JsonResult getFollowVlog(@RequestParam("userId")String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<CorgiVlog> corgiVlogs = corgiVlogService.getUserVlog(userId, page, pageSize);
+        List<VlogDetail> vlogDetails = new ArrayList<>();
+        for (CorgiVlog vlog : corgiVlogs) {
+            VlogDetail detail = buildVlogDetail(vlog, getUserId());
+            if (detail != null) {
+                vlogDetails.add(detail);
+            }
+        }
+        return new JsonResult(vlogDetails);
+    }
+
     @GetMapping("vlog_detail")
     public JsonResult vlogDetail(@RequestParam("activityId") String activityId) {
         return new JsonResult(getVlogDetail(activityId, getUserId()));
