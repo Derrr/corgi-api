@@ -80,7 +80,7 @@ public class CorgiFeedController extends BaseController {
     }
 
     @GetMapping("get_user_vlog")
-    public JsonResult getFollowVlog(@RequestParam("userId")String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getUserVlog(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<CorgiVlog> corgiVlogs = corgiVlogService.getUserVlog(userId, page, pageSize);
         List<VlogDetail> vlogDetails = new ArrayList<>();
         for (CorgiVlog vlog : corgiVlogs) {
@@ -133,6 +133,28 @@ public class CorgiFeedController extends BaseController {
 
         corgiVlogService.addVlog(corgiVlog);
         return new JsonResult(result.getId());
+    }
+
+    @GetMapping("delete_vlog")
+    public JsonResult deleteVlog(@RequestParam("activityId") String activityId) {
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
+        if (hasUserId() && getUserId().equals(activity.getUserId())) {
+            corgiVlogService.deleteVlog(activityId);
+            activity.setStatus(CorgiActivity.DELETED);
+            corgiActivityService.updateCorgiActivityStatus(activity);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("fail_vlog")
+    public JsonResult failVlog(@RequestParam("activityId") String activityId) {
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
+        if (hasUserId() && getUserId().equals(activity.getUserId())) {
+            corgiVlogService.deleteVlog(activityId);
+            activity.setCheckStatus("failed");
+            corgiActivityService.updateCorgiActivityStatus(activity);
+        }
+        return new JsonResult();
     }
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
