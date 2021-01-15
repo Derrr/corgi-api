@@ -1,26 +1,18 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.activity.api.CorgiActivityService;
-import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
-import com.corgi.entity.ActivityBillboard;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserLogin;
 import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**

@@ -4,23 +4,15 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
-import com.corgi.entity.ActivityBillboard;
 import com.corgi.entity.BarActivityDetail;
-import com.corgi.user.api.CorgiBillboardService;
 import com.corgi.user.api.CorgiCouponService;
-import com.corgi.user.api.CorgiPicService;
-import com.corgi.user.api.CorgiUserActivityService;
 import com.corgi.user.entity.CorgiCoupon;
-import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
