@@ -51,22 +51,31 @@ public class CorgiDateController extends BaseController {
         }
         try {
             enterPark(userDate);
-            Random random = new Random();
             for (int i = 0; i < 100; i++) {
                 String takenId = checkTaken(userDate.getUserId());
-                if (StringUtils.isNotEmpty(takenId)) {
-                    if (hasTicket(userDate.getUserId()) && hitBack(takenId, userDate)) {
-                        return match(takenId, userDate.getUserId());
+                for (int j = 0; j < 100; j++) {
+                    if (StringUtils.isNotEmpty(takenId)) {
+                        if (hasTicket(userDate.getUserId()) && hitBack(takenId, userDate)) {
+                            return match(takenId, userDate.getUserId());
+                        }
+                        clearTaken(userDate.getUserId());
+                        if (!hasTicket(userDate.getUserId())) {
+                            return new JsonResult();
+                        }
                     }
-                    clearTaken(userDate.getUserId());
-                    if (!hasTicket(userDate.getUserId())) {
-                        return new JsonResult();
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        log.error(e.getMessage(), e);
                     }
                 }
 
-                String quarry = pick(userDate);
-                if (!hasTicket(userDate.getUserId()) || StringUtils.isEmpty(quarry)) {
+                String quarry = pick(userDate, i);
+                if (!hasTicket(userDate.getUserId())) {
                     return new JsonResult();
+                }
+                if (StringUtils.isEmpty(quarry)) {
+                    continue;
                 }
                 if (flirt(quarry, userDate.getUserId())) {
                     takenId = waitTaken(userDate.getUserId());
@@ -76,11 +85,6 @@ public class CorgiDateController extends BaseController {
                         return match(takenId, userDate.getUserId());
                     }
                     clearTaken(userDate.getUserId());
-                }
-                try {
-                    Thread.sleep(random.nextInt(100));
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage(), e);
                 }
             }
 
@@ -167,36 +171,30 @@ public class CorgiDateController extends BaseController {
         return redisTemplate.hasKey(TICKET.concat(userId));
     }
 
-    private String pick(UserDate userDate) {
-        for (int i = 0; i < 100; i++) {
-            if (!hasTicket(userDate.getUserId())) {
-                return null;
-            }
-            GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(10000, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
-            List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
-            if (results.size() > 0) {
-                Map datedMap = redisTemplate.opsForHash().entries(DATED_USERS.concat(userDate.getUserId()));
-                Long now = System.currentTimeMillis();
-                for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : results) {
-                    String pickId = geoResult.getContent().getName();
-                    if (userDate.getUserId().equals(pickId)) {
-                        continue;
-                    }
-                    if (datedMap != null) {
-                        String time = (String) datedMap.get(pickId);
-                        if (time != null && now - Long.parseLong(time) < 4 * 3600 * 1000) {
-                            continue;
-                        } else if (time != null) {
-                            redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
-                        }
-                    }
-                    return pickId;
+    private String pick(UserDate userDate, int i) {
+        if (!hasTicket(userDate.getUserId())) {
+            return null;
+        }
+        Integer range = 50 * i;
+        GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(range, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
+        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
+        if (results.size() > 0) {
+            Map datedMap = redisTemplate.opsForHash().entries(DATED_USERS.concat(userDate.getUserId()));
+            Long now = System.currentTimeMillis();
+            for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : results) {
+                String pickId = geoResult.getContent().getName();
+                if (userDate.getUserId().equals(pickId)) {
+                    continue;
                 }
-            }
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-                log.error(e.getMessage(), e);
+                if (datedMap != null) {
+                    String time = (String) datedMap.get(pickId);
+                    if (time != null && now - Long.parseLong(time) < 4 * 3600 * 1000) {
+                        continue;
+                    } else if (time != null) {
+                        redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
+                    }
+                }
+                return pickId;
             }
         }
         return null;
