@@ -175,8 +175,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_check_pic")
-    public JsonResult getCheckPic(@RequestParam(required = false, name = "userId") String userId, @RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
-        List<CheckPic> checkPics = corgiPicService.getCheckPic(userId, status, type, page, size);
+    public JsonResult getCheckPic( @RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+        List<CheckPic> checkPics = corgiPicService.getCheckPic(status, type, page, size);
         return new JsonResult(checkPics);
     }
 
