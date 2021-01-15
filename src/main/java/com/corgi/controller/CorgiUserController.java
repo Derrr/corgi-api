@@ -485,6 +485,9 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
         log.info("sending code to: {}  ", telNo);
+        if("18390938126".equals(telNo)){
+            return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
+        }
         Random random = new Random();
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
