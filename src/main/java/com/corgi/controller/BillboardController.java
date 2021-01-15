@@ -4,10 +4,11 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
-import com.corgi.entity.ActivityBillboard;
+import com.corgi.entity.ActivityBillboardDetail;
 import com.corgi.user.api.CorgiBillboardService;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiUserActivityService;
+import com.corgi.user.entity.ActivityBillboard;
 import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -52,31 +54,24 @@ public class BillboardController extends BaseController {
     public JsonResult getActivityBillboard() {
         List<String> activityIds = corgiBillboardService.getActivityBillboard();
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(buildActivityBillboard(activities, false));
+        return new JsonResult(buildActivityBillboard(activities, true));
     }
 
     @GetMapping("get_all_activity_billboard")
     public JsonResult getAllActivityBillboard() {
-        List<String> activityIds = corgiBillboardService.getActivityBillboard();
+        List<ActivityBillboard> activityBoards = corgiBillboardService.getAllActivityBillboard();
+        List<String> activityIds = new ArrayList<>();
+        HashMap<String, String> lastTimeMap = new HashMap<>();
+        for (ActivityBillboard billboard : activityBoards) {
+            activityIds.add(billboard.getActivityId());
+            lastTimeMap.put(billboard.getActivityId(), billboard.getLastTime());
+        }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        List<ActivityBillboard> activityBillboards = buildActivityBillboard(activities, false);
-//        if (activityIds.size() > activityBillboards.size()) {
-//            for (String activityId : activityIds) {
-//                boolean hasId = false;
-//                for (ActivityBillboard billboard : activityBillboards) {
-//                    if (activityId.equals(billboard.getId())) {
-//                        hasId = true;
-//                        break;
-//                    }
-//                }
-//                if (!hasId) {
-//                    ActivityBillboard billboard = new ActivityBillboard();
-//                    billboard.setId(activityId);
-//                    activityBillboards.add(billboard);
-//                }
-//            }
-//        }
-        return new JsonResult(activityBillboards);
+        List<ActivityBillboardDetail> activityBillboardDetails = buildActivityBillboard(activities, true);
+        for (ActivityBillboardDetail detail : activityBillboardDetails) {
+            detail.setLastTime(lastTimeMap.get(detail.getId()));
+        }
+        return new JsonResult(activityBillboardDetails);
     }
 
     @GetMapping("add_activity_billboard")
@@ -95,15 +90,15 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
-    private List<ActivityBillboard> buildActivityBillboard(List<CorgiActivity> activities, boolean all) {
-        List<ActivityBillboard> billboards = new ArrayList<>();
+    private List<ActivityBillboardDetail> buildActivityBillboard(List<CorgiActivity> activities, boolean all) {
+        List<ActivityBillboardDetail> billboards = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         String nowTime = sdf.format(new Date());
         for (CorgiActivity corgiActivity : activities) {
             if (corgiActivity == null || StringUtils.isEmpty(corgiActivity.getId())) {
                 continue;
             }
-            ActivityBillboard billboard = ActivityBillboard.getResult(corgiActivity);
+            ActivityBillboardDetail billboard = ActivityBillboardDetail.getResult(corgiActivity);
             if (!all && !StringUtils.isEmpty(billboard.getSignUpTime()) && nowTime.compareTo(billboard.getSignUpTime()) > 0) {
                 continue;
             }
