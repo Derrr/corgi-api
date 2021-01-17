@@ -169,8 +169,9 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("count_check_pic")
     public JsonResult countCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String status,
-                                    @RequestParam(required = false, name = "type", defaultValue = "") String type) {
-        long count = corgiPicService.countCheckPic(status, type);
+                                    @RequestParam(required = false, name = "type", defaultValue = "") String type,
+                                    @RequestParam(required = false, name = "status") String userId) {
+        long count = corgiPicService.countCheckPic(status, type, userId);
         return new JsonResult(count);
     }
 
