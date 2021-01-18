@@ -318,9 +318,21 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("like_comment")
+    public JsonResult likeComment(@RequestParam("commentId") String commentId) {
+        corgiCommentService.likeComment(commentId, getUserId());
+        return new JsonResult();
+    }
+
+    @GetMapping("unlike_comment")
+    public JsonResult unlikeComment(@RequestParam("commentId") String commentId) {
+        corgiCommentService.disLikeComment(commentId, getUserId());
+        return new JsonResult();
+    }
+
     @GetMapping("get_comments")
     public JsonResult getComment(@RequestParam("activityId") String activityId) {
-        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId);
+        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, getUserId());
         return new JsonResult(activityComments);
     }
 
