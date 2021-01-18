@@ -46,6 +46,8 @@ public class CorgiFeedController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiLikeService corgiLikeService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -130,8 +132,9 @@ public class CorgiFeedController extends BaseController {
         corgiVlog.setUserId(corgiActivity.getUserId());
         corgiVlog.setType(CorgiVlog.TYPE.USER);
         corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
-
         corgiVlogService.addVlog(corgiVlog);
+
+        corgiUserActivityService.addActivityCreator(corgiActivity.getUserId(), result.getId(), CorgiActivity.CAT_VIDEO);
         return new JsonResult(result.getId());
     }
 
