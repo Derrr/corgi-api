@@ -290,7 +290,7 @@ public class CorgiActivityController extends BaseController {
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
-        if (!activityLike.getUserId().equals(activityLike.getLikeUserId().equals(activityLike.getLikeUserId()))) {
+        if (!activityLike.getUserId().equals(activityLike.getLikeUserId())) {
             mqService.sendMessage(PushMessage.builder()
                     .type(PushMessage.DEFAULT)
                     .sourceUserId(activityLike.getLikeUserId())
@@ -514,6 +514,7 @@ public class CorgiActivityController extends BaseController {
             }
         }
         corgiUserActivityService.deleteActivityCreator(activityId);
+        corgiVlogService.deleteVlog(activityId);
         corgiActivityService.deleteCorgiActivity(activityId);
         return new JsonResult();
     }
