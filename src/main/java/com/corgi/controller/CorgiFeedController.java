@@ -143,6 +143,7 @@ public class CorgiFeedController extends BaseController {
         CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
         if (hasUserId() && getUserId().equals(activity.getUserId())) {
             corgiVlogService.deleteVlog(activityId);
+            corgiUserActivityService.deleteActivity(activityId);
             activity.setStatus(CorgiActivity.DELETED);
             corgiActivityService.updateCorgiActivityStatus(activity);
         }
