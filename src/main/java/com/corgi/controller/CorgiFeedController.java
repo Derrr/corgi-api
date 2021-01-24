@@ -62,7 +62,7 @@ public class CorgiFeedController extends BaseController {
             if (detail != null) {
                 details.add(detail);
             }
-            corgiFeedService.viewFeed(feed, getUserId());
+            corgiFeedService.viewFeed(getUserId(), feed);
         }
         mqService.refreshFeed(getUserId());
         return new JsonResult(details);
