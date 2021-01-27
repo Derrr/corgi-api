@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.BarActivityDetail;
@@ -13,6 +14,7 @@ import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +49,8 @@ public class CorgiBarController extends BaseController {
     private CorgiVideoService corgiVideoService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private MQService mqService;
 
 
     @PostMapping("add_bar_activity")
@@ -56,6 +60,8 @@ public class CorgiBarController extends BaseController {
         }
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         CorgiActivity activity = corgiActivityService.addCorgiActivity(corgiActivity);
+        mqService.sendBarActivityMessage(PushMessage.builder()
+                .targetUserId(corgiActivity.getUserId()).build());
         return new JsonResult(activity);
     }
 
@@ -68,6 +74,7 @@ public class CorgiBarController extends BaseController {
             corgiActivity.setStatus(status);
         }
         List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(corgiActivity, page, pageSize);
+
         return new JsonResult(corgiActivities);
     }
 

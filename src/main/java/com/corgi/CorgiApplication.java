@@ -48,6 +48,16 @@ public class CorgiApplication {
         return new Queue(CorgiQueueName.FEED_REFRESH);
     }
 
+    @Bean
+    public Queue barActivityQueue() {
+        return new Queue(CorgiQueueName.BAR_ACTIVITY_QUEUE);
+    }
+
+    @Bean
+    public Queue influencerQueue() {
+        return new Queue(CorgiQueueName.INFLUENCER_JOIN_QUEUE);
+    }
+
 
     @Bean
     public Queue registerQueue() {
