@@ -58,6 +58,10 @@ public class CorgiApplication {
         return new Queue(CorgiQueueName.INFLUENCER_JOIN_QUEUE);
     }
 
+    @Bean
+    public Queue influencerLeftQueue() {
+        return new Queue(CorgiQueueName.INFLUENCER_LEFT_QUEUE);
+    }
 
     @Bean
     public Queue registerQueue() {

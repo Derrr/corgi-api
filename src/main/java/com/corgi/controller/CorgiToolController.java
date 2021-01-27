@@ -465,6 +465,7 @@ public class CorgiToolController extends BaseController {
                     userDetail.setUserId(userProfile.getUserId());
                     corgiUserService.updateDetail(userDetail);
                     corgiToolService.countUserNumber(name);
+                    mqService.sendInfluencerLeftMessage(PushMessage.builder().targetUserId(userProfile.getUserId()).build());
                     break;
                 }
             }
