@@ -194,8 +194,6 @@ public class CorgiUserController extends BaseController {
         userDetail.setGroup(changeGroup(userDetail.getGroup()));
         userDetail.setPreferGroup(changeGroupList(userDetail.getPreferGroup()));
         String result = corgiUserService.addDetail(userDetail);
-        mqService.sendRegisterMessage(PushMessage.builder()
-                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
     }
 
@@ -442,13 +440,14 @@ public class CorgiUserController extends BaseController {
         UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
         if (oldPosition != null) {
             result.put("city", oldPosition.getCity());
+            corgiUserService.updateUserPosition(userPosition);
+        } else {
+            //为空则为第一次注册，发送注册推送
+            corgiUserService.updateUserPosition(userPosition);
+            mqService.sendRegisterMessage(PushMessage.builder()
+                    .targetUserId(userPosition.getUserId()).build());
         }
-        corgiUserService.updateUserPosition(userPosition);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userPosition.getUserId())
-//                .option(TraceFollow.COUNT)
-//                .type(TraceFollow.STAY)
-//                .build());
+
         return new JsonResult(result);
     }
 
