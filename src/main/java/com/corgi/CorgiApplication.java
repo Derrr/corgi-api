@@ -59,4 +59,9 @@ public class CorgiApplication {
     }
 
 
+    @Bean
+    public Queue registerQueue() {
+        return new Queue(CorgiQueueName.REGISTER_QUEUE);
+    }
+
 }

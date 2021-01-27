@@ -440,13 +440,14 @@ public class CorgiUserController extends BaseController {
         UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
         if (oldPosition != null) {
             result.put("city", oldPosition.getCity());
+            corgiUserService.updateUserPosition(userPosition);
+        } else {
+            //为空则为第一次注册，发送注册推送
+            corgiUserService.updateUserPosition(userPosition);
+            mqService.sendRegisterMessage(PushMessage.builder()
+                    .targetUserId(userPosition.getUserId()).build());
         }
-        corgiUserService.updateUserPosition(userPosition);
-//        mqService.sendTrace(TraceFollow.builder()
-//                .userId(userPosition.getUserId())
-//                .option(TraceFollow.COUNT)
-//                .type(TraceFollow.STAY)
-//                .build());
+
         return new JsonResult(result);
     }
 
@@ -485,7 +486,8 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
         log.info("sending code to: {}  ", telNo);
-        if("18390938126".equals(telNo)){
+        List<String> blockTel = corgiBlacklistService.getBeBlacked("-1");
+        if (blockTel.contains(telNo)) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
         }
         Random random = new Random();
@@ -727,7 +729,7 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         String LockKey = "call_user_city_lock_" + userId;
-        if(!corgiUtilService.tryLock(LockKey, "1", 2L)){
+        if (!corgiUtilService.tryLock(LockKey, "1", 2L)) {
             return new JsonResult();
         }
         String key = getCallUserCityKey(userId);
