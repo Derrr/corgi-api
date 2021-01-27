@@ -42,6 +42,14 @@ public class MQService {
         }
     }
 
+    public void sendInfluencerLeftMessage(PushMessage pushMessage) {
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.INFLUENCER_LEFT_QUEUE, pushMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     public void refreshFeed(String userId) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.FEED_REFRESH, userId);
