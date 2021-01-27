@@ -14,6 +14,7 @@ import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +67,8 @@ public class CorgiToolController extends BaseController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private MQService mqService;
 
     public static final String ACTIVITY_TASK = "activity";
     public static final String USER_TASK = "user";
@@ -440,6 +443,8 @@ public class CorgiToolController extends BaseController {
                     userDetail.setUserId(userProfile.getUserId());
                     corgiUserService.updateDetail(userDetail);
                     corgiToolService.countUserNumber(name);
+                    mqService.sendInfluencerMessage(PushMessage.builder()
+                            .targetUserId(userProfile.getUserId()).build());
                     break;
                 }
             }

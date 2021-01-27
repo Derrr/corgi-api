@@ -26,6 +26,22 @@ public class MQService {
         }
     }
 
+    public void sendBarActivityMessage(PushMessage pushMessage) {
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.BAR_ACTIVITY_QUEUE, pushMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void sendInfluencerMessage(PushMessage pushMessage) {
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.INFLUENCER_JOIN_QUEUE, pushMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     public void refreshFeed(String userId) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.FEED_REFRESH, userId);
