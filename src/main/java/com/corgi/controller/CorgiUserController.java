@@ -194,6 +194,8 @@ public class CorgiUserController extends BaseController {
         userDetail.setGroup(changeGroup(userDetail.getGroup()));
         userDetail.setPreferGroup(changeGroupList(userDetail.getPreferGroup()));
         String result = corgiUserService.addDetail(userDetail);
+        mqService.sendRegisterMessage(PushMessage.builder()
+                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
     }
 

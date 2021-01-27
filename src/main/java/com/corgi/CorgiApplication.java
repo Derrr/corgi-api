@@ -43,4 +43,9 @@ public class CorgiApplication {
         return new Queue(CorgiQueueName.TRACE_FOLLOW_QUEUE);
     }
 
+    @Bean
+    public Queue registerQueue() {
+        return new Queue(CorgiQueueName.REGISTER_QUEUE);
+    }
+
 }
