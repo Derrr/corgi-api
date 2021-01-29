@@ -184,6 +184,13 @@ public class CorgiUserController extends BaseController {
             pics = new ArrayList<>();
         }
         userDetail = aliyunGreenService.checkAvatar(userDetail);
+        if (pics.size() == 0) {
+            UserPic userPic = new UserPic();
+            userPic.setPicUrl(userDetail.getAvatar());
+            userPic.setStatus(userDetail.getAvatarCheckStatus());
+            userPic.setDataId(userDetail.getAvatarDataId());
+            pics.add(userPic);
+        }
         userDetail.setUserPics(pics);
         userDetail.setCheckStatus(AliyunGreenService.PASS);
         if (!aliyunGreenService.checkText(userDetail.getNickname())) {
