@@ -348,6 +348,12 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("downgrade_activity")
+    public JsonResult downgradeActivity(@RequestParam("activityId") String activityId) {
+        corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.NOT_GOOD);
+        return new JsonResult();
+    }
+
     @GetMapping("count_task")
     public JsonResult countTask(@RequestParam("type") String type) {
         long count = 0;
