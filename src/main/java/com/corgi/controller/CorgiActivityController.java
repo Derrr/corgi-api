@@ -341,6 +341,7 @@ public class CorgiActivityController extends BaseController {
         List<ActivityLike> activityLikes = corgiLikeService.getActivityLike(activityId, page, pageSize);
         for (ActivityLike like : activityLikes) {
             like.setIsFollow(corgiUserFollowService.isFollowed(getUserId(), like.getLikeUserId()));
+            like.setType(null);
         }
         return new JsonResult(activityLikes);
     }
