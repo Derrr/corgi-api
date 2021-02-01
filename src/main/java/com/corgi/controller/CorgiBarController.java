@@ -184,6 +184,12 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(barProfiles);
     }
 
+    @GetMapping("get_bar_lis_by_city")
+    public JsonResult getBarListByCity(@RequestParam(required = false, name = "city") String city) {
+        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city);
+        return new JsonResult(barProfiles);
+    }
+
     @GetMapping("get_bar_account_list")
     public JsonResult getBarAccountList(@RequestParam(required = false, name = "status") String status) {
         if (hasUserId()) {
