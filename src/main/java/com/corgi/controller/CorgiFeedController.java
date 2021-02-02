@@ -48,6 +48,8 @@ public class CorgiFeedController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiShareService corgiShareService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -174,6 +176,7 @@ public class CorgiFeedController extends BaseController {
         vlogDetail.setUserDetail(corgiUserService.getUserDetailBasic(vlog.getUserId()));
         vlogDetail.setActivityDetail(corgiActivityFeedService.getActivityById(vlog.getActivityId()));
         vlogDetail.setHasLike(corgiLikeService.countUserLike(vlog.getActivityId(), userId));
+        vlogDetail.setShareCount(corgiShareService.countShare(vlog.getActivityId()));
         return vlogDetail;
     }
 
