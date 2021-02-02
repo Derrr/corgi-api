@@ -17,4 +17,5 @@ public class VlogDetail extends CorgiVlog {
     private UserDetail userDetail;
     private CorgiActivity activityDetail;
     private Integer hasLike;
+    private Integer shareCount;
 }
