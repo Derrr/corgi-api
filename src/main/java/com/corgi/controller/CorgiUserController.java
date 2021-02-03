@@ -20,13 +20,11 @@ import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
-import com.corgi.common.messages.TraceFollow;
 import com.corgi.common.util.CharacterUtils;
 import com.corgi.common.util.IPUtil;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.CheckPic;
-import com.corgi.entity.CorgiPic;
 import com.corgi.entity.MailMessage;
 import com.corgi.entity.StorageToken;
 import com.corgi.exception.PermissionException;
@@ -46,6 +44,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -130,8 +129,25 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+    }
 
+    @GetMapping("/unregister")
+    public JsonResult unregister() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        UserLogin userLogin = new UserLogin();
+        userLogin.setUserId(getUserId());
+        userLogin.setUnregisterDate(sdf.format(new Date()));
+        corgiUserService.updatePush(userLogin);
+        return new JsonResult();
+    }
 
+    @GetMapping("/cancel_unregister")
+    public JsonResult cancelUnregister() {
+        UserLogin userLogin = new UserLogin();
+        userLogin.setUserId(getUserId());
+        userLogin.setUnregisterDate("0");
+        corgiUserService.updatePush(userLogin);
+        return new JsonResult();
     }
 
     @PostMapping("/login_test")
@@ -184,6 +200,13 @@ public class CorgiUserController extends BaseController {
             pics = new ArrayList<>();
         }
         userDetail = aliyunGreenService.checkAvatar(userDetail);
+        if (pics.size() == 0) {
+            UserPic userPic = new UserPic();
+            userPic.setPicUrl(userDetail.getAvatar());
+            userPic.setStatus(userDetail.getAvatarCheckStatus());
+            userPic.setDataId(userDetail.getAvatarDataId());
+            pics.add(userPic);
+        }
         userDetail.setUserPics(pics);
         userDetail.setCheckStatus(AliyunGreenService.PASS);
         if (!aliyunGreenService.checkText(userDetail.getNickname())) {

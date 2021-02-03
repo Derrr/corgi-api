@@ -97,7 +97,7 @@ public class CorgiActivityController extends BaseController {
         if (checkDuplicateActivity(activity)) {
             return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
         }
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
@@ -225,7 +225,7 @@ public class CorgiActivityController extends BaseController {
             }
         }
         activity = aliyunGreenService.checkImageActivity(activity);
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getId(), CheckPic.ACTIVITY);
+        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
         if (!checkActivityPic(activityPics)) {
             activity.setCheckStatus(AliyunGreenService.CHECK);
         }
@@ -954,7 +954,7 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult();
         }
         String activityId = activityPics.get(0).getActivityId();
-        List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics, activityId, CheckPic.ACTIVITY);
+        List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics, getUserId(), CheckPic.ACTIVITY);
         String status = AliyunGreenService.PASS;
         for (ActivityPic pic : activityPicList) {
             String result = corgiPicService.addActivityPic(pic);

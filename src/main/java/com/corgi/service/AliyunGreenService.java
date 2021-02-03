@@ -318,7 +318,6 @@ public class AliyunGreenService {
                             if (!suggestion.equals("pass")) {
                                 pic.setStatus(CorgiPic.NEED_CHECK);
                                 pic.setResult(suggestion + "-" + scene + "-" + label + "-" + rate);
-                                addCheckPic(pic, sourceId, type);
                                 needCheck = true;
                                 break;
                             }
@@ -327,6 +326,7 @@ public class AliyunGreenService {
                             pic.setStatus(CorgiPic.NORMAL);
                             pic.setResult("pass");
                         }
+                        addCheckPic(pic, sourceId, type);
                     } else {
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
                         pic.setStatus(CorgiPic.NEED_CHECK);
