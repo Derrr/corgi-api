@@ -14,6 +14,7 @@ import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiCoupon;
 import com.corgi.user.entity.CorgiFeed;
 import com.corgi.user.entity.CorgiVlog;
+import com.corgi.user.entity.CorgiVlogHot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,10 @@ public class CorgiFeedController extends BaseController {
                 details.add(detail);
             }
             corgiFeedService.viewFeed(getUserId(), feed);
+            CorgiVlogHot hot = new CorgiVlogHot();
+            hot.setActivityId(feed);
+            hot.setViewCount(1);
+            corgiVlogService.updateHotVlog(hot);
         }
         mqService.refreshFeed(getUserId());
         return new JsonResult(details);
