@@ -290,7 +290,13 @@ public class CorgiActivityController extends BaseController {
         CorgiVlogHot hot = new CorgiVlogHot();
         hot.setActivityId(activityLike.getActivityId());
         hot.setLikeCount(1);
-        corgiVlogService.updateHotVlog(hot);
+        try {
+            if(corgiUtilService.lock("like_video_"+activityLike.getActivityId())) {
+                corgiVlogService.updateHotVlog(hot);
+            }
+        }finally {
+            corgiUtilService.unlock("like_video_"+activityLike.getActivityId());
+        }
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
