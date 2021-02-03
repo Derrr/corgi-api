@@ -134,11 +134,12 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/unregister")
     public JsonResult unregister() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String time = sdf.format(new Date());
         UserLogin userLogin = new UserLogin();
         userLogin.setUserId(getUserId());
-        userLogin.setUnregisterDate(sdf.format(new Date()));
+        userLogin.setUnregisterDate(time);
         corgiUserService.updatePush(userLogin);
-        return new JsonResult();
+        return new JsonResult(time);
     }
 
     @GetMapping("/cancel_unregister")
