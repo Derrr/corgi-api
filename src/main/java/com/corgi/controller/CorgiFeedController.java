@@ -105,7 +105,7 @@ public class CorgiFeedController extends BaseController {
     public JsonResult viewVideo(@RequestParam("activityId") String activityId) {
         if (corgiUtilService.lock("view_" + activityId)) {
             try {
-                corgiFeedService.viewFeed(activityId, getUserId());
+                corgiFeedService.viewFeed(getUserId(), activityId);
                 CorgiVlog corgiVlog = new CorgiVlog();
                 corgiVlog.setActivityId(activityId);
                 corgiVlog.setViewCount(1);
