@@ -37,15 +37,14 @@ public class AliyunVodService {
         this.managementClient = new DefaultAcsClient(profile);
     }
 
-    @GetMapping("get_video_info")
-    public JsonResult getVideoUrl(@RequestParam("videoId") String videoId) {
+    public GetPlayInfoResponse getVideoUrl(String videoId) {
         GetPlayInfoRequest request = new GetPlayInfoRequest();
         request.setVideoId(videoId);
         try {
-            return new JsonResult(this.managementClient.getAcsResponse(request));
+           return this.managementClient.getAcsResponse(request);
         } catch (ClientException e) {
             e.printStackTrace();
         }
-        return new JsonResult();
+        return null;
     }
 }

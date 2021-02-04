@@ -8,6 +8,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.BarActivityDetail;
 import com.corgi.entity.VlogDetail;
+import com.corgi.service.AliyunVodService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
@@ -53,6 +54,8 @@ public class CorgiFeedController extends BaseController {
     private CorgiShareService corgiShareService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private AliyunVodService aliyunVodService;
     @Autowired
     private MQService mqService;
 
@@ -166,6 +169,11 @@ public class CorgiFeedController extends BaseController {
             corgiActivityService.updateCorgiActivityStatus(activity);
         }
         return new JsonResult();
+    }
+
+    @GetMapping("get_video_info")
+    public JsonResult getVideoInfo(@RequestParam("videoId")String videoId){
+        return new JsonResult(aliyunVodService.getVideoUrl(videoId));
     }
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
