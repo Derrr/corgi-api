@@ -1,7 +1,9 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.common.JsonResult;
+import com.corgi.entity.VlogDetail;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiVlog;
 import com.corgi.user.entity.CorgiVlogHot;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,6 +23,8 @@ import java.util.List;
 public class CorgiHotVlogController extends BaseController {
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiActivityFeedService corgiActivityFeedService;
 
     @GetMapping("list")
     public JsonResult listHot(@RequestParam(required = false, name = "status") String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -28,7 +33,12 @@ public class CorgiHotVlogController extends BaseController {
         if (!StringUtils.isEmpty(status)) {
             hot.setStatus(status);
         }
-        return new JsonResult(corgiVlogService.getHotVlog(hot, page, pageSize));
+        List<CorgiVlogHot> hots = corgiVlogService.getHotVlog(hot, page, pageSize);
+        List<VlogDetail> details = new ArrayList<>();
+        for (CorgiVlogHot hot1 : hots) {
+            details.add(buildDetail(hot1));
+        }
+        return new JsonResult(details);
     }
 
     @GetMapping("count")
@@ -57,5 +67,18 @@ public class CorgiHotVlogController extends BaseController {
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
         return new JsonResult();
+    }
+
+    private VlogDetail buildDetail(CorgiVlogHot hot) {
+        VlogDetail detail = new VlogDetail();
+        detail.setActivityId(hot.getActivityId());
+        detail.setId(hot.getId());
+        detail.setLikeCount(hot.getLikeCount());
+        detail.setViewCount(hot.getViewCount());
+        detail.setExpectView(hot.getExpectView());
+        detail.setCtime(hot.getCtime());
+        detail.setStatus(hot.getStatus());
+        detail.setActivityDetail(corgiActivityFeedService.getActivityById(hot.getActivityId()));
+        return detail;
     }
 }

@@ -14,6 +14,7 @@ public class VlogDetail extends CorgiVlog {
         return detail;
     }
 
+    private Integer expectView;
     private UserDetail userDetail;
     private CorgiActivity activityDetail;
     private Integer hasLike;
