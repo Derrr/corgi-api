@@ -42,7 +42,9 @@ public class AliyunVodService {
         request.setVideoId(videoId);
         try {
             log.info("preparing request info...");
-            return this.managementClient.getAcsResponse(request);
+            GetPlayInfoResponse response = this.managementClient.getAcsResponse(request);
+            log.info("response... {} ", response);
+            return response;
         } catch (ClientException e) {
             e.printStackTrace();
         } catch (Exception e) {
