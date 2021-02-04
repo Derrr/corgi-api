@@ -45,10 +45,8 @@ public class AliyunVodService {
             GetPlayInfoResponse response = this.managementClient.getAcsResponse(request);
             log.info("response... {} ", response);
             return response;
-        } catch (ClientException e) {
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return null;
     }
