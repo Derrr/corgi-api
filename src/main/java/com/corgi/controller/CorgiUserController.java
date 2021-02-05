@@ -184,7 +184,11 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_basic_detail")
     public JsonResult getBasicDetail(@RequestParam("userId") String userId) {
-        return new JsonResult(corgiUserService.getUserLogin(userId));
+        UserLogin userLogin = corgiUserService.getUserLogin(userId);
+        if (userLogin == null || StringUtils.isEmpty(userLogin.getUserId())) {
+            return new JsonResult(Constants.PERMISSION_ERROR_CODE, "用户不存在");
+        }
+        return new JsonResult(userLogin);
     }
 
     @PostMapping("/add_user")

@@ -280,22 +280,25 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(activityList)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "点赞失败，活动不存在");
         }
+        CorgiActivity activity = activityList.get(0);
         activityLike.setUserId(activityList.get(0).getUserId());
         activityLike.setLikeUserId(getUserId());
         corgiLikeService.addActivityLike(activityLike);
-        CorgiVlog corgiVlog = new CorgiVlog();
-        corgiVlog.setActivityId(activityLike.getActivityId());
-        corgiVlog.setLikeCount(1);
-        corgiVlogService.addVlogCount(corgiVlog);
-        CorgiVlogHot hot = new CorgiVlogHot();
-        hot.setActivityId(activityLike.getActivityId());
-        hot.setLikeCount(1);
-        try {
-            if(corgiUtilService.lock("like_video_"+activityLike.getActivityId())) {
-                corgiVlogService.updateHotVlog(hot);
+        if (!StringUtils.isEmpty(activity.getVideoId())) {
+            CorgiVlog corgiVlog = new CorgiVlog();
+            corgiVlog.setActivityId(activityLike.getActivityId());
+            corgiVlog.setLikeCount(1);
+            corgiVlogService.addVlogCount(corgiVlog);
+            CorgiVlogHot hot = new CorgiVlogHot();
+            hot.setActivityId(activityLike.getActivityId());
+            hot.setLikeCount(1);
+            try {
+                if (corgiUtilService.lock("like_video_" + activityLike.getActivityId())) {
+                    corgiVlogService.updateHotVlog(hot);
+                }
+            } finally {
+                corgiUtilService.unlock("like_video_" + activityLike.getActivityId());
             }
-        }finally {
-            corgiUtilService.unlock("like_video_"+activityLike.getActivityId());
         }
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
