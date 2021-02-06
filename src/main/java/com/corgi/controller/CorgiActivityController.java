@@ -844,6 +844,7 @@ public class CorgiActivityController extends BaseController {
             ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
             activities = page.getCorgiActivityList();
         }
+        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
         List<CorgiActivityDetail> detailList = convertDetail(activities, userId);
         return new PageResult(detailList, activityQuery.getTPage(), activityQuery.getDPage());
     }
