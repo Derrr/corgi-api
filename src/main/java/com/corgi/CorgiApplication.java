@@ -44,6 +44,12 @@ public class CorgiApplication {
     }
 
     @Bean
+    public Queue feedQueue() {
+        return new Queue(CorgiQueueName.FEED_REFRESH);
+    }
+
+
+    @Bean
     public Queue registerQueue() {
         return new Queue(CorgiQueueName.REGISTER_QUEUE);
     }

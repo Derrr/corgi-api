@@ -26,6 +26,14 @@ public class MQService {
         }
     }
 
+    public void refreshFeed(String userId) {
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.FEED_REFRESH, userId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     public void sendRegisterMessage(PushMessage pushMessage) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.REGISTER_QUEUE, pushMessage);
