@@ -794,9 +794,16 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(activityQuery.getUserId())) {
             activityQuery.setUserId(userId);
         }
-        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
-        List<CorgiActivityDetail> detailList = convertDetail(page.getCorgiActivityList(), userId);
-        return new PageResult(detailList, page.getTPage(), page.getDPage());
+        List<CorgiActivity> activities;
+        if ("24".equals(activityQuery.getTopic())) {
+            List<String> activityIds = corgiToolService.getActivityIdsByTopic("24", activityQuery.getTPage() / activityQuery.getPageSize() + 1, activityQuery.getPageSize());
+            activities = corgiActivityService.getActivityByIds(activityIds);
+        } else {
+            ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
+            activities = page.getCorgiActivityList();
+        }
+        List<CorgiActivityDetail> detailList = convertDetail(activities, userId);
+        return new PageResult(detailList, activityQuery.getTPage(), activityQuery.getDPage());
     }
 
     @GetMapping("get_city_activity")
