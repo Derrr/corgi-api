@@ -795,6 +795,7 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setUserId(userId);
         }
         List<CorgiActivity> activities;
+
         if ("24".equals(activityQuery.getTopic())) {
             List<String> activityIds = corgiToolService.getActivityIdsByTopic("24", activityQuery.getTPage() / activityQuery.getPageSize() + 1, activityQuery.getPageSize());
             activities = corgiActivityService.getActivityByIds(activityIds);
@@ -802,6 +803,7 @@ public class CorgiActivityController extends BaseController {
             ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
             activities = page.getCorgiActivityList();
         }
+        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
         List<CorgiActivityDetail> detailList = convertDetail(activities, userId);
         return new PageResult(detailList, activityQuery.getTPage(), activityQuery.getDPage());
     }
