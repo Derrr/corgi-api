@@ -282,7 +282,9 @@ public class CorgiActivityController extends BaseController {
         }
         CorgiActivity activity = activityList.get(0);
         activityLike.setUserId(activityList.get(0).getUserId());
-        activityLike.setLikeUserId(getUserId());
+        if (hasUserId()) {
+            activityLike.setLikeUserId(getUserId());
+        }
         Integer result = corgiLikeService.addActivityLike(activityLike);
         if (result < 1) {
             return new JsonResult();
