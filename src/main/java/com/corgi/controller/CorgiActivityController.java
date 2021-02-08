@@ -283,22 +283,15 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity activity = activityList.get(0);
         activityLike.setUserId(activityList.get(0).getUserId());
         activityLike.setLikeUserId(getUserId());
-        corgiLikeService.addActivityLike(activityLike);
+        Integer result = corgiLikeService.addActivityLike(activityLike);
+        if (result < 1) {
+            return new JsonResult();
+        }
         if (!StringUtils.isEmpty(activity.getVideoId())) {
             CorgiVlog corgiVlog = new CorgiVlog();
             corgiVlog.setActivityId(activityLike.getActivityId());
             corgiVlog.setLikeCount(1);
             corgiVlogService.addVlogCount(corgiVlog);
-            CorgiVlogHot hot = new CorgiVlogHot();
-            hot.setActivityId(activityLike.getActivityId());
-            hot.setLikeCount(1);
-            try {
-                if (corgiUtilService.lock("like_video_" + activityLike.getActivityId())) {
-                    corgiVlogService.updateHotVlog(hot);
-                }
-            } finally {
-                corgiUtilService.unlock("like_video_" + activityLike.getActivityId());
-            }
         }
         HashMap extra = new HashMap();
         extra.put("activityId", activityLike.getActivityId());
@@ -317,16 +310,13 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("unlike")
     public JsonResult unlike(@RequestParam("activityId") String activityId) {
-        corgiLikeService.deleteActivityLike(getUserId(), activityId);
-        CorgiVlog corgiVlog = new CorgiVlog();
-        corgiVlog.setActivityId(activityId);
-        corgiVlog.setLikeCount(-1);
-        corgiVlogService.addVlogCount(corgiVlog);
-
-        CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
-        corgiVlogHot.setActivityId(activityId);
-        corgiVlogHot.setLikeCount(-1);
-        corgiVlogService.updateHotVlog(corgiVlogHot);
+        Integer result = corgiLikeService.deleteActivityLike(getUserId(), activityId);
+        if (result > 0) {
+            CorgiVlog corgiVlog = new CorgiVlog();
+            corgiVlog.setActivityId(activityId);
+            corgiVlog.setLikeCount(-1);
+            corgiVlogService.addVlogCount(corgiVlog);
+        }
         return new JsonResult();
     }
 
