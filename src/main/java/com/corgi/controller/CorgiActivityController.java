@@ -281,7 +281,8 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "点赞失败，活动不存在");
         }
         CorgiActivity activity = activityList.get(0);
-        activityLike.setUserId(activityList.get(0).getUserId());
+        log.info(""+activity);
+        activityLike.setUserId(activity.getUserId());
         if (hasUserId()) {
             activityLike.setLikeUserId(getUserId());
         }
