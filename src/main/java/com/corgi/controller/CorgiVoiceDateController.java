@@ -54,6 +54,11 @@ public class CorgiVoiceDateController extends BaseController {
         try {
             enterPark(userDate);
             for (int i = 0; i < 100; i++) {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 String takenId = checkTaken(userDate.getUserId());
                 if (StringUtils.isNotEmpty(takenId)) {
                     if (hasTicket(userDate.getUserId()) && hitBack(takenId, userDate)) {
@@ -65,31 +70,23 @@ public class CorgiVoiceDateController extends BaseController {
                     }
                 }
 
-                for (int j = 0; j < 100; j++) {
-                    String quarry = pick(userDate, j);
+                String quarry = pick(userDate, 100);
+                if (!hasTicket(userDate.getUserId())) {
+                    return new JsonResult();
+                }
+                if (StringUtils.isEmpty(quarry)) {
+                    continue;
+                }
+                if (flirt(quarry, userDate.getUserId())) {
+                    takenId = waitTaken(userDate.getUserId());
                     if (!hasTicket(userDate.getUserId())) {
-                        return new JsonResult();
+                        return reject(userDate.getUserId(), takenId);
+                    } else if (quarry.equals(takenId)) {
+                        return match(takenId, userDate.getUserId());
                     }
-                    if (StringUtils.isEmpty(quarry)) {
-                        continue;
-                    }
-                    if (flirt(quarry, userDate.getUserId())) {
-                        takenId = waitTaken(userDate.getUserId());
-                        if (!hasTicket(userDate.getUserId())) {
-                            return reject(userDate.getUserId(), takenId);
-                        } else if (quarry.equals(takenId)) {
-                            return match(takenId, userDate.getUserId());
-                        }
-                        clearTaken(userDate.getUserId());
-                    }
-                    try {
-                        Thread.sleep(100L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    clearTaken(userDate.getUserId());
                 }
             }
-
         } finally {
             leavePark(userDate.getUserId());
         }
