@@ -3,6 +3,7 @@ package com.corgi.service;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
+import com.corgi.user.entity.CorgiDate;
 import com.corgi.user.entity.UserTrace;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -69,6 +70,14 @@ public class MQService {
     public void sendTrace(TraceFollow traceFollow) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.TRACE_FOLLOW_QUEUE, traceFollow);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void sendDate(CorgiDate corgiDate){
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.USER_DATE_QUEUE, corgiDate);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

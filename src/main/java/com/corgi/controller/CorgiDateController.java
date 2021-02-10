@@ -6,8 +6,11 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.DateDetail;
 import com.corgi.entity.UserDate;
+import com.corgi.service.MQService;
+import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.entity.CorgiDate;
 import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +39,14 @@ public class CorgiDateController extends BaseController {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private MQService mqService;
     @Reference
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiUserDateService corgiUserDateService;
 
     @PostMapping("hunt")
     public JsonResult searchDate(@RequestBody UserDate userDate) {
@@ -141,6 +148,48 @@ public class CorgiDateController extends BaseController {
         redisTemplate.opsForHash().putAll(DATE_RESPONSE.concat(userId).concat(dateId), result);
         redisTemplate.expire(DATE_RESPONSE.concat(userId).concat(dateId), 10, TimeUnit.SECONDS);
         return new JsonResult(result);
+    }
+
+    @PostMapping("start_date")
+    public JsonResult startDate(CorgiDate date) {
+        mqService.sendDate(date);
+        return new JsonResult();
+    }
+
+    @GetMapping("end_date")
+    public JsonResult endDate() {
+        CorgiDate update = new CorgiDate();
+        update.setUserId(getUserId());
+        update.setStatus(CorgiDate.CLOSE);
+        corgiUserDateService.updateDate(update);
+        return new JsonResult();
+    }
+
+    @GetMapping("list_date")
+    public JsonResult listDate(@RequestParam("status") String status) {
+        CorgiDate search = new CorgiDate();
+        search.setUserId(getUserId());
+        search.setStatus(status);
+        List<CorgiDate> list = corgiUserDateService.searchDate(search);
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (CorgiDate corgiDate : list) {
+                if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
+                    UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
+                    corgiDate.setTakenUserDetail(detail);
+                }
+            }
+        }
+        return new JsonResult(list);
+    }
+
+    @GetMapping("get_date")
+    public JsonResult listDate(@RequestParam("id") Integer id) {
+        CorgiDate corgiDate = corgiUserDateService.getDateById(id);
+        if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
+            UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
+            corgiDate.setTakenUserDetail(detail);
+        }
+        return new JsonResult(corgiDate);
     }
 
     private JsonResult reject(String userId, String dateId) {
