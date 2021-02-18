@@ -74,6 +74,8 @@ public class CorgiUserController extends BaseController {
     private CorgiBillboardService corgiBillboardService;
     @Reference
     private CorgiSoundService corgiSoundService;
+    @Reference
+    private CorgiVisitService corgiVisitService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -382,14 +384,11 @@ public class CorgiUserController extends BaseController {
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
         try {
             UserDetail userDetail = corgiUserService.getUserDetail(userId, loginUserId);
-//            List<UserPic> corgiPics = userDetail.getUserPics();
-//            for (UserPic pic : corgiPics) {
-//                log.info("pic url... {} ", pic.getPicUrl());
-//            }
             if (userDetail == null) {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
+            corgiVisitService.visit(getUserId(), userId);
             log.info("detail code:{} ", 0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
@@ -792,6 +791,14 @@ public class CorgiUserController extends BaseController {
             }
         }
         return null;
+    }
+
+    @GetMapping("get_visitors")
+    public JsonResult getVisitor(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+        if (StringUtils.isEmpty(userId)) {
+            userId = getUserId();
+        }
+        return new JsonResult(corgiVisitService.getVisitor(userId, size));
     }
 
 
