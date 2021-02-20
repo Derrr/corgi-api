@@ -801,6 +801,25 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiVisitService.getVisitor(userId, size));
     }
 
+    @GetMapping("get_map_user")
+    public JsonResult getMapUser(UserQuery userQuery) {
+        MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
+        return new JsonResult(mapUserProfile);
+    }
+
+    @GetMapping("get_user_by_ids")
+    public JsonResult getUserByIds(@RequestParam("userIds") String userIds) {
+        String[] ids = userIds.split(",");
+        List<UserDetail> profiles = new ArrayList<>();
+        for (int i = 0; i < ids.length; i++) {
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
+            if (userDetail != null) {
+                profiles.add(userDetail);
+            }
+        }
+        return new JsonResult(profiles);
+    }
+
 
     public static String changeGroup(String group) {
         if ("猴子".equals(group)) {
