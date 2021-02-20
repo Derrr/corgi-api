@@ -804,6 +804,28 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
+        List<UserProfile> userProfiles = mapUserProfile.getUsers();
+        if(!CollectionUtils.isEmpty(userProfiles)){
+            CorgiActivity corgiActivity = new CorgiActivity();
+            corgiActivity.setStatus(CorgiActivity.CREATED);
+            try {
+                for (UserProfile userProfile : userProfiles) {
+                    String key = "activity_count_" + userProfile.getUserId();
+                    String count = redisTemplate.opsForValue().get(key);
+                    if (StringUtils.isEmpty(count) || !StringUtils.isNumeric(count)) {
+                        corgiActivity.setUserId(userProfile.getUserId());
+                        long finalCount = corgiActivityService.countCorgiActivity(corgiActivity);
+                        userProfile.setActivityCount((int) finalCount);
+                        redisTemplate.opsForValue().set(key, finalCount + "", 1, TimeUnit.HOURS);
+                    } else {
+                        userProfile.setActivityCount(Integer.parseInt(count));
+                    }
+                    userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
         return new JsonResult(mapUserProfile);
     }
 
