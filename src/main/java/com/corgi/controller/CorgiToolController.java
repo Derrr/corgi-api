@@ -119,8 +119,14 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_topics")
-    public JsonResult getTopics(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false, name = "text") String text) {
-        List<CorgiTopic> topics = corgiToolService.searchTopic(text, status);
+    public JsonResult getTopics() {
+        List<CorgiTopic> topics = corgiToolService.searchTopic(null, "release");
+        return new JsonResult(topics);
+    }
+
+    @GetMapping("get_all_topics")
+    public JsonResult getAllTopics(@RequestParam(required = false,name = "status")String status) {
+        List<CorgiTopic> topics = corgiToolService.searchTopic(null, status);
         return new JsonResult(topics);
     }
 
@@ -175,7 +181,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_check_pic")
-    public JsonResult getCheckPic( @RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+    public JsonResult getCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         List<CheckPic> checkPics = corgiPicService.getCheckPic(status, type, page, size);
         return new JsonResult(checkPics);
     }
