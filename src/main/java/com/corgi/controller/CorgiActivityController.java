@@ -832,6 +832,7 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setUserId(userId);
         }
         List<CorgiActivity> activities;
+
         if ("24".equals(activityQuery.getTopic())) {
             List<String> activityIds = corgiToolService.getActivityIdsByTopic("24", activityQuery.getTPage() / activityQuery.getPageSize() + 1, activityQuery.getPageSize());
             activities = corgiActivityService.getActivityByIds(activityIds);
