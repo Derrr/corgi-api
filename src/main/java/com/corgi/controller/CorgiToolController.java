@@ -12,6 +12,7 @@ import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiArea;
 import com.corgi.entity.CorgiStatistic;
 import com.corgi.entity.CorgiTopic;
+import com.corgi.entity.tool.Topic;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
@@ -19,6 +20,7 @@ import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
@@ -61,6 +63,8 @@ public class CorgiToolController extends BaseController {
     private CorgiBillboardService corgiBillboardService;
     @Reference
     private CorgiSoundService corgiSoundService;
+    @Reference
+    private CorgiVlogService corgiVlogService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -127,10 +131,18 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(topics);
     }
 
-    @GetMapping("get_all_topics")
-    public JsonResult getAllTopics(@RequestParam(required = false,name = "status")String status) {
+    @GetMapping("search_topics")
+    public JsonResult getAllTopics(@RequestParam(required = false, name = "status") String status) {
         List<CorgiTopic> topics = corgiToolService.searchTopic(null, status);
-        return new JsonResult(topics);
+        List<Topic> result = new ArrayList<>();
+        for (CorgiTopic corgiTopic : topics) {
+            CorgiVlog countResult = corgiVlogService.countByTopic(corgiTopic.getTopicId());
+            Topic topic = new Topic();
+            BeanUtils.copyProperties(corgiTopic, topic);
+            topic.initCount(countResult);
+            result.add(topic);
+        }
+        return new JsonResult(result);
     }
 
     @GetMapping("get_activity_types")
@@ -153,13 +165,15 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_check_sound")
-    public JsonResult getCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size) {
+    public JsonResult getCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String
+                                            status, @RequestParam("page") int page, @RequestParam("pageSize") int size) {
         List<CorgiSound> checkSound = corgiSoundService.getCheckSound(status, page, size);
         return new JsonResult(checkSound);
     }
 
     @GetMapping("count_check_sound")
-    public JsonResult countCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String status) {
+    public JsonResult countCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String
+                                              status) {
         long count = corgiSoundService.countCheckSound(status);
         return new JsonResult(count);
     }
@@ -177,7 +191,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("count_check_pic")
-    public JsonResult countCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String status,
+    public JsonResult countCheckPic(@RequestParam(required = false, name = "status", defaultValue = "") String
+                                            status,
                                     @RequestParam(required = false, name = "type", defaultValue = "") String type,
                                     @RequestParam(required = false, name = "userId") String userId) {
         long count = corgiPicService.countCheckPic(status, type, userId);
@@ -185,7 +200,10 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_check_pic")
-    public JsonResult getCheckPic(@RequestParam(required = false, name = "userId") String userId, @RequestParam(required = false, name = "status", defaultValue = "") String status, @RequestParam("page") int page, @RequestParam("pageSize") int size, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+    public JsonResult getCheckPic(@RequestParam(required = false, name = "userId") String
+                                          userId, @RequestParam(required = false, name = "status", defaultValue = "") String status,
+                                  @RequestParam("page") int page, @RequestParam("pageSize") int size,
+                                  @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         List<CheckPic> checkPics = corgiPicService.getCheckPic(userId, status, type, page, size);
         return new JsonResult(checkPics);
     }
@@ -219,7 +237,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_statistics")
-    public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+    public JsonResult getStatistics(@RequestParam("type") String type, @RequestParam("startDate") String
+            startDate, @RequestParam("endDate") String endDate) {
         List<HashMap> statistics = null;
         if (CorgiStatistic.ACTIVITY_TYPE.equals(type) || CorgiStatistic.PUBLISH.equals(type) || CorgiStatistic.USER_CITY.equals(type)) {
             statistics = corgiStatisticService.getList(type, startDate, endDate);
@@ -230,7 +249,9 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("sum_statistics")
-    public JsonResult sumStatistics(@RequestParam("type") String type, @RequestParam(required = false, name = "beginDate") String beginDate, @RequestParam(required = false, name = "endDate") String endDate) {
+    public JsonResult sumStatistics(@RequestParam("type") String
+                                            type, @RequestParam(required = false, name = "beginDate") String
+                                            beginDate, @RequestParam(required = false, name = "endDate") String endDate) {
         long sum = corgiStatisticService.sumCount(type, beginDate, endDate);
         return new JsonResult(sum);
     }
@@ -260,7 +281,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_nickname")
-    public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
+    public JsonResult agreeNickname(@RequestParam("userId") String
+                                            userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
         if (!StringUtils.isEmpty(nickname)) {
             String result = corgiUserService.updateUserNickname(userId, nickname, "");
             if (!CorgiConstants.SUCCESS.equals(result)) {
@@ -271,7 +293,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_desc")
-    public JsonResult agreeDesc(@RequestParam("userId") String userId, @RequestParam(required = false, name = "desc", defaultValue = "") String desc) {
+    public JsonResult agreeDesc(@RequestParam("userId") String
+                                        userId, @RequestParam(required = false, name = "desc", defaultValue = "") String desc) {
         if (!StringUtils.isEmpty(desc)) {
             UserDetail userDetail = new UserDetail();
             userDetail.setDesc(desc);
@@ -303,7 +326,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_title")
-    public JsonResult agreeTitle(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "title", defaultValue = "") String title) {
+    public JsonResult agreeTitle(@RequestParam("activityId") String
+                                         activityId, @RequestParam(required = false, name = "title", defaultValue = "") String title) {
         if (!StringUtils.isEmpty(title)) {
             corgiActivityService.updateByColumnn(activityId, "title", title);
         }
@@ -311,7 +335,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_type")
-    public JsonResult agreeType(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
+    public JsonResult agreeType(@RequestParam("activityId") String
+                                        activityId, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         if (!StringUtils.isEmpty(type)) {
             corgiActivityService.updateByColumnn(activityId, "activityType", type);
         }
@@ -319,7 +344,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_content")
-    public JsonResult agreeContent(@RequestParam("activityId") String activityId, @RequestParam(required = false, name = "content", defaultValue = "") String content) {
+    public JsonResult agreeContent(@RequestParam("activityId") String
+                                           activityId, @RequestParam(required = false, name = "content", defaultValue = "") String content) {
         if (!StringUtils.isEmpty(content)) {
             corgiActivityService.updateByColumnn(activityId, "content", content);
         }
@@ -387,19 +413,22 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_user_stay")
-    public JsonResult getUserStay(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate, @RequestParam("stayCount") String stayCount) {
+    public JsonResult getUserStay(@RequestParam("startDate") String startDate, @RequestParam("endDate") String
+            endDate, @RequestParam("stayCount") String stayCount) {
         List<HashMap> userStays = corgiStatisticService.getUserStay(startDate, endDate, stayCount);
         return new JsonResult(userStays);
     }
 
     @GetMapping("get_user_trace")
-    public JsonResult getUserTrace(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+    public JsonResult getUserTrace(@RequestParam("startDate") String startDate, @RequestParam("endDate") String
+            endDate) {
         List<HashMap> traces = corgiStatisticService.getUserTraceSum(startDate, endDate);
         return new JsonResult(traces);
     }
 
     @GetMapping("add_character")
-    public JsonResult addCharacter(@RequestParam("openId") String openId, @RequestParam("character") String character) {
+    public JsonResult addCharacter(@RequestParam("openId") String openId, @RequestParam("character") String
+            character) {
         corgiStatisticService.addCharacter(openId, character);
         return new JsonResult();
     }
@@ -426,7 +455,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_report")
-    public JsonResult getReport(CorgiReport corgiReport, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getReport(CorgiReport corgiReport, @RequestParam("page") Integer
+            page, @RequestParam("pageSize") Integer pageSize) {
         return new JsonResult(corgiBlacklistService.getReport(corgiReport, page, pageSize));
     }
 
@@ -437,7 +467,8 @@ public class CorgiToolController extends BaseController {
 
 
     @GetMapping("update_report_status")
-    public JsonResult updateReportStatus(@RequestParam("status") String status, @RequestParam("reportId") String reportId) {
+    public JsonResult updateReportStatus(@RequestParam("status") String status, @RequestParam("reportId") String
+            reportId) {
         corgiBlacklistService.updateStatus(reportId, status);
         return new JsonResult();
     }
@@ -487,7 +518,8 @@ public class CorgiToolController extends BaseController {
 
 
     @GetMapping("update_billboard")
-    public JsonResult updateBillboard(@RequestParam(required = false, name = "from") String from, @RequestParam(required = false, name = "to") String to) {
+    public JsonResult updateBillboard(@RequestParam(required = false, name = "from") String
+                                              from, @RequestParam(required = false, name = "to") String to) {
         if (StringUtils.isEmpty(from) || StringUtils.isEmpty(to)) {
             return new JsonResult();
         }
@@ -531,7 +563,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("set_match_factor2")
-    public JsonResult setMatchFactor2(@RequestParam("value") List<String> value, @RequestParam("table") String table) {
+    public JsonResult setMatchFactor2(@RequestParam("value") List<String> value, @RequestParam("table") String
+            table) {
         redisTemplate.delete("match_factor_" + table);
         redisTemplate.opsForList().rightPushAll("match_factor_" + table, value);
         return new JsonResult();
