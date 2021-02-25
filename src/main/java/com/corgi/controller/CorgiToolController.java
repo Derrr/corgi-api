@@ -132,8 +132,8 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("search_topics")
-    public JsonResult getAllTopics(@RequestParam(required = false, name = "status") String status) {
-        List<CorgiTopic> topics = corgiToolService.searchTopic(null, status);
+    public JsonResult getAllTopics(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false,name = "topic") String key) {
+        List<CorgiTopic> topics = corgiToolService.searchTopic(key, status);
         List<Topic> result = new ArrayList<>();
         for (CorgiTopic corgiTopic : topics) {
             CorgiVlog countResult = corgiVlogService.countByTopic(corgiTopic.getTopicId());
