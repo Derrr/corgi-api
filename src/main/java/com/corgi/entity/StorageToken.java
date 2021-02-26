@@ -14,4 +14,5 @@ public class StorageToken {
     private String accessKeySecret;
     private String accessKeyId;
     private String expiration;
+    private String workflowId;
 }

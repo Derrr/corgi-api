@@ -422,6 +422,7 @@ public class CorgiUserController extends BaseController {
             token.setAccessKeyId(response.getCredentials().getAccessKeyId());
             token.setAccessKeySecret(response.getCredentials().getAccessKeySecret());
             token.setExpiration(response.getCredentials().getExpiration());
+            token.setWorkflowId("aaf163046a83f3462053a51b8a8bf634");
             return new JsonResult(token);
         } catch (ClientException e) {
             log.error(e.getMessage(), e);
@@ -805,7 +806,7 @@ public class CorgiUserController extends BaseController {
     public JsonResult getMapUser(UserQuery userQuery) {
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         List<UserProfile> userProfiles = mapUserProfile.getUsers();
-        if(!CollectionUtils.isEmpty(userProfiles)){
+        if (!CollectionUtils.isEmpty(userProfiles)) {
             CorgiActivity corgiActivity = new CorgiActivity();
             corgiActivity.setStatus(CorgiActivity.CREATED);
             try {
