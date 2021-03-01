@@ -175,13 +175,15 @@ public class CorgiVoiceDateController extends BaseController {
             return null;
         }
         Integer range = 50 * i;
-        GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(range, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
+        GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(range, Metrics.KILOMETERS)));
         List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
+        log.info(" get size:{} ", results.size());
         if (results.size() > 0) {
             Map datedMap = redisTemplate.opsForHash().entries(DATED_USERS.concat(userDate.getUserId()));
             Long now = System.currentTimeMillis();
             for (GeoResult<RedisGeoCommands.GeoLocation<String>> geoResult : results) {
                 String pickId = geoResult.getContent().getName();
+                log.info(" id:{} ", pickId);
                 if (userDate.getUserId().equals(pickId)) {
                     continue;
                 }
