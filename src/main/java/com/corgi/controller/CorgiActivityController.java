@@ -277,7 +277,7 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("like")
     public JsonResult like(@RequestBody ActivityLike activityLike) {
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityLike.getActivityId()));
-        if (CollectionUtils.isEmpty(activityList)) {
+        if (CollectionUtils.isEmpty(activityList) || activityList.get(0).getId() == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "点赞失败，活动不存在");
         }
         CorgiActivity activity = activityList.get(0);
