@@ -58,7 +58,7 @@ public class CorgiDateController extends BaseController {
         }
         try {
             enterPark(userDate);
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 50; i++) {
                 String takenId = checkTaken(userDate.getUserId());
                 for (int j = 0; j < 100; j++) {
                     if (StringUtils.isNotEmpty(takenId)) {
@@ -224,7 +224,7 @@ public class CorgiDateController extends BaseController {
         if (!hasTicket(userDate.getUserId())) {
             return null;
         }
-        Integer range = 500 * i;
+        Integer range = 100 * i;
         GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = redisTemplate.opsForGeo().radius(PARK, new Circle(new Point(userDate.getLng(), userDate.getLat()), new Distance(range, Metrics.KILOMETERS)), RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().sortAscending());
         List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();
         if (results.size() > 0) {
