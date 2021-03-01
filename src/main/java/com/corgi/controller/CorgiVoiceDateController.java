@@ -185,14 +185,14 @@ public class CorgiVoiceDateController extends BaseController {
                 if (userDate.getUserId().equals(pickId)) {
                     continue;
                 }
-                if (datedMap != null) {
-                    String time = (String) datedMap.get(pickId);
-                    if (time != null && now - Long.parseLong(time) < 4 * 3600 * 1000) {
-                        continue;
-                    } else if (time != null) {
-                        redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
-                    }
-                }
+//                if (datedMap != null) {
+//                    String time = (String) datedMap.get(pickId);
+//                    if (time != null && now - Long.parseLong(time) < 4 * 3600 * 1000) {
+//                        continue;
+//                    } else if (time != null) {
+//                        redisTemplate.opsForHash().delete(DATED_USERS.concat(userDate.getUserId()), pickId);
+//                    }
+//                }
                 return pickId;
             }
         }
