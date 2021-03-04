@@ -132,7 +132,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("search_topics")
-    public JsonResult getAllTopics(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false,name = "topic") String key) {
+    public JsonResult getAllTopics(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false, name = "topic") String key) {
         List<CorgiTopic> topics = corgiToolService.searchTopic(key, status);
         List<Topic> result = new ArrayList<>();
         for (CorgiTopic corgiTopic : topics) {
@@ -528,6 +528,14 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("add_billboard")
+    public JsonResult addBillboard(@RequestParam("userId") String userId, @RequestParam("date") String date) {
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUserId(userId);
+        userProfile.setMatch(0.0);
+        corgiBillboardService.addBillboard(userProfile, date, "user");
+        return new JsonResult();
+    }
 
     @GetMapping("count")
     public JsonResult count(@RequestParam("user") String user) {
