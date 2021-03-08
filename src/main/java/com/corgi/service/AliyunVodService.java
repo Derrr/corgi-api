@@ -5,10 +5,7 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
-import com.aliyuncs.vod.model.v20170321.GetCategoriesRequest;
-import com.aliyuncs.vod.model.v20170321.GetCategoriesResponse;
-import com.aliyuncs.vod.model.v20170321.GetPlayInfoRequest;
-import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
+import com.aliyuncs.vod.model.v20170321.*;
 import com.corgi.common.JsonResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +55,19 @@ public class AliyunVodService {
         request.setCateId(categoryId);
         request.setPageNo(1L);
         request.setPageSize(100L);
+        try {
+            return this.managementClient.getAcsResponse(request);
+        } catch (ClientException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public GetVideoListResponse getVideoList(Integer page, Integer pageSize, Long cateId) {
+        GetVideoListRequest request = new GetVideoListRequest();
+        request.setCateId(cateId);
+        request.setPageNo(page);
+        request.setPageSize(pageSize);
         try {
             return this.managementClient.getAcsResponse(request);
         } catch (ClientException e) {

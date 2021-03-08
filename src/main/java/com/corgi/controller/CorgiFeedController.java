@@ -185,14 +185,20 @@ public class CorgiFeedController extends BaseController {
     }
 
     @GetMapping("get_video_info")
-    public JsonResult getVideoInfo(@RequestParam("videoId")String videoId){
+    public JsonResult getVideoInfo(@RequestParam("videoId") String videoId) {
         return new JsonResult(aliyunVodService.getVideoUrl(videoId));
     }
 
     @GetMapping("get_category_info")
-    public JsonResult getCategoryInfo(){
+    public JsonResult getCategoryInfo() {
         return new JsonResult(aliyunVodService.getVideoCategory(1000260458L));
     }
+
+    @GetMapping("get_bgm_list")
+    public JsonResult getBGMList(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize, @RequestParam("cateId") Long cateId) {
+        return new JsonResult(aliyunVodService.getVideoList(page, pageSize, cateId));
+    }
+
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
         CorgiVlog vlog = corgiVlogService.getVlog(activityId);
