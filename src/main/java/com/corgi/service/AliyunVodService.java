@@ -5,6 +5,8 @@ import com.aliyuncs.IAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.aliyuncs.vod.model.v20170321.GetCategoriesRequest;
+import com.aliyuncs.vod.model.v20170321.GetCategoriesResponse;
 import com.aliyuncs.vod.model.v20170321.GetPlayInfoRequest;
 import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
 import com.corgi.common.JsonResult;
@@ -47,6 +49,19 @@ public class AliyunVodService {
             return response;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public GetCategoriesResponse getVideoCategory(Long categoryId) {
+        GetCategoriesRequest request = new GetCategoriesRequest();
+        request.setCateId(categoryId);
+        request.setPageNo(1L);
+        request.setPageSize(100L);
+        try {
+            return this.managementClient.getAcsResponse(request);
+        } catch (ClientException e) {
+            e.printStackTrace();
         }
         return null;
     }
