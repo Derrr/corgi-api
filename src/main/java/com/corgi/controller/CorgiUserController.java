@@ -802,6 +802,23 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiVisitService.getVisitor(userId, size));
     }
 
+    @GetMapping("get_visited")
+    public JsonResult getVisited(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+        if (StringUtils.isEmpty(userId)) {
+            userId = getUserId();
+        }
+        return new JsonResult(corgiVisitService.getVisited(userId, size));
+    }
+
+    @GetMapping("count_visit")
+    public JsonResult countVisit(@RequestParam(required = false, name = "userId") String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            userId = getUserId();
+        }
+        return new JsonResult(corgiVisitService.countVisit(userId));
+    }
+
+
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
