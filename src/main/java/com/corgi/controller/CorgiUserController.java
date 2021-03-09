@@ -388,7 +388,6 @@ public class CorgiUserController extends BaseController {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
-            corgiVisitService.visit(getUserId(), userId);
             log.info("detail code:{} ", 0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
@@ -398,6 +397,11 @@ public class CorgiUserController extends BaseController {
         }
     }
 
+    @GetMapping("/visit")
+    public JsonResult visit(@RequestParam("userId") String userId) {
+        corgiVisitService.visit(getUserId(), userId);
+        return new JsonResult();
+    }
 
     @GetMapping("/get_upload_token")
     public JsonResult getUploadToken() {
