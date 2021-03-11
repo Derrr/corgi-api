@@ -1200,9 +1200,6 @@ public class CorgiActivityController extends BaseController {
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
-                } else {
-                    it.remove();
-                    continue;
                 }
                 Integer signUp = corgiUserActivityService.getStatus(userId, activity.getId());
                 double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
