@@ -62,13 +62,17 @@ public class CorgiOpenPageController extends BaseController {
 
     @GetMapping("get_open_page")
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
+        List<CorgiOpenPage> result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
+        if (!CollectionUtils.isEmpty(result)) {
+            return new JsonResult(result);
+        }
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
         List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
         corgiOpenPage.setCity("全国");
         openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
-        List<CorgiOpenPage> result = new ArrayList<>();
+        result = new ArrayList<>();
         if (!CollectionUtils.isEmpty(openPages)) {
             result.add(openPages.get(new Random().nextInt(openPages.size())));
         }
