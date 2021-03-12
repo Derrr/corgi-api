@@ -438,8 +438,8 @@ public class CorgiUserController extends BaseController {
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
                     throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "非当前用户");
                 } else {
-                    UserDetail u = corgiUserService.getUserDetailBasic(jwtUserId);
-                    if(u == null || StringUtils.isEmpty(u.getUserId())){
+                    UserDetail u = corgiUserService.getUserDetail(jwtUserId, null);
+                    if (u == null || StringUtils.isEmpty(u.getUserId())) {
                         throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "用户不存在");
                     }
                     Date expireDate = decodedJWT.getExpiresAt();
