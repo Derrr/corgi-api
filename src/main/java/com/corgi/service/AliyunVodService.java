@@ -75,4 +75,19 @@ public class AliyunVodService {
         }
         return null;
     }
+
+    public CreateUploadVideoResponse getUploadToken(String title, String fileName) {
+        CreateUploadVideoRequest request = new CreateUploadVideoRequest();
+        request.setFileName(fileName);
+        request.setTitle(title);
+        request.setActionName("CreateUploadVideo");
+        request.setWorkflowId("aaf163046a83f3462053a51b8a8bf634");
+        try {
+            return this.managementClient.getAcsResponse(request);
+        } catch (ClientException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

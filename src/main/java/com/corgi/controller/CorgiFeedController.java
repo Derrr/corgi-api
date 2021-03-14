@@ -199,6 +199,11 @@ public class CorgiFeedController extends BaseController {
         return new JsonResult(aliyunVodService.getVideoList(page, pageSize, cateId));
     }
 
+    @GetMapping("get_upload_token")
+    public JsonResult getUploadToken(@RequestParam("title") String title, @RequestParam("fileName") String fileName) {
+        return new JsonResult(aliyunVodService.getUploadToken(title, fileName));
+    }
+
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
         CorgiVlog vlog = corgiVlogService.getVlog(activityId);
