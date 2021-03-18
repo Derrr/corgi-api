@@ -33,6 +33,12 @@ public class CorgiSystemController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("search_system_message")
+    public JsonResult searchSystemMessage(MessageRecord record, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+        return new JsonResult(corgiSystemMessageService.searchMessageRecord(record, page, size));
+    }
+
+
     @PostMapping("update_system_message")
     public JsonResult updateSystemMessage(@RequestBody SystemMessage systemMessage) {
         log.info("sent time...{} ", systemMessage.getSentTime());
