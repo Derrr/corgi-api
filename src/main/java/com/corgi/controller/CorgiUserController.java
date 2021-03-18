@@ -388,7 +388,6 @@ public class CorgiUserController extends BaseController {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
-            log.info("detail code:{} ", 0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -448,6 +447,10 @@ public class CorgiUserController extends BaseController {
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
                     throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "非当前用户");
                 } else {
+                    UserDetail u = corgiUserService.getUserDetail(jwtUserId, null);
+                    if (u == null || StringUtils.isEmpty(u.getUserId())) {
+                        throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "用户不存在");
+                    }
                     Date expireDate = decodedJWT.getExpiresAt();
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
