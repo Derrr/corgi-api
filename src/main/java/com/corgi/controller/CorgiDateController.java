@@ -151,7 +151,7 @@ public class CorgiDateController extends BaseController {
     }
 
     @PostMapping("start_date")
-    public JsonResult startDate(CorgiDate date) {
+    public JsonResult startDate(@RequestBody CorgiDate date) {
         if (hasUserId()) {
             date.setUserId(getUserId());
         }
