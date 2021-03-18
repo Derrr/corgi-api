@@ -155,6 +155,7 @@ public class CorgiDateController extends BaseController {
         if (hasUserId()) {
             date.setUserId(getUserId());
         }
+        log.info("date:{} ", date);
         mqService.sendDate(date);
         return new JsonResult();
     }
