@@ -152,6 +152,9 @@ public class CorgiDateController extends BaseController {
 
     @PostMapping("start_date")
     public JsonResult startDate(CorgiDate date) {
+        if (hasUserId()) {
+            date.setUserId(getUserId());
+        }
         mqService.sendDate(date);
         return new JsonResult();
     }
