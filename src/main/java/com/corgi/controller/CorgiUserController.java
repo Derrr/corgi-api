@@ -384,7 +384,6 @@ public class CorgiUserController extends BaseController {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
-            log.info("detail code:{} ", 0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
