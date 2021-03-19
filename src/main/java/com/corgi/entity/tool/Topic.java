@@ -2,7 +2,9 @@ package com.corgi.entity.tool;
 
 import com.corgi.entity.CorgiTopic;
 import com.corgi.user.entity.CorgiVlog;
+import lombok.Data;
 
+@Data
 public class Topic extends CorgiTopic {
 
     private Integer likeCount;
