@@ -11,9 +11,9 @@ public class Topic extends CorgiTopic {
     private Integer vlogCount;
 
     public void initCount(CorgiVlog vlog) {
-        this.likeCount = vlog.getLikeCount();
-        this.viewCount = vlog.getViewCount();
-        this.commentCount = vlog.getCommentCount();
-        this.vlogCount = vlog.getId();
+        this.likeCount = vlog.getLikeCount() == null ? 0 : vlog.getLikeCount();
+        this.viewCount = vlog.getViewCount() == null ? 0 : vlog.getViewCount();
+        this.commentCount = vlog.getCommentCount() == null ? 0 : vlog.getCommentCount();
+        this.vlogCount = vlog.getId() == null ? 0 : vlog.getId();
     }
 }
