@@ -39,7 +39,6 @@ public class AliyunVodService {
     public GetPlayInfoResponse getVideoUrl(String videoId) {
         GetPlayInfoRequest request = new GetPlayInfoRequest();
         request.setVideoId(videoId);
-        request.setFormats("mp4");
         try {
             log.info("preparing request info...");
             GetPlayInfoResponse response = this.managementClient.getAcsResponse(request);
