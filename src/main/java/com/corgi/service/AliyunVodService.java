@@ -50,6 +50,20 @@ public class AliyunVodService {
         return null;
     }
 
+    public GetVideoInfoResponse getVideoInfo(String videoId) {
+        GetVideoInfoRequest request = new GetVideoInfoRequest();
+        request.setVideoId(videoId);
+        try {
+            log.info("preparing request info...");
+            GetVideoInfoResponse response = this.managementClient.getAcsResponse(request);
+            log.info("response... {} ", response);
+            return response;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     public GetCategoriesResponse getVideoCategory(Long categoryId) {
         GetCategoriesRequest request = new GetCategoriesRequest();
         request.setCateId(categoryId);

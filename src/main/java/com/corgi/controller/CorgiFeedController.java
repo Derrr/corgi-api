@@ -189,6 +189,11 @@ public class CorgiFeedController extends BaseController {
         return new JsonResult(aliyunVodService.getVideoUrl(videoId));
     }
 
+    @GetMapping("get_video_detail")
+    public JsonResult getVideoDetail(@RequestParam("videoId") String videoId) {
+        return new JsonResult(aliyunVodService.getVideoInfo(videoId));
+    }
+
     @GetMapping("get_category_info")
     public JsonResult getCategoryInfo() {
         return new JsonResult(aliyunVodService.getVideoCategory(1000260458L));
