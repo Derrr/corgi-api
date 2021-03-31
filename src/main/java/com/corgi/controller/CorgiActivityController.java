@@ -820,18 +820,19 @@ public class CorgiActivityController extends BaseController {
         Integer activitySize = activityList.size();
         log.info("activity ... {} ", activityList);
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+        activityQuery.setStartTime("2021/04/01");
         if (activitySize >= orgPageSize) {
             activityQuery.setPageSize(activityList.size() / 5);
         } else if (activitySize > 0 && activityQuery.getPage() > 1) {
             activityQuery.setOffset((orgPage - 1) * orgPageSize / 5);
             activityQuery.setPageSize(orgPage * orgPageSize - activityQuery.getOffset());
         }
-        //List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
-//        log.info("business ... {} ", businessList);
-//        int mergeSize = activityList.size() / 5;
-//        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
-//        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
-//        result.addAll(businessList.subList(mergeSize, businessList.size()));
+        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
+        log.info("business ... {} ", businessList);
+        int mergeSize = activityList.size() / 5;
+        mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
+        List<CorgiActivity> result = mergeActivity(activityList, businessList.subList(0, mergeSize));
+        result.addAll(businessList.subList(mergeSize, businessList.size()));
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         return new JsonResult(detailList);
     }
