@@ -8,6 +8,8 @@ import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.auth.sts.AssumeRoleRequest;
 import com.aliyuncs.auth.sts.AssumeRoleResponse;
+import com.aliyuncs.cloudauth.model.v20190307.CompareFacesResponse;
+import com.aliyuncs.cloudauth.model.v20190307.DescribeVerifyResultResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
@@ -76,6 +78,8 @@ public class CorgiUserController extends BaseController {
     private CorgiSoundService corgiSoundService;
     @Reference
     private CorgiVisitService corgiVisitService;
+    @Reference
+    private CorgiUserDateService corgiUserDateService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -865,6 +869,65 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(profiles);
+    }
+
+    @GetMapping("update_date_status")
+    public JsonResult updateDateStatus(@RequestParam("status") String status) {
+        CorgiDate corgiDate = new CorgiDate();
+        corgiDate.setUserId(getUserId());
+        corgiDate.setStatus(status);
+        corgiUserDateService.updateDate(corgiDate);
+        return new JsonResult();
+    }
+
+    @PostMapping("update_date")
+    public JsonResult updateDate(@RequestBody() CorgiDate date) {
+        if (hasUserId()) {
+            date.setUserId(getUserId());
+        }
+        corgiUserDateService.addDate(date);
+        return new JsonResult();
+    }
+
+    @GetMapping("get_verify_token")
+    public JsonResult getVerifyToken() throws PermissionException {
+        String userId = getUserId();
+        UserDetail detail = corgiUserService.getUserDetailBasic(userId);
+        if (detail != null) {
+            return new JsonResult(aliyunGreenService.getDescribeVerifyToken(detail));
+        } else {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "找不到用户");
+        }
+    }
+
+    @GetMapping("get_verify_result")
+    public JsonResult getVerifyResult(@RequestParam("requestId") String requestId) throws PermissionException {
+        DescribeVerifyResultResponse response = aliyunGreenService.getDescribeVerifyResult(requestId);
+        String userId = getUserId();
+        log.info("user:{} verity result: {} ", userId, response);
+        Float score = response.getFaceComparisonScore();
+        if (score != null && score > 50) {
+            UserDetail userDetail = new UserDetail();
+            userDetail.setUserId(userId);
+            userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
+            corgiUserService.updateDetail(userDetail);
+            return new JsonResult("success");
+        }
+        return new JsonResult("fail");
+    }
+
+    @GetMapping("get_compare_result")
+    public JsonResult getCompareResult(@RequestParam("avatar") String avatar) throws PermissionException {
+        String userId = getUserId();
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        if (userDetail != null && UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
+            CompareFacesResponse response = aliyunGreenService.compareAvatar(userDetail.getAvatar(), avatar);
+            Float score = response.getData().getSimilarityScore();
+            if (score != null && score > 80) {
+                return new JsonResult("verified");
+            }
+        }
+        return new JsonResult("normal");
     }
 
 

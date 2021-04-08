@@ -6,8 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
-import com.aliyuncs.cloudauth.model.v20190307.DetectFaceAttributesRequest;
-import com.aliyuncs.cloudauth.model.v20190307.DetectFaceAttributesResponse;
+import com.aliyuncs.cloudauth.model.v20190307.*;
 
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
@@ -21,8 +20,10 @@ import com.aliyuncs.http.ProtocolType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.common.constant.Constants;
 import com.corgi.common.util.CorgiHttpUtil;
 import com.corgi.entity.*;
+import com.corgi.exception.PermissionException;
 import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.api.CorgiSoundService;
 import com.corgi.user.entity.CorgiSound;
@@ -87,7 +88,57 @@ public class AliyunGreenService {
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
         this.managementClient = new DefaultAcsClient(profile);
+    }
 
+    public DescribeVerifyTokenResponse getDescribeVerifyToken(UserDetail userDetail) throws PermissionException {
+        String requestId = UUID.randomUUID().toString().replaceAll("-", "");
+        DescribeVerifyTokenRequest request = new DescribeVerifyTokenRequest();
+        request.setSysProtocol(ProtocolType.HTTPS);
+        request.setBizId(requestId);
+        request.setBizType("corgi-avatar");
+        request.setFaceRetainedImageUrl(userDetail.getAvatar());
+        try {
+            DescribeVerifyTokenResponse response = managementClient.getAcsResponse(request);
+            response.setRequestId(requestId);
+            return response;
+        } catch (ClientException e) {
+            log.error("ErrCode:" + e.getErrCode());
+            log.error("ErrMsg:" + e.getErrMsg());
+            log.error("RequestId:" + e.getRequestId());
+            throw new PermissionException(Constants.PARAMETER_ERROR_CODE, "获取token失败");
+        }
+    }
+
+    public DescribeVerifyResultResponse getDescribeVerifyResult(String requestId) throws PermissionException {
+        DescribeVerifyResultRequest verifyResultRequest = new DescribeVerifyResultRequest();
+        verifyResultRequest.setSysProtocol(ProtocolType.HTTPS);
+        verifyResultRequest.setBizId(requestId);
+        verifyResultRequest.setBizType("corgi-avatar");
+        try {
+            return managementClient.getAcsResponse(verifyResultRequest);
+        } catch (ClientException e) {
+            log.error("ErrCode:" + e.getErrCode());
+            log.error("ErrMsg:" + e.getErrMsg());
+            log.error("RequestId:" + e.getRequestId());
+            throw new PermissionException(Constants.PARAMETER_ERROR_CODE, "获取验证结果失败");
+        }
+    }
+
+    public CompareFacesResponse compareAvatar(String oldAvatar, String newAvatar) throws PermissionException {
+        CompareFacesRequest request = new CompareFacesRequest();
+        request.setSysMethod(MethodType.POST);
+        request.setSourceImageType("FacePic");
+        request.setSourceImageValue(newAvatar);
+        request.setTargetImageType("FacePic");
+        request.setTargetImageValue(oldAvatar);
+        try {
+            return managementClient.getAcsResponse(request);
+        } catch (ClientException e) {
+            log.error("ErrCode:" + e.getErrCode());
+            log.error("ErrMsg:" + e.getErrMsg());
+            log.error("RequestId:" + e.getRequestId());
+            throw new PermissionException(Constants.PARAMETER_ERROR_CODE, "获取验证结果失败");
+        }
     }
 
     public UserDetail checkAvatar(UserDetail userDetail) {
@@ -104,8 +155,8 @@ public class AliyunGreenService {
             userDetail.setAvatarDataId(corgiPic.getDataId());
             return userDetail;
         }
-        corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
-        userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+        //corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
+        //userDetail.setAvatarCheckStatus(corgiPic.getStatus());
         userDetail.setAvatarDataId(corgiPic.getDataId());
         return userDetail;
     }

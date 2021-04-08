@@ -169,32 +169,32 @@ public class CorgiDateController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("list_date")
-    public JsonResult listDate(@RequestParam("status") String status) {
-        CorgiDate search = new CorgiDate();
-        search.setUserId(getUserId());
-        search.setStatus(status);
-        List<CorgiDate> list = corgiUserDateService.searchDate(search);
-        if (CollectionUtils.isNotEmpty(list)) {
-            for (CorgiDate corgiDate : list) {
-                if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
-                    UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
-                    corgiDate.setTakenUserDetail(detail);
-                }
-            }
-        }
-        return new JsonResult(list);
-    }
+//    @GetMapping("list_date")
+//    public JsonResult listDate(@RequestParam("status") String status) {
+//        CorgiDate search = new CorgiDate();
+//        search.setUserId(getUserId());
+//        search.setStatus(status);
+//        List<CorgiDate> list = corgiUserDateService.searchDate(search);
+//        if (CollectionUtils.isNotEmpty(list)) {
+//            for (CorgiDate corgiDate : list) {
+//                if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
+//                    UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
+//                    corgiDate.setTakenUserDetail(detail);
+//                }
+//            }
+//        }
+//        return new JsonResult(list);
+//    }
 
-    @GetMapping("get_date")
-    public JsonResult listDate(@RequestParam("id") Integer id) {
-        CorgiDate corgiDate = corgiUserDateService.getDateById(id);
-        if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
-            UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
-            corgiDate.setTakenUserDetail(detail);
-        }
-        return new JsonResult(corgiDate);
-    }
+//    @GetMapping("get_date")
+//    public JsonResult listDate(@RequestParam("id") Integer id) {
+//        CorgiDate corgiDate = corgiUserDateService.getDateById(id);
+//        if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
+//            UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
+//            corgiDate.setTakenUserDetail(detail);
+//        }
+//        return new JsonResult(corgiDate);
+//    }
 
     private JsonResult reject(String userId, String dateId) {
         if (StringUtils.isNotEmpty(dateId)) {
