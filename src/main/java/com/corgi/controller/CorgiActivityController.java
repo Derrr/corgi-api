@@ -229,8 +229,8 @@ public class CorgiActivityController extends BaseController {
                 }
             }
         }
+        activity = aliyunGreenService.checkImageActivity(activity);
         if (CorgiActivity.CAT_IMAGE.equals(activity.getCategory())) {
-            activity = aliyunGreenService.checkImageActivity(activity);
             List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
             if (!checkActivityPic(activityPics)) {
                 activity.setCheckStatus(AliyunGreenService.CHECK);
