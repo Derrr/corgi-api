@@ -211,6 +211,11 @@ public class CorgiActivityController extends BaseController {
         }
         redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
+        if (!StringUtils.isEmpty(activity.getVideoId()) || !StringUtils.isEmpty(activity.getVideoUrl())) {
+            activity.setCategory(CorgiActivity.CAT_VIDEO);
+        } else if (CollectionUtils.isEmpty(activity.getPics())) {
+            activity.setCategory(CorgiActivity.CAT_TEXT);
+        }
         activity.setCheckStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
             UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
@@ -224,12 +229,14 @@ public class CorgiActivityController extends BaseController {
                 }
             }
         }
-        activity = aliyunGreenService.checkImageActivity(activity);
-        List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
-        if (!checkActivityPic(activityPics)) {
-            activity.setCheckStatus(AliyunGreenService.CHECK);
+        if (CorgiActivity.CAT_IMAGE.equals(activity.getCategory())) {
+            activity = aliyunGreenService.checkImageActivity(activity);
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
+            if (!checkActivityPic(activityPics)) {
+                activity.setCheckStatus(AliyunGreenService.CHECK);
+            }
+            activity.setPics(activityPics);
         }
-        activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
         return new JsonResult(AddActivityResult.getResult(activity));
     }
