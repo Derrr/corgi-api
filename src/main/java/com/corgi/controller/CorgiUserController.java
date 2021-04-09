@@ -914,9 +914,9 @@ public class CorgiUserController extends BaseController {
             userDetail.setUserId(userId);
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
             corgiUserService.updateDetail(userDetail);
-            return new JsonResult("success");
+            return new JsonResult("verified");
         }
-        return new JsonResult("fail");
+        return new JsonResult("normal");
     }
 
     @GetMapping("get_compare_result")
