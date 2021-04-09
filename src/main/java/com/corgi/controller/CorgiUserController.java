@@ -892,6 +892,9 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_verify_token")
     public JsonResult getVerifyToken() throws PermissionException {
         String userId = getUserId();
+        if(!hasUserId()){
+            userId = "1";
+        }
         UserDetail detail = corgiUserService.getUserDetailBasic(userId);
         if (detail != null) {
             return new JsonResult(aliyunGreenService.getDescribeVerifyToken(detail));
@@ -919,6 +922,9 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_compare_result")
     public JsonResult getCompareResult(@RequestParam("avatar") String avatar) throws PermissionException {
         String userId = getUserId();
+        if(!hasUserId()){
+            userId = "1";
+        }
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
         if (userDetail != null && UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
             CompareFacesResponse response = aliyunGreenService.compareAvatar(userDetail.getAvatar(), avatar);
