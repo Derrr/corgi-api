@@ -137,7 +137,7 @@ public class AliyunGreenService {
             log.error("ErrCode:" + e.getErrCode());
             log.error("ErrMsg:" + e.getErrMsg());
             log.error("RequestId:" + e.getRequestId());
-            throw new PermissionException(Constants.PARAMETER_ERROR_CODE, "获取验证结果失败");
+            return new CompareFacesResponse();
         }
     }
 
