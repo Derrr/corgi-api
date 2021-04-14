@@ -7,15 +7,15 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.BarActivityDetail;
+import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.entity.PicInfo;
 import com.corgi.entity.VlogDetail;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.service.AliyunVodService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.CorgiCoupon;
-import com.corgi.user.entity.CorgiFeed;
-import com.corgi.user.entity.CorgiVlog;
-import com.corgi.user.entity.CorgiVlogHot;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +24,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author tairanliu
@@ -52,27 +49,26 @@ public class CorgiFeedController extends BaseController {
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiShareService corgiShareService;
+    @Reference
+    private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiCommentService corgiCommentService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
     private AliyunVodService aliyunVodService;
     @Autowired
+    private AliyunGreenService aliyunGreenService;
+    @Autowired
     private MQService mqService;
 
     @GetMapping("get_feeds")
-    public JsonResult getFeeds() {
-        List<String> feedIds = corgiFeedService.getUnviewFeed(getUserId());
-        List<VlogDetail> details = new ArrayList<>();
+    public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
+        List<String> feedIds = corgiFeedService.getUnviewFeed(getUserId(), size);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
+        List<CorgiActivityDetail> details = convertDetail(corgiActivities, getUserId());
         for (String feed : feedIds) {
-            VlogDetail detail = getVlogDetail(feed, getUserId());
-            if (detail != null) {
-                details.add(detail);
-            }
             corgiFeedService.viewFeed(getUserId(), feed);
-            CorgiVlogHot hot = new CorgiVlogHot();
-            hot.setActivityId(feed);
-            hot.setViewCount(1);
-            corgiVlogService.updateHotVlog(hot);
         }
         mqService.refreshFeed(getUserId());
         return new JsonResult(details);
@@ -127,10 +123,6 @@ public class CorgiFeedController extends BaseController {
         if (corgiUtilService.lock("view_" + activityId)) {
             try {
                 corgiFeedService.viewFeed(getUserId(), activityId);
-                CorgiVlog corgiVlog = new CorgiVlog();
-                corgiVlog.setActivityId(activityId);
-                corgiVlog.setViewCount(1);
-                corgiVlogService.addVlogCount(corgiVlog);
             } finally {
                 corgiUtilService.unlock("view_" + activityId);
             }
@@ -225,6 +217,51 @@ public class CorgiFeedController extends BaseController {
         vlogDetail.setHasLike(corgiLikeService.countUserLike(vlog.getActivityId(), userId));
         vlogDetail.setShareCount(corgiShareService.countShare(vlog.getActivityId()));
         return vlogDetail;
+    }
+
+    private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
+        if (!CollectionUtils.isEmpty(activityList)) {
+            Iterator<CorgiActivity> it = activityList.iterator();
+            while (it.hasNext()) {
+                CorgiActivity activity = it.next();
+                if (!activity.getUserId().equals(userId) && "fail".equals(activity.getCheckStatus())) {
+                    it.remove();
+                    continue;
+                }
+                activity.setCurrentTime(now);
+                Integer height = 0;
+                Integer width = 0;
+
+                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                    String picUrl = activity.getPics().get(0).getPicUrl();
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    height = picInfo.getHeight();
+                    width = picInfo.getWidth();
+                }
+                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
+                Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
+                Integer shareCount = corgiShareService.countShare(activity.getId());
+                ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
+                CorgiActivityDetail detail = new CorgiActivityDetail(activity)
+                        .initSize(height, width)
+                        .initCommentCount(commentCount)
+                        .initLikeUsers(users)
+                        .hasLike(hasLike);
+
+                detail.setLastComment(activityComment);
+                detail.setShareCount(shareCount);
+                if (!StringUtils.isEmpty(activity.getUserId())) {
+                    UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
+                    detail.setUserDetail(userDetail);
+                    detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, activity.getUserId()));
+                }
+                detailList.add(detail);
+            }
+        }
+        return detailList;
     }
 
 }
