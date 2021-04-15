@@ -236,6 +236,12 @@ public class CorgiDateController extends BaseController {
         }
     }
 
+    @PostMapping("update_apply")
+    public JsonResult apply(@RequestBody CorgiDate corgiDate) {
+        corgiUserDateService.updateDate(corgiDate);
+        return new JsonResult();
+    }
+
     private String getKey(String userId1, String userId2) {
         if (userId1.compareTo(userId2) > 0) {
             return userId1 + "-" + userId2;
