@@ -11,6 +11,7 @@ import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiDate;
+import com.corgi.user.entity.CorgiDateApply;
 import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,15 +187,39 @@ public class CorgiDateController extends BaseController {
 //        return new JsonResult(list);
 //    }
 
-//    @GetMapping("get_date")
-//    public JsonResult listDate(@RequestParam("id") Integer id) {
-//        CorgiDate corgiDate = corgiUserDateService.getDateById(id);
-//        if (StringUtils.isNotEmpty(corgiDate.getTakenUser())) {
-//            UserDetail detail = corgiUserService.getUserDetail(corgiDate.getTakenUser(), null);
-//            corgiDate.setTakenUserDetail(detail);
-//        }
-//        return new JsonResult(corgiDate);
-//    }
+    @GetMapping("get_user_date")
+    public JsonResult getDate(@RequestParam("userId") String userId) {
+        CorgiDate corgiDate = corgiUserDateService.getDateByUserId(userId);
+        return new JsonResult(corgiDate);
+    }
+
+    @GetMapping("get_user_apply")
+    public JsonResult getApply(@RequestParam("userId") String userId) {
+        CorgiDateApply corgiDate = corgiUserDateService.getUserApply(userId, getUserId());
+        return new JsonResult(corgiDate);
+    }
+
+    @PostMapping("update_date")
+    public JsonResult updateDate(@RequestBody CorgiDate corgiDate) {
+        corgiDate.setUserId(getUserId());
+        corgiUserDateService.addDate(corgiDate);
+        return new JsonResult();
+    }
+
+    @PostMapping("change_date_status")
+    public JsonResult updateDateStatus(@RequestBody CorgiDate corgiDate) {
+        corgiDate.setUserId(getUserId());
+        corgiUserDateService.updateDate(corgiDate);
+        return new JsonResult();
+    }
+
+    @PostMapping("apply")
+    public JsonResult apply(@RequestBody CorgiDateApply corgiDateApply) {
+        corgiDateApply.setApplyUserId(getUserId());
+        CorgiDateApply apply = corgiUserDateService.apply(corgiDateApply);
+        return new JsonResult(apply);
+    }
+
 
     private JsonResult reject(String userId, String dateId) {
         if (StringUtils.isNotEmpty(dateId)) {
