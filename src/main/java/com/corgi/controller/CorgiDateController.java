@@ -4,8 +4,10 @@ import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.Constants;
 import com.corgi.entity.DateDetail;
 import com.corgi.entity.UserDate;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
@@ -42,6 +44,8 @@ public class CorgiDateController extends BaseController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private CorgiUtilService corgiUtilService;
     @Reference
     private CorgiUserService corgiUserService;
     @Reference
@@ -216,8 +220,27 @@ public class CorgiDateController extends BaseController {
     @PostMapping("apply")
     public JsonResult apply(@RequestBody CorgiDateApply corgiDateApply) {
         corgiDateApply.setApplyUserId(getUserId());
-        CorgiDateApply apply = corgiUserDateService.apply(corgiDateApply);
-        return new JsonResult(apply);
+        String key = "apply-" + getKey(corgiDateApply.getApplyUserId(), corgiDateApply.getApprovalUserId());
+        corgiUtilService.lock(key);
+        try {
+            CorgiDateApply apply = corgiUserDateService.apply(corgiDateApply);
+            if ("exists".equals(apply.getStatus())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "已存在正在进行中的约会");
+            }
+            if (StringUtils.isEmpty(apply.getDateId())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "对方未开启约会");
+            }
+            return new JsonResult(apply);
+        } finally {
+            corgiUtilService.unlock(key);
+        }
+    }
+
+    private String getKey(String userId1, String userId2) {
+        if (userId1.compareTo(userId2) > 0) {
+            return userId1 + "-" + userId2;
+        }
+        return userId2 + "-" + userId1;
     }
 
 
