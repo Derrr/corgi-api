@@ -199,7 +199,7 @@ public class CorgiDateController extends BaseController {
         return new JsonResult(corgiDate);
     }
 
-    @PostMapping("update_date")
+    @PostMapping("add_date")
     public JsonResult updateDate(@RequestBody CorgiDate corgiDate) {
         corgiDate.setUserId(getUserId());
         corgiUserDateService.addDate(corgiDate);
