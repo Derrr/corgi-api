@@ -64,13 +64,17 @@ public class CorgiFeedController extends BaseController {
 
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
-        List<String> feedIds = corgiFeedService.getUnviewFeed(getUserId(), size);
-        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
-        List<CorgiActivityDetail> details = convertDetail(corgiActivities, getUserId());
-        for (String feed : feedIds) {
-            corgiFeedService.viewFeed(getUserId(), feed);
+        String userId = "1";
+        if(hasUserId()){
+            userId = getUserId();
         }
-        mqService.refreshFeed(getUserId());
+        List<String> feedIds = corgiFeedService.getUnviewFeed(userId, size);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
+        List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
+        for (String feed : feedIds) {
+            corgiFeedService.viewFeed(userId, feed);
+        }
+        mqService.refreshFeed(userId);
         return new JsonResult(details);
     }
 
