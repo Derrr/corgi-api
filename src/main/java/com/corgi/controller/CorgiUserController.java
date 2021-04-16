@@ -210,6 +210,9 @@ public class CorgiUserController extends BaseController {
         if (pics == null) {
             pics = new ArrayList<>();
         }
+        if (StringUtils.isEmpty(userDetail.getAvatarCheckStatus())) {
+            userDetail.setAvatarCheckStatus(UserDetail.NO_FACE);
+        }
         userDetail = aliyunGreenService.checkAvatar(userDetail);
         if (pics.size() == 0) {
             UserPic userPic = new UserPic();
@@ -916,7 +919,7 @@ public class CorgiUserController extends BaseController {
             corgiUserService.updateDetail(userDetail);
             return new JsonResult("verified");
         }
-        return new JsonResult("normal");
+        return new JsonResult(UserDetail.NO_FACE);
     }
 
     @GetMapping("get_compare_result")
@@ -935,7 +938,7 @@ public class CorgiUserController extends BaseController {
                 }
             }
         }
-        return new JsonResult("normal");
+        return new JsonResult(UserDetail.NO_FACE);
     }
 
 

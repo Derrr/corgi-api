@@ -236,6 +236,12 @@ public class CorgiDateController extends BaseController {
         }
     }
 
+    @PostMapping("approve")
+    public JsonResult approve(@RequestBody CorgiDateApply corgiDateApply) {
+        corgiUserDateService.approve(corgiDateApply);
+        return new JsonResult();
+    }
+
     @PostMapping("update_apply")
     public JsonResult apply(@RequestBody CorgiDate corgiDate) {
         corgiUserDateService.updateDate(corgiDate);
