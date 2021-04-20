@@ -749,12 +749,7 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(userIds)) {
             return new JsonResult();
         }
-        List<CorgiActivity> corgiActivities;
-        if (hasVersion()) {
-            corgiActivities = corgiActivityService.getAllActivityByUserIds(getUserId(), userIds, CorgiActivity.CREATED, page, size);
-        } else {
-            corgiActivities = corgiActivityService.getActivityByUserIds(userIds, CorgiActivity.CREATED, page, size);
-        }
+        List<CorgiActivity> corgiActivities = corgiActivityService.getAllActivityByUserIds(getUserId(), userIds, CorgiActivity.CREATED, page, size);
         return new JsonResult(convertDetail(corgiActivities, userId));
     }
 
