@@ -80,6 +80,8 @@ public class CorgiUserController extends BaseController {
     private CorgiVisitService corgiVisitService;
     @Reference
     private CorgiUserDateService corgiUserDateService;
+    @Reference
+    private CorgiFakeService corgiFakeService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -116,12 +118,14 @@ public class CorgiUserController extends BaseController {
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
             try {
                 corgiUtilService.lock(lockKey);
+
                 if (StringUtils.isEmpty(userLogin.getUserId())) {
                     userLogin = corgiUserService.login(userLogin);
                     if ("-1".equals(userLogin.getStatus())) {
                         easemobService.registerUser(userLogin.getUserId());
                         userLogin.setStatus("0");
                     }
+                    corgiFakeService.deleteFakeFollower(userLogin.getUserId());
                     userLogin.setJwt(JWTUtils.createJWT(userLogin.getUserId(), userLogin.getVersion()));
                     return new JsonResult(userLogin);
                 } else if (StringUtils.isEmpty(userLogin.getTelNo())) {
