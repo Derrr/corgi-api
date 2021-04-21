@@ -248,6 +248,11 @@ public class CorgiDateController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_apply")
+    public JsonResult getApply(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiUserDateService.getApplies(getUserId(), page, pageSize));
+    }
+
     private String getKey(String userId1, String userId2) {
         if (userId1.compareTo(userId2) > 0) {
             return userId1 + "-" + userId2;
