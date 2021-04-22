@@ -75,9 +75,9 @@ public class MQService {
         }
     }
 
-    public void sendDate(CorgiDate corgiDate){
+    public void sendDate(PushMessage pushMessage){
         try {
-            rabbitTemplate.convertAndSend(CorgiQueueName.USER_DATE_QUEUE, corgiDate);
+            rabbitTemplate.convertAndSend(CorgiQueueName.USER_DATE_QUEUE, pushMessage);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

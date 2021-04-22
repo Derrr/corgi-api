@@ -5,6 +5,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.DateDetail;
 import com.corgi.entity.UserDate;
 import com.corgi.service.CorgiUtilService;
@@ -161,7 +162,7 @@ public class CorgiDateController extends BaseController {
             date.setUserId(getUserId());
         }
         log.info("date:{} ", date);
-        mqService.sendDate(date);
+        //mqService.sendDate(date);
         return new JsonResult();
     }
 
@@ -230,6 +231,12 @@ public class CorgiDateController extends BaseController {
             if (StringUtils.isEmpty(apply.getDateId())) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "对方未开启约会");
             }
+            UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+            PushMessage pushMessage = PushMessage.builder()
+                    .sourceUserId("datehelper")
+                    .message(this.getResult(CorgiDateApply.APPLY,getUserId(),detail))
+                    .targetUserId(corgiDateApply.getApprovalUserId()).build();
+            mqService.sendDate(pushMessage);
             return new JsonResult(apply);
         } finally {
             corgiUtilService.unlock(key);
@@ -238,19 +245,29 @@ public class CorgiDateController extends BaseController {
 
     @PostMapping("approve")
     public JsonResult approve(@RequestBody CorgiDateApply corgiDateApply) {
-        corgiUserDateService.approve(corgiDateApply);
+        corgiDateApply.setOperator(getUserId());
+        CorgiDateApply apply = corgiUserDateService.approve(corgiDateApply);
+        PushMessage pushMessage = PushMessage.builder()
+                .sourceUserId("datehelper")
+                .message(this.getResult(apply.getStatus(),getUserId(),apply.getUserInfo()))
+                .targetUserId(corgiDateApply.getApprovalUserId()).build();
+        mqService.sendDate(pushMessage);
         return new JsonResult();
     }
 
     @PostMapping("update_apply")
-    public JsonResult apply(@RequestBody CorgiDate corgiDate) {
-        corgiUserDateService.updateDate(corgiDate);
+    public JsonResult updateApply(@RequestBody CorgiDateApply corgiDateApply) {
+        corgiUserDateService.updateApply(corgiDateApply);
         return new JsonResult();
     }
 
     @GetMapping("get_apply")
     public JsonResult getApply(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiUserDateService.getApplies(getUserId(), page, pageSize));
+        List<CorgiDateApply> applies = corgiUserDateService.getApplies(getUserId(), page, pageSize);
+        for (CorgiDateApply apply : applies) {
+            apply.setResult(this.getResult(apply.getStatus(), getUserId(), apply.getUserInfo()));
+        }
+        return new JsonResult(applies);
     }
 
     private String getKey(String userId1, String userId2) {
@@ -387,6 +404,29 @@ public class CorgiDateController extends BaseController {
         redisTemplate.opsForHash().put(DATED_USERS.concat(loginUserId), takenId, System.currentTimeMillis() + "");
         redisTemplate.expire(DATED_USERS.concat(loginUserId), 4, TimeUnit.HOURS);
         return new JsonResult(dateDetail);
+    }
+
+    private String getResult(String status, String userId, UserDetail operator) {
+        if (CorgiDateApply.APPLY.equals(status)) {
+            return operator.getNickname() + " 申请参与你的约会，去了解下吧.";
+        }
+        if (CorgiDateApply.AGREE.equals(status)) {
+            if (userId.equals(operator.getUserId())) {
+                return "约会已确认记得按时赴约哦";
+            } else {
+                return operator.getNickname() + "刚刚同意了你的约会申请，记得按时赴约哦~";
+            }
+        }
+        if (CorgiDateApply.CANCEL.equals(status)) {
+            if (userId.equals(operator.getUserId())) {
+                return "已取消该申请，去看看其他人吧。";
+            } else if ("system".equals(operator.getUserId())) {
+                return "超时未确认已自动取消，去看看其他约会吧。";
+            } else {
+                return "对方取消了该约会，去看看其他约会吧。";
+            }
+        }
+        return "约会状态获取失败";
     }
 
 }
