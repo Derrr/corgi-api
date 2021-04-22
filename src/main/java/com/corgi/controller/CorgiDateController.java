@@ -232,9 +232,14 @@ public class CorgiDateController extends BaseController {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "对方未开启约会");
             }
             UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+            if (detail == null) {
+                detail = new UserDetail();
+                detail.setUserId(getUserId());
+                detail.setNickname("已注销");
+            }
             PushMessage pushMessage = PushMessage.builder()
                     .sourceUserId("datehelper")
-                    .message(this.getResult(CorgiDateApply.APPLY,getUserId(),detail))
+                    .message(this.getResult(CorgiDateApply.APPLY, getUserId(), detail))
                     .targetUserId(corgiDateApply.getApprovalUserId()).build();
             mqService.sendDate(pushMessage);
             return new JsonResult(apply);
@@ -249,7 +254,7 @@ public class CorgiDateController extends BaseController {
         CorgiDateApply apply = corgiUserDateService.approve(corgiDateApply);
         PushMessage pushMessage = PushMessage.builder()
                 .sourceUserId("datehelper")
-                .message(this.getResult(apply.getStatus(),getUserId(),apply.getUserInfo()))
+                .message(this.getResult(apply.getStatus(), getUserId(), apply.getUserInfo()))
                 .targetUserId(corgiDateApply.getApprovalUserId()).build();
         mqService.sendDate(pushMessage);
         return new JsonResult();
