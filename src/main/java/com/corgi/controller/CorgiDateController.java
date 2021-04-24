@@ -13,9 +13,7 @@ import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.CorgiDate;
-import com.corgi.user.entity.CorgiDateApply;
-import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.*;
@@ -273,6 +271,19 @@ public class CorgiDateController extends BaseController {
             apply.setResult(this.getResult(apply.getStatus(), getUserId(), apply.getUserInfo()));
         }
         return new JsonResult(applies);
+    }
+
+    @GetMapping("get_nearby_date_user")
+    public JsonResult getDatingUser(UserQuery userQuery) {
+        MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
+        List<UserDetail> profiles = new ArrayList<>();
+        for (String userId : mapUserProfile.getUserIds()) {
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+            if (userDetail != null) {
+                profiles.add(userDetail);
+            }
+        }
+        return new JsonResult(profiles);
     }
 
     private String getKey(String userId1, String userId2) {
