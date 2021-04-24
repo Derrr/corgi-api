@@ -279,7 +279,9 @@ public class CorgiDateController extends BaseController {
         List<UserDetail> profiles = new ArrayList<>();
         for (String userId : mapUserProfile.getUserIds()) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+            CorgiDate date = corgiUserDateService.getDateByUserId(userId);
             if (userDetail != null) {
+                userDetail.setDate(date);
                 profiles.add(userDetail);
             }
         }
