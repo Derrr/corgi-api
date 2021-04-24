@@ -273,7 +273,7 @@ public class CorgiDateController extends BaseController {
         return new JsonResult(applies);
     }
 
-    @GetMapping("get_nearby_date_user")
+    @GetMapping("get_date_user")
     public JsonResult getDatingUser(UserQuery userQuery) {
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         List<UserDetail> profiles = new ArrayList<>();
