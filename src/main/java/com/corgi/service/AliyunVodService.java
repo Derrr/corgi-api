@@ -36,12 +36,12 @@ public class AliyunVodService {
         this.managementClient = new DefaultAcsClient(profile);
     }
 
-    public GetPlayInfoResponse getVideoUrl(String videoId) {
-        GetPlayInfoRequest request = new GetPlayInfoRequest();
+    public GetVideoInfoResponse getVideoUrl(String videoId) {
+        GetVideoInfoRequest request = new GetVideoInfoRequest();
         request.setVideoId(videoId);
         try {
             log.info("preparing request info...");
-            GetPlayInfoResponse response = this.managementClient.getAcsResponse(request);
+            GetVideoInfoResponse response = this.managementClient.getAcsResponse(request);
             log.info("response... {} ", response);
             return response;
         } catch (Exception e) {

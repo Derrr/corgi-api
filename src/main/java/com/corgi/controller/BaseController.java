@@ -28,7 +28,15 @@ public class BaseController {
     }
 
     public boolean hasVersion() {
-        return RequestUtil.hasVersion();
+        if (RequestUtil.hasVersion()) {
+            String version = RequestUtil.getVersion();
+            if (version.startsWith("android")) {
+                return version.compareTo("android1.8.0") > 0;
+            } else {
+                return version.compareTo("1.8.0") > 0;
+            }
+        }
+        return false;
     }
 
     public String getVersion() {

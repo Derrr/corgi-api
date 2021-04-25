@@ -2,15 +2,14 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.aliyuncs.vod.model.v20170321.GetMezzanineInfoResponse;
-import com.aliyuncs.vod.model.v20170321.GetPlayInfoRequest;
 import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
+import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
 import com.corgi.common.PageResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
-import com.corgi.common.messages.TraceFollow;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.AddAttendResult;
 import com.corgi.exception.PermissionException;
@@ -222,6 +221,16 @@ public class CorgiActivityController extends BaseController {
             GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
             if (mezzanine != null) {
                 activity.setVideoUrl(mezzanine.getFileURL());
+                GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
+                if (infoResponse != null && infoResponse.getVideo() != null) {
+                    if (StringUtils.isEmpty(activity.getCoverUrl())) {
+                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL());
+                    }
+                    if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
+                        activity.setCheckStatus(AliyunGreenService.FAIL);
+                    }
+                }
+
             }
             activity.setCategory(CorgiActivity.CAT_VIDEO);
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
@@ -760,7 +769,12 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(userIds)) {
             return new JsonResult();
         }
-        List<CorgiActivity> corgiActivities = corgiActivityService.getAllActivityByUserIds(getUserId(), userIds, CorgiActivity.CREATED, page, size);
+        List<CorgiActivity> corgiActivities = new ArrayList<>();
+        if (hasVersion()) {
+            corgiActivities = corgiActivityService.getAllActivityByUserIds(getUserId(), userIds, CorgiActivity.CREATED, page, size);
+        } else {
+            corgiActivities = corgiActivityService.getAllActivityByUserIds(getUserId(), userIds, CorgiActivity.CAT_IMAGE, page, size);
+        }
         return new JsonResult(convertDetail(corgiActivities, userId));
     }
 
@@ -950,11 +964,7 @@ public class CorgiActivityController extends BaseController {
                 result = corgiActivityService.getUserRunningActivity(userId, page, pageSize);
             }
         } else {
-            if (hasVersion()) {
-                result = corgiActivityService.getAllActivityByUserIds(getUserId(), Arrays.asList(userId), "", (page - 1) * pageSize, pageSize);
-            } else {
-                result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), "", (page - 1) * pageSize, pageSize);
-            }
+            result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), CorgiActivity.CAT_IMAGE, (page - 1) * pageSize, pageSize);
         }
         return new JsonResult(result);
     }
