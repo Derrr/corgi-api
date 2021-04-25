@@ -30,12 +30,13 @@ public class RequestUtil {
     }
 
     public static boolean hasVersion() {
-        String version = getRequest().getHeader("version");
-        return !StringUtils.isEmpty(version);
+        JwtUser user = (JwtUser) getRequest().getAttribute(JWTUtils.JWT_USER);
+        return user != null && !StringUtils.isEmpty(user.getVersion());
     }
 
     public static String getVersion() {
-        return getRequest().getHeader("version");
+        JwtUser user = (JwtUser) getRequest().getAttribute(JWTUtils.JWT_USER);
+        return user.getVersion();
     }
 
 
