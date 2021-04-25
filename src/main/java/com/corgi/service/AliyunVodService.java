@@ -56,7 +56,6 @@ public class AliyunVodService {
         try {
             log.info("preparing request info...");
             GetMezzanineInfoResponse response = this.managementClient.getAcsResponse(request);
-            log.info("response... {} ", response);
             return response;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

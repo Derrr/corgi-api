@@ -2,6 +2,7 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.aliyun.oss.common.comm.ResponseMessage;
+import com.aliyuncs.vod.model.v20170321.GetAIMediaAuditJobResponse;
 import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
@@ -84,7 +85,7 @@ public class CorgiFeedController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
-        List<String> feedIds = corgiFeedService.getFeedByActivityId(activityId,userId,page, size);
+        List<String> feedIds = corgiFeedService.getFeedByActivityId(activityId, userId, page, size);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
         return new JsonResult(details);
@@ -145,6 +146,27 @@ public class CorgiFeedController extends BaseController {
         }
         return new JsonResult();
     }
+
+    @PostMapping("callback")
+    public JsonResult callback(@RequestBody GetAIMediaAuditJobResponse.MediaAuditJob job) {
+        String videoId = job.getMediaId();
+        CorgiVlog vlog = corgiVlogService.getVlogByVideoId(videoId);
+        log.info("callback:{} ", videoId);
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
+        if ("fail".equals(job.getStatus())) {
+            log.info("check fail...{}:{} ", videoId, job.getCode() + job.getMessage());
+            activity.setCheckStatus(AliyunGreenService.CHECK);
+            corgiActivityService.updateCorgiActivityStatus(activity);
+        } else {
+            String suggestion = job.getData().getSuggestion();
+            if (!suggestion.equals("normal")) {
+                activity.setCheckStatus(AliyunGreenService.FAIL);
+                corgiActivityService.updateCorgiActivityStatus(activity);
+            }
+        }
+        return new JsonResult();
+    }
+
 
     @PostMapping("add_vlog")
     public JsonResult addView(@RequestBody CorgiActivity corgiActivity) {

@@ -217,23 +217,6 @@ public class CorgiActivityController extends BaseController {
         redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         if (!StringUtils.isEmpty(activity.getVideoId())) {
-            GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
-            GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
-            if (mezzanine != null) {
-                activity.setVideoUrl(mezzanine.getFileURL());
-                GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
-                if (infoResponse != null && infoResponse.getVideo() != null) {
-                    log.info("url:{} ", infoResponse.getVideo().getCoverURL());
-                    log.info("status:{} ", infoResponse.getVideo().getAuditStatus());
-                    if (StringUtils.isEmpty(activity.getCoverUrl())) {
-                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL());
-                    }
-                    if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
-                        activity.setCheckStatus(AliyunGreenService.FAIL);
-                    }
-                }
-
-            }
             activity.setCategory(CorgiActivity.CAT_VIDEO);
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
             activity.setCategory(CorgiActivity.CAT_TEXT);
@@ -260,6 +243,15 @@ public class CorgiActivityController extends BaseController {
             activity.setPics(activityPics);
         }
         activity = corgiActivityService.addCorgiActivity(activity);
+        if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) {
+            CorgiVlog corgiVlog = new CorgiVlog();
+            corgiVlog.setActivityId(activity.getId());
+            corgiVlog.setUserId(activity.getUserId());
+            corgiVlog.setVideoId(activity.getVideoId());
+            corgiVlog.setType(CorgiVlog.TYPE.USER);
+            corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
+            corgiVlogService.addVlog(corgiVlog);
+        }
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 
