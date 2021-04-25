@@ -223,6 +223,8 @@ public class CorgiActivityController extends BaseController {
                 activity.setVideoUrl(mezzanine.getFileURL());
                 GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
                 if (infoResponse != null && infoResponse.getVideo() != null) {
+                    log.info("url:{} ", infoResponse.getVideo().getCoverURL());
+                    log.info("status:{} ", infoResponse.getVideo().getAuditStatus());
                     if (StringUtils.isEmpty(activity.getCoverUrl())) {
                         activity.setCoverUrl(infoResponse.getVideo().getCoverURL());
                     }
