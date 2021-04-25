@@ -1,6 +1,9 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.aliyuncs.vod.model.v20170321.GetMezzanineInfoResponse;
+import com.aliyuncs.vod.model.v20170321.GetPlayInfoRequest;
+import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
 import com.corgi.common.JsonResult;
@@ -11,6 +14,7 @@ import com.corgi.common.messages.TraceFollow;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.AddAttendResult;
 import com.corgi.exception.PermissionException;
+import com.corgi.service.AliyunVodService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
@@ -69,6 +73,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiUtilService corgiUtilService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AliyunVodService aliyunVodService;
     @Autowired
     private MQService mqService;
 
@@ -211,7 +217,12 @@ public class CorgiActivityController extends BaseController {
         }
         redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
-        if (!StringUtils.isEmpty(activity.getVideoId()) || !StringUtils.isEmpty(activity.getVideoUrl())) {
+        if (!StringUtils.isEmpty(activity.getVideoId())) {
+            GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
+            GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
+            if (mezzanine != null) {
+                activity.setVideoUrl(mezzanine.getFileURL());
+            }
             activity.setCategory(CorgiActivity.CAT_VIDEO);
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
             activity.setCategory(CorgiActivity.CAT_TEXT);
