@@ -237,7 +237,7 @@ public class CorgiDateController extends BaseController {
             }
             PushMessage pushMessage = PushMessage.builder()
                     .sourceUserId("datehelper")
-                    .message(this.getResult(CorgiDateApply.APPLY, getUserId(), detail))
+                    .message(this.getResult(CorgiDateApply.APPLY, getUserId(), getUserId()))
                     .targetUserId(corgiDateApply.getApprovalUserId()).build();
             mqService.sendDate(pushMessage);
             return new JsonResult(apply);
@@ -252,7 +252,7 @@ public class CorgiDateController extends BaseController {
         CorgiDateApply apply = corgiUserDateService.approve(corgiDateApply);
         PushMessage pushMessage = PushMessage.builder()
                 .sourceUserId("datehelper")
-                .message(this.getResult(apply.getStatus(), getUserId(), apply.getUserInfo()))
+                .message(this.getResult(apply.getStatus(), getUserId(), apply.getOperator()))
                 .targetUserId(corgiDateApply.getApprovalUserId()).build();
         mqService.sendDate(pushMessage);
         return new JsonResult();
@@ -268,7 +268,7 @@ public class CorgiDateController extends BaseController {
     public JsonResult getApply(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<CorgiDateApply> applies = corgiUserDateService.getApplies(getUserId(), page, pageSize);
         for (CorgiDateApply apply : applies) {
-            apply.setResult(this.getResult(apply.getStatus(), getUserId(), apply.getUserInfo()));
+            apply.setResult(this.getResult(apply.getStatus(), getUserId(), apply.getOperator()));
         }
         return new JsonResult(applies);
     }
@@ -424,21 +424,23 @@ public class CorgiDateController extends BaseController {
         return new JsonResult(dateDetail);
     }
 
-    private String getResult(String status, String userId, UserDetail operator) {
+    private String getResult(String status, String userId, String operator) {
         if (CorgiDateApply.APPLY.equals(status)) {
-            return operator.getNickname() + " 申请参与你的约会，去了解下吧.";
+            UserDetail detail = corgiUserService.getUserDetailBasic(operator);
+            return detail.getNickname() + " 申请参与你的约会，去了解下吧.";
         }
         if (CorgiDateApply.AGREE.equals(status)) {
-            if (userId.equals(operator.getUserId())) {
+            if (userId.equals(operator)) {
                 return "约会已确认记得按时赴约哦";
             } else {
-                return operator.getNickname() + "刚刚同意了你的约会申请，记得按时赴约哦~";
+                UserDetail detail = corgiUserService.getUserDetailBasic(operator);
+                return detail.getNickname() + "刚刚同意了你的约会申请，记得按时赴约哦~";
             }
         }
         if (CorgiDateApply.CANCEL.equals(status)) {
-            if (userId.equals(operator.getUserId())) {
+            if (userId.equals(operator)) {
                 return "已取消该申请，去看看其他人吧。";
-            } else if ("system".equals(operator.getUserId())) {
+            } else if ("system".equals(operator)) {
                 return "超时未确认已自动取消，去看看其他约会吧。";
             } else {
                 return "对方取消了该约会，去看看其他约会吧。";
