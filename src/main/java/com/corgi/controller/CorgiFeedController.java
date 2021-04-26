@@ -7,10 +7,8 @@ import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
-import com.corgi.entity.BarActivityDetail;
-import com.corgi.entity.CorgiActivityDetail;
-import com.corgi.entity.PicInfo;
-import com.corgi.entity.VlogDetail;
+import com.corgi.common.util.RequestUtil;
+import com.corgi.entity.*;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.AliyunVodService;
 import com.corgi.service.CorgiUtilService;
@@ -148,7 +146,7 @@ public class CorgiFeedController extends BaseController {
     }
 
     @PostMapping("callback")
-    public JsonResult callback(@RequestBody GetAIMediaAuditJobResponse.MediaAuditJob job) {
+    public JsonResult callback(@RequestBody CallbackBody job) {
         String videoId = job.getMediaId();
         CorgiVlog vlog = corgiVlogService.getVlogByVideoId(videoId);
         log.info("callback:{} ", videoId);
