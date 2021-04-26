@@ -880,7 +880,7 @@ public class CorgiActivityController extends BaseController {
         Integer orgPageSize = activityQuery.getPageSize();
         Integer orgPage = activityQuery.getPage();
         activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
-        List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
+        List<CorgiActivity> activityList = corgiActivityService.getCityCorgiActivityByRange(lng, lat, 0, activityQuery);
         Integer activitySize = activityList.size();
         log.info("activity ... {} ", activityList);
         activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
@@ -891,7 +891,7 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setOffset((orgPage - 1) * orgPageSize / 5);
             activityQuery.setPageSize(orgPage * orgPageSize - activityQuery.getOffset());
         }
-        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, 0, activityQuery);
+        List<CorgiActivity> businessList = corgiActivityService.getCityCorgiActivityByRange(lng, lat, 0, activityQuery);
         log.info("business ... {} ", businessList);
         int mergeSize = activityList.size() / 5;
         mergeSize = mergeSize > businessList.size() ? businessList.size() : mergeSize;
@@ -912,6 +912,11 @@ public class CorgiActivityController extends BaseController {
 //            return new JsonResult(detailList);
 //        }
 
+        if(hasVersion()){
+            List<CorgiActivity> businessList = corgiActivityService.getCityCorgiActivityByRange(lng, lat, range, activityQuery);
+            List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
+            return new JsonResult(detailList);
+        }
         //activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         //List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         //log.info("activity ... {} ", activityList);
