@@ -394,6 +394,9 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/get_user_detail")
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
         try {
+            if (hasUserId()) {
+                loginUserId = getUserId();
+            }
             UserDetail userDetail = corgiUserService.getUserDetail(userId, loginUserId);
             if (userDetail == null) {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
