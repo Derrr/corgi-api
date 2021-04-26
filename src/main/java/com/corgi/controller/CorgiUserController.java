@@ -483,7 +483,7 @@ public class CorgiUserController extends BaseController {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new PermissionException(Constants.PERMISSION_ERROR_CODE, e.getMessage());
+            throw new PermissionException(Constants.SERVER_ERROR_CODE, e.getMessage());
         }
         UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
         if (oldPosition != null) {
