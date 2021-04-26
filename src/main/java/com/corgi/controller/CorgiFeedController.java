@@ -1,6 +1,7 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.common.comm.ResponseMessage;
 import com.aliyuncs.vod.model.v20170321.GetAIMediaAuditJobResponse;
 import com.corgi.activity.api.CorgiActivityFeedService;
@@ -146,17 +147,22 @@ public class CorgiFeedController extends BaseController {
     }
 
     @PostMapping("callback")
-    public JsonResult callback(@RequestBody CallbackBody job) {
-        String videoId = job.getMediaId();
+    public JsonResult callback(@RequestBody String jobStr) {
+        log.info("callback:{} ", jobStr);
+        JSONObject job = JSONObject.parseObject(jobStr);
+        String videoId = job.getString("MediaId");
         CorgiVlog vlog = corgiVlogService.getVlogByVideoId(videoId);
-        log.info("callback:{} ", videoId);
         CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
-        if ("fail".equals(job.getStatus())) {
-            log.info("check fail...{}:{} ", videoId, job.getCode() + job.getMessage());
+        String status = job.getString("Status");
+        if ("fail".equals(status)) {
+            String code = job.getString("Code");
+            String message = job.getString("Message");
+            log.info("check fail...{}:{} ", videoId, code + message);
             activity.setCheckStatus(AliyunGreenService.CHECK);
             corgiActivityService.updateCorgiActivityStatus(activity);
         } else {
-            String suggestion = job.getData().getSuggestion();
+            JSONObject data = job.getJSONObject("Data");
+            String suggestion = data.getString("Suggestion");
             if (!suggestion.equals("normal")) {
                 activity.setCheckStatus(AliyunGreenService.FAIL);
                 corgiActivityService.updateCorgiActivityStatus(activity);
