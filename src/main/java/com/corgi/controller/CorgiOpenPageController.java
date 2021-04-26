@@ -11,10 +11,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 /**
@@ -64,7 +61,7 @@ public class CorgiOpenPageController extends BaseController {
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
         List<CorgiOpenPage> result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
         if (!CollectionUtils.isEmpty(result)) {
-            return new JsonResult(result);
+            return new JsonResult(Arrays.asList(result.get(new Random().nextInt(result.size()))));
         }
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
