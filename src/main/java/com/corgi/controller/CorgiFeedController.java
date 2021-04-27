@@ -68,6 +68,9 @@ public class CorgiFeedController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        if (size > 15) {
+            size = 5;
+        }
         List<String> feedIds = corgiFeedService.getUnviewFeed(userId, size);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
