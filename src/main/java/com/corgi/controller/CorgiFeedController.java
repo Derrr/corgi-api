@@ -268,7 +268,7 @@ public class CorgiFeedController extends BaseController {
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
-                if (!activity.getUserId().equals(userId) && "fail".equals(activity.getCheckStatus())) {
+                if (!userId.equals(activity.getUserId()) && "fail".equals(activity.getCheckStatus())) {
                     it.remove();
                     continue;
                 }
