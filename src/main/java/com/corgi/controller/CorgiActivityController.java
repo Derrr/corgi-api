@@ -913,15 +913,15 @@ public class CorgiActivityController extends BaseController {
 //        }
 
         if(hasVersion()){
-            List<CorgiActivity> businessList = corgiActivityService.getCityCorgiActivityByRange(lng, lat, range, activityQuery);
+            List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
             List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
             return new JsonResult(detailList);
         }
         //activityQuery.setCategory(CorgiActivity.CAT_ACTIVITY);
         //List<CorgiActivity> activityList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         //log.info("activity ... {} ", activityList);
-        activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
-        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
+        //activityQuery.setCategory(CorgiActivity.CAT_BUSINESS);
+        List<CorgiActivity> businessList = corgiActivityService.getCityCorgiActivityByRange(lng, lat, range, activityQuery);
 //        log.info("business ... {} ", businessList);
 //        if (activityList.size() == 0 && businessList.size() == 0) {
 //            Integer page = activityQuery.getPage();

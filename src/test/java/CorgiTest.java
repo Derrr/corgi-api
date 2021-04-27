@@ -12,7 +12,7 @@ public class CorgiTest {
 
     @Test
     public void testJWTPayload() {
-        String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTkzNTEwOTUsInVzZXJJZCI6IjciLCJ2ZXJzaW9uIjoiMS44LjAiLCJpYXQiOjE2MTkzNDM4OTV9.WEFPxLw0-7o_uegLYJFDGMzqzYfge3rmfRH78s4JplQ";
+        String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTk1NDA4OTAsInVzZXJJZCI6IjE5ODg2NiIsInZlcnNpb24iOiIxLjguMCIsImlhdCI6MTYxOTUzMzY5MH0.NIpXq5sL7QP9h_rwwKMqxeX9OMhTKI4Pap7XW_6hZ7w";
         System.out.println(JWTUtils.createJWT("7", "1.8.0", 1000 * 60 * 60 * 24 * 365 * 100L));
         DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
         System.out.println(decodedJWT.getClaim("userId").asString());
