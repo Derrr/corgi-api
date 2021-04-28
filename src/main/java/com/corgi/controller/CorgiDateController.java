@@ -427,7 +427,7 @@ public class CorgiDateController extends BaseController {
     private String getResult(String status, String userId, String operator) {
         if (CorgiDateApply.APPLY.equals(status)) {
             UserDetail detail = corgiUserService.getUserDetailBasic(operator);
-            String name = "";
+            String name = operator;
             if (detail != null) {
                 name = detail.getNickname();
             }
@@ -438,7 +438,7 @@ public class CorgiDateController extends BaseController {
                 return "约会已确认记得按时赴约哦";
             } else {
                 UserDetail detail = corgiUserService.getUserDetailBasic(operator);
-                String name = "";
+                String name = operator;
                 if (detail != null) {
                     name = detail.getNickname();
                 }
