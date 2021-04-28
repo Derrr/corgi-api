@@ -427,14 +427,22 @@ public class CorgiDateController extends BaseController {
     private String getResult(String status, String userId, String operator) {
         if (CorgiDateApply.APPLY.equals(status)) {
             UserDetail detail = corgiUserService.getUserDetailBasic(operator);
-            return detail.getNickname() + " 申请参与你的约会，去了解下吧.";
+            String name = "";
+            if (detail != null) {
+                name = detail.getNickname();
+            }
+            return name + " 申请参与你的约会，去了解下吧.";
         }
         if (CorgiDateApply.AGREE.equals(status)) {
             if (userId.equals(operator)) {
                 return "约会已确认记得按时赴约哦";
             } else {
                 UserDetail detail = corgiUserService.getUserDetailBasic(operator);
-                return detail.getNickname() + "刚刚同意了你的约会申请，记得按时赴约哦~";
+                String name = "";
+                if (detail != null) {
+                    name = detail.getNickname();
+                }
+                return name + "刚刚同意了你的约会申请，记得按时赴约哦~";
             }
         }
         if (CorgiDateApply.CANCEL.equals(status)) {
