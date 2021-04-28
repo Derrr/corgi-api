@@ -30,9 +30,10 @@ public class CorgiTest {
 
     @Test
     public void test() {
-        String test = "2020/05/0115:00";
-        if (!test.contains(" ")) {
-            System.out.println(test.substring(0, 10) + " " + test.substring(10)+ Double.valueOf("70.00"));
-        }
+        String test = "https://outin-b05cd5a4435f11ebb03200163e1a3b4a.oss-cn-shanghai.aliyuncs.com/customerTrans/2ae7e3316109dcaf0598af101336d5e0/126a8e06-17916f1ca6c-0006-cca8-bf1-60efa.mp4?Expires=1619591217&OSSAccessKeyId=LTAIrkwb21KyGjJl&Signature=fTaY2439DEkP3JT963wNn6cCVIg%3D";
+        System.out.printf(test.split("\\?Expires")[0]);
+//        if (!test.contains(" ")) {
+//            System.out.println(test.substring(0, 10) + " " + test.substring(10)+ Double.valueOf("70.00"));
+//        }
     }
 }

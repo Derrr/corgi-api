@@ -167,7 +167,7 @@ public class CorgiFeedController extends BaseController {
             JSONObject data = job.getJSONObject("Data");
             String suggestion = data.getString("Suggestion");
             log.info("check success...{}:{} ", videoId, suggestion);
-            if (!suggestion.equals("normal")) {
+            if (!suggestion.equals("pass")) {
                 activity.setCheckStatus(AliyunGreenService.FAIL);
                 corgiActivityService.updateCorgiActivityStatus(activity);
             }
