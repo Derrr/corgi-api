@@ -729,8 +729,12 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
-        corgiBlacklistService.addBlacklist(userId, blockId);
-        return new JsonResult();
+        String result = corgiBlacklistService.addBlacklist(userId, blockId);
+        if(CorgiConstants.SUCCESS.equals(result)){
+            return new JsonResult("拉黑成功");
+        }else {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"请不要重复拉黑");
+        }
     }
 
     @GetMapping("unblock")
@@ -738,8 +742,12 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
-        corgiBlacklistService.deleteBlacklist(userId, blockId);
-        return new JsonResult();
+        String result = corgiBlacklistService.deleteBlacklist(userId, blockId);
+        if(CorgiConstants.SUCCESS.equals(result)){
+            return new JsonResult("取消拉黑成功");
+        }else {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"对方不在黑名单中");
+        }
     }
 
     @GetMapping("get_blacklist")
