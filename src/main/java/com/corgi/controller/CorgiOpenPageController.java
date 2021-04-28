@@ -4,12 +4,14 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.user.api.CorgiBannerService;
 import com.corgi.user.api.CorgiOpenPageService;
+import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiBanner;
 import com.corgi.user.entity.CorgiOpenPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -27,6 +29,8 @@ public class CorgiOpenPageController extends BaseController {
 
     @Reference
     private CorgiOpenPageService corgiOpenPageService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Autowired
     private StringRedisTemplate redisTemplate;
 
@@ -67,7 +71,7 @@ public class CorgiOpenPageController extends BaseController {
         List<CorgiOpenPage> result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
         if (!CollectionUtils.isEmpty(result)) {
             CorgiOpenPage page = result.get(new Random().nextInt(result.size()));
-            if(redisTemplate.opsForValue().setIfAbsent("birthday_"+getUserId()+"_"+page.getUrl(),System.currentTimeMillis()+"",2L, TimeUnit.HOURS)) {
+            if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 2L, TimeUnit.HOURS)) {
                 return new JsonResult(Arrays.asList(page));
             }
         }
@@ -75,8 +79,18 @@ public class CorgiOpenPageController extends BaseController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
         List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
+        String province = corgiOpenPage.getProvince();
+        if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
+            province = corgiUserService.getProvince(corgiOpenPage.getCity());
+        }
+        if (!StringUtils.isEmpty(province)) {
+            corgiOpenPage.setCity(province);
+            openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+        }
         corgiOpenPage.setCity("全国");
         openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+
+
         result = new ArrayList<>();
         if (!CollectionUtils.isEmpty(openPages)) {
             result.add(openPages.get(new Random().nextInt(openPages.size())));
