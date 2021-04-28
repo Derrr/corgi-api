@@ -217,6 +217,21 @@ public class CorgiActivityController extends BaseController {
         redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         if (!StringUtils.isEmpty(activity.getVideoId())) {
+            GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
+            GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
+            if (mezzanine != null) {
+                activity.setVideoUrl(mezzanine.getFileURL());
+                GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId().split("\\?Expires")[0]);
+                if (infoResponse != null && infoResponse.getVideo() != null) {
+                    if (StringUtils.isEmpty(activity.getCoverUrl())) {
+                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
+                    }
+                    if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
+                        activity.setCheckStatus(AliyunGreenService.FAIL);
+                    }
+                }
+
+            }
             activity.setCategory(CorgiActivity.CAT_VIDEO);
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
             activity.setCategory(CorgiActivity.CAT_TEXT);
@@ -912,7 +927,7 @@ public class CorgiActivityController extends BaseController {
 //            return new JsonResult(detailList);
 //        }
 
-        if(hasVersion()){
+        if (hasVersion()) {
             List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
             List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
             return new JsonResult(detailList);
