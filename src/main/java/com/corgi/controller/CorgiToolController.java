@@ -377,6 +377,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("agree_activity")
     public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.PASS);
+        corgiUserActivityService.changeActivityCreator(activityId, "normal");
         return new JsonResult();
     }
 
