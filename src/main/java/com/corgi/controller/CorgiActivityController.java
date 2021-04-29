@@ -1206,10 +1206,15 @@ public class CorgiActivityController extends BaseController {
             likedActivity.setCategory(corgiActivity.getCategory());
             if (!CollectionUtils.isEmpty(corgiActivity.getPics()) && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
                 String picUrl = corgiActivity.getPics().get(0).getPicUrl();
-                if (CorgiActivity.CAT_VIDEO.equals(corgiActivity.getCategory())) {
-                    log.info("cover:{} ",corgiActivity.getCoverUrl());
-                    picUrl = corgiActivity.getCoverUrl();
-                }
+                likedActivity.setPicUrl(picUrl);
+                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                Integer height = picInfo.getHeight();
+                Integer width = picInfo.getWidth();
+                likedActivity.setHeight(height);
+                likedActivity.setWidth(width);
+            }
+            if (CorgiActivity.CAT_VIDEO.equals(corgiActivity.getCategory())) {
+                String picUrl = corgiActivity.getCoverUrl();
                 likedActivity.setPicUrl(picUrl);
                 PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                 Integer height = picInfo.getHeight();
