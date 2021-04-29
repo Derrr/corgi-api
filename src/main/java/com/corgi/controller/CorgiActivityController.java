@@ -566,6 +566,7 @@ public class CorgiActivityController extends BaseController {
         corgiUserActivityService.deleteActivityCreator(activityId);
         corgiVlogService.deleteVlog(activityId);
         corgiActivityService.deleteCorgiActivity(activityId);
+        corgiLikeService.deleteActivityLike(null, activityId);
         return new JsonResult();
     }
 
