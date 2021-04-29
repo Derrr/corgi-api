@@ -1070,10 +1070,8 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_liked_activity")
     public JsonResult getLikedActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        log.info("into activity....");
         List<CorgiActivity> corgiActivities = new ArrayList<>();
         List<String> activityIds = corgiLikeService.getLikedActivity(userId, page, pageSize);
-        log.info("activityIds..." + activityIds);
         if (!CollectionUtils.isEmpty(activityIds)) {
             corgiActivities = corgiActivityService.getActivityByIds(activityIds);
         }
@@ -1209,6 +1207,7 @@ public class CorgiActivityController extends BaseController {
             if (!CollectionUtils.isEmpty(corgiActivity.getPics()) && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
                 String picUrl = corgiActivity.getPics().get(0).getPicUrl();
                 if (CorgiActivity.CAT_VIDEO.equals(corgiActivity.getCategory())) {
+                    log.info("cover:{} ",corgiActivity.getCoverUrl());
                     picUrl = corgiActivity.getCoverUrl();
                 }
                 likedActivity.setPicUrl(picUrl);
