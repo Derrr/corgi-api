@@ -749,7 +749,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_detail")
     public JsonResult getDetail(@RequestParam("activityId") String activityId, @RequestParam("userId") String userId) {
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
-        if (CollectionUtils.isEmpty(corgiActivities)) {
+        if (CollectionUtils.isEmpty(corgiActivities) || corgiActivities.get(0) == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
         CorgiActivity activity = corgiActivities.get(0);
