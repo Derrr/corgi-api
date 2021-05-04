@@ -68,11 +68,14 @@ public class CorgiOpenPageController extends BaseController {
 
     @GetMapping("get_open_page")
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
-        List<CorgiOpenPage> result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
-        if (!CollectionUtils.isEmpty(result)) {
-            CorgiOpenPage page = result.get(new Random().nextInt(result.size()));
-            if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 2L, TimeUnit.HOURS)) {
-                return new JsonResult(Arrays.asList(page));
+        List<CorgiOpenPage> result;
+        if (hasVersion()) {
+            result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
+            if (!CollectionUtils.isEmpty(result)) {
+                CorgiOpenPage page = result.get(new Random().nextInt(result.size()));
+                if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 2L, TimeUnit.HOURS)) {
+                    return new JsonResult(Arrays.asList(page));
+                }
             }
         }
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
