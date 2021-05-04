@@ -277,6 +277,10 @@ public class CorgiFeedController extends BaseController {
                     it.remove();
                     continue;
                 }
+                if (!userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                    it.remove();
+                    continue;
+                }
                 activity.setCurrentTime(now);
                 Integer height = 0;
                 Integer width = 0;
