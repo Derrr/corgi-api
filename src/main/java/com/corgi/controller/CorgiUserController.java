@@ -399,7 +399,7 @@ public class CorgiUserController extends BaseController {
             }
             UserDetail userDetail = corgiUserService.getUserDetail(userId, loginUserId);
             if (userDetail == null) {
-                log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
+                log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
             userDetail.setMatch(0.0);
