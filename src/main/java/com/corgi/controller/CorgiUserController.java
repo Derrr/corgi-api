@@ -402,6 +402,7 @@ public class CorgiUserController extends BaseController {
                 log.info("detail code:{} ", Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
+            userDetail.setMatch(0.0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -730,10 +731,10 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         String result = corgiBlacklistService.addBlacklist(userId, blockId);
-        if(CorgiConstants.SUCCESS.equals(result)){
+        if (CorgiConstants.SUCCESS.equals(result)) {
             return new JsonResult("拉黑成功");
-        }else {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"请不要重复拉黑");
+        } else {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请不要重复拉黑");
         }
     }
 
@@ -743,10 +744,10 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         String result = corgiBlacklistService.deleteBlacklist(userId, blockId);
-        if(CorgiConstants.SUCCESS.equals(result)){
+        if (CorgiConstants.SUCCESS.equals(result)) {
             return new JsonResult("取消拉黑成功");
-        }else {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"对方不在黑名单中");
+        } else {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "对方不在黑名单中");
         }
     }
 
