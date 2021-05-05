@@ -12,8 +12,8 @@ public class CorgiTest {
 
     @Test
     public void testJWTPayload() {
-        String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MTk1NDA4OTAsInVzZXJJZCI6IjE5ODg2NiIsInZlcnNpb24iOiIxLjguMCIsImlhdCI6MTYxOTUzMzY5MH0.NIpXq5sL7QP9h_rwwKMqxeX9OMhTKI4Pap7XW_6hZ7w";
-        System.out.println(JWTUtils.createJWT("7", "1.8.0", 1000 * 60 * 60 * 24 * 365 * 100L));
+        String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzU0MjUwNDgsInVzZXJJZCI6Ii0xIiwidmVyc2lvbiI6IlYxLjAiLCJpYXQiOjE1ODgzMDIxNTV9.UcR_5JX0hIPBzySF9q4vh4oI8DyY7pXmHTzQqffiKkM";
+        System.out.println(JWTUtils.createJWT("7", "1.7.0", 1000 * 60 * 60 * 24 * 365 * 100L));
         DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
         System.out.println(decodedJWT.getClaim("userId").asString());
         System.out.println(decodedJWT.getClaim("version").asString());
@@ -21,7 +21,7 @@ public class CorgiTest {
 
     @Test
     public void testProjectCJWTPayload() {
-        String jwt = JWTUtils.createJWT("-2", "V1.0", 1000 * 60 * 60 * 24 * 365 * 100L);
+        String jwt = JWTUtils.createJWT("-2", "1.8.0", 1000 * 60 * 60 * 24 * 365 * 100L);
         System.out.println(jwt);
         DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
         System.out.println(decodedJWT.getExpiresAt());
