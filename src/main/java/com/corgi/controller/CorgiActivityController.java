@@ -293,7 +293,7 @@ public class CorgiActivityController extends BaseController {
                     .type(PushMessage.DEFAULT)
                     .sourceUserId(activityComment.getCommentUserId())
                     .targetUserId(activityComment.getUserId())
-                    .message(PushMessage.NEW_MESSAGE)
+                    .message(PushMessage.USER_COMMENT)
                     .extra(extra)
                     .build());
         }
@@ -303,7 +303,7 @@ public class CorgiActivityController extends BaseController {
                     .type(PushMessage.DEFAULT)
                     .sourceUserId(activityComment.getCommentUserId())
                     .targetUserId(activityComment.getReplyUserId())
-                    .message(PushMessage.NEW_MESSAGE)
+                    .message(PushMessage.USER_COMMENT)
                     .extra(extra)
                     .build());
         }
@@ -342,7 +342,7 @@ public class CorgiActivityController extends BaseController {
                     .type(PushMessage.DEFAULT)
                     .sourceUserId(activityLike.getLikeUserId())
                     .targetUserId(activityLike.getUserId())
-                    .message(PushMessage.NEW_MESSAGE)
+                    .message(PushMessage.USER_LIKE)
                     .extra(extra)
                     .build());
         }
