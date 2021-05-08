@@ -45,6 +45,12 @@ public class EvaluateController extends BaseController {
         userEvaluation.setEvaluatorId(detail.getUserId());
         userEvaluation.setEvaluatorName(detail.getNickname());
         userEvaluation.setEvaluatorAvatar(detail.getAvatar());
+
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userEvaluation.getUserId());
+        userEvaluation.setUserId(userDetail.getUserId());
+        userEvaluation.setUserName(userDetail.getNickname());
+        userEvaluation.setUserAvatar(userDetail.getAvatar());
+
         if (UserEvaluation.TYPE_DATE.equals(userEvaluation.getType())) {
             String applyId = userEvaluation.getApplyId();
             try {
