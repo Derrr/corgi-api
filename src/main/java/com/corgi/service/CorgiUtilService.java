@@ -121,7 +121,7 @@ public class CorgiUtilService {
         value.set(id);
         while (!tryLock(key, id)) {
             try {
-                if (System.currentTimeMillis() - now > 3000) {
+                if (System.currentTimeMillis() - now > 30000) {
                     return false;
                 }
                 Thread.sleep(100L);
@@ -133,12 +133,12 @@ public class CorgiUtilService {
     }
 
     public boolean tryLock(String key, String value) {
-        return tryLock(key, value, 30L);
+        return tryLock(key, value, 30L, TimeUnit.SECONDS);
     }
 
-    public boolean tryLock(String key, String value, Long time) {
+    public boolean tryLock(String key, String value, Long time, TimeUnit timeUnit) {
         ValueOperations operations = redisTemplate.opsForValue();
-        if (operations.setIfAbsent(key, value, time, TimeUnit.SECONDS)) {
+        if (operations.setIfAbsent(key, value, time, timeUnit)) {
             return true;
         }
         return false;

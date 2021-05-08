@@ -789,7 +789,7 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         String LockKey = "call_user_city_lock_" + userId;
-        if (!corgiUtilService.tryLock(LockKey, "1", 2L)) {
+        if (!corgiUtilService.tryLock(LockKey, "1", 20L, TimeUnit.SECONDS)) {
             return new JsonResult();
         }
         String key = getCallUserCityKey(userId);
