@@ -1099,7 +1099,7 @@ public class CorgiActivityController extends BaseController {
         if (!corgiUtilService.tryLock(LockKey, "1", 2L)) {
             return new JsonResult();
         }
-        log.info("city call... ");
+        log.info("city call... ", city);
         if (!"69548".equals(getUserId())) {
             String key = getCallCityKey(getUserId());
             if (key == null) {
