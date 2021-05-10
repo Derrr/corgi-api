@@ -124,4 +124,21 @@ public class EvaluateController extends BaseController {
     public JsonResult getDateEvaluation(@RequestParam("applyId") String applyId, @RequestParam(required = false, name = "evaluatorId") String evaluatorId) {
         return new JsonResult(corgiEvaluationService.getDateEvaluation(applyId, evaluatorId));
     }
+
+    @GetMapping("get_need_evaluation")
+    public JsonResult getNeedEvaluation(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        CorgiDateApply query = new CorgiDateApply();
+        query.setApplyUserId(getUserId());
+        List<CorgiDateApply> applies = corgiUserDateService.searchApplies(query, page, pageSize);
+        String userId = getUserId();
+        for (CorgiDateApply apply : applies) {
+            if (userId.equals(apply.getApplyUserId())) {
+                apply.setUserInfo(corgiUserService.getUserDetailBasic(apply.getApprovalUserId()));
+            } else {
+                apply.setUserInfo(corgiUserService.getUserDetailBasic(apply.getApplyUserId()));
+            }
+            apply.setResult("我们完成了一次约会，帮我评价吧！");
+        }
+        return new JsonResult(applies);
+    }
 }
