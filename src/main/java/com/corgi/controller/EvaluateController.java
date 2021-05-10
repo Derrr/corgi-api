@@ -41,6 +41,7 @@ public class EvaluateController extends BaseController {
 
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
+        log.info(corgiUserService + "" + getUserId());
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         userEvaluation.setEvaluatorId(detail.getUserId());
         userEvaluation.setEvaluatorName(detail.getNickname());
