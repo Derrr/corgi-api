@@ -61,7 +61,7 @@ public class EvaluateController extends BaseController {
                 if (CorgiDateApply.CANCEL.equals(apply.getStatus())) {
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "约会已取消");
                 }
-                if (!CorgiDateApply.APPLY.equals(apply.getStatus())) {
+                if (!CorgiDateApply.AGREE.equals(apply.getStatus())) {
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还不能评价该约会");
                 }
                 if (!getUserId().equals(apply.getApplyUserId()) && !getUserId().equals(apply.getApprovalUserId())) {
