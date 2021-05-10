@@ -402,6 +402,9 @@ public class CorgiUserController extends BaseController {
                 log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
+            if (userDetail.getRole() == null) {
+                userDetail.setRole("");
+            }
             userDetail.setMatch(0.0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
