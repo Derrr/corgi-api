@@ -273,10 +273,10 @@ public class CorgiFeedController extends BaseController {
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
-                if ("2021/02/07".compareTo(activity.getCreateTime()) > 0) {
-                    it.remove();
-                    continue;
-                }
+//                if ("2021/02/07".compareTo(activity.getCreateTime()) > 0) {
+//                    it.remove();
+//                    continue;
+//                }
                 if (StringUtils.isEmpty(activity.getUserId()) || (!userId.equals(activity.getUserId()) && "fail".equals(activity.getCheckStatus()))) {
                     it.remove();
                     continue;
