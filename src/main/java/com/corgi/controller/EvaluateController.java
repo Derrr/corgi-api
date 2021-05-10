@@ -127,9 +127,7 @@ public class EvaluateController extends BaseController {
 
     @GetMapping("get_need_evaluation")
     public JsonResult getNeedEvaluation(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        CorgiDateApply query = new CorgiDateApply();
-        query.setApplyUserId(getUserId());
-        List<CorgiDateApply> applies = corgiUserDateService.searchApplies(query, page, pageSize);
+        List<CorgiDateApply> applies = corgiEvaluationService.getNeeEvaluation(getUserId(), page, pageSize);
         String userId = getUserId();
         for (CorgiDateApply apply : applies) {
             if (userId.equals(apply.getApplyUserId())) {
