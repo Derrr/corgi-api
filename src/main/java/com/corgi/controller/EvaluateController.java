@@ -1,5 +1,6 @@
 package com.corgi.controller;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.service.CorgiUtilService;
@@ -10,7 +11,6 @@ import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiDateApply;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserEvaluation;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -41,7 +41,6 @@ public class EvaluateController extends BaseController {
 
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
-        log.info(corgiUserService + "" + getUserId());
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         userEvaluation.setEvaluatorId(detail.getUserId());
         userEvaluation.setEvaluatorName(detail.getNickname());
