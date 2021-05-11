@@ -909,7 +909,7 @@ public class CorgiUserController extends BaseController {
         String userId = getUserId();
         log.info("user:{} verity result: {} ", userId, response);
         Float score = response.getFaceComparisonScore();
-        if (score != null && score > 50) {
+        if (score != null && score > 40) {
             UserDetail userDetail = new UserDetail();
             userDetail.setUserId(userId);
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
