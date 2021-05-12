@@ -72,7 +72,7 @@ public class CorgiOpenPageController extends BaseController {
         if (hasVersion()) {
             result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
             if (!CollectionUtils.isEmpty(result)) {
-                CorgiOpenPage page = result.get(new Random().nextInt(result.size()));
+                CorgiOpenPage page = result.get(0);
                 if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
                     return new JsonResult(Arrays.asList(page));
                 }
