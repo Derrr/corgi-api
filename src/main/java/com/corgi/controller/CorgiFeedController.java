@@ -167,7 +167,7 @@ public class CorgiFeedController extends BaseController {
             JSONObject data = job.getJSONObject("Data");
             //判断人工审核
             if (data == null) {
-                String suggestion = data.getString("AuditStatus");
+                String suggestion = job.getString("AuditStatus");
                 if ("Normal".equals(suggestion)) {
                     activity.setCheckStatus(AliyunGreenService.PASS);
                     corgiActivityService.updateCorgiActivityStatus(activity);
