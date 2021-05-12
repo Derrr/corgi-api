@@ -171,6 +171,10 @@ public class CorgiFeedController extends BaseController {
                 activity.setCheckStatus(AliyunGreenService.FAIL);
                 corgiActivityService.updateCorgiActivityStatus(activity);
                 corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+            } else {
+                activity.setCheckStatus(AliyunGreenService.PASS);
+                corgiActivityService.updateCorgiActivityStatus(activity);
+                corgiUserActivityService.changeActivityCreator(activity.getId(), "normal");
             }
         }
         return new JsonResult();
