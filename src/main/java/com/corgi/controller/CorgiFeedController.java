@@ -165,16 +165,26 @@ public class CorgiFeedController extends BaseController {
             corgiActivityService.updateCorgiActivityStatus(activity);
         } else {
             JSONObject data = job.getJSONObject("Data");
-            String suggestion = data.getString("Suggestion");
-            log.info("check success...{}:{} ", videoId, suggestion);
-            if (!suggestion.equals("pass")) {
-                activity.setCheckStatus(AliyunGreenService.FAIL);
-                corgiActivityService.updateCorgiActivityStatus(activity);
-                corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+            //判断人工审核
+            if (data == null) {
+                String suggestion = data.getString("AuditStatus");
+                if ("Normal".equals(suggestion)) {
+                    activity.setCheckStatus(AliyunGreenService.PASS);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
+                    corgiUserActivityService.changeActivityCreator(activity.getId(), "normal");
+                } else {
+                    activity.setCheckStatus(AliyunGreenService.FAIL);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
+                    corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                }
             } else {
-                activity.setCheckStatus(AliyunGreenService.PASS);
-                corgiActivityService.updateCorgiActivityStatus(activity);
-                corgiUserActivityService.changeActivityCreator(activity.getId(), "normal");
+                String suggestion = data.getString("Suggestion");
+                log.info("check success...{}:{} ", videoId, suggestion);
+                if (!suggestion.equals("pass")) {
+                    activity.setCheckStatus(AliyunGreenService.FAIL);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
+                    corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                }
             }
         }
         return new JsonResult();
