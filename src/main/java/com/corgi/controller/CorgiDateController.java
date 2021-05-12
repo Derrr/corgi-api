@@ -275,6 +275,7 @@ public class CorgiDateController extends BaseController {
 
     @GetMapping("get_date_user")
     public JsonResult getDatingUser(UserQuery userQuery) {
+        userQuery.setUserId(getUserId());
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         List<UserDetail> profiles = new ArrayList<>();
         for (String userId : mapUserProfile.getUserIds()) {

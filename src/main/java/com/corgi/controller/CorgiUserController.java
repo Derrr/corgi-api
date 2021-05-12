@@ -402,6 +402,9 @@ public class CorgiUserController extends BaseController {
                 log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
+            if (userDetail.getRole() == null) {
+                userDetail.setRole("");
+            }
             userDetail.setMatch(0.0);
             return new JsonResult(userDetail);
         } catch (Exception e) {
@@ -851,6 +854,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
+        userQuery.setUserId(getUserId());
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         return new JsonResult(mapUserProfile);
     }
@@ -906,7 +910,7 @@ public class CorgiUserController extends BaseController {
         String userId = getUserId();
         log.info("user:{} verity result: {} ", userId, response);
         Float score = response.getFaceComparisonScore();
-        if (score != null && score > 50) {
+        if (score != null && score > 40) {
             UserDetail userDetail = new UserDetail();
             userDetail.setUserId(userId);
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
