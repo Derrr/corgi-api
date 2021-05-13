@@ -211,10 +211,9 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
-        if (redisTemplate.hasKey("activity_sent_" + activity.getUserId())) {
+        if (!redisTemplate.opsForValue().setIfAbsent("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
         }
-        redisTemplate.opsForValue().set("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS);
         activity.setCategory(CorgiActivity.CAT_IMAGE);
         if (!StringUtils.isEmpty(activity.getVideoId())) {
             GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
