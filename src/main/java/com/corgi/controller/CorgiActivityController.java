@@ -752,7 +752,9 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
         CorgiActivity activity = corgiActivities.get(0);
-        List<CorgiActivityDetail> details = convertDetail(Arrays.asList(activity), userId);
+        List<CorgiActivity> activities = new ArrayList<>();
+        activities.add(corgiActivities.get(0));
+        List<CorgiActivityDetail> details = convertDetail(activities, userId);
         if (CollectionUtils.isEmpty(details)) {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
