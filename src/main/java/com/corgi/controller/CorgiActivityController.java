@@ -181,19 +181,21 @@ public class CorgiActivityController extends BaseController {
                 Integer width = picInfo.getWidth();
                 detail.setHeight(height);
                 detail.setWidth(width);
-            } else if(detail.getUserDetail() != null && !StringUtils.isEmpty(detail.getUserDetail().getAvatar())){
-                String picUrl = detail.getUserDetail().getAvatar();
-                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                Integer height = picInfo.getHeight();
-                Integer width = picInfo.getWidth();
-                detail.setHeight(height);
-                detail.setWidth(width);
-                ActivityPic pic = new ActivityPic();
-                pic.setActivityId(detail.getId());
-                pic.setPicUrl(picUrl);
-                detail.setPics(Arrays.asList(pic));
+                details.add(detail);
             }
-            details.add(detail);
+//            else if(detail.getUserDetail() != null && !StringUtils.isEmpty(detail.getUserDetail().getAvatar())){
+//                String picUrl = detail.getUserDetail().getAvatar();
+//                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+//                Integer height = picInfo.getHeight();
+//                Integer width = picInfo.getWidth();
+//                detail.setHeight(height);
+//                detail.setWidth(width);
+//                ActivityPic pic = new ActivityPic();
+//                pic.setActivityId(detail.getId());
+//                pic.setPicUrl(picUrl);
+//                detail.setPics(Arrays.asList(pic));
+//            }
+
         }
         return new JsonResult(details);
     }
