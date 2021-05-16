@@ -181,7 +181,7 @@ public class CorgiActivityController extends BaseController {
                 Integer width = picInfo.getWidth();
                 detail.setHeight(height);
                 detail.setWidth(width);
-            } else {
+            } else if(detail.getUserDetail() != null && !StringUtils.isEmpty(detail.getUserDetail().getAvatar())){
                 String picUrl = detail.getUserDetail().getAvatar();
                 PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                 Integer height = picInfo.getHeight();
