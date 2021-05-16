@@ -188,6 +188,10 @@ public class CorgiActivityController extends BaseController {
                 Integer width = picInfo.getWidth();
                 detail.setHeight(height);
                 detail.setWidth(width);
+                ActivityPic pic = new ActivityPic();
+                pic.setActivityId(detail.getId());
+                pic.setPicUrl(picUrl);
+                detail.setPics(Arrays.asList(pic));
             }
             details.add(detail);
         }
