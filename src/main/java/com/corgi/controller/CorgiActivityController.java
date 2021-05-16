@@ -133,7 +133,7 @@ public class CorgiActivityController extends BaseController {
             activity.setUserId(getUserId());
         }
         String now = System.currentTimeMillis() + "";
-        if (redisTemplate.opsForValue().setIfAbsent("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS)) {
+        if (!redisTemplate.opsForValue().setIfAbsent("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
         }
         Integer addResult = -1;
