@@ -132,35 +132,29 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
-        if (redisTemplate.hasKey("activity_attended_" + activity.getUserId())) {
+        String now = System.currentTimeMillis() + "";
+        if (redisTemplate.opsForValue().setIfAbsent("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
         }
-        String now = System.currentTimeMillis() + "";
-        redisTemplate.opsForValue().set("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS);
         Integer addResult = -1;
-        corgiUtilService.lock("attending_" + activity.getUserId());
-        try {
-            CorgiActivity searchActivity = new CorgiActivity();
-            searchActivity.setUserId(activity.getUserId());
-            searchActivity.setBarId(activity.getBarId());
-            searchActivity.setCreateTime(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
-            searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
-            List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, -1, 1);
-            if (CollectionUtils.isEmpty(result)) {
-                activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
-                activity.setCheckStatus(AliyunGreenService.PASS);
-                activity = aliyunGreenService.checkImageActivity(activity);
-                activity = corgiActivityService.addCorgiActivity(activity);
-                addResult = 0;
-            } else {
-                activity = result.get(0);
-                addResult = 1;
-                if (!CollectionUtils.isEmpty(activity.getPics())) {
-                    addResult = 2;
-                }
+        CorgiActivity searchActivity = new CorgiActivity();
+        searchActivity.setUserId(activity.getUserId());
+        searchActivity.setBarId(activity.getBarId());
+        searchActivity.setCreateTime(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
+        searchActivity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+        List<CorgiActivity> result = corgiActivityService.searchCorgiActivity(searchActivity, -1, 1);
+        if (CollectionUtils.isEmpty(result)) {
+            activity.setCategory(CorgiActivity.CAT_ATTENDANCE);
+            activity.setCheckStatus(AliyunGreenService.PASS);
+            activity = aliyunGreenService.checkImageActivity(activity);
+            activity = corgiActivityService.addCorgiActivity(activity);
+            addResult = 0;
+        } else {
+            activity = result.get(0);
+            addResult = 1;
+            if (!CollectionUtils.isEmpty(activity.getPics())) {
+                addResult = 2;
             }
-        } finally {
-            corgiUtilService.unlock("attending_" + activity.getUserId());
         }
         return new JsonResult(AddAttendResult.getResult(activity, addResult));
     }
@@ -182,6 +176,13 @@ public class CorgiActivityController extends BaseController {
             }
             if (!CollectionUtils.isEmpty(detail.getPics()) && !StringUtils.isEmpty(detail.getPics().get(0).getPicUrl())) {
                 String picUrl = detail.getPics().get(0).getPicUrl();
+                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                Integer height = picInfo.getHeight();
+                Integer width = picInfo.getWidth();
+                detail.setHeight(height);
+                detail.setWidth(width);
+            } else {
+                String picUrl = detail.getUserDetail().getAvatar();
                 PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                 Integer height = picInfo.getHeight();
                 Integer width = picInfo.getWidth();
