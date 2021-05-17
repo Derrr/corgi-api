@@ -64,6 +64,9 @@ public class CorgiHotVlogController extends BaseController {
     public JsonResult addHot(@RequestBody CorgiVlogHot corgiVlogHot) {
         corgiVlogHot.setViewCount(null);
         corgiVlogHot.setLikeCount(null);
+        if (corgiVlogHot.getExpectView() == null || corgiVlogHot.getExpectView() <= 0) {
+            corgiVlogHot.setExpectView(3000);
+        }
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
         return new JsonResult();

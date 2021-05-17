@@ -3,6 +3,8 @@ package com.corgi.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.entity.CorgiUserEvaluation;
+import com.corgi.service.AliyunNLPService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.CorgiEvaluationService;
 import com.corgi.user.api.CorgiUserDateService;
@@ -38,6 +40,8 @@ public class EvaluateController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private AliyunNLPService aliyunNLPService;
 
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
@@ -79,6 +83,11 @@ public class EvaluateController extends BaseController {
                 if (!CollectionUtils.isEmpty(evaluationList)) {
                     return new JsonResult(Constants.API_ERROR_CODE, "已评价过该约会");
                 }
+                Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
+                if (score == null) {
+                    score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
+                }
+                userEvaluation.setScore(score);
                 corgiEvaluationService.addEvaluation(userEvaluation);
                 return new JsonResult();
             } finally {
@@ -94,13 +103,23 @@ public class EvaluateController extends BaseController {
         if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评价过于频繁");
         }
+        Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
+        if (score == null) {
+            score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
+        }
+        userEvaluation.setScore(score);
         corgiEvaluationService.addEvaluation(userEvaluation);
         return new JsonResult();
     }
 
     @GetMapping("get_user_evaluation")
     public JsonResult getUserEvaluation(@RequestParam("userId") String userId) {
-        return new JsonResult(corgiEvaluationService.getEvaluationByUser(userId));
+        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByUser(userId);
+        Double totalScore = corgiEvaluationService.getUserEvaluation(userId);
+        CorgiUserEvaluation evaluation = new CorgiUserEvaluation();
+        evaluation.setTags(tags);
+        evaluation.setTotalScore(totalScore);
+        return new JsonResult(evaluation);
     }
 
     @GetMapping("get_my_evaluation")
@@ -109,6 +128,11 @@ public class EvaluateController extends BaseController {
             userId = getUserId();
         }
         return new JsonResult(corgiEvaluationService.getEvaluationByEvaluator(userId, page, pageSize));
+    }
+
+    @GetMapping("get_tag_evaluation")
+    public JsonResult getTagEvaluation(@RequestParam("userId") String userId, @RequestParam("tag") String tag, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiEvaluationService.getEvaluationByTag(userId, tag, page, pageSize));
     }
 
     @GetMapping("delete_evaluation")
