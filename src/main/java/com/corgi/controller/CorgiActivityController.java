@@ -267,6 +267,14 @@ public class CorgiActivityController extends BaseController {
             corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
             corgiVlogService.addVlog(corgiVlog);
         }
+        if ("69548".equals(getUserId())) {
+            CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
+            corgiVlogHot.setViewCount(null);
+            corgiVlogHot.setLikeCount(null);
+            corgiVlogHot.setExpectView(3000);
+            corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
+            corgiVlogService.addHotVlog(corgiVlogHot);
+        }
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 
