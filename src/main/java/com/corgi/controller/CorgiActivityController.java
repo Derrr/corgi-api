@@ -133,7 +133,7 @@ public class CorgiActivityController extends BaseController {
             activity.setUserId(getUserId());
         }
         String now = System.currentTimeMillis() + "";
-        if (redisTemplate.opsForValue().setIfAbsent("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS)) {
+        if (!redisTemplate.opsForValue().setIfAbsent("activity_attended_" + activity.getUserId(), now, 2L, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.API_ERROR_CODE, "打卡太频繁了哦");
         }
         Integer addResult = -1;
@@ -195,7 +195,6 @@ public class CorgiActivityController extends BaseController {
 //                pic.setPicUrl(picUrl);
 //                detail.setPics(Arrays.asList(pic));
 //            }
-
         }
         return new JsonResult(details);
     }
@@ -209,7 +208,14 @@ public class CorgiActivityController extends BaseController {
         search.setCategory(CorgiActivity.CAT_ATTENDANCE);
         search.setCreateTime(new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
         List<String> activityIds = corgiUserActivityService.getHeatActivity(search, 1, 18);
-        return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        List<CorgiActivity> result = new ArrayList<>();
+        for (CorgiActivity activity : activities) {
+            if (!CollectionUtils.isEmpty(activity.getPics()) && !StringUtils.isEmpty(activity.getPics().get(0).getPicUrl())) {
+                result.add(activity);
+            }
+        }
+        return new JsonResult(result);
     }
 
 
