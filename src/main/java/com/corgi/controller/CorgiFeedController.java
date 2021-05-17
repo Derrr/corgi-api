@@ -155,6 +155,9 @@ public class CorgiFeedController extends BaseController {
         JSONObject job = JSONObject.parseObject(jobStr);
         String videoId = job.getString("MediaId");
         CorgiVlog vlog = corgiVlogService.getVlogByVideoId(videoId);
+        if (vlog == null) {
+            return new JsonResult();
+        }
         CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
         String status = job.getString("Status");
         if ("fail".equals(status)) {
