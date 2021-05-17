@@ -2,6 +2,7 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityFeedService;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.VlogDetail;
 import com.corgi.user.api.*;
@@ -23,6 +24,8 @@ import java.util.List;
 public class CorgiHotVlogController extends BaseController {
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiPicService corgiPicService;
     @Reference
     private CorgiActivityFeedService corgiActivityFeedService;
 
@@ -81,7 +84,9 @@ public class CorgiHotVlogController extends BaseController {
         detail.setExpectView(hot.getExpectView());
         detail.setCtime(hot.getCtime());
         detail.setStatus(hot.getStatus());
-        detail.setActivityDetail(corgiActivityFeedService.getActivityById(hot.getActivityId()));
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(hot.getActivityId());
+        activity.setPics(corgiPicService.getActivityPic(activity.getId()));
+        detail.setActivityDetail(activity);
         return detail;
     }
 }

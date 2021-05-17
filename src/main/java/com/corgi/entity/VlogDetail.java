@@ -1,5 +1,6 @@
 package com.corgi.entity;
 
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.CorgiVlog;
 import com.corgi.user.entity.UserDetail;
