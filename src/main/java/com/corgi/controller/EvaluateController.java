@@ -141,7 +141,9 @@ public class EvaluateController extends BaseController {
     public JsonResult deleteEvaluation(@RequestParam("id") Integer id) {
         UserEvaluation userEvaluation = new UserEvaluation();
         userEvaluation.setId(id);
-        userEvaluation.setEvaluatorId(getUserId());
+        if(hasUserId()) {
+            userEvaluation.setEvaluatorId(getUserId());
+        }
         corgiEvaluationService.deleteEvaluation(userEvaluation);
         return new JsonResult();
     }
