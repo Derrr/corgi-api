@@ -114,11 +114,13 @@ public class EvaluateController extends BaseController {
 
     @GetMapping("get_user_evaluation")
     public JsonResult getUserEvaluation(@RequestParam("userId") String userId) {
-        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByUser(userId);
+        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByUser(userId, getUserId(), 1, 6);
         Double totalScore = corgiEvaluationService.getUserEvaluation(userId);
+        Integer userCount = corgiEvaluationService.getUserCount(userId);
         CorgiUserEvaluation evaluation = new CorgiUserEvaluation();
-        evaluation.setTags(tags);
+        evaluation.setEvaluations(tags);
         evaluation.setTotalScore(totalScore);
+        evaluation.setUserCount(userCount);
         return new JsonResult(evaluation);
     }
 
@@ -162,5 +164,17 @@ public class EvaluateController extends BaseController {
             apply.setResult("我们完成了一次约会，帮我评价吧！");
         }
         return new JsonResult(applies);
+    }
+
+    @GetMapping("like")
+    public JsonResult like(@RequestParam("evaluationId") String evaluationId) {
+        corgiEvaluationService.likeEvaluation(getUserId(), evaluationId);
+        return new JsonResult();
+    }
+
+    @GetMapping("unlike")
+    public JsonResult unlike(@RequestParam("evaluationId") String evaluationId) {
+        corgiEvaluationService.unlikeEvaluation(getUserId(), evaluationId);
+        return new JsonResult();
     }
 }

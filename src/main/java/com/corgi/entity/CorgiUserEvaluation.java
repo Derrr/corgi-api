@@ -13,5 +13,6 @@ import java.util.List;
 @Data
 public class CorgiUserEvaluation implements Serializable {
     private Double totalScore;
-    private List<UserEvaluation> tags;
+    private Integer userCount;
+    private List<UserEvaluation> evaluations;
 }
