@@ -235,9 +235,12 @@ public class CorgiDateController extends BaseController {
                 detail.setUserId(getUserId());
                 detail.setNickname("已注销");
             }
+            HashMap<String,String> extra = new HashMap<>();
+            extra.put("type","601");
             PushMessage pushMessage = PushMessage.builder()
                     .sourceUserId("datehelper")
                     .message(this.getResult(CorgiDateApply.APPLY, getUserId(), getUserId()))
+                    .extra(extra)
                     .targetUserId(corgiDateApply.getApprovalUserId()).build();
             mqService.sendDate(pushMessage);
             return new JsonResult(apply);
@@ -250,9 +253,12 @@ public class CorgiDateController extends BaseController {
     public JsonResult approve(@RequestBody CorgiDateApply corgiDateApply) {
         corgiDateApply.setOperator(getUserId());
         CorgiDateApply apply = corgiUserDateService.approve(corgiDateApply);
+        HashMap<String,String> extra = new HashMap<>();
+        extra.put("type","602");
         PushMessage pushMessage = PushMessage.builder()
                 .sourceUserId("datehelper")
                 .message(this.getResult(apply.getStatus(), getUserId(), apply.getOperator()))
+                .extra(extra)
                 .targetUserId(corgiDateApply.getApprovalUserId()).build();
         mqService.sendDate(pushMessage);
         return new JsonResult();

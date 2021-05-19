@@ -7,6 +7,7 @@ import com.corgi.user.api.CorgiOpenPageService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiBanner;
 import com.corgi.user.entity.CorgiOpenPage;
+import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -70,11 +71,27 @@ public class CorgiOpenPageController extends BaseController {
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
         List<CorgiOpenPage> result;
         if (hasVersion()) {
+            UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+            SimpleDateFormat sdf = new SimpleDateFormat("/MM/dd");
+            if (!StringUtils.isEmpty(detail.getBirthday()) && detail.getBirthday().contains(sdf.format(new Date()))) {
+                CorgiOpenPage page = new CorgiOpenPage();
+                page.setUrl(getUserId());
+                page.setPicUrl(detail.getAvatar());
+                page.setPicType("birthday");
+                page.setUrlType("4");
+                page.setTitle(detail.getNickname());
+                if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
+                    log.info("birthday self:{} ", getUserId());
+                    return new JsonResult(Arrays.asList(page));
+                }
+            }
             result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
             if (!CollectionUtils.isEmpty(result)) {
-                CorgiOpenPage page = result.get(0);
-                if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
-                    return new JsonResult(Arrays.asList(page));
+                for (CorgiOpenPage page : result) {
+                    if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
+                        log.info("birthday from:{},to:{} ", page.getUrl(), getUserId());
+                        return new JsonResult(Arrays.asList(page));
+                    }
                 }
             }
         }
