@@ -114,11 +114,11 @@ public class EvaluateController extends BaseController {
 
     @GetMapping("get_user_evaluation")
     public JsonResult getUserEvaluation(@RequestParam("userId") String userId) {
-        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByUser(userId, getUserId(), 1, 6);
+        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByHeat(userId, getUserId(), 6);
         Double totalScore = corgiEvaluationService.getUserEvaluation(userId);
         Integer userCount = corgiEvaluationService.getUserCount(userId);
         CorgiUserEvaluation evaluation = new CorgiUserEvaluation();
-        evaluation.setEvaluations(tags);
+        evaluation.setTags(tags);
         evaluation.setTotalScore(totalScore);
         evaluation.setUserCount(userCount);
         return new JsonResult(evaluation);
