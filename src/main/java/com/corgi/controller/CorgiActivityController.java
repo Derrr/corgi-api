@@ -271,6 +271,7 @@ public class CorgiActivityController extends BaseController {
             CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
             corgiVlogHot.setViewCount(null);
             corgiVlogHot.setLikeCount(null);
+            corgiVlogHot.setActivityId(activity.getId());
             corgiVlogHot.setExpectView(3000);
             corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
             corgiVlogService.addHotVlog(corgiVlogHot);
