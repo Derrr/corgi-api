@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.entity.CorgiUserEvaluation;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.service.AliyunNLPService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.CorgiEvaluationService;
@@ -42,6 +43,8 @@ public class EvaluateController extends BaseController {
     private CorgiUtilService corgiUtilService;
     @Autowired
     private AliyunNLPService aliyunNLPService;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
 
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
@@ -83,6 +86,11 @@ public class EvaluateController extends BaseController {
                 if (!CollectionUtils.isEmpty(evaluationList)) {
                     return new JsonResult(Constants.API_ERROR_CODE, "已评价过该约会");
                 }
+                if (aliyunGreenService.checkText(userEvaluation.getTag())) {
+                    userEvaluation.setCheckStatus(AliyunGreenService.PASS);
+                } else {
+                    userEvaluation.setCheckStatus(AliyunGreenService.CHECK);
+                }
                 Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
                 if (score == null) {
                     score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
@@ -100,8 +108,8 @@ public class EvaluateController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
-        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评价过于频繁");
+        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
         }
         Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
         if (score == null) {
@@ -112,9 +120,22 @@ public class EvaluateController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("can_evaluate")
+    public JsonResult canEvaluate(@RequestParam("userId") String userId) {
+        int match = corgiUserFollowService.isFollowed(getUserId(), userId);
+        if (match < 3) {
+            return new JsonResult("0");
+        }
+        String friendKey = "friend_evaluate_" + getUserId() + "-" + userId;
+        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
+            return new JsonResult("0");
+        }
+        return new JsonResult("1");
+    }
+
     @GetMapping("get_user_evaluation")
-    public JsonResult getUserEvaluation(@RequestParam("userId") String userId) {
-        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByHeat(userId, getUserId(), 6);
+    public JsonResult getUserEvaluation(@RequestParam("userId") String userId, @RequestParam("pageSize") Integer pageSize) {
+        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByHeat(userId, getUserId(), pageSize);
         Double totalScore = corgiEvaluationService.getUserEvaluation(userId);
         Integer userCount = corgiEvaluationService.getUserCount(userId);
         CorgiUserEvaluation evaluation = new CorgiUserEvaluation();
@@ -122,6 +143,11 @@ public class EvaluateController extends BaseController {
         evaluation.setTotalScore(totalScore);
         evaluation.setUserCount(userCount);
         return new JsonResult(evaluation);
+    }
+
+    @GetMapping("get_recent_evaluation")
+    public JsonResult getRecentEvaluation(@RequestParam("userId") String userId, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiEvaluationService.getEvaluationByUser(userId, getUserId(), 1, pageSize));
     }
 
     @GetMapping("get_my_evaluation")
@@ -141,9 +167,19 @@ public class EvaluateController extends BaseController {
     public JsonResult deleteEvaluation(@RequestParam("id") Integer id) {
         UserEvaluation userEvaluation = new UserEvaluation();
         userEvaluation.setId(id);
-        if(hasUserId()) {
+        if (hasUserId()) {
             userEvaluation.setEvaluatorId(getUserId());
         }
+        corgiEvaluationService.deleteEvaluation(userEvaluation);
+        return new JsonResult();
+    }
+
+    @GetMapping("delete_evaluation_by_tag")
+    public JsonResult deleteEvaluationByTag(UserEvaluation userEvaluation) {
+        if (hasUserId()) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE,"删除tag请联系管理员");
+        }
+        userEvaluation.setEvaluatorId("");
         corgiEvaluationService.deleteEvaluation(userEvaluation);
         return new JsonResult();
     }
