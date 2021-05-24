@@ -369,6 +369,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("remove_activity")
     public JsonResult removeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.removeActivity(activityId);
+        corgiUserActivityService.deleteActivityCreator(activityId);
         corgiUserActivityService.deleteActivity(activityId);
         return new JsonResult();
     }
