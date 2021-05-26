@@ -50,6 +50,12 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("update_order")
+    public JsonResult updateOrder(@RequestParam("userId") String userId, @RequestParam("date") String date, @RequestParam("order")Integer order) {
+        corgiBillboardService.updateBillboardOrder(userId, date, order);
+        return new JsonResult();
+    }
+
     @GetMapping("get_activity_billboard")
     public JsonResult getActivityBillboard() {
         List<String> activityIds = corgiBillboardService.getActivityBillboard();
