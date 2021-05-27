@@ -131,9 +131,13 @@ public class EvaluateController extends BaseController {
             return new JsonResult("0");
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userId;
-        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
+        String id = redisTemplate.opsForValue().get(friendKey);
+        if (!StringUtils.isEmpty(id)) {
             return new JsonResult("0");
         }
+//        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 20L, TimeUnit.HOURS)) {
+//            return new JsonResult("0");
+//        }
         return new JsonResult("1");
     }
 
