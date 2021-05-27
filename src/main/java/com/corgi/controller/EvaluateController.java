@@ -111,9 +111,9 @@ public class EvaluateController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
-        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
-        }
+//        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
+//        }
         Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
         if (score == null) {
             score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
