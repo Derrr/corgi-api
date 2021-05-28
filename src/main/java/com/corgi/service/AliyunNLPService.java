@@ -29,7 +29,7 @@ public class AliyunNLPService {
     @Value("${aliyun.AccessKeySecret}")
     private String accessKeySecret;
     private IAcsClient managementClient;
-    String REGION_ID = "cn-shanghai";
+    String REGION_ID = "cn-hangzhou";
 
     @PostConstruct
     void init() {
