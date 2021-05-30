@@ -47,6 +47,8 @@ public class CorgiBarController extends BaseController {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiVideoService corgiVideoService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -186,7 +188,13 @@ public class CorgiBarController extends BaseController {
 
     @GetMapping("get_bar_list_by_city")
     public JsonResult getBarListByCity(@RequestParam(required = false, name = "city") String city) {
-        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city);
+        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city, null, null);
+        if (CollectionUtils.isEmpty(barProfiles)) {
+            UserPosition position = corgiUserService.getUserPosition(getUserId());
+            if (position != null) {
+                barProfiles = corgiBarService.getBarListByCity(null, position.getLat(), position.getLng());
+            }
+        }
         return new JsonResult(barProfiles);
     }
 
