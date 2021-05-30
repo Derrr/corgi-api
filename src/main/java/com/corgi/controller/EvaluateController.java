@@ -114,6 +114,11 @@ public class EvaluateController extends BaseController {
 //        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
 //            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
 //        }
+        if (aliyunGreenService.checkText(userEvaluation.getTag())) {
+            userEvaluation.setCheckStatus(AliyunGreenService.PASS);
+        } else {
+            userEvaluation.setCheckStatus(AliyunGreenService.CHECK);
+        }
         Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
         if (score == null) {
             score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
