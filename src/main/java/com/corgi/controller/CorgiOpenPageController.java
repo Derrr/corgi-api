@@ -71,7 +71,7 @@ public class CorgiOpenPageController extends BaseController {
         if (hasVersion()) {
             UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
             SimpleDateFormat sdf = new SimpleDateFormat("/MM/dd");
-            if (!StringUtils.isEmpty(detail.getBirthday()) && detail.getBirthday().contains(sdf.format(new Date()))) {
+            if (detail != null && !StringUtils.isEmpty(detail.getBirthday()) && detail.getBirthday().contains(sdf.format(new Date()))) {
                 CorgiOpenPage page = new CorgiOpenPage();
                 page.setUrl(getUserId());
                 page.setPicUrl(detail.getAvatar());
