@@ -89,17 +89,7 @@ public class EvaluateController extends BaseController {
                 if (!CollectionUtils.isEmpty(evaluationList)) {
                     return new JsonResult(Constants.API_ERROR_CODE, "已评价过该约会");
                 }
-                if (aliyunGreenService.checkText(userEvaluation.getTag())) {
-                    userEvaluation.setCheckStatus(AliyunGreenService.PASS);
-                } else {
-                    userEvaluation.setCheckStatus(AliyunGreenService.CHECK);
-                }
-                Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
-                if (score == null) {
-                    score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
-                }
-                userEvaluation.setScore(score);
-                corgiEvaluationService.addEvaluation(userEvaluation);
+                this.addUserEvaluation(userEvaluation);
                 return new JsonResult();
             } finally {
                 corgiUtilService.unlock(dateKey);
@@ -114,6 +104,12 @@ public class EvaluateController extends BaseController {
 //        if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
 //            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
 //        }
+        String evaluationId = this.addUserEvaluation(userEvaluation);
+        redisTemplate.opsForValue().set(friendKey, evaluationId, 23, TimeUnit.HOURS);
+        return new JsonResult();
+    }
+
+    private String addUserEvaluation(UserEvaluation userEvaluation) {
         if (aliyunGreenService.checkText(userEvaluation.getTag())) {
             userEvaluation.setCheckStatus(AliyunGreenService.PASS);
         } else {
@@ -124,9 +120,7 @@ public class EvaluateController extends BaseController {
             score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
         }
         userEvaluation.setScore(score);
-        String evaluationId = corgiEvaluationService.addEvaluation(userEvaluation);
-        redisTemplate.opsForValue().set(friendKey, evaluationId, 23, TimeUnit.HOURS);
-        return new JsonResult();
+        return corgiEvaluationService.addEvaluation(userEvaluation);
     }
 
     @GetMapping("can_evaluate")
