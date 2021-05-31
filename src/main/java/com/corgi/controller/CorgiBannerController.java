@@ -62,27 +62,17 @@ public class CorgiBannerController extends BaseController {
     public JsonResult getBanner(CorgiBanner corgiBanner) {
         corgiBanner.setStatus(CorgiBanner.STATUS_ENABLE);
         List<CorgiBanner> bannerList = corgiBannerService.listBanner(corgiBanner);
-        corgiBanner.setTopic(null);
-        List<CorgiBanner> allBannerList = corgiBannerService.listBanner(corgiBanner);
-        if (CollectionUtils.isEmpty(bannerList)) {
-            return new JsonResult(allBannerList);
-        }
-        for (CorgiBanner banner : allBannerList) {
-            if (!containBanner(bannerList, banner)) {
-                bannerList.add(banner);
-            }
-        }
         return new JsonResult(bannerList);
     }
 
-    private boolean containBanner(List<CorgiBanner> bannerList, CorgiBanner singleBanner) {
-        for (CorgiBanner banner : bannerList) {
-            if (banner.getId().equals(singleBanner.getId())) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    private boolean containBanner(List<CorgiBanner> bannerList, CorgiBanner singleBanner) {
+//        for (CorgiBanner banner : bannerList) {
+//            if (banner.getId().equals(singleBanner.getId())) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
 }
 
