@@ -141,8 +141,8 @@ public class EvaluateController extends BaseController {
     }
 
     @GetMapping("get_user_evaluation")
-    public JsonResult getUserEvaluation(@RequestParam("userId") String userId, @RequestParam("pageSize") Integer pageSize) {
-        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByHeat(userId, getUserId(), pageSize);
+    public JsonResult getUserEvaluation(@RequestParam("userId") String userId, @RequestParam(required = false, name = "page", defaultValue = "1") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByHeat(userId, getUserId(), page, pageSize);
         Double totalScore = corgiEvaluationService.getUserEvaluation(userId);
         Integer userCount = corgiEvaluationService.getUserCount(userId);
         CorgiUserEvaluation evaluation = new CorgiUserEvaluation();
@@ -153,7 +153,7 @@ public class EvaluateController extends BaseController {
     }
 
     @GetMapping("get_recent_evaluation")
-    public JsonResult getRecentEvaluation(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getRecentEvaluation(@RequestParam("userId") String userId, @RequestParam(name = "page", defaultValue = "1") Integer page, @RequestParam("pageSize") Integer pageSize) {
         return new JsonResult(corgiEvaluationService.getEvaluationByUser(userId, getUserId(), page, pageSize));
     }
 
