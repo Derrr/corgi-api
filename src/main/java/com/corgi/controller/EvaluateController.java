@@ -153,8 +153,8 @@ public class EvaluateController extends BaseController {
     }
 
     @GetMapping("get_recent_evaluation")
-    public JsonResult getRecentEvaluation(@RequestParam("userId") String userId, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiEvaluationService.getEvaluationByUser(userId, getUserId(), 1, pageSize));
+    public JsonResult getRecentEvaluation(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiEvaluationService.getEvaluationByUser(userId, getUserId(), page, pageSize));
     }
 
     @GetMapping("get_my_evaluation")
