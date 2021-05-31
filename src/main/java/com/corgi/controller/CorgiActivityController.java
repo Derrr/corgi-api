@@ -270,7 +270,7 @@ public class CorgiActivityController extends BaseController {
         if ("69548".equals(getUserId())) {
             CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
             corgiVlogHot.setViewCount(null);
-            corgiVlogHot.setLikeCount(null);
+            corgiVlogHot.setLikeCount(0);
             corgiVlogHot.setActivityId(activity.getId());
             corgiVlogHot.setExpectView(3000);
             corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
