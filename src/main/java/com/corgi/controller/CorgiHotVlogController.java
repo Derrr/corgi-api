@@ -2,9 +2,11 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityFeedService;
+import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.VlogDetail;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiVlog;
 import com.corgi.user.entity.CorgiVlogHot;
@@ -28,6 +30,8 @@ public class CorgiHotVlogController extends BaseController {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiActivityFeedService corgiActivityFeedService;
+    @Reference
+    private CorgiActivityService corgiActivityService;
 
     @GetMapping("list")
     public JsonResult listHot(@RequestParam(required = false, name = "status") String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -72,6 +76,7 @@ public class CorgiHotVlogController extends BaseController {
         }
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
+        corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         return new JsonResult();
     }
 
