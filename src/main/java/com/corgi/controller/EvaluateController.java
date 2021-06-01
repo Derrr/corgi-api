@@ -56,6 +56,9 @@ public class EvaluateController extends BaseController {
 
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
+        if (getUserId().equals(userEvaluation.getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不能给自己点赞哦");
+        }
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         userEvaluation.setEvaluatorId(detail.getUserId());
         userEvaluation.setEvaluatorName(detail.getNickname());
@@ -235,6 +238,9 @@ public class EvaluateController extends BaseController {
         UserEvaluation userEvaluation = corgiEvaluationService.getEvaluationById(evaluationId);
         if (userEvaluation == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论不存在");
+        }
+        if (getUserId().equals(userEvaluation.getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不能给自己点赞哦");
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
         String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
