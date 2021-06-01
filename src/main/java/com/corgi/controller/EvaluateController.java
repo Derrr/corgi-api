@@ -3,10 +3,12 @@ package com.corgi.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.CorgiUserEvaluation;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.AliyunNLPService;
 import com.corgi.service.CorgiUtilService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiEvaluationService;
 import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
@@ -21,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +51,8 @@ public class EvaluateController extends BaseController {
     private AliyunGreenService aliyunGreenService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private MQService mqService;
 
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
@@ -120,7 +125,16 @@ public class EvaluateController extends BaseController {
             score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
         }
         userEvaluation.setScore(score);
-        return corgiEvaluationService.addEvaluation(userEvaluation);
+        String evaluationId = corgiEvaluationService.addEvaluation(userEvaluation);
+        HashMap<String, String> extra = new HashMap<>();
+        extra.put("type", "405");
+        PushMessage pushMessage = PushMessage
+                .builder().sourceUserId(userEvaluation.getEvaluatorId())
+                .message("有新的评价了哦～")
+                .extra(extra)
+                .targetUserId(userEvaluation.getUserId()).build();
+        mqService.sendMessage(pushMessage);
+        return evaluationId;
     }
 
     @GetMapping("can_evaluate")
