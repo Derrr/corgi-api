@@ -57,7 +57,7 @@ public class EvaluateController extends BaseController {
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
         if (getUserId().equals(userEvaluation.getUserId())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不能给自己点赞哦");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不能给自己评价哦");
         }
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         userEvaluation.setEvaluatorId(detail.getUserId());
