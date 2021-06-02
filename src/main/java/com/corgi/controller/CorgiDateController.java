@@ -10,6 +10,7 @@ import com.corgi.entity.DateDetail;
 import com.corgi.entity.UserDate;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
+import com.corgi.user.api.CorgiEvaluationService;
 import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
@@ -51,6 +52,8 @@ public class CorgiDateController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiUserDateService corgiUserDateService;
+    @Reference
+    private CorgiEvaluationService corgiEvaluationService;
 
     @PostMapping("hunt")
     public JsonResult searchDate(@RequestBody UserDate userDate) {
@@ -199,6 +202,15 @@ public class CorgiDateController extends BaseController {
     @GetMapping("get_user_apply")
     public JsonResult getApply(@RequestParam("userId") String userId) {
         CorgiDateApply corgiDate = corgiUserDateService.getUserApply(userId, getUserId());
+        if (CorgiDateApply.FINISH.equals(corgiDate.getStatus())) {
+            return new JsonResult();
+        }
+        if (CorgiDateApply.AGREE.equals(corgiDate.getStatus())) {
+            List<UserEvaluation> userEvaluations = corgiEvaluationService.getDateEvaluation(corgiDate.getId() + "", getUserId());
+            if (CollectionUtils.isNotEmpty(userEvaluations)) {
+                return new JsonResult();
+            }
+        }
         return new JsonResult(corgiDate);
     }
 

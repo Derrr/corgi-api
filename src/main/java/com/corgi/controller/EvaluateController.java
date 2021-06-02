@@ -98,6 +98,13 @@ public class EvaluateController extends BaseController {
                     return new JsonResult(Constants.API_ERROR_CODE, "已评价过该约会");
                 }
                 this.addUserEvaluation(userEvaluation);
+                List<UserEvaluation> dateEvaluations = corgiEvaluationService.getDateEvaluation(userEvaluation.getApplyId(), userEvaluation.getUserId());
+                if (!CollectionUtils.isEmpty(dateEvaluations)) {
+                    CorgiDateApply apply = new CorgiDateApply();
+                    apply.setId(Integer.valueOf(userEvaluation.getApplyId()));
+                    apply.setStatus(CorgiDateApply.FINISH);
+                    corgiUserDateService.approve(apply);
+                }
                 return new JsonResult();
             } finally {
                 corgiUtilService.unlock(dateKey);
