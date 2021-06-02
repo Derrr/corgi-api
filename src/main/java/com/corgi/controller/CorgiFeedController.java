@@ -290,10 +290,6 @@ public class CorgiFeedController extends BaseController {
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
-//                if ("2021/02/07".compareTo(activity.getCreateTime()) > 0) {
-//                    it.remove();
-//                    continue;
-//                }
                 if (StringUtils.isEmpty(activity.getUserId()) || (!userId.equals(activity.getUserId()) && "fail".equals(activity.getCheckStatus()))) {
                     it.remove();
                     continue;
@@ -303,10 +299,10 @@ public class CorgiFeedController extends BaseController {
                     continue;
                 }
                 activity.setCurrentTime(now);
-                Integer height = 0;
-                Integer width = 0;
+                Long height = activity.getHeight();
+                Long width = activity.getWidth();
 
-                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();

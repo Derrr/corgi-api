@@ -412,8 +412,8 @@ public class AliyunGreenService {
             result = redisTemplate.opsForValue().get(url);
             if (!StringUtils.isEmpty(result) && result.split("_").length == 2) {
                 String[] hw = result.split("_");
-                picInfo.setHeight(Integer.valueOf(hw[0]));
-                picInfo.setWidth(Integer.valueOf(hw[1]));
+                picInfo.setHeight(Long.valueOf(hw[0]));
+                picInfo.setWidth(Long.valueOf(hw[1]));
                 return picInfo;
             }
         } catch (Exception e) {
@@ -429,10 +429,10 @@ public class AliyunGreenService {
                     Integer orientation = orientObject.getInteger("value");
                     revert = orientation != null && orientation > 4;
                 }
-                Integer height = image.getJSONObject("ImageHeight").getInteger("value");
-                Integer weight = image.getJSONObject("ImageWidth").getInteger("value");
+                Long height = image.getJSONObject("ImageHeight").getLong("value");
+                Long weight = image.getJSONObject("ImageWidth").getLong("value");
                 if (revert) {
-                    Integer tmp = height;
+                    Long tmp = height;
                     height = weight;
                     weight = tmp;
                 }

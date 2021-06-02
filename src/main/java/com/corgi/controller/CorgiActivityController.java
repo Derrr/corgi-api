@@ -79,17 +79,6 @@ public class CorgiActivityController extends BaseController {
 
     public static final String CALL_CITY_PREFIX = "call_city_";
 
-//    private static Comparator<CorgiActivityDetail> detailComparator = (o1, o2) -> o2.getMatch().compareTo(o1.getMatch());
-//
-//    private static Comparator<CorgiActivityDetail> timeComparator = (a1, a2) -> {
-//        String c1 = a1.getCreateTime() == null ? "" : a1.getCreateTime();
-//        String c2 = a2.getCreateTime() == null ? "" : a2.getCreateTime();
-//        return c2.compareTo(c1);
-//    };
-
-    //private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-    //private static SimpleDateFormat sdf_simple = new SimpleDateFormat("yyyy/MM/dd");
-
     @PostMapping("add_activity")
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
         if (hasUserId()) {
@@ -175,12 +164,14 @@ public class CorgiActivityController extends BaseController {
                 detail.setUserDetail(corgiUserService.getUserDetail(activity.getUserId(), null));
             }
             if (!CollectionUtils.isEmpty(detail.getPics()) && !StringUtils.isEmpty(detail.getPics().get(0).getPicUrl())) {
-                String picUrl = detail.getPics().get(0).getPicUrl();
-                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                Integer height = picInfo.getHeight();
-                Integer width = picInfo.getWidth();
-                detail.setHeight(height);
-                detail.setWidth(width);
+                if (detail.getHeight() == null || detail.getWidth() == null) {
+                    String picUrl = detail.getPics().get(0).getPicUrl();
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    Long height = picInfo.getHeight();
+                    Long width = picInfo.getWidth();
+                    detail.setHeight(height);
+                    detail.setWidth(width);
+                }
                 details.add(detail);
             }
         }
@@ -220,6 +211,8 @@ public class CorgiActivityController extends BaseController {
             GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
             GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
             if (mezzanine != null) {
+                activity.setHeight(mezzanine.getHeight());
+                activity.setWidth(mezzanine.getWidth());
                 activity.setVideoUrl(mezzanine.getFileURL().split("\\?Expires")[0]);
                 GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
                 if (infoResponse != null && infoResponse.getVideo() != null) {
@@ -230,7 +223,6 @@ public class CorgiActivityController extends BaseController {
                         activity.setCheckStatus(AliyunGreenService.FAIL);
                     }
                 }
-
             }
             activity.setCategory(CorgiActivity.CAT_VIDEO);
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
@@ -1108,7 +1100,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("/call_city")
     public JsonResult callCity(@RequestParam("city") String city, @RequestParam("activityId") String activityId) {
         String LockKey = "call_city_lock_" + getUserId();
-        if (!corgiUtilService.tryLock(LockKey, "1", 20L,TimeUnit.SECONDS)) {
+        if (!corgiUtilService.tryLock(LockKey, "1", 20L, TimeUnit.SECONDS)) {
             return new JsonResult();
         }
         log.info("city call... ", city);
@@ -1138,7 +1130,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("/call_activity_city")
     public JsonResult callActivityCity(@RequestParam("activityId") String activityId, @RequestParam("city") String city) {
         String LockKey = "call_activity_city_lock_" + getUserId();
-        if (!corgiUtilService.tryLock(LockKey, "1", 20L,TimeUnit.SECONDS)) {
+        if (!corgiUtilService.tryLock(LockKey, "1", 20L, TimeUnit.SECONDS)) {
             return new JsonResult();
         }
         HashMap extra = new HashMap();
@@ -1224,22 +1216,22 @@ public class CorgiActivityController extends BaseController {
             likedActivity.setActivityId(corgiActivity.getId());
             likedActivity.setCategory(corgiActivity.getCategory());
             if (!CollectionUtils.isEmpty(corgiActivity.getPics()) && !StringUtils.isEmpty(corgiActivity.getPics().get(0).getPicUrl())) {
-                String picUrl = corgiActivity.getPics().get(0).getPicUrl();
-                likedActivity.setPicUrl(picUrl);
-                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                Integer height = picInfo.getHeight();
-                Integer width = picInfo.getWidth();
-                likedActivity.setHeight(height);
-                likedActivity.setWidth(width);
+                if (corgiActivity.getHeight() == null || corgiActivity.getWidth() == null) {
+                    String picUrl = corgiActivity.getPics().get(0).getPicUrl();
+                    likedActivity.setPicUrl(picUrl);
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    Long height = picInfo.getHeight();
+                    Long width = picInfo.getWidth();
+                    likedActivity.setHeight(height);
+                    likedActivity.setWidth(width);
+                } else {
+                    likedActivity.setHeight(corgiActivity.getHeight());
+                    likedActivity.setWidth(corgiActivity.getWidth());
+                }
             }
             if (CorgiActivity.CAT_VIDEO.equals(corgiActivity.getCategory())) {
-                String picUrl = corgiActivity.getCoverUrl();
-                likedActivity.setPicUrl(picUrl);
-                PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                Integer height = picInfo.getHeight();
-                Integer width = picInfo.getWidth();
-                likedActivity.setHeight(height);
-                likedActivity.setWidth(width);
+                likedActivity.setHeight(corgiActivity.getHeight());
+                likedActivity.setWidth(corgiActivity.getWidth());
             }
             likedActivities.add(likedActivity);
         }
@@ -1259,10 +1251,10 @@ public class CorgiActivityController extends BaseController {
                     continue;
                 }
                 activity.setCurrentTime(now);
-                Integer height = 0;
-                Integer width = 0;
+                Long height = activity.getHeight();
+                Long width = activity.getWidth();
 
-                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();
