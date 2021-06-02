@@ -155,9 +155,10 @@ public class CorgiUtilService {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
-                Integer height = 0;
-                Integer width = 0;
-                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
+                Long height = activity.getHeight();
+                Long width = activity.getWidth();
+                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1
+                        && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();
