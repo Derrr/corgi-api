@@ -64,6 +64,16 @@ public class CorgiBarController extends BaseController {
         CorgiActivity activity = corgiActivityService.addCorgiActivity(corgiActivity);
         mqService.sendBarActivityMessage(PushMessage.builder()
                 .targetUserId(corgiActivity.getUserId()).build());
+        BarProfile profile = corgiBarService.getBarProfile(corgiActivity.getUserId());
+        HashMap extra = new HashMap();
+        extra.put("type", "202");
+        extra.put("city",profile.getCity());
+        mqService.sendSilentMessage(PushMessage.builder()
+                .type(PushMessage.CITY)
+                .sourceUserId(getUserId())
+                .message("你所在的商户发动态啦")
+                .extra(extra)
+                .build());
         return new JsonResult(activity);
     }
 

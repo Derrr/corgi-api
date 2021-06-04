@@ -269,6 +269,14 @@ public class CorgiActivityController extends BaseController {
             corgiVlogService.addHotVlog(corgiVlogHot);
             corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
+        HashMap extra = new HashMap();
+        extra.put("type", "201");
+        mqService.sendSilentMessage(PushMessage.builder()
+                .type(PushMessage.FOLLOW)
+                .sourceUserId(getUserId())
+                .message("你关注的人发动态啦")
+                .extra(extra)
+                .build());
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 

@@ -417,6 +417,14 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/visit")
     public JsonResult visit(@RequestParam("userId") String userId) {
         corgiVisitService.visit(getUserId(), userId);
+        HashMap extra = new HashMap();
+        extra.put("type", "203");
+        mqService.sendSilentMessage(PushMessage.builder()
+                .sourceUserId(getUserId())
+                .targetUserId(userId)
+                .message("有人访问你啦")
+                .extra(extra)
+                .build());
         return new JsonResult();
     }
 

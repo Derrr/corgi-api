@@ -283,4 +283,9 @@ public class EvaluateController extends BaseController {
         corgiEvaluationService.unlikeEvaluation(getUserId(), evaluationId);
         return new JsonResult();
     }
+
+    @GetMapping
+    public JsonResult getTags(@RequestParam("userId") String userId) {
+        return new JsonResult(corgiEvaluationService.getTags(userId));
+    }
 }
