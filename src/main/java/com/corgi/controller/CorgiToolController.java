@@ -8,10 +8,7 @@ import com.corgi.common.CorgiQueueName;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
-import com.corgi.entity.CheckPic;
-import com.corgi.entity.CorgiArea;
-import com.corgi.entity.CorgiStatistic;
-import com.corgi.entity.CorgiTopic;
+import com.corgi.entity.*;
 import com.corgi.entity.tool.Topic;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
@@ -68,6 +65,8 @@ public class CorgiToolController extends BaseController {
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
+    private AliyunGreenService aliyunGreenService;
+    @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -117,6 +116,17 @@ public class CorgiToolController extends BaseController {
     public JsonResult getTags() {
         List<String> tags = corgiToolService.getTags();
         return new JsonResult(tags);
+    }
+
+    @GetMapping("check_pic")
+    public JsonResult checkPic(@RequestParam("picUrl") String picUrl) {
+        CorgiPic pic = new CorgiPic();
+        pic.setPicUrl(picUrl);
+        List<CorgiPic> results = (List<CorgiPic>) aliyunGreenService.checkPic(Arrays.asList(pic), getUserId(), "share");
+        if (CollectionUtils.isEmpty(results)) {
+            return new JsonResult("check");
+        }
+        return new JsonResult(results.get(0).getStatus());
     }
 
     @GetMapping("get_interests")
