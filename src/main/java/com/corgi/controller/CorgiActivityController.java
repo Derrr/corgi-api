@@ -1240,6 +1240,9 @@ public class CorgiActivityController extends BaseController {
             if (CorgiActivity.CAT_VIDEO.equals(corgiActivity.getCategory())) {
                 likedActivity.setHeight(corgiActivity.getHeight());
                 likedActivity.setWidth(corgiActivity.getWidth());
+                if (StringUtils.isEmpty(likedActivity.getPicUrl())) {
+                    likedActivity.setPicUrl(corgiActivity.getCoverUrl());
+                }
             }
             likedActivities.add(likedActivity);
         }
