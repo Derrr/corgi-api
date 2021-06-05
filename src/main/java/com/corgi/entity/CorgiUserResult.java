@@ -12,4 +12,5 @@ import java.util.List;
 @Data
 public class CorgiUserResult implements Serializable {
     private String result;
+    private Integer total;
 }

@@ -170,11 +170,9 @@ public class EvaluateController extends BaseController {
         List<UserEvaluation> tags = corgiEvaluationService.getEvaluationByHeat(userId, getUserId(), page, pageSize);
         Double totalScore = corgiEvaluationService.getUserEvaluation(userId);
         Integer userCount = corgiEvaluationService.getUserCount(userId);
-        Integer evaluationCount = corgiEvaluationService.getEvaluationCount(userId);
         CorgiUserEvaluation evaluation = new CorgiUserEvaluation();
         evaluation.setTags(tags);
         evaluation.setTotalScore(totalScore);
-        evaluation.setEvaluationCount(evaluationCount);
         evaluation.setUserCount(userCount);
         return new JsonResult(evaluation);
     }
@@ -182,8 +180,10 @@ public class EvaluateController extends BaseController {
     @GetMapping("get_user_result")
     public JsonResult getUserResult(@RequestParam("userId") String userId) {
         Double rank = corgiEvaluationService.getRank(userId);
+        Integer total = corgiEvaluationService.getEvaluationCount(userId);
         CorgiUserResult result = new CorgiUserResult();
         result.setResult("超" + Math.round(rank) + "%用户");
+        result.setTotal(total);
         return new JsonResult(result);
     }
 
