@@ -301,18 +301,18 @@ public class EvaluateController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不能给自己点赞哦");
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
-        String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
-        if (oldEvaluationId != null) {
-            UserEvaluation oldEvaluation = corgiEvaluationService.getEvaluationById(oldEvaluationId);
-            if (oldEvaluation != null && oldEvaluation.getEvaluatorId().equals(getUserId())) {
-                if (userEvaluation.getTag().equals(oldEvaluation.getTag())) {
-                    corgiEvaluationService.deleteEvaluation(oldEvaluation);
-                    redisTemplate.delete(friendKey);
-                    return new JsonResult(corgiEvaluationService.countByTag(userEvaluation.getTag(), userEvaluation.getUserId()));
-                }
-            }
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
-        }
+//        String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
+//        if (oldEvaluationId != null) {
+//            UserEvaluation oldEvaluation = corgiEvaluationService.getEvaluationById(oldEvaluationId);
+//            if (oldEvaluation != null && oldEvaluation.getEvaluatorId().equals(getUserId())) {
+//                if (userEvaluation.getTag().equals(oldEvaluation.getTag())) {
+//                    corgiEvaluationService.deleteEvaluation(oldEvaluation);
+//                    redisTemplate.delete(friendKey);
+//                    return new JsonResult(corgiEvaluationService.countByTag(userEvaluation.getTag(), userEvaluation.getUserId()));
+//                }
+//            }
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
+//        }
         int match = corgiUserFollowService.isFollowed(getUserId(), userEvaluation.getUserId());
         if (match < 3) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
