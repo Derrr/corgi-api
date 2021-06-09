@@ -297,8 +297,18 @@ public class EvaluateController extends BaseController {
         if (userEvaluation == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论不存在");
         }
+        userEvaluation.setStatus("created");
+        userEvaluation.setType("friend");
         if (getUserId().equals(userEvaluation.getUserId())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不能给自己点赞哦");
+            Integer count = corgiEvaluationService.countByUser(getUserId(), getUserId());
+            if (count > 2) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "给自己评价不能超过3次哦");
+            }
+            userEvaluation.setEvaluatorId(userEvaluation.getUserId());
+            userEvaluation.setEvaluatorName(userEvaluation.getUserName());
+            userEvaluation.setEvaluatorAvatar(userEvaluation.getUserAvatar());
+            corgiEvaluationService.addEvaluation(userEvaluation);
+            return new JsonResult(corgiEvaluationService.countByTag(userEvaluation.getTag(), userEvaluation.getUserId()));
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
 //        String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
