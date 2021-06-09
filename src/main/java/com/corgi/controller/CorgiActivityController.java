@@ -40,8 +40,8 @@ import java.util.concurrent.TimeUnit;
 public class CorgiActivityController extends BaseController {
     @Reference
     private CorgiActivityService corgiActivityService;
-    @Reference
-    private CorgiUserMatchService corgiUserMatchService;
+    //@Reference
+    //private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
@@ -1280,7 +1280,7 @@ public class CorgiActivityController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 Integer signUp = corgiUserActivityService.getStatus(userId, activity.getId());
-                double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
+                //double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
@@ -1295,7 +1295,7 @@ public class CorgiActivityController extends BaseController {
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
-                        .initMatch(match)
+                        //.initMatch(match)
                         .initSize(height, width)
                         .initSignUpStatus(signUp)
                         .initCommentCount(commentCount)
