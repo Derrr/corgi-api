@@ -115,7 +115,7 @@ public class EvaluateController extends BaseController {
         userEvaluation.setType(UserEvaluation.TYPE_FRIEND);
         if (getUserId().equals(userEvaluation.getUserId())) {
             Integer count = corgiEvaluationService.countByUser(getUserId(), getUserId());
-            if (count > 3) {
+            if (count > 2) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评价自己不能超过3次");
             }
             this.addUserEvaluation(userEvaluation, false);
