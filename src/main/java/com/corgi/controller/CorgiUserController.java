@@ -66,8 +66,8 @@ public class CorgiUserController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiToolService corgiToolService;
-    @Reference
-    private CorgiUserMatchService corgiUserMatchService;
+    //@Reference
+    //private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
