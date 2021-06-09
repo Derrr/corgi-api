@@ -202,7 +202,7 @@ public class CorgiDateController extends BaseController {
     @GetMapping("get_user_apply")
     public JsonResult getApply(@RequestParam("userId") String userId) {
         CorgiDateApply corgiDate = corgiUserDateService.getUserApply(userId, getUserId());
-        if (CorgiDateApply.FINISH.equals(corgiDate.getStatus())) {
+        if (corgiDate == null || CorgiDateApply.FINISH.equals(corgiDate.getStatus())) {
             return new JsonResult();
         }
         if (CorgiDateApply.AGREE.equals(corgiDate.getStatus())) {
