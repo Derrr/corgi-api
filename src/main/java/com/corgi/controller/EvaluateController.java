@@ -178,7 +178,6 @@ public class EvaluateController extends BaseController {
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userId;
         String id = redisTemplate.opsForValue().get(friendKey);
-        log.info("friendkey" + friendKey + "..." + id + " ");
         if (!StringUtils.isEmpty(id)) {
             return new JsonResult("0");
         }
