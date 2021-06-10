@@ -447,6 +447,9 @@ public class CorgiDateController extends BaseController {
 
     private String getResult(String status, String userId, String operator) {
         if (CorgiDateApply.APPLY.equals(status)) {
+            if (userId.equals(operator)) {
+                return "你申请参与了约会";
+            }
             UserDetail detail = corgiUserService.getUserDetailBasic(operator);
             String name = operator;
             if (detail != null) {
