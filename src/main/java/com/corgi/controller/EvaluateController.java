@@ -18,6 +18,7 @@ import com.corgi.user.entity.CorgiDateApply;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserEvaluation;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,10 +59,16 @@ public class EvaluateController extends BaseController {
 
     @GetMapping("refresh")
     public JsonResult refreshEvaluation() {
+        MDC.put("reqId", "");
         List<String> tags = corgiEvaluationService.getTags(null);
         for (String tag : tags) {
             Double score = aliyunNLPService.getSaChe(tag);
-            corgiEvaluationService.updateScoreByTag(tag,score);
+            corgiEvaluationService.updateScoreByTag(tag, score);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return new JsonResult();
     }
