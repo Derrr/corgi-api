@@ -46,6 +46,8 @@ public class AliyunNLPService {
             JSONObject result = data.getJSONObject("result");
             Double pos = result.getDouble("positive_prob");
             Double neg = result.getDouble("negative_prob");
+            Double neu = result.getDouble("neutral_prob");
+            log.info("pos:{}, neu:{}, neu:{} ", pos, neg, neu);
             return (pos - neg + 1) * 50;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

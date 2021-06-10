@@ -55,6 +55,16 @@ public class EvaluateController extends BaseController {
     @Autowired
     private MQService mqService;
 
+    @GetMapping("refresh")
+    public JsonResult refreshEvaluation() {
+        List<String> tags = corgiEvaluationService.getTags(null);
+        for (String tag : tags) {
+            Double score = aliyunNLPService.getSaChe(tag);
+            corgiEvaluationService.updateScoreByTag(tag,score);
+        }
+        return new JsonResult();
+    }
+
     @PostMapping("add_evaluation")
     public JsonResult addEvaluation(@RequestBody UserEvaluation userEvaluation) {
 
