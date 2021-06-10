@@ -47,7 +47,7 @@ public class AliyunNLPService {
             Double pos = result.getDouble("positive_prob");
             Double neg = result.getDouble("negative_prob");
             Double neu = result.getDouble("neutral_prob");
-            log.info("pos:{}, neu:{}, neu:{} ", pos, neg, neu);
+            log.info("tag:{} pos:{}, neu:{}, neu:{} ", text, pos, neg, neu);
             return (pos - neg + 1) * 50;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
