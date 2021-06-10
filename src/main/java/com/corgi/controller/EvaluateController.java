@@ -178,6 +178,7 @@ public class EvaluateController extends BaseController {
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userId;
         String id = redisTemplate.opsForValue().get(friendKey);
+        log.info("friendkey" + friendKey + "..." + id + " ");
         if (!StringUtils.isEmpty(id)) {
             return new JsonResult("0");
         }
@@ -255,8 +256,8 @@ public class EvaluateController extends BaseController {
         }
         corgiEvaluationService.deleteEvaluation(userEvaluation);
         if (oldUserEvaluation != null) {
-            String friendKey = "friend_evaluate_" + getUserId() + "-" + oldUserEvaluation.getUserId();
-            redisTemplate.delete(friendKey);
+            //String friendKey = "friend_evaluate_" + getUserId() + "-" + oldUserEvaluation.getUserId();
+            //redisTemplate.delete(friendKey);
         }
         return new JsonResult();
     }
