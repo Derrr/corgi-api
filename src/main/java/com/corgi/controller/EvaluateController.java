@@ -166,7 +166,7 @@ public class EvaluateController extends BaseController {
     @GetMapping("can_evaluate")
     public JsonResult canEvaluate(@RequestParam("userId") String userId) {
         if (getUserId().equals(userId)) {
-            if (corgiEvaluationService.countByUser(userId, userId) > 3) {
+            if (corgiEvaluationService.countByUser(userId, userId) > 2) {
                 return new JsonResult("0");
             } else {
                 return new JsonResult("1");
