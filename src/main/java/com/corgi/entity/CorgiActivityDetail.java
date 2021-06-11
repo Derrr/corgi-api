@@ -19,8 +19,6 @@ public class CorgiActivityDetail extends CorgiActivity {
     private BarProfile barDetail;
     private Integer signUpStatus;
     private Double match = 0.0;
-    private Integer height = 0;
-    private Integer width = 0;
     private Long commentCount;
     private Long likeCount = 0L;
     private Integer hasLike = 0;
@@ -80,9 +78,9 @@ public class CorgiActivityDetail extends CorgiActivity {
         return this;
     }
 
-    public CorgiActivityDetail initSize(int height, int width) {
-        this.height = height;
-        this.width = width;
+    public CorgiActivityDetail initSize(Long height, Long width) {
+        this.setHeight(height);
+        this.setWidth(width);
         return this;
     }
 

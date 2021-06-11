@@ -121,7 +121,7 @@ public class CorgiUtilService {
         value.set(id);
         while (!tryLock(key, id)) {
             try {
-                if (System.currentTimeMillis() - now > 3000) {
+                if (System.currentTimeMillis() - now > 30000) {
                     return false;
                 }
                 Thread.sleep(100L);
@@ -133,12 +133,12 @@ public class CorgiUtilService {
     }
 
     public boolean tryLock(String key, String value) {
-        return tryLock(key, value, 30L);
+        return tryLock(key, value, 30L, TimeUnit.SECONDS);
     }
 
-    public boolean tryLock(String key, String value, Long time) {
+    public boolean tryLock(String key, String value, Long time, TimeUnit timeUnit) {
         ValueOperations operations = redisTemplate.opsForValue();
-        if (operations.setIfAbsent(key, value, time, TimeUnit.SECONDS)) {
+        if (operations.setIfAbsent(key, value, time, timeUnit)) {
             return true;
         }
         return false;
@@ -155,9 +155,10 @@ public class CorgiUtilService {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
             for (CorgiActivity activity : activityList) {
-                Integer height = 0;
-                Integer width = 0;
-                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1) {
+                Long height = activity.getHeight();
+                Long width = activity.getWidth();
+                if (!CollectionUtils.isEmpty(activity.getPics()) && activity.getPics().size() == 1
+                        && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();

@@ -155,6 +155,9 @@ public class CorgiFeedController extends BaseController {
         JSONObject job = JSONObject.parseObject(jobStr);
         String videoId = job.getString("MediaId");
         CorgiVlog vlog = corgiVlogService.getVlogByVideoId(videoId);
+        if (vlog == null) {
+            return new JsonResult();
+        }
         CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
         String status = job.getString("Status");
         if ("fail".equals(status)) {
@@ -165,12 +168,26 @@ public class CorgiFeedController extends BaseController {
             corgiActivityService.updateCorgiActivityStatus(activity);
         } else {
             JSONObject data = job.getJSONObject("Data");
-            String suggestion = data.getString("Suggestion");
-            log.info("check success...{}:{} ", videoId, suggestion);
-            if (!suggestion.equals("pass")) {
-                activity.setCheckStatus(AliyunGreenService.FAIL);
-                corgiActivityService.updateCorgiActivityStatus(activity);
-                corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+            //判断人工审核
+            if (data == null) {
+                String suggestion = job.getString("AuditStatus");
+                if ("Normal".equals(suggestion)) {
+                    activity.setCheckStatus(AliyunGreenService.PASS);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
+                    corgiUserActivityService.changeActivityCreator(activity.getId(), "normal");
+                } else {
+                    activity.setCheckStatus(AliyunGreenService.FAIL);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
+                    corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                }
+            } else {
+                String suggestion = data.getString("Suggestion");
+                log.info("check success...{}:{} ", videoId, suggestion);
+                if (!suggestion.equals("pass")) {
+                    activity.setCheckStatus(AliyunGreenService.FAIL);
+                    corgiActivityService.updateCorgiActivityStatus(activity);
+                    corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                }
             }
         }
         return new JsonResult();
@@ -273,11 +290,11 @@ public class CorgiFeedController extends BaseController {
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
-//                if ("2021/02/07".compareTo(activity.getCreateTime()) > 0) {
-//                    it.remove();
-//                    continue;
-//                }
                 if (StringUtils.isEmpty(activity.getUserId()) || (!userId.equals(activity.getUserId()) && "fail".equals(activity.getCheckStatus()))) {
+                    it.remove();
+                    continue;
+                }
+                if (!CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) && CollectionUtils.isEmpty(activity.getPics())) {
                     it.remove();
                     continue;
                 }
@@ -286,10 +303,10 @@ public class CorgiFeedController extends BaseController {
                     continue;
                 }
                 activity.setCurrentTime(now);
-                Integer height = 0;
-                Integer width = 0;
+                Long height = activity.getHeight();
+                Long width = activity.getWidth();
 
-                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();

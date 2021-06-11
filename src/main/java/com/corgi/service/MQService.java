@@ -27,6 +27,14 @@ public class MQService {
         }
     }
 
+    public void sendSilentMessage(PushMessage pushMessage){
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.SILENT_PUSH_QUEUE, pushMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     public void sendBarActivityMessage(PushMessage pushMessage) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.BAR_ACTIVITY_QUEUE, pushMessage);

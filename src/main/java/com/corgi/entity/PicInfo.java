@@ -7,6 +7,6 @@ import lombok.Data;
  */
 @Data
 public class PicInfo {
-    Integer height = 0;
-    Integer width = 0;
+    Long height = 0L;
+    Long width = 0L;
 }

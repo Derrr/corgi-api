@@ -66,8 +66,8 @@ public class CorgiUserController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiToolService corgiToolService;
-    @Reference
-    private CorgiUserMatchService corgiUserMatchService;
+    //@Reference
+    //private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
@@ -417,6 +417,14 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/visit")
     public JsonResult visit(@RequestParam("userId") String userId) {
         corgiVisitService.visit(getUserId(), userId);
+        HashMap extra = new HashMap();
+        extra.put("type", "203");
+        mqService.sendSilentMessage(PushMessage.builder()
+                .sourceUserId(getUserId())
+                .targetUserId(userId)
+                .message("有人访问你啦")
+                .extra(extra)
+                .build());
         return new JsonResult();
     }
 
@@ -792,7 +800,7 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         String LockKey = "call_user_city_lock_" + userId;
-        if (!corgiUtilService.tryLock(LockKey, "1", 2L)) {
+        if (!corgiUtilService.tryLock(LockKey, "1", 20L, TimeUnit.SECONDS)) {
             return new JsonResult();
         }
         String key = getCallUserCityKey(userId);

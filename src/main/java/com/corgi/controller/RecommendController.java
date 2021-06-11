@@ -78,9 +78,9 @@ public class RecommendController extends BaseController {
 
     @GetMapping("get_city_user")
     public JsonResult getCityUser(@RequestParam("city") String city) {
-        List<UserProfile> result = corgiUserRecommendService.getInfluencerByCity(null, city, 12);
+        List<UserProfile> result = corgiUserRecommendService.getCityPopulate(null, city, 1, 12);
         if (result.size() < 12) {
-            List<UserProfile> cityResult = corgiUserRecommendService.getCityPopulate(null, city, 1, 12 - result.size());
+            List<UserProfile> cityResult = corgiUserRecommendService.getInfluencerByCity(null, city, 12 - result.size());
             result.addAll(cityResult);
         }
         return new JsonResult(result);

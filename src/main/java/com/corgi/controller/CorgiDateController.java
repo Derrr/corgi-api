@@ -10,6 +10,7 @@ import com.corgi.entity.DateDetail;
 import com.corgi.entity.UserDate;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
+import com.corgi.user.api.CorgiEvaluationService;
 import com.corgi.user.api.CorgiUserDateService;
 import com.corgi.user.api.CorgiUserFollowService;
 import com.corgi.user.api.CorgiUserService;
@@ -51,6 +52,8 @@ public class CorgiDateController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiUserDateService corgiUserDateService;
+    @Reference
+    private CorgiEvaluationService corgiEvaluationService;
 
     @PostMapping("hunt")
     public JsonResult searchDate(@RequestBody UserDate userDate) {
@@ -199,6 +202,15 @@ public class CorgiDateController extends BaseController {
     @GetMapping("get_user_apply")
     public JsonResult getApply(@RequestParam("userId") String userId) {
         CorgiDateApply corgiDate = corgiUserDateService.getUserApply(userId, getUserId());
+        if (corgiDate == null || CorgiDateApply.FINISH.equals(corgiDate.getStatus())) {
+            return new JsonResult();
+        }
+        if (CorgiDateApply.AGREE.equals(corgiDate.getStatus())) {
+            List<UserEvaluation> userEvaluations = corgiEvaluationService.getDateEvaluation(corgiDate.getId() + "", getUserId());
+            if (CollectionUtils.isNotEmpty(userEvaluations)) {
+                return new JsonResult();
+            }
+        }
         return new JsonResult(corgiDate);
     }
 
@@ -235,13 +247,15 @@ public class CorgiDateController extends BaseController {
                 detail.setUserId(getUserId());
                 detail.setNickname("已注销");
             }
-            HashMap<String,String> extra = new HashMap<>();
-            extra.put("type","601");
+            HashMap<String, String> extra = new HashMap<>();
+            extra.put("type", "601");
             PushMessage pushMessage = PushMessage.builder()
                     .sourceUserId("datehelper")
-                    .message(this.getResult(CorgiDateApply.APPLY, getUserId(), getUserId()))
+                    .message(this.getResult(CorgiDateApply.APPLY, getUserId(), corgiDateApply))
                     .extra(extra)
                     .targetUserId(corgiDateApply.getApprovalUserId()).build();
+            mqService.sendDate(pushMessage);
+            pushMessage.setTargetUserId(corgiDateApply.getApplyUserId());
             mqService.sendDate(pushMessage);
             return new JsonResult(apply);
         } finally {
@@ -253,11 +267,11 @@ public class CorgiDateController extends BaseController {
     public JsonResult approve(@RequestBody CorgiDateApply corgiDateApply) {
         corgiDateApply.setOperator(getUserId());
         CorgiDateApply apply = corgiUserDateService.approve(corgiDateApply);
-        HashMap<String,String> extra = new HashMap<>();
-        extra.put("type","602");
+        HashMap<String, String> extra = new HashMap<>();
+        extra.put("type", "602");
         PushMessage pushMessage = PushMessage.builder()
                 .sourceUserId("datehelper")
-                .message(this.getResult(apply.getStatus(), getUserId(), apply.getOperator()))
+                .message(this.getResult(apply.getStatus(), getUserId(), apply))
                 .extra(extra)
                 .targetUserId(corgiDateApply.getApprovalUserId()).build();
         mqService.sendDate(pushMessage);
@@ -274,7 +288,7 @@ public class CorgiDateController extends BaseController {
     public JsonResult getApply(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<CorgiDateApply> applies = corgiUserDateService.getApplies(getUserId(), page, pageSize);
         for (CorgiDateApply apply : applies) {
-            apply.setResult(this.getResult(apply.getStatus(), getUserId(), apply.getOperator()));
+            apply.setResult(this.getResult(apply.getStatus(), getUserId(), apply));
         }
         return new JsonResult(applies);
     }
@@ -431,21 +445,25 @@ public class CorgiDateController extends BaseController {
         return new JsonResult(dateDetail);
     }
 
-    private String getResult(String status, String userId, String operator) {
+    private String getResult(String status, String userId, CorgiDateApply apply) {
         if (CorgiDateApply.APPLY.equals(status)) {
-            UserDetail detail = corgiUserService.getUserDetailBasic(operator);
-            String name = operator;
+            if (userId.equals(apply.getApplyUserId())) {
+                UserDetail detail = corgiUserService.getUserDetailBasic(apply.getApprovalUserId());
+                return "你申请参与了 " + detail.getNickname() + " 的约会";
+            }
+            UserDetail detail = corgiUserService.getUserDetailBasic(apply.getApplyUserId());
+            String name = apply.getApprovalUserId();
             if (detail != null) {
                 name = detail.getNickname();
             }
             return name + " 申请参与你的约会，去了解下吧.";
         }
         if (CorgiDateApply.AGREE.equals(status)) {
-            if (userId.equals(operator)) {
+            if (userId.equals(apply.getApprovalUserId())) {
                 return "约会已确认记得按时赴约哦";
             } else {
-                UserDetail detail = corgiUserService.getUserDetailBasic(operator);
-                String name = operator;
+                UserDetail detail = corgiUserService.getUserDetailBasic(apply.getApprovalUserId());
+                String name = apply.getApprovalUserId();
                 if (detail != null) {
                     name = detail.getNickname();
                 }
@@ -453,9 +471,9 @@ public class CorgiDateController extends BaseController {
             }
         }
         if (CorgiDateApply.CANCEL.equals(status)) {
-            if (userId.equals(operator)) {
+            if (userId.equals(apply.getOperator())) {
                 return "已取消该申请，去看看其他人吧。";
-            } else if ("system".equals(operator)) {
+            } else if ("system".equals(apply.getOperator())) {
                 return "超时未确认已自动取消，去看看其他约会吧。";
             } else {
                 return "对方取消了该约会，去看看其他约会吧。";

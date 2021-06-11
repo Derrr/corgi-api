@@ -2,10 +2,8 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
-import com.corgi.user.api.CorgiBannerService;
 import com.corgi.user.api.CorgiOpenPageService;
 import com.corgi.user.api.CorgiUserService;
-import com.corgi.user.entity.CorgiBanner;
 import com.corgi.user.entity.CorgiOpenPage;
 import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;

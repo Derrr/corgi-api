@@ -2,8 +2,11 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityFeedService;
+import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.VlogDetail;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.CorgiVlog;
 import com.corgi.user.entity.CorgiVlogHot;
@@ -24,7 +27,11 @@ public class CorgiHotVlogController extends BaseController {
     @Reference
     private CorgiVlogService corgiVlogService;
     @Reference
+    private CorgiPicService corgiPicService;
+    @Reference
     private CorgiActivityFeedService corgiActivityFeedService;
+    @Reference
+    private CorgiActivityService corgiActivityService;
 
     @GetMapping("list")
     public JsonResult listHot(@RequestParam(required = false, name = "status") String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
@@ -64,8 +71,12 @@ public class CorgiHotVlogController extends BaseController {
     public JsonResult addHot(@RequestBody CorgiVlogHot corgiVlogHot) {
         corgiVlogHot.setViewCount(null);
         corgiVlogHot.setLikeCount(null);
+        if (corgiVlogHot.getExpectView() == null || corgiVlogHot.getExpectView() <= 0) {
+            corgiVlogHot.setExpectView(3000);
+        }
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
+        corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         return new JsonResult();
     }
 
@@ -78,7 +89,9 @@ public class CorgiHotVlogController extends BaseController {
         detail.setExpectView(hot.getExpectView());
         detail.setCtime(hot.getCtime());
         detail.setStatus(hot.getStatus());
-        detail.setActivityDetail(corgiActivityFeedService.getActivityById(hot.getActivityId()));
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(hot.getActivityId());
+        activity.setPics(corgiPicService.getActivityPic(activity.getId()));
+        detail.setActivityDetail(activity);
         return detail;
     }
 }
