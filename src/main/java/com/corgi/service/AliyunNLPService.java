@@ -48,11 +48,31 @@ public class AliyunNLPService {
             Double neg = result.getDouble("negative_prob");
             Double neu = result.getDouble("neutral_prob");
             log.info("tag:{} pos:{}, neu:{}, neu:{} ", text, pos, neg, neu);
-            return (pos - neg + 1) * 50;
+            return getPosScore(pos) * pos + 75.0 * neu + getNegScore(neg) * neg;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    private Double getPosScore(Double pos) {
+        if (pos > 0.999) {
+            return 100.0;
+        }
+        if (pos < 0.8) {
+            return 90.0;
+        }
+        return 85.0 - 5 * Math.log10(1.0 - pos);
+    }
+
+    private Double getNegScore(Double neg) {
+        if (neg > 0.999) {
+            return 40.0;
+        }
+        if (neg < 0.8) {
+            return 60.0;
+        }
+        return 70.0 + 10 * Math.log10(1.0 - neg);
     }
 
 }
