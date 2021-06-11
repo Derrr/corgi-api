@@ -162,9 +162,9 @@ public class EvaluateController extends BaseController {
         } else {
             userEvaluation.setCheckStatus(AliyunGreenService.CHECK);
         }
-        Double score = aliyunNLPService.getSaChe(userEvaluation.getTag());
+        Double score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
         if (score == null) {
-            score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
+            score = aliyunNLPService.getSaChe(userEvaluation.getTag());
         }
         userEvaluation.setScore(score);
         String evaluationId = corgiEvaluationService.addEvaluation(userEvaluation);
