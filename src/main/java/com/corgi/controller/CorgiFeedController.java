@@ -294,6 +294,10 @@ public class CorgiFeedController extends BaseController {
                     it.remove();
                     continue;
                 }
+                if (!CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) && CollectionUtils.isEmpty(activity.getPics())) {
+                    it.remove();
+                    continue;
+                }
                 if (!userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     it.remove();
                     continue;

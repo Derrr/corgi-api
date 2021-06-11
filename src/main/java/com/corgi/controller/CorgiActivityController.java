@@ -1261,6 +1261,14 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
+                if (!CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) && CollectionUtils.isEmpty(activity.getPics())) {
+                    it.remove();
+                    continue;
+                }
+                if (!userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                    it.remove();
+                    continue;
+                }
                 activity.setCurrentTime(now);
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
@@ -1344,7 +1352,8 @@ public class CorgiActivityController extends BaseController {
         return true;
     }
 
-    private List<CorgiActivity> mergeActivity(List<CorgiActivity> activityList, List<CorgiActivity> businessList) {
+    private List<CorgiActivity> mergeActivity
+            (List<CorgiActivity> activityList, List<CorgiActivity> businessList) {
         List<Integer> takenPositions = new ArrayList<>();
         Random random = new Random();
         int bound = activityList.size();
