@@ -251,10 +251,11 @@ public class CorgiDateController extends BaseController {
             extra.put("type", "601");
             PushMessage pushMessage = PushMessage.builder()
                     .sourceUserId("datehelper")
-                    .message(this.getResult(CorgiDateApply.APPLY, getUserId(), corgiDateApply))
+                    .message(this.getResult(CorgiDateApply.APPLY, corgiDateApply.getApprovalUserId(), corgiDateApply))
                     .extra(extra)
                     .targetUserId(corgiDateApply.getApprovalUserId()).build();
             mqService.sendDate(pushMessage);
+            pushMessage.setMessage(this.getResult(CorgiDateApply.APPLY, getUserId(), corgiDateApply));
             pushMessage.setTargetUserId(corgiDateApply.getApplyUserId());
             mqService.sendDate(pushMessage);
             return new JsonResult(apply);
