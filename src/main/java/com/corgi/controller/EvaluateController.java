@@ -143,9 +143,9 @@ public class EvaluateController extends BaseController {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
             }
             String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
-//            if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
-//                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
-//            }
+            if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
+            }
             String evaluationId = this.addUserEvaluation(userEvaluation);
             redisTemplate.opsForValue().set(friendKey, evaluationId, 23L, TimeUnit.HOURS);
         }
@@ -195,10 +195,10 @@ public class EvaluateController extends BaseController {
             return new JsonResult("0");
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userId;
-//        String id = redisTemplate.opsForValue().get(friendKey);
-//        if (!StringUtils.isEmpty(id)) {
-//            return new JsonResult("0");
-//        }
+        String id = redisTemplate.opsForValue().get(friendKey);
+        if (!StringUtils.isEmpty(id)) {
+            return new JsonResult("0");
+        }
         return new JsonResult("1");
     }
 
@@ -329,8 +329,8 @@ public class EvaluateController extends BaseController {
             return new JsonResult(corgiEvaluationService.countByTag(userEvaluation.getTag(), userEvaluation.getUserId()));
         }
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
-//        String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
-//        if (oldEvaluationId != null) {
+        String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
+        if (oldEvaluationId != null) {
 //            UserEvaluation oldEvaluation = corgiEvaluationService.getEvaluationById(oldEvaluationId);
 //            if (oldEvaluation != null && oldEvaluation.getEvaluatorId().equals(getUserId())) {
 //                if (userEvaluation.getTag().equals(oldEvaluation.getTag())) {
@@ -339,8 +339,8 @@ public class EvaluateController extends BaseController {
 //                    return new JsonResult(corgiEvaluationService.countByTag(userEvaluation.getTag(), userEvaluation.getUserId()));
 //                }
 //            }
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
-//        }
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
+        }
         int match = corgiUserFollowService.isFollowed(getUserId(), userEvaluation.getUserId());
         if (match < 3) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
