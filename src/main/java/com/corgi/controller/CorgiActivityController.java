@@ -765,7 +765,7 @@ public class CorgiActivityController extends BaseController {
         CorgiActivity activity = corgiActivities.get(0);
         List<CorgiActivity> activities = new ArrayList<>();
         activities.add(corgiActivities.get(0));
-        List<CorgiActivityDetail> details = convertDetail(activities, userId);
+        List<CorgiActivityDetail> details = convertDetail(activities, userId, true);
         if (CollectionUtils.isEmpty(details)) {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
@@ -899,8 +899,16 @@ public class CorgiActivityController extends BaseController {
         query.setTopics(Arrays.asList(topic));
         List<String> activityIds = corgiUserActivityService.getHeatActivity(query, activityQuery.getPage(), activityQuery.getPageSize());
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        List<CorgiActivity> result = new ArrayList<>();
+        if (activities != null) {
+            for (CorgiActivity activity : activities) {
+                if (!AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                    result.add(activity);
+                }
+            }
+        }
         CorgiTopic topicDetail = corgiToolService.getTopic(topic);
-        return new JsonResult(new CorgiTopicList(topicDetail, activities));
+        return new JsonResult(new CorgiTopicList(topicDetail, result));
     }
 
 
@@ -1249,8 +1257,11 @@ public class CorgiActivityController extends BaseController {
         return likedActivities;
     }
 
-
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
+        return convertDetail(activityList, userId, false);
+    }
+
+    private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId, boolean showNotGood) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
@@ -1265,7 +1276,7 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                if (!showNotGood && !userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     it.remove();
                     continue;
                 }
