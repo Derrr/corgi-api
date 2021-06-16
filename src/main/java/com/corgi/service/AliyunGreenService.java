@@ -156,7 +156,7 @@ public class AliyunGreenService {
             return userDetail;
         }
         //corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
-        //userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+        userDetail.setAvatarCheckStatus(corgiPic.getStatus());
         userDetail.setAvatarDataId(corgiPic.getDataId());
         return userDetail;
     }
