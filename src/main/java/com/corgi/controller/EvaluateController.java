@@ -363,7 +363,7 @@ public class EvaluateController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping
+    @GetMapping("get_tags")
     public JsonResult getTags(@RequestParam("userId") String userId) {
         return new JsonResult(corgiEvaluationService.getTags(userId));
     }
