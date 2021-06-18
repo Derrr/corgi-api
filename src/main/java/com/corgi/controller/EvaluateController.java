@@ -315,7 +315,6 @@ public class EvaluateController extends BaseController {
         if (userEvaluation == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论不存在");
         }
-        userEvaluation.setStatus("created");
         userEvaluation.setType("friend");
         if (getUserId().equals(userEvaluation.getUserId())) {
             Integer count = corgiEvaluationService.countByUser(getUserId(), getUserId());

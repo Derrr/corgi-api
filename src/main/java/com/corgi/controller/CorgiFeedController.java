@@ -19,12 +19,14 @@ import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -61,6 +63,8 @@ public class CorgiFeedController extends BaseController {
     private AliyunGreenService aliyunGreenService;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
@@ -68,6 +72,8 @@ public class CorgiFeedController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        String key = "get_feeds-" + userId;
+        redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS);
         if (size > 10) {
             size = 5;
         }
