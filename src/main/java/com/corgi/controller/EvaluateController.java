@@ -312,10 +312,9 @@ public class EvaluateController extends BaseController {
     @GetMapping("like")
     public JsonResult like(@RequestParam("evaluationId") String evaluationId) {
         UserEvaluation userEvaluation = corgiEvaluationService.getEvaluationById(evaluationId);
-        if (userEvaluation == null) {
+        if (userEvaluation == null || "deleted".equals(userEvaluation.getStatus())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论不存在");
         }
-        userEvaluation.setStatus("created");
         userEvaluation.setType("friend");
         if (getUserId().equals(userEvaluation.getUserId())) {
             Integer count = corgiEvaluationService.countByUser(getUserId(), getUserId());
