@@ -29,6 +29,7 @@ import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.MailMessage;
 import com.corgi.entity.StorageToken;
+import com.corgi.entity.UserShare;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
@@ -461,6 +462,7 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user_position")
     public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) throws PermissionException {
+        log.info("updating version:{} ", getVersion());
         HashMap result = new HashMap();
         result.put("freq", 1);
         try {
@@ -468,6 +470,7 @@ public class CorgiUserController extends BaseController {
             if (!StringUtils.isEmpty(jwt)) {
                 DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
                 String jwtUserId = decodedJWT.getClaim("userId").asString();
+                log.info("updating user:{} ", jwtUserId);
                 if (JWTUtils.ADMIN_ID.equals(jwtUserId)) {
                     result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
@@ -475,7 +478,7 @@ public class CorgiUserController extends BaseController {
                 } else {
                     UserLogin u = corgiUserService.getUserLogin(jwtUserId);
                     if (u == null || StringUtils.isEmpty(u.getUserId())) {
-                        throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "用户不存在");
+                        throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "用户不存在:" + jwtUserId + " v:" + userPosition.getVersion());
                     }
                     Date expireDate = decodedJWT.getExpiresAt();
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {
@@ -649,6 +652,17 @@ public class CorgiUserController extends BaseController {
                                     @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
         return new JsonResult(userProfiles);
+    }
+
+    @GetMapping("get_share_user")
+    public JsonResult getShareUser(@RequestParam("userId") String userId, @RequestParam(required = false, name = "name") String name,
+                                   @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<UserProfile> userProfiles = corgiUserFollowService.getShareUserByPage(userId, name, page, pageSize);
+        if (StringUtils.isNotEmpty(name)) {
+            return new JsonResult(groupByShare(userProfiles, userId));
+        } else {
+            return new JsonResult(userProfiles);
+        }
     }
 
     @GetMapping("get_match_user")
@@ -945,6 +959,22 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(UserDetail.NO_FACE);
+    }
+
+    private UserShare groupByShare(List<UserProfile> userProfiles, String userId) {
+        UserShare share = new UserShare();
+        if (CollectionUtils.isEmpty(userProfiles)) {
+            return share;
+        }
+        for (UserProfile userProfile : userProfiles) {
+            int follow = corgiUserFollowService.isFollowed(userId, userProfile.getUserId());
+            if (follow >= 3) {
+                share.getMatchUsers().add(userProfile);
+            } else {
+                share.getFollowUsers().add(userProfile);
+            }
+        }
+        return share;
     }
 
 

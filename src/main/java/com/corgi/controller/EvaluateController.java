@@ -312,7 +312,7 @@ public class EvaluateController extends BaseController {
     @GetMapping("like")
     public JsonResult like(@RequestParam("evaluationId") String evaluationId) {
         UserEvaluation userEvaluation = corgiEvaluationService.getEvaluationById(evaluationId);
-        if (userEvaluation == null) {
+        if (userEvaluation == null || "deleted".equals(userEvaluation.getStatus())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论不存在");
         }
         userEvaluation.setType("friend");
@@ -362,7 +362,7 @@ public class EvaluateController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping
+    @GetMapping("get_tags")
     public JsonResult getTags(@RequestParam("userId") String userId) {
         return new JsonResult(corgiEvaluationService.getTags(userId));
     }
