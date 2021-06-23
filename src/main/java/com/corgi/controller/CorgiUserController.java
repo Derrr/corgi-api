@@ -654,16 +654,16 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(userProfiles);
     }
 
-    @GetMapping("get_share_user")
-    public JsonResult getShareUser(@RequestParam("userId") String userId, @RequestParam(required = false, name = "name") String name,
-                                   @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<UserProfile> userProfiles = corgiUserFollowService.getShareUserByPage(userId, name, page, pageSize);
-        if (StringUtils.isNotEmpty(name)) {
-            return new JsonResult(groupByShare(userProfiles, userId));
-        } else {
-            return new JsonResult(userProfiles);
-        }
-    }
+//    @GetMapping("get_share_user")
+//    public JsonResult getShareUser(@RequestParam("userId") String userId, @RequestParam(required = false, name = "name") String name,
+//                                   @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+//        List<UserProfile> userProfiles = corgiUserFollowService.getShareUserByPage(userId, name, page, pageSize);
+//        if (StringUtils.isNotEmpty(name)) {
+//            return new JsonResult(groupByShare(userProfiles, userId));
+//        } else {
+//            return new JsonResult(userProfiles);
+//        }
+//    }
 
     @GetMapping("get_match_user")
     public JsonResult getMatchUser(@RequestParam("userId") String userId, @RequestParam("type") String type,
