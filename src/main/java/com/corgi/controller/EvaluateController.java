@@ -340,10 +340,11 @@ public class EvaluateController extends BaseController {
 //            }
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
         }
-//        int match = corgiUserFollowService.isFollowed(getUserId(), userEvaluation.getUserId());
-//        if (match < 3) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
-//        }
+        int match = corgiUserFollowService.isFollowed(getUserId(), userEvaluation.getUserId());
+        if (match < 3) {
+            userEvaluation.setStatus("anonymous");
+            //return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
+        }
         if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
         }
