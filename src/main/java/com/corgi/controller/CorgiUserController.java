@@ -395,7 +395,8 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userPic.setUserId(getUserId());
         }
-        if(userPic != null){
+        List<UserPic> pics = corgiPicService.getUserPic(userPic.getUserId());
+        if(CollectionUtils.isEmpty(pics) && userPic != null){
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "无法修改");
         }
         List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), userPic.getUserId(), CheckPic.USER);
