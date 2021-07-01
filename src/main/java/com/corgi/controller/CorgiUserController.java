@@ -261,9 +261,6 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userDetail.setUserId(getUserId());
         }
-        if (userDetail != null) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "无法修改");
-        }
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
@@ -379,9 +376,6 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userPic.setUserId(getUserId());
         }
-        if(userPic != null){
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "无法修改");
-        }
         if (StringUtils.isEmpty(userPic.getUserId())) {
             userPic.setUserId(getUserId());
         }
@@ -394,10 +388,6 @@ public class CorgiUserController extends BaseController {
     public JsonResult addUserPic(@RequestBody UserPic userPic) {
         if (hasUserId()) {
             userPic.setUserId(getUserId());
-        }
-        List<UserPic> pics = corgiPicService.getUserPic(userPic.getUserId());
-        if(!CollectionUtils.isEmpty(pics)){
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "无法修改");
         }
         List<UserPic> userPics = (List<UserPic>) aliyunGreenService.checkPic(Arrays.asList(userPic), userPic.getUserId(), CheckPic.USER);
         String result = corgiPicService.addUserPic(userPics.get(0));
