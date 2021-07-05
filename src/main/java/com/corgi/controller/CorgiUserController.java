@@ -290,9 +290,6 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userDetail.setUserId(getUserId());
         }
-        if (userDetail != null) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "无法修改");
-        }
         if (StringUtils.isEmpty(userDetail.getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "userId为空");
         }
