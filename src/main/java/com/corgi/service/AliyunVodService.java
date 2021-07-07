@@ -3,6 +3,7 @@ package com.corgi.service;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.aliyuncs.vod.model.v20170321.*;
@@ -34,6 +35,22 @@ public class AliyunVodService {
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
         this.managementClient = new DefaultAcsClient(profile);
+    }
+
+    public String getCoverUrl(String videoId) {
+        ListSnapshotsRequest request = new ListSnapshotsRequest();
+        request.setVideoId("71bcceccef46417c9d9bd04c6dd074eb");
+        try {
+            ListSnapshotsResponse response = this.managementClient.getAcsResponse(request);
+            return response.getMediaSnapshot().getSnapshots().get(0).getUrl();
+        } catch (ClientException e) {
+            log.error("ErrCode:" + e.getErrCode());
+            log.error("ErrMsg:" + e.getErrMsg());
+            log.error("RequestId:" + e.getRequestId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return "";
     }
 
     public GetVideoInfoResponse getVideoUrl(String videoId) {
