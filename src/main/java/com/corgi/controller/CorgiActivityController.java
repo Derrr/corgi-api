@@ -269,6 +269,18 @@ public class CorgiActivityController extends BaseController {
             corgiVlogService.addHotVlog(corgiVlogHot);
             corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
+//        else {
+//            Double avgCount = corgiLikeService.getAvgLike(getUserId());
+//            if (avgCount > 1) {
+//                CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
+//                corgiVlogHot.setViewCount(null);
+//                corgiVlogHot.setLikeCount(0);
+//                corgiVlogHot.setActivityId(activity.getId());
+//                corgiVlogHot.setExpectView(new Double(Math.pow(avgCount, 1.5) * 10).intValue());
+//                corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
+//                corgiVlogService.addHotVlog(corgiVlogHot);
+//            }
+//        }
         HashMap extra = new HashMap();
         extra.put("type", "201");
         mqService.sendSilentMessage(PushMessage.builder()
