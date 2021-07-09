@@ -217,7 +217,7 @@ public class CorgiActivityController extends BaseController {
                 GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
                 if (infoResponse != null && infoResponse.getVideo() != null) {
                     if (StringUtils.isEmpty(activity.getCoverUrl())) {
-                        activity.setCoverUrl(aliyunVodService.getCoverUrl(activity.getVideoId()));
+                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL());
                     }
                     if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
                         activity.setCheckStatus(AliyunGreenService.FAIL);

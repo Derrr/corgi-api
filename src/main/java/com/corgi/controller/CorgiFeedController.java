@@ -165,36 +165,41 @@ public class CorgiFeedController extends BaseController {
             return new JsonResult();
         }
         CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
+        String eventType = job.getString("EventType");
         String status = job.getString("Status");
-        if ("fail".equals(status)) {
-            String code = job.getString("Code");
-            String message = job.getString("Message");
-            log.info("check fail...{}:{} ", videoId, code + message);
-            activity.setCheckStatus(AliyunGreenService.CHECK);
-            corgiActivityService.updateCorgiActivityStatus(activity);
-        } else {
-            JSONObject data = job.getJSONObject("Data");
-            //判断人工审核
-            if (data == null) {
-                String suggestion = job.getString("AuditStatus");
-                if ("Normal".equals(suggestion)) {
-                    activity.setCheckStatus(AliyunGreenService.PASS);
-                    corgiActivityService.updateCorgiActivityStatus(activity);
-                    corgiUserActivityService.changeActivityCreator(activity.getId(), "normal");
-                } else {
-                    activity.setCheckStatus(AliyunGreenService.FAIL);
-                    corgiActivityService.updateCorgiActivityStatus(activity);
-                    corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
-                }
+        if ("AIMediaAuditComplete".equals(eventType)) {
+            if ("fail".equals(status)) {
+                String code = job.getString("Code");
+                String message = job.getString("Message");
+                log.info("check fail...{}:{} ", videoId, code + message);
+                activity.setCheckStatus(AliyunGreenService.CHECK);
+                corgiActivityService.updateCorgiActivityStatus(activity);
             } else {
-                String suggestion = data.getString("Suggestion");
-                log.info("check success...{}:{} ", videoId, suggestion);
-                if (!suggestion.equals("pass")) {
-                    activity.setCheckStatus(AliyunGreenService.FAIL);
-                    corgiActivityService.updateCorgiActivityStatus(activity);
-                    corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                JSONObject data = job.getJSONObject("Data");
+                //判断人工审核
+                if (data == null) {
+                    String suggestion = job.getString("AuditStatus");
+                    if ("Normal".equals(suggestion)) {
+                        activity.setCheckStatus(AliyunGreenService.PASS);
+                        corgiActivityService.updateCorgiActivityStatus(activity);
+                        corgiUserActivityService.changeActivityCreator(activity.getId(), "normal");
+                    } else {
+                        activity.setCheckStatus(AliyunGreenService.FAIL);
+                        corgiActivityService.updateCorgiActivityStatus(activity);
+                        corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                    }
+                } else {
+                    String suggestion = data.getString("Suggestion");
+                    log.info("check success...{}:{} ", videoId, suggestion);
+                    if (!suggestion.equals("pass")) {
+                        activity.setCheckStatus(AliyunGreenService.FAIL);
+                        corgiActivityService.updateCorgiActivityStatus(activity);
+                        corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                    }
                 }
             }
+        } else {
+
         }
         return new JsonResult();
     }
