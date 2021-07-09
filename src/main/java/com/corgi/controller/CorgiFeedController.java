@@ -1,6 +1,7 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.common.comm.ResponseMessage;
 import com.aliyuncs.vod.model.v20170321.GetAIMediaAuditJobResponse;
@@ -164,10 +165,11 @@ public class CorgiFeedController extends BaseController {
         if (vlog == null) {
             return new JsonResult();
         }
-        CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
+
         String eventType = job.getString("EventType");
         String status = job.getString("Status");
-        if ("AIMediaAuditComplete".equals(eventType)) {
+        if ("AIMediaAuditComplete".equals(eventType) || "CreateAuditComplete".equals(eventType)) {
+            CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
             if ("fail".equals(status)) {
                 String code = job.getString("Code");
                 String message = job.getString("Message");
@@ -198,8 +200,14 @@ public class CorgiFeedController extends BaseController {
                     }
                 }
             }
-        } else {
-
+        } else if ("SnapshotComplete".equals(eventType)) {
+            if ("success".equals(status)) {
+                JSONArray snapshots = job.getJSONArray("Snapshots");
+                String cover = snapshots.getString(0).split("\\?Expires")[0];
+                if (!StringUtils.isEmpty(cover)) {
+                    corgiActivityService.updateByColumnn(vlog.getActivityId(), "coverUrl", cover);
+                }
+            }
         }
         return new JsonResult();
     }
