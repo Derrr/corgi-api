@@ -39,7 +39,7 @@ public class AliyunVodService {
 
     public String getCoverUrl(String videoId) {
         ListSnapshotsRequest request = new ListSnapshotsRequest();
-        request.setVideoId("71bcceccef46417c9d9bd04c6dd074eb");
+        request.setVideoId(videoId);
         try {
             ListSnapshotsResponse response = this.managementClient.getAcsResponse(request);
             return response.getMediaSnapshot().getSnapshots().get(0).getUrl();
