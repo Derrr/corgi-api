@@ -720,7 +720,7 @@ public class CorgiUserController extends BaseController {
 
 
     @GetMapping("update_user_tag")
-    public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam("tags") List<String> tags) {
+    public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam(required = false, name = "tags") List<String> tags) {
         if (hasUserId()) {
             userId = getUserId();
         }
