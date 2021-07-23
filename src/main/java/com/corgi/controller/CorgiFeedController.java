@@ -201,6 +201,7 @@ public class CorgiFeedController extends BaseController {
                 }
             }
         } else if ("SnapshotComplete".equals(eventType)) {
+            log.info("status:{} ", status);
             if ("success".equals(status)) {
                 JSONArray snapshots = job.getJSONArray("Snapshots");
                 String cover = snapshots.getString(0).split("\\?Expires")[0];
