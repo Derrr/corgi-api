@@ -207,7 +207,6 @@ public class CorgiFeedController extends BaseController {
             if ("success".equals(status)) {
                 JSONArray snapshots = job.getJSONArray("Snapshots");
                 String cover = snapshots.getString(0).split("\\?Expires")[0];
-                log.info("cover:{} ", cover);
                 if (!StringUtils.isEmpty(cover)) {
                     corgiActivityService.updateByColumnn(vlog.getActivityId(), "coverUrl", cover);
                 }
