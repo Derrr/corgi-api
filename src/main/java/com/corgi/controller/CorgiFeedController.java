@@ -168,6 +168,7 @@ public class CorgiFeedController extends BaseController {
 
         String eventType = job.getString("EventType");
         String status = job.getString("Status");
+        log.info("eventType:{} ", eventType);
         if ("AIMediaAuditComplete".equals(eventType) || "CreateAuditComplete".equals(eventType)) {
             CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
             if ("fail".equals(status)) {
