@@ -161,6 +161,9 @@ public class CorgiFeedController extends BaseController {
         log.info("callback:{} ", jobStr);
         JSONObject job = JSONObject.parseObject(jobStr);
         String videoId = job.getString("MediaId");
+        if (StringUtils.isEmpty(videoId)) {
+            videoId = job.getString("VideoId");
+        }
         CorgiVlog vlog = corgiVlogService.getVlogByVideoId(videoId);
         if (vlog == null) {
             return new JsonResult();
@@ -168,7 +171,6 @@ public class CorgiFeedController extends BaseController {
 
         String eventType = job.getString("EventType");
         String status = job.getString("Status");
-        log.info("eventType:{} ", eventType);
         if ("AIMediaAuditComplete".equals(eventType) || "CreateAuditComplete".equals(eventType)) {
             CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
             if ("fail".equals(status)) {
@@ -202,11 +204,9 @@ public class CorgiFeedController extends BaseController {
                 }
             }
         } else if ("SnapshotComplete".equals(eventType)) {
-            log.info("status:{} ", status);
             if ("success".equals(status)) {
                 JSONArray snapshots = job.getJSONArray("Snapshots");
                 String cover = snapshots.getString(0).split("\\?Expires")[0];
-                log.info("cover:{} ", cover);
                 if (!StringUtils.isEmpty(cover)) {
                     corgiActivityService.updateByColumnn(vlog.getActivityId(), "coverUrl", cover);
                 }
