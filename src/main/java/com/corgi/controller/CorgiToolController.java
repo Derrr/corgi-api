@@ -463,6 +463,7 @@ public class CorgiToolController extends BaseController {
         if (version.get("type") != null) {
             type = version.get("type").toString();
         }
+        log.info("version:{}", version);
         redisTemplate.opsForHash().putAll(VERSION_KEY + type, version);
         return new JsonResult();
     }
