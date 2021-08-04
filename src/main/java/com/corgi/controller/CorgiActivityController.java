@@ -402,8 +402,16 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_comments")
-    public JsonResult getComment(@RequestParam("activityId") String activityId) {
-        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, getUserId());
+    public JsonResult getComment(@RequestParam("activityId") String activityId,
+                                 @RequestParam(required = false, name = "commentId") Integer commentId,
+                                 @RequestParam(required = false, name = "size") Integer size) {
+        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, commentId, size, getUserId());
+        return new JsonResult(activityComments);
+    }
+
+    @GetMapping("get_hot_comments")
+    public JsonResult getHotComment(@RequestParam("activityId") String activityId) {
+        List<ActivityComment> activityComments = corgiCommentService.getHotComment(activityId, getUserId());
         return new JsonResult(activityComments);
     }
 

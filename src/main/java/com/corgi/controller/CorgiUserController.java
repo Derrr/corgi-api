@@ -285,6 +285,18 @@ public class CorgiUserController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("/default_nickname")
+    public JsonResult getDefaultNickname() {
+        String nickname = getNickname();
+        for (int i = 0; i < 5; i++) {
+            if (corgiUserService.countUserNickname(nickname) == 0) {
+                break;
+            }
+            nickname = getNickname();
+        }
+        return new JsonResult(nickname);
+    }
+
     @PostMapping("/update_nickname")
     public JsonResult updateNickname(@RequestBody UserDetail userDetail) {
         if (hasUserId()) {
@@ -998,6 +1010,14 @@ public class CorgiUserController extends BaseController {
             return "偏胖";
         }
         return group;
+    }
+
+    private String getNickname() {
+        StringBuffer sb = new StringBuffer("小可_");
+        for (int i = 0; i < 5; i++) {
+            sb.append(Math.round(Math.random() * 25 + 65));
+        }
+        return sb.toString();
     }
 
     public static List<String> changeGroupList(List<String> groups) {
