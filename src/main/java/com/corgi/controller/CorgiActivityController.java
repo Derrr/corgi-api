@@ -403,9 +403,9 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_comments")
     public JsonResult getComment(@RequestParam("activityId") String activityId,
-                                 @RequestParam(required = false, name = "commentId") Integer commentId,
+                                 @RequestParam(required = false, name = "id") Integer id,
                                  @RequestParam(required = false, name = "size") Integer size) {
-        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, commentId, size, getUserId());
+        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, id, size, getUserId());
         return new JsonResult(activityComments);
     }
 
