@@ -339,10 +339,12 @@ public class CorgiFeedController extends BaseController {
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
+                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)
                         .initCommentCount(commentCount)
                         .initLikeUsers(users)
+                        .initLikeCount(likeCount)
                         .hasLike(hasLike);
 
                 detail.setLastComment(activityComment);
