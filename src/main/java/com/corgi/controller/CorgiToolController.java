@@ -497,11 +497,13 @@ public class CorgiToolController extends BaseController {
     public JsonResult setInfluencer(@RequestParam("name") String name) {
         UserDetail userDetail = new UserDetail();
         userDetail.setNickname(name);
+        log.info("influencer name:{} ",name);
         List<UserProfile> userProfiles = corgiUserService.searchUsers(userDetail, null, 1, 100);
         if (!CollectionUtils.isEmpty(userProfiles)) {
             userDetail = new UserDetail();
             userDetail.setAvatarStatus("influencer");
             for (UserProfile userProfile : userProfiles) {
+                log.info("influencer nickname:{} ",userProfile.getNickname());
                 if (name.equals(userProfile.getNickname())) {
                     userDetail.setUserId(userProfile.getUserId());
                     corgiUserService.updateDetail(userDetail);
