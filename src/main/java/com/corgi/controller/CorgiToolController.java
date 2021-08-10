@@ -494,25 +494,17 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("set_influencer")
-    public JsonResult setInfluencer(@RequestParam("name") String name) {
-        UserDetail userDetail = new UserDetail();
-        userDetail.setNickname(name);
-        log.info("influencer name:{} ",name);
-        List<UserProfile> userProfiles = corgiUserService.searchUsers(userDetail, null, 1, 100);
-        if (!CollectionUtils.isEmpty(userProfiles)) {
+    public JsonResult setInfluencer(@RequestParam("userId") String userId) {
+        UserDetail userProfile = corgiUserService.getUserDetailBasic(userId);
+        if (userProfile != null) {
             userDetail = new UserDetail();
             userDetail.setAvatarStatus("influencer");
-            for (UserProfile userProfile : userProfiles) {
-                log.info("influencer nickname:{} ",userProfile.getNickname());
-                if (name.equals(userProfile.getNickname())) {
-                    userDetail.setUserId(userProfile.getUserId());
-                    corgiUserService.updateDetail(userDetail);
-                    corgiToolService.countUserNumber(name);
-                    mqService.sendInfluencerMessage(PushMessage.builder()
-                            .targetUserId(userProfile.getUserId()).build());
-                    break;
-                }
-            }
+            userDetail.setUserId(userProfile.getUserId());
+            corgiUserService.updateDetail(userDetail);
+            corgiToolService.countUserNumber(userProfile.getNickname());
+            mqService.sendInfluencerMessage(PushMessage.builder()
+                    .targetUserId(userProfile.getUserId()).build());
+
         }
         return new JsonResult();
     }
