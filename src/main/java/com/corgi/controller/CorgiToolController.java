@@ -497,7 +497,7 @@ public class CorgiToolController extends BaseController {
     public JsonResult setInfluencer(@RequestParam("userId") String userId) {
         UserDetail userProfile = corgiUserService.getUserDetailBasic(userId);
         if (userProfile != null) {
-            userDetail = new UserDetail();
+            UserDetail userDetail = new UserDetail();
             userDetail.setAvatarStatus("influencer");
             userDetail.setUserId(userProfile.getUserId());
             corgiUserService.updateDetail(userDetail);
