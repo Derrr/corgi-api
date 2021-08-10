@@ -285,6 +285,11 @@ public class CorgiUserController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("/default_avatar")
+    public JsonResult getDefaultAvatar() {
+        return new JsonResult("");
+    }
+
     @GetMapping("/default_nickname")
     public JsonResult getDefaultNickname() {
         String nickname = getNickname();
