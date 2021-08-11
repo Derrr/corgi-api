@@ -42,6 +42,8 @@ public class RecommendController extends BaseController {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiBillboardService corgiBillboardService;
 
     private Comparator<CorgiActivityDetail> activityComparator = new Comparator<CorgiActivityDetail>() {
         @Override
@@ -55,6 +57,18 @@ public class RecommendController extends BaseController {
     @GetMapping("get_user")
     public JsonResult getUser(@RequestParam(required = false, name = "city", defaultValue = "") String city, @RequestParam("size") Integer size) {
         List<UserProfile> result = corgiUserRecommendService.getRecUser(getUserId(), size);
+        if (result.size() < size) {
+            List<UserProfile> extraResult = corgiUserRecommendService.getInfluencerByCity(getUserId(), city, size - result.size());
+            result.addAll(extraResult);
+        }
+        return new JsonResult(result);
+    }
+
+    @GetMapping("get_city_user")
+    public JsonResult getCityUser(@RequestParam(required = false, name = "city", defaultValue = "") String city, @RequestParam("size") Integer size) {
+        UserDetail detail = new UserDetail();
+        detail.setCity(city);
+        List<UserProfile> result = corgiBillboardService.getPopularUser(detail, size);
         if (result.size() < size) {
             List<UserProfile> extraResult = corgiUserRecommendService.getInfluencerByCity(getUserId(), city, size - result.size());
             result.addAll(extraResult);

@@ -601,8 +601,10 @@ public class CorgiUserController extends BaseController {
         IAcsClient client = new DefaultAcsClient(profile);
 
         String sign = "SMS_180049529";
+        String signName = "可基";
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
+            signName = "Corgi";
         }
         log.info("to {} sending code:{}", telNo, code);
         CommonRequest request = new CommonRequest();
@@ -612,7 +614,7 @@ public class CorgiUserController extends BaseController {
         request.setAction("SendSms");
         request.putQueryParameter("RegionId", "cn-hangzhou");
         request.putQueryParameter("PhoneNumbers", telNo.replaceAll("-", ""));
-        request.putQueryParameter("SignName", "可基");
+        request.putQueryParameter("SignName", signName);
         request.putQueryParameter("TemplateCode", sign);
         request.putQueryParameter("TemplateParam", "{\"code\":\"" + code + "\"}");
         try {
