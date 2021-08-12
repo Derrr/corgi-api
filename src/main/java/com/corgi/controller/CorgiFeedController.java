@@ -11,10 +11,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
-import com.corgi.service.AliyunGreenService;
-import com.corgi.service.AliyunVodService;
-import com.corgi.service.CorgiUtilService;
-import com.corgi.service.MQService;
+import com.corgi.service.*;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,6 +65,8 @@ public class CorgiFeedController extends BaseController {
     private MQService mqService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AsyncTaskService asyncTaskService;
 
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
@@ -86,6 +87,42 @@ public class CorgiFeedController extends BaseController {
         }
         mqService.refreshFeed(userId);
         return new JsonResult(details);
+    }
+
+    @GetMapping("get_user_feeds")
+    public JsonResult getUserFeeds(@RequestParam("userId") String userId, @RequestParam("lastTimestamp") Long lastId, @RequestParam("pageSize") Integer size) {
+        for (int i = 0; i < 5; i++) {
+            Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);
+            Future<List<ActivityLike>> likeFuture = asyncTaskService.getUserLike(lastId, userId, size);
+            Future<List<ActivityComment>> commentFuture = asyncTaskService.getUserComment(lastId, userId, size);
+
+            List<UserActivity> userActivities = new ArrayList<>();
+            try {
+                userActivities = this.mergeCreate(userActivities, activityFuture.get(), size);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            try {
+                userActivities = this.mergeComment(userActivities, commentFuture.get(), size);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            try {
+                userActivities = this.mergeLike(userActivities, likeFuture.get(), size);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            userActivities = this.populateUserActivity(userActivities);
+            if (!CollectionUtils.isEmpty(userActivities) && userActivities.size() == 1) {
+                UserActivity tmp = userActivities.get(0);
+                if (tmp.getDetail() == null && tmp.getType() == null) {
+                    lastId = tmp.getOperateTime();
+                    continue;
+                }
+            }
+            return new JsonResult(userActivities);
+        }
+        return new JsonResult(new ArrayList<>());
     }
 
     @GetMapping("get_feeds_by_activity")
@@ -287,6 +324,109 @@ public class CorgiFeedController extends BaseController {
         return new JsonResult(aliyunVodService.getUploadToken(title, fileName));
     }
 
+    private List<UserActivity> populateUserActivity(List<UserActivity> userActivities) {
+        if (CollectionUtils.isEmpty(userActivities)) {
+            return userActivities;
+        }
+        HashMap<String, UserActivity> activityMap = new HashMap<>();
+        List<String> activityIds = new ArrayList<>();
+        Long timestamp = null;
+        for (UserActivity userActivity : userActivities) {
+            String activityId = userActivity.getDetail().getId();
+            activityIds.add(activityId);
+            activityMap.put(activityId, userActivity);
+            userActivity.setDetail(null);
+            timestamp = userActivity.getOperateTime();
+        }
+        List<CorgiActivityDetail> details = convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId());
+        for (CorgiActivityDetail detail : details) {
+            UserActivity activity = activityMap.get(detail.getId());
+            activity.setDetail(detail);
+        }
+        Iterator<UserActivity> it = userActivities.iterator();
+        while (it.hasNext()) {
+            UserActivity activity = it.next();
+            if (activity.getDetail() == null) {
+                it.remove();
+            }
+        }
+        if (CollectionUtils.isEmpty(userActivities)) {
+            UserActivity userActivity = new UserActivity(timestamp);
+            userActivities.add(userActivity);
+        }
+        return userActivities;
+    }
+
+    private List<UserActivity> mergeCreate(List<UserActivity> userActivities, List<CorgiActivity> activityList, Integer size) {
+        if (activityList == null) {
+            return userActivities;
+        }
+        if (CollectionUtils.isEmpty(userActivities)) {
+            for (CorgiActivity corgiActivity : activityList) {
+                UserActivity activity = new UserActivity(corgiActivity.getId(), corgiActivity.getCreateTime(), UserActivity.CREATE);
+                userActivities.add(activity);
+            }
+        }
+        for (CorgiActivity corgiActivity : activityList) {
+            UserActivity activity = new UserActivity(corgiActivity.getId(), corgiActivity.getCreateTime(), UserActivity.CREATE);
+            userActivities = addUserActivity(userActivities, activity, size);
+        }
+        return userActivities;
+    }
+
+    private List<UserActivity> mergeComment(List<UserActivity> userActivities, List<ActivityComment> commentList, Integer size) {
+        if (commentList == null) {
+            return userActivities;
+        }
+        if (CollectionUtils.isEmpty(userActivities)) {
+            for (ActivityComment comment : commentList) {
+                UserActivity activity = new UserActivity(comment.getActivityId(), comment.getCtime(), UserActivity.COMMENT);
+                userActivities.add(activity);
+            }
+        }
+        for (ActivityComment comment : commentList) {
+            UserActivity activity = new UserActivity(comment.getActivityId(), comment.getCtime(), UserActivity.COMMENT);
+            userActivities = addUserActivity(userActivities, activity, size);
+        }
+        return userActivities;
+    }
+
+    private List<UserActivity> mergeLike(List<UserActivity> userActivities, List<ActivityLike> likeList, Integer size) {
+        if (likeList == null) {
+            return userActivities;
+        }
+        if (CollectionUtils.isEmpty(userActivities)) {
+            for (ActivityLike like : likeList) {
+                UserActivity activity = new UserActivity(like.getActivityId(), like.getCtime(), UserActivity.LIKE);
+                userActivities.add(activity);
+            }
+        }
+        for (ActivityLike like : likeList) {
+            UserActivity activity = new UserActivity(like.getActivityId(), like.getCtime(), UserActivity.LIKE);
+            userActivities = addUserActivity(userActivities, activity, size);
+        }
+        return userActivities;
+    }
+
+    private List<UserActivity> addUserActivity(List<UserActivity> userActivities, UserActivity activity, Integer size) {
+        boolean added = false;
+        List<UserActivity> result = new ArrayList<>();
+        Integer tmpSize = userActivities.size() < size ? userActivities.size() : size;
+        for (int i = 0; i < tmpSize; i++) {
+            UserActivity userActivity = userActivities.get(i);
+            if (userActivity.lesser(activity)) {
+                result.add(activity);
+                added = true;
+                break;
+            } else {
+                result.add(userActivity);
+            }
+        }
+        if (!added && result.size() < size) {
+            userActivities.add(activity);
+        }
+        return result;
+    }
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
         CorgiVlog vlog = corgiVlogService.getVlog(activityId);

@@ -973,14 +973,18 @@ public class CorgiActivityController extends BaseController {
 
 
     @GetMapping("get_user_activity")
-    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam(name = "status", required = false) String status, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<? extends CorgiActivity> result;
-        if (CorgiActivity.CREATED.equals(status) && hasVersion()) {
-            result = convertDetail(corgiActivityService.getUserAllRunningActivity(userId, page, pageSize), getUserId());
-        } else {
-            result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), CorgiActivity.CAT_IMAGE, (page - 1) * pageSize, pageSize);
-        }
+    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        List<? extends CorgiActivity> result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), CorgiActivity.CAT_IMAGE, (page - 1) * pageSize, pageSize);
         return new JsonResult(result);
+    }
+
+    @GetMapping("get_user_video")
+    public JsonResult getUserVideo(@RequestParam("activityId") String activityId) {
+        ActivityQuery query = new ActivityQuery();
+        query.setActivityId(activityId);
+        query.setUserId(getUserId());
+        query.setCategory(CorgiActivity.CAT_VIDEO);
+        return new JsonResult(corgiActivityService.getFeedActivity(query));
     }
 
     @GetMapping("get_user_running_activity")
