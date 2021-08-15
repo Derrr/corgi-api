@@ -116,7 +116,7 @@ public class CorgiFeedController extends BaseController {
             if (!CollectionUtils.isEmpty(userActivities) && userActivities.size() == 1) {
                 UserActivity tmp = userActivities.get(0);
                 if (tmp.getDetail() == null && tmp.getType() == null) {
-                    lastId = tmp.getOperateTime();
+                    lastId = tmp.getOptTime();
                     continue;
                 }
             }
@@ -336,7 +336,7 @@ public class CorgiFeedController extends BaseController {
             activityIds.add(activityId);
             activityMap.put(activityId, userActivity);
             userActivity.setDetail(null);
-            timestamp = userActivity.getOperateTime();
+            timestamp = userActivity.getOptTime();
         }
         List<CorgiActivityDetail> details = convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId());
         for (CorgiActivityDetail detail : details) {

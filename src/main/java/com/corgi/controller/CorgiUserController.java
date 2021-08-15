@@ -111,6 +111,9 @@ public class CorgiUserController extends BaseController {
     private String roleArn;
     private static String CODE_PREFIX = "telCode_";
     public static final String CALL_USER_CITY_PREFIX = "call_user_city_";
+    public static final List<String> AVATRS = Arrays.asList("https://corgi-pic.oss-cn-beijing.aliyuncs.com/default-avatar/corgi-butt.png",
+            "https://corgi-pic.oss-cn-beijing.aliyuncs.com/default-avatar/corgi-front.png",
+            "https://corgi-pic.oss-cn-beijing.aliyuncs.com/default-avatar/corgi-profile.png");
 
     @PostMapping("/login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
@@ -287,7 +290,8 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/default_avatar")
     public JsonResult getDefaultAvatar() {
-        return new JsonResult("");
+        Integer index = new Random().nextInt(AVATRS.size());
+        return new JsonResult(AVATRS.get(index));
     }
 
     @GetMapping("/default_nickname")

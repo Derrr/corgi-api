@@ -14,11 +14,11 @@ public class UserActivity {
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private String type;
-    private Long operateTime;
+    private Long optTime;
     private CorgiActivityDetail detail;
 
     public UserActivity(Long ctime) {
-        this.operateTime = ctime;
+        this.optTime = ctime;
     }
 
     public UserActivity(String activityId, String ctime, String type) {
@@ -26,19 +26,19 @@ public class UserActivity {
         this.detail = new CorgiActivityDetail();
         this.detail.setId(activityId);
         try {
-            this.operateTime = SDF.parse(ctime).getTime();
+            this.optTime = SDF.parse(ctime).getTime();
         } catch (ParseException e) {
         }
     }
 
 
     public boolean lesser(UserActivity userActivity) {
-        if (userActivity == null || userActivity.getOperateTime() == null) {
+        if (userActivity == null || userActivity.getOptTime() == null) {
             return false;
         }
-        if (operateTime == null) {
+        if (optTime == null) {
             return true;
         }
-        return operateTime < userActivity.getOperateTime();
+        return optTime < userActivity.getOptTime();
     }
 }
