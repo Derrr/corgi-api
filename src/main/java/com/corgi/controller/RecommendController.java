@@ -64,8 +64,8 @@ public class RecommendController extends BaseController {
         return new JsonResult(result);
     }
 
-    @GetMapping("get_city_user")
-    public JsonResult getCityUser(@RequestParam(required = false, name = "city", defaultValue = "") String city, @RequestParam("size") Integer size) {
+    @GetMapping("get_local_user")
+    public JsonResult getLocalUser(@RequestParam(required = false, name = "city", defaultValue = "") String city, @RequestParam("size") Integer size) {
         UserDetail detail = new UserDetail();
         detail.setCity(city);
         List<UserProfile> result = corgiBillboardService.getPopularUser(detail, size);
