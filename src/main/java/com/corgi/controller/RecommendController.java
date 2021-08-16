@@ -44,6 +44,8 @@ public class RecommendController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiBillboardService corgiBillboardService;
+    @Reference
+    private CorgiBarService corgiBarService;
 
     private Comparator<CorgiActivityDetail> activityComparator = new Comparator<CorgiActivityDetail>() {
         @Override
@@ -79,6 +81,16 @@ public class RecommendController extends BaseController {
     @GetMapping("get_city_image")
     public JsonResult getCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         List<String> activityIds = corgiUserRecommendService.getCityRecommendImage(getUserId(), city, page, size);
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
+        return new JsonResult(convertDetail(activityList));
+    }
+
+    @GetMapping("get_bar_activity")
+    public JsonResult getBarActivity(@RequestParam("city") String city) {
+        List<String> activityIds = corgiBarService.getBarActivity(city, 3);
+        if (CollectionUtils.isEmpty(activityIds)) {
+            return new JsonResult(new ArrayList());
+        }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         return new JsonResult(convertDetail(activityList));
     }

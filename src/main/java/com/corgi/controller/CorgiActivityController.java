@@ -40,8 +40,6 @@ import java.util.concurrent.TimeUnit;
 public class CorgiActivityController extends BaseController {
     @Reference
     private CorgiActivityService corgiActivityService;
-    //@Reference
-    //private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
@@ -66,6 +64,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiFeedService corgiFeedService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -952,6 +952,25 @@ public class CorgiActivityController extends BaseController {
             userId = getUserId();
         }
         List<CorgiActivity> activityList = corgiActivityService.getFeedActivity(activityQuery);
+        if (!CollectionUtils.isEmpty(activityList) && activityList.size() >= 5) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            CorgiVlog query = new CorgiVlog();
+            query.setUserId(getUserId());
+            query.setCtime(sdf.format(new Date()));
+            Integer size = activityList.size() / 5;
+            List<CorgiVlog> corgiVlogs = corgiVlogService.recallBarVlog(query, size);
+            List<String> activityIds = new ArrayList<>();
+            for (CorgiVlog vlog : corgiVlogs) {
+                activityIds.add(vlog.getActivityId());
+                CorgiFeed feed = new CorgiFeed();
+                feed.setFeed(vlog.getActivityId());
+                feed.setUserId(getUserId());
+                feed.setFeedUserId(vlog.getUserId());
+                corgiFeedService.addBarFeed(feed);
+            }
+            List<CorgiActivity> businessList = corgiActivityService.getActivityByIds(activityIds);
+            activityList = mergeActivity(activityList, businessList);
+        }
         List<CorgiActivityDetail> detailList = convertDetail(activityList, userId);
         return new JsonResult(detailList);
     }
@@ -1272,25 +1291,16 @@ public class CorgiActivityController extends BaseController {
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
                 }
-                Integer signUp = corgiUserActivityService.getStatus(userId, activity.getId());
-                //double match = corgiUserMatchService.getUserMatch(userId, activity.getUserId());
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
-                Integer signUpCount = corgiUserActivityService.countUsers(activity.getId(), null);
                 List<UserProfile> signUpUsers = new ArrayList<>();
-                if (signUpCount != null && signUpCount > 0 && signUpCount <= 3) {
-                    signUpUsers = corgiUserActivityService.getUsers(activity.getId(), null, null);
-                } else if (signUpCount != null && signUpCount > 3) {
-                    signUpUsers = corgiUserActivityService.getPopularUsers(activity.getId(), null);
-                }
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         //.initMatch(match)
                         .initSize(height, width)
-                        .initSignUpStatus(signUp)
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
@@ -1298,18 +1308,12 @@ public class CorgiActivityController extends BaseController {
                         .hasLike(hasLike);
 
                 detail.setLastComment(activityComment);
-                detail.setSignUpCount(signUpCount);
                 detail.setShareCount(shareCount);
                 if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
                     detail.setBarDetail(profile);
-                } else if (CorgiActivity.CAT_ATTENDANCE.equals(detail.getCategory()) && !StringUtils.isEmpty(detail.getBarId())) {
-                    BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
-                    detail.setBarDetail(profile);
-                    detail.setUserDetail(corgiUserService.getUserDetail(detail.getUserId(), null));
-                    detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, detail.getUserId()));
                 } else if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
