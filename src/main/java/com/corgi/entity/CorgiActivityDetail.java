@@ -54,6 +54,7 @@ public class CorgiActivityDetail extends CorgiActivity {
 
     public CorgiActivityDetail initLikeCount(Long likeCount) {
         this.likeCount = likeCount;
+        super.setLikeCount(likeCount);
         return this;
     }
 
