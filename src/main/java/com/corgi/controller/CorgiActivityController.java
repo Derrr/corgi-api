@@ -948,10 +948,8 @@ public class CorgiActivityController extends BaseController {
 
 
     @GetMapping("get_city_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
-        if (hasUserId()) {
-            userId = getUserId();
-        }
+    public JsonResult getRangeActivity(@RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
+        String userId = getUserId();
         List<CorgiActivity> activityList = corgiActivityService.getFeedActivity(activityQuery);
         if (!CollectionUtils.isEmpty(activityList) && activityList.size() >= 5) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
