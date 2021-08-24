@@ -30,6 +30,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private boolean hasCallCity;
     private boolean canCallCity;
     private Integer isFollowed;
+    private String timeShow;
 
     public CorgiActivityDetail() {
         super();

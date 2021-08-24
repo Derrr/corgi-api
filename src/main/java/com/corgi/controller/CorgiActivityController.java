@@ -10,6 +10,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.PageResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.AddAttendResult;
 import com.corgi.exception.PermissionException;
@@ -1266,6 +1267,8 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Long nowTime = System.currentTimeMillis();
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
@@ -1299,14 +1302,13 @@ public class CorgiActivityController extends BaseController {
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
-                        //.initMatch(match)
                         .initSize(height, width)
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
                         .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
-
+                detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
                 if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {

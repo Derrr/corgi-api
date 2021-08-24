@@ -10,6 +10,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.util.RequestUtil;
+import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
@@ -449,6 +450,8 @@ public class CorgiFeedController extends BaseController {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Long nowTime = System.currentTimeMillis();
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
@@ -486,7 +489,7 @@ public class CorgiFeedController extends BaseController {
                         .initLikeUsers(users)
                         .initLikeCount(likeCount)
                         .hasLike(hasLike);
-
+                detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getUserId())) {

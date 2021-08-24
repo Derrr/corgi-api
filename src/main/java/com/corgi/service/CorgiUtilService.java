@@ -3,6 +3,7 @@ package com.corgi.service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.PicInfo;
 import com.corgi.user.api.CorgiBarService;
@@ -33,6 +34,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -154,6 +156,8 @@ public class CorgiUtilService {
     public List<CorgiActivityDetail> convertUserActivityDetail(List<CorgiActivity> activityList, String userId, BarProfile barProfile) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(activityList)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Long nowTime = System.currentTimeMillis();
             for (CorgiActivity activity : activityList) {
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
@@ -170,6 +174,7 @@ public class CorgiUtilService {
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width);
+                detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
                 detail.setLikeUsers(activityLikes);
