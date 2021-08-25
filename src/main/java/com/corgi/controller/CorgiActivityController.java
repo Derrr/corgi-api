@@ -950,6 +950,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_city_activity")
     public JsonResult getRangeActivity(@RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
         String userId = getUserId();
+        activityQuery.setUserId(null);
         List<CorgiActivity> activityList = corgiActivityService.getFeedActivity(activityQuery);
         if (!CollectionUtils.isEmpty(activityList) && activityList.size() >= 5) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -997,9 +998,7 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_user_video")
-    public JsonResult getUserVideo(@RequestParam("activityId") String activityId) {
-        ActivityQuery query = new ActivityQuery();
-        query.setActivityId(activityId);
+    public JsonResult getUserVideo(ActivityQuery query) {
         query.setUserId(getUserId());
         query.setCategory(CorgiActivity.CAT_VIDEO);
         return new JsonResult(corgiActivityService.getFeedActivity(query));
