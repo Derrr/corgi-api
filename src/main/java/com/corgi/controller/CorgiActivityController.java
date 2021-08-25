@@ -1122,7 +1122,7 @@ public class CorgiActivityController extends BaseController {
         if (!CollectionUtils.isEmpty(activityIds)) {
             corgiActivities = corgiActivityService.getActivityByIds(activityIds);
         }
-        return new JsonResult(covertLiked(corgiActivities));
+        return new JsonResult(convertDetail(corgiActivities, getUserId(), true));
     }
 
     @PostMapping("share")
