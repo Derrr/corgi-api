@@ -810,11 +810,28 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detail);
     }
 
+    @GetMapping("count_follow_activity")
+    public JsonResult countFollowActivity() {
+        String key = "latest_activity_" + getUserId();
+        String activityId = redisTemplate.opsForValue().get(key);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -3);
+        String endTime = sdf.format(calendar.getTime());
+        ActivityQuery query = new ActivityQuery();
+        query.setEndTime(endTime);
+        query.setActivityId(activityId);
+        return new JsonResult(corgiUserActivityService.countFollowUserActivity(query));
+    }
+
     @GetMapping("get_follow_activity")
     public JsonResult getFollowActivity(ActivityQuery activityQuery) {
         if (hasUserId()) {
             activityQuery.setUserId(getUserId());
         }
+        String userId = activityQuery.getUserId();
+        String key = "latest_activity_" + userId;
+        String latestActivityId = redisTemplate.opsForValue().get(key);
         if (activityQuery.getPage() != null && activityQuery.getPage() > 1) {
             for (int i = 1; i < activityQuery.getPage(); i++) {
                 String lastActivityId = this.getLastActivity(activityQuery);
@@ -825,9 +842,16 @@ public class CorgiActivityController extends BaseController {
             }
         }
         List<String> activityIds = corgiUserActivityService.getFollowUserActivity(activityQuery);
+
         if (CollectionUtils.isEmpty(activityIds)) {
             return new JsonResult();
         }
+        if (StringUtils.isEmpty(latestActivityId)) {
+            latestActivityId = activityIds.get(0);
+        } else if (latestActivityId.compareTo(activityIds.get(0)) < 0) {
+            latestActivityId = activityIds.get(0);
+        }
+        redisTemplate.opsForValue().set(key, latestActivityId, 3L, TimeUnit.DAYS);
         return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), activityQuery.getUserId()));
     }
 
