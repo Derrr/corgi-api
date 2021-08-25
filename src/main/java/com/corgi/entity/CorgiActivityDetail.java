@@ -111,7 +111,7 @@ public class CorgiActivityDetail extends CorgiActivity {
         if (CollectionUtils.isNotEmpty(picUrls)) {
             return picUrls.get(0).getPicUrl();
         }
-        return null;
+        return super.getCoverUrl();
     }
 
     public String getActivityId() {
