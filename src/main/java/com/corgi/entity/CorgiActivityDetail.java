@@ -1,6 +1,7 @@
 package com.corgi.entity;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.*;
 import lombok.Data;
@@ -31,6 +32,8 @@ public class CorgiActivityDetail extends CorgiActivity {
     private boolean canCallCity;
     private Integer isFollowed;
     private String timeShow;
+    private String picUrl;
+    private String activityId;
 
     public CorgiActivityDetail() {
         super();
@@ -101,5 +104,17 @@ public class CorgiActivityDetail extends CorgiActivity {
                     .build());
         }
         return this;
+    }
+
+    public String getPicUrl() {
+        List<ActivityPic> picUrls = super.getPics();
+        if (CollectionUtils.isNotEmpty(picUrls)) {
+            return picUrls.get(0).getPicUrl();
+        }
+        return null;
+    }
+
+    public String getActivityId() {
+        return super.getId();
     }
 }
