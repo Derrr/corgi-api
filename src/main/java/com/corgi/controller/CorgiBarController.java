@@ -49,6 +49,8 @@ public class CorgiBarController extends BaseController {
     private CorgiVideoService corgiVideoService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -67,7 +69,7 @@ public class CorgiBarController extends BaseController {
         BarProfile profile = corgiBarService.getBarProfile(corgiActivity.getUserId());
         HashMap extra = new HashMap();
         extra.put("type", "202");
-        extra.put("city",profile.getCity());
+        extra.put("city", profile.getCity());
         mqService.sendSilentMessage(PushMessage.builder()
                 .type(PushMessage.CITY)
                 .sourceUserId(getUserId())
@@ -206,6 +208,14 @@ public class CorgiBarController extends BaseController {
             }
         }
         return new JsonResult(barProfiles);
+    }
+
+    @GetMapping("get_city_bar_activity")
+    public JsonResult getCityBarActivity(@RequestParam("city") String city) {
+        CorgiActivity query = new CorgiActivity();
+        query.setCity(city);
+        List<String> activityIds = corgiUserActivityService.getCityBarActivity(query, 1, 3);
+        return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
     }
 
     @GetMapping("get_bar_account_list")
