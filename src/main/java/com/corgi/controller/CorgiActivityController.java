@@ -820,7 +820,8 @@ public class CorgiActivityController extends BaseController {
         String endTime = sdf.format(calendar.getTime());
         ActivityQuery query = new ActivityQuery();
         query.setEndTime(endTime);
-        query.setActivityId(activityId);
+        //query.setActivityId(activityId);
+        query.setUserId(getUserId());
         return new JsonResult(corgiUserActivityService.countFollowUserActivity(query));
     }
 
