@@ -406,7 +406,9 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getComment(@RequestParam("activityId") String activityId,
                                  @RequestParam(required = false, name = "lastId") Integer id,
                                  @RequestParam(required = false, name = "size") Integer size) {
+        List<ActivityComment> hotComments = corgiCommentService.getHotComment(activityId, getUserId());
         List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, id, size, getUserId());
+        activityComments.addAll(0, hotComments);
         return new JsonResult(activityComments);
     }
 
