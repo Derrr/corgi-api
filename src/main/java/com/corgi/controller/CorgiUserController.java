@@ -26,10 +26,7 @@ import com.corgi.common.util.CharacterUtils;
 import com.corgi.common.util.IPUtil;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
-import com.corgi.entity.CheckPic;
-import com.corgi.entity.MailMessage;
-import com.corgi.entity.StorageToken;
-import com.corgi.entity.UserShare;
+import com.corgi.entity.*;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
@@ -83,6 +80,8 @@ public class CorgiUserController extends BaseController {
     private CorgiUserDateService corgiUserDateService;
     @Reference
     private CorgiFakeService corgiFakeService;
+    @Reference
+    private CorgiLikeService corgiLikeService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -434,6 +433,14 @@ public class CorgiUserController extends BaseController {
             log.info("detail code:{} ", Constants.SERVER_ERROR_CODE);
             return new JsonResult(Constants.SERVER_ERROR_CODE, e.getMessage());
         }
+    }
+
+    @GetMapping("/get_user_data")
+    public JsonResult getUserData(@RequestParam("userId") String userId) {
+        Integer follow = corgiUserFollowService.countFollow(userId);
+        Integer fans = corgiUserFollowService.countFollowed(userId);
+        Integer getLike = corgiLikeService.countUserLikeByDate(userId, null);
+        return new JsonResult(new UserData(userId, follow, fans, getLike));
     }
 
     @GetMapping("/visit")
