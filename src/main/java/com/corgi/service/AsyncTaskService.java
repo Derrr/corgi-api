@@ -13,8 +13,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -33,6 +33,7 @@ public class AsyncTaskService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityLike query = new ActivityLike();
         query.setLikeUserId(userId);
+        query.setCtime(sdf.format(new Date()));
         if(timestamp > 0) {
             query.setCtime(sdf.format(new Date(timestamp)));
         }
@@ -44,6 +45,7 @@ public class AsyncTaskService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityComment query = new ActivityComment();
         query.setCommentUserId(userId);
+        query.setCtime(sdf.format(new Date()));
         if(timestamp > 0) {
             query.setCtime(sdf.format(new Date(timestamp)));
         }
@@ -55,6 +57,7 @@ public class AsyncTaskService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityQuery query = new ActivityQuery();
         query.setUserId(userId);
+        query.setEndTime(sdf.format(new Date()));
         if(timestamp > 0) {
             query.setEndTime(sdf.format(new Date(timestamp)));
         }
