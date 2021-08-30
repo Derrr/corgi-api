@@ -9,9 +9,11 @@ import com.corgi.entity.PicInfo;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiCommentService;
 import com.corgi.user.api.CorgiLikeService;
+import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.ActivityComment;
 import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.BarProfile;
+import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -50,6 +52,8 @@ public class CorgiUtilService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private AliyunGreenService aliyunGreenService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Reference
     private CorgiLikeService corgiLikeService;
     @Reference
@@ -172,6 +176,7 @@ public class CorgiUtilService {
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
                 List<ActivityLike> activityLikes = corgiLikeService.getFollowUser(userId, activity.getId());
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
@@ -180,6 +185,12 @@ public class CorgiUtilService {
                 detail.setLikeUsers(activityLikes);
                 detail.setCommentCount(commentCount);
                 detail.setBarDetail(barProfile);
+                if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory())) {
+                    UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
+                    if (userDetail != null) {
+                        detail.setUserDetail(userDetail);
+                    }
+                }
                 detailList.add(detail);
             }
         }

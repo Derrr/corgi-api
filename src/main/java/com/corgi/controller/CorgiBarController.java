@@ -92,6 +92,12 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(corgiActivities);
     }
 
+    @GetMapping("get_bar_user_activity")
+    public JsonResult getBarUserActivity(@RequestParam("barId") String barId, @RequestParam(required = false, defaultValue = "", name = "activityId") String activityId, @RequestParam("size") Integer size) {
+        List<CorgiActivity> corgiActivities = corgiActivityService.getBarAppraisedActivity(barId, activityId, size);
+        return new JsonResult(corgiUtilService.convertUserActivityDetail(corgiActivities, getUserId(), null));
+    }
+
     @GetMapping("get_active_bar_activity")
     public JsonResult getActiveBarActivity(@RequestParam("barId") String barId) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
