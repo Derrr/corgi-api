@@ -424,7 +424,7 @@ public class CorgiFeedController extends BaseController {
             }
         }
         if (!added && result.size() < size) {
-            userActivities.add(activity);
+            result.add(activity);
         }
         return result;
     }
