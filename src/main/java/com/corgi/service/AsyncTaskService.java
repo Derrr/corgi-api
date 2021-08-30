@@ -33,7 +33,9 @@ public class AsyncTaskService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityLike query = new ActivityLike();
         query.setLikeUserId(userId);
-        query.setCtime(sdf.format(new Date(timestamp)));
+        if(timestamp > 0) {
+            query.setCtime(sdf.format(new Date(timestamp)));
+        }
         return new AsyncResult<>(corgiLikeService.queryLike(query, size));
     }
 
@@ -42,7 +44,9 @@ public class AsyncTaskService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityComment query = new ActivityComment();
         query.setCommentUserId(userId);
-        query.setCtime(sdf.format(new Date(timestamp)));
+        if(timestamp > 0) {
+            query.setCtime(sdf.format(new Date(timestamp)));
+        }
         return new AsyncResult<>(corgiCommentService.queryComment(query, size));
     }
 
@@ -51,7 +55,9 @@ public class AsyncTaskService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityQuery query = new ActivityQuery();
         query.setUserId(userId);
-        query.setEndTime(sdf.format(new Date(timestamp)));
+        if(timestamp > 0) {
+            query.setEndTime(sdf.format(new Date(timestamp)));
+        }
         query.setPageSize(size);
         return new AsyncResult<>(corgiUserActivityService.queryActivity(query));
     }
