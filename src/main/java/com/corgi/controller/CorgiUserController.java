@@ -269,9 +269,9 @@ public class CorgiUserController extends BaseController {
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
+        userDetail = aliyunGreenService.checkBackground(userDetail);
         if (hasUserId()) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
-            userDetail = aliyunGreenService.checkBackground(userDetail);
             userDetail = aliyunGreenService.checkDesc(userDetail);
             userDetail.setGroup(changeGroup(userDetail.getGroup()));
         }
