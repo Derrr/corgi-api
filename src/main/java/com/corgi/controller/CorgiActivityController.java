@@ -207,27 +207,29 @@ public class CorgiActivityController extends BaseController {
         if (!redisTemplate.opsForValue().setIfAbsent("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
         }
-        activity.setCategory(CorgiActivity.CAT_IMAGE);
-        if (!StringUtils.isEmpty(activity.getVideoId())) {
-            GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
-            GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
-            if (mezzanine != null) {
-                activity.setHeight(mezzanine.getHeight());
-                activity.setWidth(mezzanine.getWidth());
-                activity.setVideoUrl(mezzanine.getFileURL().split("\\?Expires")[0]);
-                GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
-                if (infoResponse != null && infoResponse.getVideo() != null) {
-                    if (StringUtils.isEmpty(activity.getCoverUrl())) {
-                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
-                    }
-                    if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
-                        activity.setCheckStatus(AliyunGreenService.FAIL);
+        if (StringUtils.isEmpty(activity.getCategory())) {
+            activity.setCategory(CorgiActivity.CAT_IMAGE);
+            if (!StringUtils.isEmpty(activity.getVideoId())) {
+                GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
+                GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
+                if (mezzanine != null) {
+                    activity.setHeight(mezzanine.getHeight());
+                    activity.setWidth(mezzanine.getWidth());
+                    activity.setVideoUrl(mezzanine.getFileURL().split("\\?Expires")[0]);
+                    GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
+                    if (infoResponse != null && infoResponse.getVideo() != null) {
+                        if (StringUtils.isEmpty(activity.getCoverUrl())) {
+                            activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
+                        }
+                        if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
+                            activity.setCheckStatus(AliyunGreenService.FAIL);
+                        }
                     }
                 }
+                activity.setCategory(CorgiActivity.CAT_VIDEO);
+            } else if (CollectionUtils.isEmpty(activity.getPics())) {
+                activity.setCategory(CorgiActivity.CAT_TEXT);
             }
-            activity.setCategory(CorgiActivity.CAT_VIDEO);
-        } else if (CollectionUtils.isEmpty(activity.getPics())) {
-            activity.setCategory(CorgiActivity.CAT_TEXT);
         }
         activity.setCheckStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
@@ -270,26 +272,42 @@ public class CorgiActivityController extends BaseController {
             corgiVlogService.addHotVlog(corgiVlogHot);
             corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
-//        else {
-//            Double avgCount = corgiLikeService.getAvgLike(getUserId());
-//            if (avgCount > 1) {
-//                CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
-//                corgiVlogHot.setViewCount(null);
-//                corgiVlogHot.setLikeCount(0);
-//                corgiVlogHot.setActivityId(activity.getId());
-//                corgiVlogHot.setExpectView(new Double(Math.pow(avgCount, 1.5) * 10).intValue());
-//                corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
-//                corgiVlogService.addHotVlog(corgiVlogHot);
-//            }
-//        }
+
+//        extra.put("type", "201");
+//        mqService.sendSilentMessage(PushMessage.builder()
+//                .type(PushMessage.FOLLOW)
+//                .sourceUserId(getUserId())
+//                .message("你关注的人发动态啦")
+//                .extra(extra)
+//                .build());
+        if (CollectionUtils.isEmpty(activity.getMentionUserIds())) {
+            new JsonResult(AddActivityResult.getResult(activity));
+        }
         HashMap extra = new HashMap();
-        extra.put("type", "201");
-        mqService.sendSilentMessage(PushMessage.builder()
-                .type(PushMessage.FOLLOW)
-                .sourceUserId(getUserId())
-                .message("你关注的人发动态啦")
-                .extra(extra)
-                .build());
+        extra.put("activityId", activity.getId());
+        extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
+        for (String mentionUserId : activity.getMentionUserIds()) {
+            if (!getUserId().equals(mentionUserId)) {
+                mqService.sendMessage(PushMessage.builder()
+                        .type(PushMessage.DEFAULT)
+                        .sourceUserId(getUserId())
+                        .targetUserId(mentionUserId)
+                        .message(PushMessage.ACTIVITY_AT)
+                        .extra(extra)
+                        .build());
+                corgiToolService.addActivityMessage(ActivityMessage.builder()
+                        .activityId(activity.getId())
+                        .fromUserAvatar(userDetail.getAvatar())
+                        .fromUserName(userDetail.getNickname())
+                        .fromUserId(getUserId())
+                        .toUserId(mentionUserId)
+                        .time(System.currentTimeMillis())
+                        .content("@了你")
+                        .messageType(ActivityMessage.COMMENT)
+                        .build());
+            }
+        }
         return new JsonResult(AddActivityResult.getResult(activity));
     }
 
@@ -392,7 +410,19 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("like_comment")
     public JsonResult likeComment(@RequestParam("commentId") String commentId) {
-        corgiCommentService.likeComment(commentId, getUserId());
+        ActivityComment activityComment = corgiCommentService.likeComment(commentId, getUserId());
+        HashMap extra = new HashMap();
+        extra.put("activityId", activityComment.getActivityId());
+        extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
+        if (!activityComment.getCommentUserId().equals(getUserId())) {
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.DEFAULT)
+                    .sourceUserId(getUserId())
+                    .targetUserId(activityComment.getCommentUserId())
+                    .message(PushMessage.COMMENT_LIKE)
+                    .extra(extra)
+                    .build());
+        }
         return new JsonResult();
     }
 
