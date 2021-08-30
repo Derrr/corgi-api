@@ -151,8 +151,8 @@ public class AliyunGreenService {
         corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), userDetail.getUserId(), CheckPic.BACKGROUND).get(0);
         if (CheckPic.NEED_CHECK.equals(corgiPic.getStatus())) {
             mailService.sendCheckMessage("用户背景：", userDetail.getUserId());
-            userDetail.setAvatarCheckStatus(corgiPic.getStatus());
-            userDetail.setAvatarDataId(corgiPic.getDataId());
+            userDetail.setBgCheckStatus(corgiPic.getStatus());
+            userDetail.setBgDataId(corgiPic.getDataId());
             return userDetail;
         }
         userDetail.setBgCheckStatus(corgiPic.getStatus());
@@ -175,7 +175,9 @@ public class AliyunGreenService {
             return userDetail;
         }
         //corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
-        userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+        if (StringUtils.isEmpty(userDetail.getAvatarCheckStatus())) {
+            userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+        }
         userDetail.setAvatarDataId(corgiPic.getDataId());
         return userDetail;
     }
