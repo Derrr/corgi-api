@@ -209,27 +209,27 @@ public class CorgiActivityController extends BaseController {
         }
         if (StringUtils.isEmpty(activity.getCategory())) {
             activity.setCategory(CorgiActivity.CAT_IMAGE);
-            if (!StringUtils.isEmpty(activity.getVideoId())) {
-                GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
-                GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
-                if (mezzanine != null) {
-                    activity.setHeight(mezzanine.getHeight());
-                    activity.setWidth(mezzanine.getWidth());
-                    activity.setVideoUrl(mezzanine.getFileURL().split("\\?Expires")[0]);
-                    GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
-                    if (infoResponse != null && infoResponse.getVideo() != null) {
-                        if (StringUtils.isEmpty(activity.getCoverUrl())) {
-                            activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
-                        }
-                        if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
-                            activity.setCheckStatus(AliyunGreenService.FAIL);
-                        }
+        }
+        if (!StringUtils.isEmpty(activity.getVideoId())) {
+            GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
+            GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
+            if (mezzanine != null) {
+                activity.setHeight(mezzanine.getHeight());
+                activity.setWidth(mezzanine.getWidth());
+                activity.setVideoUrl(mezzanine.getFileURL().split("\\?Expires")[0]);
+                GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
+                if (infoResponse != null && infoResponse.getVideo() != null) {
+                    if (StringUtils.isEmpty(activity.getCoverUrl())) {
+                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
+                    }
+                    if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
+                        activity.setCheckStatus(AliyunGreenService.FAIL);
                     }
                 }
-                activity.setCategory(CorgiActivity.CAT_VIDEO);
-            } else if (CollectionUtils.isEmpty(activity.getPics())) {
-                activity.setCategory(CorgiActivity.CAT_TEXT);
             }
+            activity.setCategory(CorgiActivity.CAT_VIDEO);
+        } else if (CollectionUtils.isEmpty(activity.getPics())) {
+            activity.setCategory(CorgiActivity.CAT_TEXT);
         }
         activity.setCheckStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
