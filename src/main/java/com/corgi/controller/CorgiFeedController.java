@@ -413,18 +413,17 @@ public class CorgiFeedController extends BaseController {
         boolean added = false;
         List<UserActivity> result = new ArrayList<>();
         Integer tmpSize = userActivities.size() < size ? userActivities.size() : size;
+        int index = tmpSize;
         for (int i = 0; i < tmpSize; i++) {
             UserActivity userActivity = userActivities.get(i);
             if (userActivity.lesser(activity)) {
-                result.add(activity);
-                added = true;
+                index = i;
                 break;
-            } else {
-                result.add(userActivity);
             }
         }
-        if (!added && result.size() < size) {
-            result.add(activity);
+        userActivities.add(index, activity);
+        if (userActivities.size() > size) {
+            result.addAll(userActivities.subList(0, size));
         }
         return result;
     }
