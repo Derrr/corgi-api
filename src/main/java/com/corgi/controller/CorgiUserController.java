@@ -237,6 +237,9 @@ public class CorgiUserController extends BaseController {
         userDetail = aliyunGreenService.checkDesc(userDetail);
         userDetail.setGroup(changeGroup(userDetail.getGroup()));
         userDetail.setPreferGroup(changeGroupList(userDetail.getPreferGroup()));
+        userDetail.setBackground(CheckPic.getDefaultBackground());
+        userDetail.setBgCheckStatus(AliyunGreenService.PASS);
+        userDetail.setBgDataId("-");
         String result = corgiUserService.addDetail(userDetail);
         return getJsonResult(result);
     }
@@ -268,6 +271,7 @@ public class CorgiUserController extends BaseController {
         }
         if (hasUserId()) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
+            userDetail = aliyunGreenService.checkBackground(userDetail);
             userDetail = aliyunGreenService.checkDesc(userDetail);
             userDetail.setGroup(changeGroup(userDetail.getGroup()));
         }
@@ -350,6 +354,17 @@ public class CorgiUserController extends BaseController {
         }
         String result = corgiUserService.updatePreferGroup(userDetail.getUserId(), preferGroup);
         return getJsonResult(result);
+    }
+
+    @GetMapping("/delete_user_background")
+    public JsonResult deleteUserBackground() {
+        UserDetail userDetail = new UserDetail();
+        userDetail.setUserId(getUserId());
+        userDetail.setBackground(CheckPic.getDefaultBackground());
+        userDetail.setBgDataId("-");
+        userDetail.setBgCheckStatus(AliyunGreenService.PASS);
+        corgiUserService.updateDetail(userDetail);
+        return new JsonResult();
     }
 
     @GetMapping("/delete_user_sound")

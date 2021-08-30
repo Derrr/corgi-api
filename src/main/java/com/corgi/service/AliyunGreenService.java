@@ -141,6 +141,25 @@ public class AliyunGreenService {
         }
     }
 
+    public UserDetail checkBackground(UserDetail userDetail) {
+        if (StringUtils.isEmpty(userDetail.getBackground())) {
+            return userDetail;
+        }
+        UserPic corgiPic = new UserPic();
+        corgiPic.setStatus(CorgiPic.NORMAL);
+        corgiPic.setPicUrl(userDetail.getBackground());
+        corgiPic = (UserPic) checkPic(Arrays.asList(corgiPic), userDetail.getUserId(), CheckPic.BACKGROUND).get(0);
+        if (CheckPic.NEED_CHECK.equals(corgiPic.getStatus())) {
+            mailService.sendCheckMessage("用户背景：", userDetail.getUserId());
+            userDetail.setAvatarCheckStatus(corgiPic.getStatus());
+            userDetail.setAvatarDataId(corgiPic.getDataId());
+            return userDetail;
+        }
+        userDetail.setBgCheckStatus(corgiPic.getStatus());
+        userDetail.setBgDataId(corgiPic.getDataId());
+        return userDetail;
+    }
+
     public UserDetail checkAvatar(UserDetail userDetail) {
         if (StringUtils.isEmpty(userDetail.getAvatar())) {
             return userDetail;
