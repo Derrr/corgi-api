@@ -442,6 +442,8 @@ public class CorgiFeedController extends BaseController {
         vlogDetail.setActivityDetail(corgiActivityFeedService.getActivityById(vlog.getActivityId()));
         vlogDetail.setHasLike(corgiLikeService.countUserLike(vlog.getActivityId(), userId));
         vlogDetail.setShareCount(corgiShareService.countShare(vlog.getActivityId()));
+        vlogDetail.setLikeCount(corgiLikeService.countActivityLike(vlog.getActivityId()).intValue());
+        vlogDetail.setCommentCount(corgiCommentService.countActivityComment(vlog.getActivityId()).intValue());
         return vlogDetail;
     }
 
