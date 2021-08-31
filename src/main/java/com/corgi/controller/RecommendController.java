@@ -10,6 +10,7 @@ import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +48,7 @@ public class RecommendController extends BaseController {
     private CorgiBillboardService corgiBillboardService;
     @Reference
     private CorgiBarService corgiBarService;
-    @Reference
+    @Autowired
     private CorgiUtilService corgiUtilService;
 
     private Comparator<CorgiActivityDetail> activityComparator = new Comparator<CorgiActivityDetail>() {
