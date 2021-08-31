@@ -1056,9 +1056,8 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_user_video")
     public JsonResult getUserVideo(ActivityQuery query) {
-        query.setUserId(getUserId());
         query.setCategory(CorgiActivity.CAT_VIDEO);
-        return new JsonResult(corgiActivityService.getFeedActivity(query));
+        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query),getUserId()));
     }
 
     @GetMapping("get_user_running_activity")
