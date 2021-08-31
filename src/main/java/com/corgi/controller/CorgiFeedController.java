@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -430,20 +431,29 @@ public class CorgiFeedController extends BaseController {
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
         CorgiVlog vlog = corgiVlogService.getVlog(activityId);
-        if (vlog != null) {
-            return buildVlogDetail(vlog, userId);
+        if (vlog == null) {
+            vlog = new CorgiVlog();
+            vlog.setActivityId(activityId);
+            vlog.setUserId(userId);
         }
-        return null;
+        return buildVlogDetail(vlog, userId);
     }
 
     private VlogDetail buildVlogDetail(CorgiVlog vlog, String userId) {
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
         VlogDetail vlogDetail = VlogDetail.createDetail(vlog);
         vlogDetail.setUserDetail(corgiUserService.getUserDetailBasic(vlog.getUserId()));
-        vlogDetail.setActivityDetail(corgiActivityFeedService.getActivityById(vlog.getActivityId()));
+        vlogDetail.setActivityDetail(activity);
         vlogDetail.setHasLike(corgiLikeService.countUserLike(vlog.getActivityId(), userId));
         vlogDetail.setShareCount(corgiShareService.countShare(vlog.getActivityId()));
         vlogDetail.setLikeCount(corgiLikeService.countActivityLike(vlog.getActivityId()).intValue());
         vlogDetail.setCommentCount(corgiCommentService.countActivityComment(vlog.getActivityId()).intValue());
+        if (StringUtils.isEmpty(vlog.getVideoId()) && activity != null) {
+            vlogDetail.setVideoId(activity.getVideoId());
+            if (!StringUtils.isEmpty(activity.getCreateTime())) {
+                vlogDetail.setCtime(activity.getCreateTime().replaceAll("/", "-"));
+            }
+        }
         return vlogDetail;
     }
 
