@@ -94,7 +94,7 @@ public class CorgiFeedController extends BaseController {
     @GetMapping("get_user_feeds")
     public JsonResult getUserFeeds(@RequestParam("userId") String userId, @RequestParam("lastTimestamp") Long lastId, @RequestParam("pageSize") Integer size) {
         if (lastId == null) {
-            lastId = 0;
+            lastId = 0L;
         }
         for (int i = 0; i < 5; i++) {
             Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);
