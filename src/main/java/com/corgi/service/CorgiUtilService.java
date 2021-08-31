@@ -4,12 +4,11 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.util.TimeUtil;
+import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.entity.CorgiPic;
 import com.corgi.entity.PicInfo;
-import com.corgi.user.api.CorgiBarService;
-import com.corgi.user.api.CorgiCommentService;
-import com.corgi.user.api.CorgiLikeService;
-import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityComment;
 import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.BarProfile;
@@ -60,6 +59,8 @@ public class CorgiUtilService {
     private CorgiCommentService corgiCommentService;
     @Reference
     private CorgiBarService corgiBarService;
+    @Reference
+    private CorgiPicService corgiPicService;
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -195,5 +196,15 @@ public class CorgiUtilService {
             }
         }
         return detailList;
+    }
+
+    public UserDetail checkUserDetail(UserDetail detail, String userId) {
+        if (AliyunGreenService.CHECK.equals(detail.getAvatarCheckStatus()) && userId.equals(detail.getUserId())) {
+            CheckPic pic = corgiPicService.getCheckPicByDataId(detail.getAvatarDataId());
+            if (pic != null) {
+                detail.setAvatar(pic.getPicUrl());
+            }
+        }
+        return detail;
     }
 }

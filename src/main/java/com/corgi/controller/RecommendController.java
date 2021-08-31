@@ -6,6 +6,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,8 @@ public class RecommendController extends BaseController {
     private CorgiBillboardService corgiBillboardService;
     @Reference
     private CorgiBarService corgiBarService;
+    @Reference
+    private CorgiUtilService corgiUtilService;
 
     private Comparator<CorgiActivityDetail> activityComparator = new Comparator<CorgiActivityDetail>() {
         @Override
@@ -82,7 +85,7 @@ public class RecommendController extends BaseController {
     public JsonResult getCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         List<String> activityIds = corgiUserRecommendService.getCityRecommendImage(getUserId(), city, page, size);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(convertDetail(activityList));
+        return new JsonResult(convertDetail(activityList, getUserId()));
     }
 
     @GetMapping("get_bar_activity")
@@ -92,14 +95,14 @@ public class RecommendController extends BaseController {
             return new JsonResult(new ArrayList());
         }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(convertDetail(activityList));
+        return new JsonResult(convertDetail(activityList, getUserId()));
     }
 
     @GetMapping("get_not_city_image")
     public JsonResult getNotCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         List<String> activityIds = corgiUserRecommendService.getNotCityRecommendImage(getUserId(), city, page, size);
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(convertDetail(activityList));
+        return new JsonResult(convertDetail(activityList, getUserId()));
     }
 
     @GetMapping("get_city_user")
@@ -115,7 +118,7 @@ public class RecommendController extends BaseController {
     @GetMapping("get_city_activity")
     public JsonResult getCityActivity(@RequestParam("city") String city) {
         List<CorgiActivity> result = corgiActivityService.getCityRecommendActivity(city, new ActivityQuery());
-        List<CorgiActivityDetail> details = convertDetail(result);
+        List<CorgiActivityDetail> details = convertDetail(result, getUserId());
         details.sort(activityComparator);
         return new JsonResult(details);
     }
@@ -127,7 +130,7 @@ public class RecommendController extends BaseController {
         return new JsonResult();
     }
 
-    private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList) {
+    private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
         if (!CollectionUtils.isEmpty(activityList)) {
@@ -155,7 +158,7 @@ public class RecommendController extends BaseController {
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
-                    detail.setUserDetail(userDetail);
+                    detail.setUserDetail(corgiUtilService.checkUserDetail(userDetail, userId));
                     detail.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), activity.getUserId()));
                 }
 

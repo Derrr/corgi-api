@@ -153,6 +153,7 @@ public class AliyunGreenService {
             mailService.sendCheckMessage("用户背景：", userDetail.getUserId());
             userDetail.setBgCheckStatus(corgiPic.getStatus());
             userDetail.setBgDataId(corgiPic.getDataId());
+            userDetail.setBackground(null);
             return userDetail;
         }
         userDetail.setBgCheckStatus(corgiPic.getStatus());
@@ -172,6 +173,7 @@ public class AliyunGreenService {
             mailService.sendCheckMessage("用户头像：", userDetail.getUserId());
             userDetail.setAvatarCheckStatus(corgiPic.getStatus());
             userDetail.setAvatarDataId(corgiPic.getDataId());
+            userDetail.setAvatar(null);
             return userDetail;
         }
         //corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());

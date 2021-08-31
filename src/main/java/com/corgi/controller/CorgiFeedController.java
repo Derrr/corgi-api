@@ -508,7 +508,7 @@ public class CorgiFeedController extends BaseController {
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
-                    detail.setUserDetail(userDetail);
+                    detail.setUserDetail(corgiUtilService.checkUserDetail(userDetail, userId));
                     detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, activity.getUserId()));
                 }
                 detailList.add(detail);

@@ -269,8 +269,8 @@ public class CorgiUserController extends BaseController {
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
-        userDetail = aliyunGreenService.checkBackground(userDetail);
         if (hasUserId()) {
+            userDetail = aliyunGreenService.checkBackground(userDetail);
             userDetail = aliyunGreenService.checkAvatar(userDetail);
             userDetail = aliyunGreenService.checkDesc(userDetail);
             userDetail.setGroup(changeGroup(userDetail.getGroup()));
@@ -442,6 +442,20 @@ public class CorgiUserController extends BaseController {
                 userDetail.setRole("");
             }
             userDetail.setMatch(0.0);
+            if (getUserId().equals(userId)) {
+                if (CorgiPic.NEED_CHECK.equals(userDetail.getAvatarCheckStatus())){
+                    CheckPic pic = corgiPicService.getCheckPicByDataId(userDetail.getAvatarDataId());
+                    if(pic != null) {
+                        userDetail.setAvatar(pic.getPicUrl());
+                    }
+                }
+                if (CorgiPic.NEED_CHECK.equals(userDetail.getBgCheckStatus())){
+                    CheckPic pic = corgiPicService.getCheckPicByDataId(userDetail.getBgDataId());
+                    if(pic != null) {
+                        userDetail.setBackground(pic.getPicUrl());
+                    }
+                }
+            }
             return new JsonResult(userDetail);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
