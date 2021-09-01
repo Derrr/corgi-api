@@ -646,7 +646,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_share_token")
-    public JsonResult getShareToken(@RequestParam("type") String type, @RequestParam(required = false, name = "activityId", defaultValue = "-") String activityId) {
+    public JsonResult getShareToken(@RequestParam("type") String type, @RequestParam(required = false, name = "sourceId", defaultValue = "-") String activityId) {
         return new JsonResult(corgiShareService.getShareToken(getUserId(), type, activityId));
     }
 
