@@ -106,23 +106,25 @@ public class CorgiFeedController extends BaseController {
             Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);
             Future<List<ActivityLike>> likeFuture = asyncTaskService.getUserLike(lastId, userId, size);
             Future<List<ActivityComment>> commentFuture = asyncTaskService.getUserComment(lastId, userId, size);
-
             List<UserActivity> userActivities = new ArrayList<>();
             try {
                 userActivities = this.mergeCreate(userActivities, activityFuture.get(), size);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+            log.info("user_feeds:{} ", userActivities.size());
             try {
                 userActivities = this.mergeComment(userActivities, commentFuture.get(), size);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+            log.info("user_feeds:{} ", userActivities.size());
             try {
                 userActivities = this.mergeLike(userActivities, likeFuture.get(), size);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+            log.info("user_feeds:{} ", userActivities.size());
             userActivities = this.populateUserActivity(userActivities);
             if (!CollectionUtils.isEmpty(userActivities) && userActivities.size() == 1) {
                 UserActivity tmp = userActivities.get(0);
