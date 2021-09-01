@@ -287,25 +287,27 @@ public class CorgiActivityController extends BaseController {
         extra.put("activityId", activity.getId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
         UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
-        for (String mentionUserId : activity.getMentionUserIds()) {
-            if (!getUserId().equals(mentionUserId)) {
-                mqService.sendMessage(PushMessage.builder()
-                        .type(PushMessage.DEFAULT)
-                        .sourceUserId(getUserId())
-                        .targetUserId(mentionUserId)
-                        .message(PushMessage.ACTIVITY_AT)
-                        .extra(extra)
-                        .build());
-                corgiToolService.addActivityMessage(ActivityMessage.builder()
-                        .activityId(activity.getId())
-                        .fromUserAvatar(userDetail.getAvatar())
-                        .fromUserName(userDetail.getNickname())
-                        .fromUserId(getUserId())
-                        .toUserId(mentionUserId)
-                        .time(System.currentTimeMillis())
-                        .content("@了你")
-                        .messageType(ActivityMessage.COMMENT)
-                        .build());
+        if (activity.getMentionUserIds() != null) {
+            for (String mentionUserId : activity.getMentionUserIds()) {
+                if (!getUserId().equals(mentionUserId)) {
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.DEFAULT)
+                            .sourceUserId(getUserId())
+                            .targetUserId(mentionUserId)
+                            .message(PushMessage.ACTIVITY_AT)
+                            .extra(extra)
+                            .build());
+                    corgiToolService.addActivityMessage(ActivityMessage.builder()
+                            .activityId(activity.getId())
+                            .fromUserAvatar(userDetail.getAvatar())
+                            .fromUserName(userDetail.getNickname())
+                            .fromUserId(getUserId())
+                            .toUserId(mentionUserId)
+                            .time(System.currentTimeMillis())
+                            .content("@了你")
+                            .messageType(ActivityMessage.COMMENT)
+                            .build());
+                }
             }
         }
         return new JsonResult(AddActivityResult.getResult(activity));
