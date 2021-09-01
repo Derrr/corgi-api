@@ -371,6 +371,7 @@ public class CorgiFeedController extends BaseController {
     }
 
     private List<UserActivity> mergeCreate(List<UserActivity> userActivities, List<CorgiActivity> activityList, Integer size) {
+        log.info("user_feeds:{} ", activityList);
         if (activityList == null) {
             return userActivities;
         }
