@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.rmi.ServerException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -73,22 +74,27 @@ public class CorgiFeedController extends BaseController {
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
         String userId = "1";
-        if (hasUserId()) {
-            userId = getUserId();
+        try {
+            if (hasUserId()) {
+                userId = getUserId();
+            }
+            String key = "get_feeds-" + userId;
+            redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS);
+            if (size > 10) {
+                size = 5;
+            }
+            List<String> feedIds = corgiFeedService.getUnviewFeed(userId, size);
+            List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
+            List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
+            for (String feed : feedIds) {
+                corgiFeedService.viewFeed(userId, feed);
+            }
+            mqService.refreshFeed(userId);
+            return new JsonResult(details);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
-        String key = "get_feeds-" + userId;
-        redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS);
-        if (size > 10) {
-            size = 5;
-        }
-        List<String> feedIds = corgiFeedService.getUnviewFeed(userId, size);
-        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
-        List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
-        for (String feed : feedIds) {
-            corgiFeedService.viewFeed(userId, feed);
-        }
-        mqService.refreshFeed(userId);
-        return new JsonResult(details);
     }
 
     @GetMapping("get_user_feeds")
