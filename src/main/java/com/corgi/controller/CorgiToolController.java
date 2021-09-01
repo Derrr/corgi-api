@@ -61,6 +61,8 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiSoundService corgiSoundService;
     @Reference
+    private CorgiShareService corgiShareService;
+    @Reference
     private CorgiVlogService corgiVlogService;
     @Autowired
     private CorgiUtilService corgiUtilService;
@@ -643,6 +645,16 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_share_token")
+    public JsonResult getShareToken(@RequestParam("type") String type, @RequestParam(required = false, name = "activityId", defaultValue = "-") String activityId) {
+        return new JsonResult(corgiShareService.getShareToken(getUserId(), type, activityId));
+    }
+
+    @GetMapping("view_token")
+    public JsonResult viewToken(@RequestParam("token") String token) {
+        corgiShareService.viewShare(token);
+        return new JsonResult();
+    }
 
     @GetMapping("test")
     public JsonResult test() {

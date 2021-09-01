@@ -865,17 +865,13 @@ public class CorgiActivityController extends BaseController {
         String userId = activityQuery.getUserId();
         String key = "latest_activity_" + userId;
         String latestActivityId = redisTemplate.opsForValue().get(key);
-        if (activityQuery.getPage() != null && activityQuery.getPage() > 1) {
-            for (int i = 1; i < activityQuery.getPage(); i++) {
-                String lastActivityId = this.getLastActivity(activityQuery);
-                if (lastActivityId == null) {
-                    return new JsonResult();
-                }
-                activityQuery.setActivityId(lastActivityId);
-            }
+        Integer page = activityQuery.getPage();
+        if (page != null) {
+            activityQuery.setPage((page - 1) * activityQuery.getPageSize());
+        } else {
+            activityQuery.setPage(0);
         }
         List<String> activityIds = corgiUserActivityService.getFollowUserActivity(activityQuery);
-
         if (CollectionUtils.isEmpty(activityIds)) {
             return new JsonResult();
         }
@@ -886,14 +882,6 @@ public class CorgiActivityController extends BaseController {
         }
         redisTemplate.opsForValue().set(key, latestActivityId, 3L, TimeUnit.DAYS);
         return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), activityQuery.getUserId()));
-    }
-
-    private String getLastActivity(ActivityQuery query) {
-        List<String> activityIds = corgiUserActivityService.getFollowUserActivity(query);
-        if (CollectionUtils.isEmpty(activityIds)) {
-            return null;
-        }
-        return activityIds.get(activityIds.size() - 1);
     }
 
     @GetMapping("refuse")
@@ -1047,17 +1035,15 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
-
     @GetMapping("get_user_activity")
-    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        List<CorgiActivity> result = corgiActivityService.getActivityByUserIds(Arrays.asList(userId), CorgiActivity.CAT_IMAGE, page, pageSize);
-        return new JsonResult(convertDetail(result, getUserId()));
+    public JsonResult getMyRunningActivity(ActivityQuery query) {
+        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId()));
     }
 
     @GetMapping("get_user_video")
     public JsonResult getUserVideo(ActivityQuery query) {
         query.setCategory(CorgiActivity.CAT_VIDEO);
-        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query),getUserId()));
+        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId()));
     }
 
     @GetMapping("get_user_running_activity")
@@ -1148,16 +1134,20 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_liked_activity")
-    public JsonResult getLikedActivity(@RequestParam("userId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getLikedActivity(@RequestParam("userId") String userId,
+                                       @RequestParam(required = false, name = "activityId") String activityId,
+                                       @RequestParam(required = false, name = "category") String category,
+                                       @RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
+                                       @RequestParam("pageSize") Integer pageSize) {
         List<CorgiActivity> corgiActivities = new ArrayList<>();
-        List<String> activityIds = corgiLikeService.getLikedActivity(userId, page, pageSize);
+        List<String> activityIds = corgiLikeService.getLikedActivity(userId, activityId, category, page, pageSize);
         if (!CollectionUtils.isEmpty(activityIds)) {
             corgiActivities = corgiActivityService.getActivityByIds(activityIds);
         }
-        return new JsonResult(convertDetail(corgiActivities, getUserId(), true));
+        return new JsonResult(convertDetail(corgiActivities, getUserId(), false));
     }
 
-    @PostMapping("share")
+    @PostMapping("/share")
     public JsonResult addShareActivity(@RequestBody ActivityShare activityShare) {
         activityShare.setShareUserId(getUserId());
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityShare.getActivityId()));
