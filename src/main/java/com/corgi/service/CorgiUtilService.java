@@ -199,6 +199,9 @@ public class CorgiUtilService {
     }
 
     public UserDetail checkUserDetail(UserDetail detail, String userId) {
+        if (detail == null) {
+            return null;
+        }
         if (AliyunGreenService.CHECK.equals(detail.getAvatarCheckStatus()) && userId.equals(detail.getUserId())) {
             CheckPic pic = corgiPicService.getCheckPicByDataId(detail.getAvatarDataId());
             if (pic != null) {

@@ -487,6 +487,11 @@ public class CorgiFeedController extends BaseController {
                     it.remove();
                     continue;
                 }
+                UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
+                if (userDetail == null) {
+                    it.remove();
+                    continue;
+                }
                 activity.setCurrentTime(now);
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
@@ -513,7 +518,6 @@ public class CorgiFeedController extends BaseController {
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getUserId())) {
-                    UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
                     detail.setUserDetail(corgiUtilService.checkUserDetail(userDetail, userId));
                     detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, activity.getUserId()));
                 }
