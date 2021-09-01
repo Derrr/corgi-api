@@ -380,10 +380,11 @@ public class CorgiFeedController extends BaseController {
                 UserActivity activity = new UserActivity(corgiActivity.getId(), corgiActivity.getCreateTime(), UserActivity.CREATE);
                 userActivities.add(activity);
             }
-        }
-        for (CorgiActivity corgiActivity : activityList) {
-            UserActivity activity = new UserActivity(corgiActivity.getId(), corgiActivity.getCreateTime(), UserActivity.CREATE);
-            userActivities = addUserActivity(userActivities, activity, size);
+        } else {
+            for (CorgiActivity corgiActivity : activityList) {
+                UserActivity activity = new UserActivity(corgiActivity.getId(), corgiActivity.getCreateTime(), UserActivity.CREATE);
+                userActivities = addUserActivity(userActivities, activity, size);
+            }
         }
         return userActivities;
     }
@@ -397,10 +398,11 @@ public class CorgiFeedController extends BaseController {
                 UserActivity activity = new UserActivity(comment.getActivityId(), comment.getCtime(), UserActivity.COMMENT);
                 userActivities.add(activity);
             }
-        }
-        for (ActivityComment comment : commentList) {
-            UserActivity activity = new UserActivity(comment.getActivityId(), comment.getCtime(), UserActivity.COMMENT);
-            userActivities = addUserActivity(userActivities, activity, size);
+        } else {
+            for (ActivityComment comment : commentList) {
+                UserActivity activity = new UserActivity(comment.getActivityId(), comment.getCtime(), UserActivity.COMMENT);
+                userActivities = addUserActivity(userActivities, activity, size);
+            }
         }
         return userActivities;
     }
@@ -414,31 +416,31 @@ public class CorgiFeedController extends BaseController {
                 UserActivity activity = new UserActivity(like.getActivityId(), like.getCtime(), UserActivity.LIKE);
                 userActivities.add(activity);
             }
-        }
-        for (ActivityLike like : likeList) {
-            UserActivity activity = new UserActivity(like.getActivityId(), like.getCtime(), UserActivity.LIKE);
-            userActivities = addUserActivity(userActivities, activity, size);
+        } else {
+            for (ActivityLike like : likeList) {
+                UserActivity activity = new UserActivity(like.getActivityId(), like.getCtime(), UserActivity.LIKE);
+                userActivities = addUserActivity(userActivities, activity, size);
+            }
         }
         return userActivities;
     }
 
     private List<UserActivity> addUserActivity(List<UserActivity> userActivities, UserActivity activity, Integer size) {
+        int i = 0;
         boolean added = false;
-        List<UserActivity> result = new ArrayList<>();
-        Integer tmpSize = userActivities.size() < size ? userActivities.size() : size;
-        int index = tmpSize;
-        for (int i = 0; i < tmpSize; i++) {
-            UserActivity userActivity = userActivities.get(i);
-            if (userActivity.lesser(activity)) {
-                index = i;
+        for (UserActivity userActivity : userActivities) {
+            if (userActivity.lesser(userActivity) && i < size) {
+                userActivities.add(i, activity);
+                added = true;
                 break;
             }
+            i++;
         }
-        userActivities.add(index, activity);
-        if (userActivities.size() > size) {
-            result.addAll(userActivities.subList(0, size));
+        if (!added && userActivities.size() < size) {
+            userActivities.add(activity);
+            return userActivities;
         }
-        return result;
+        return userActivities.subList(0, size);
     }
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
