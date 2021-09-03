@@ -80,7 +80,7 @@ public class CorgiFeedController extends BaseController {
             }
             String key = "get_feeds-" + userId;
             if (!redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS)) {
-                return new JsonResult();
+                Thread.sleep(100L);
             }
             if (size > 10) {
                 size = 8;
