@@ -81,7 +81,7 @@ public class CorgiFeedController extends BaseController {
             String key = "get_feeds-" + userId;
             redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS);
             if (size > 10) {
-                size = 5;
+                size = 8;
             }
             List<String> feedIds = corgiFeedService.getUnviewFeed(userId, size);
             List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
