@@ -429,7 +429,7 @@ public class CorgiFeedController extends BaseController {
         int i = 0;
         boolean added = false;
         for (UserActivity userActivity : userActivities) {
-            if (userActivity.lesser(userActivity) && i < size) {
+            if (userActivity.lesser(activity) && i < size) {
                 userActivities.add(i, activity);
                 added = true;
                 break;
