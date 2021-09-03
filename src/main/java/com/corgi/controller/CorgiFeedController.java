@@ -438,13 +438,13 @@ public class CorgiFeedController extends BaseController {
             }
             i++;
         }
-        if (userActivities.size() < size) {
-            if (!added) {
-                userActivities.add(activity);
-            }
-            return userActivities;
+        if (!added) {
+            userActivities.add(activity);
         }
-        return userActivities.subList(0, size);
+        if (userActivities.size() > size) {
+            return userActivities.subList(0, size);
+        }
+        return userActivities;
     }
 
     private VlogDetail getVlogDetail(String activityId, String userId) {
