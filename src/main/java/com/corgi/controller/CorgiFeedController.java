@@ -79,7 +79,9 @@ public class CorgiFeedController extends BaseController {
                 userId = getUserId();
             }
             String key = "get_feeds-" + userId;
-            redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS);
+            if (!redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS)) {
+                return new JsonResult();
+            }
             if (size > 10) {
                 size = 8;
             }
