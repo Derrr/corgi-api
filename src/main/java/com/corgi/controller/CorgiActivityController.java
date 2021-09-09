@@ -628,19 +628,10 @@ public class CorgiActivityController extends BaseController {
                 throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
             }
         }
-        Long start = System.currentTimeMillis();
         corgiUserActivityService.deleteActivityCreator(activityId);
-        Long end1 = System.currentTimeMillis();
-        log.info("delete activity creator:{} ", (end1 - start) + "ms");
         corgiVlogService.deleteVlog(activityId);
-        Long end2 = System.currentTimeMillis();
-        log.info("delete activity vlog:{} ", (end2 - end1) + "ms");
         corgiActivityService.deleteCorgiActivity(activityId);
-        Long end3 = System.currentTimeMillis();
-        log.info("delete activity corgi:{} ", (end3 - end2) + "ms");
         corgiLikeService.deleteActivityLike(null, activityId);
-        Long end4 = System.currentTimeMillis();
-        log.info("delete activity like:{} ", (end4 - end3) + "ms");
         return new JsonResult();
     }
 
