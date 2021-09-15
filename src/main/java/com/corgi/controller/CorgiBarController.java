@@ -280,7 +280,7 @@ public class CorgiBarController extends BaseController {
         BarLogin login = new BarLogin();
         if (profile != null && !StringUtils.isEmpty(profile.getBarId())) {
             BeanUtils.copyProperties(profile, login);
-            login.setJwt(JWTUtils.createJWT(profile.getBarId(), "1.0.0"));
+            login.setJwt(JWTUtils.createJWT(profile.getBarId(), "1.0.0", 24 * 3600 * 1000L));
         } else {
             throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "账号密码错误");
         }
