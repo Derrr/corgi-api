@@ -998,6 +998,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getRangeActivity(@RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
         String userId = getUserId();
         activityQuery.setUserId(null);
+        activityQuery.setLoginUserId(userId);
         List<CorgiActivity> activityList = corgiActivityService.getFeedActivity(activityQuery);
         if (!CollectionUtils.isEmpty(activityList) && activityList.size() >= 5) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -1039,12 +1040,14 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(ActivityQuery query) {
+        query.setLoginUserId(getUserId());
         return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId()));
     }
 
     @GetMapping("get_user_video")
     public JsonResult getUserVideo(ActivityQuery query) {
         query.setCategory(CorgiActivity.CAT_VIDEO);
+        query.setLoginUserId(getUserId());
         return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId()));
     }
 
