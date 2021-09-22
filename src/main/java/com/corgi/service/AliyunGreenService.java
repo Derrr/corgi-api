@@ -304,6 +304,10 @@ public class AliyunGreenService {
     }
 
     public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type) {
+        return checkPic(urls, sourceId, type, true);
+    }
+
+    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type, boolean retry) {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
@@ -402,6 +406,14 @@ public class AliyunGreenService {
                         }
                         addCheckPic(pic, sourceId, type);
                     } else {
+                        if (retry) {
+                            try {
+                                Thread.sleep(200L);
+                            } catch (InterruptedException e) {
+                                log.error(e.getMessage(), e);
+                            }
+                            return checkPic(urls, sourceId, type, false);
+                        }
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
                         pic.setStatus(CorgiPic.NEED_CHECK);
                         pic.setResult(result);
