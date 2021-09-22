@@ -223,9 +223,6 @@ public class CorgiToolController extends BaseController {
                                   @RequestParam("page") int page, @RequestParam("pageSize") int size,
                                   @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         List<CheckPic> checkPics = corgiPicService.getCheckPic(userId, status, type, page, size);
-        if (CheckPic.USER.equals(type)) {
-            checkPics.addAll(0, corgiPicService.getCheckPic(userId, status, CheckPic.BACKGROUND, page, size));
-        }
         return new JsonResult(checkPics);
     }
 
