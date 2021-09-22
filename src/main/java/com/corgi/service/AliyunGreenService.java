@@ -408,7 +408,7 @@ public class AliyunGreenService {
                     } else {
                         if (retry) {
                             try {
-                                Thread.sleep(200L);
+                                Thread.sleep(1000L);
                             } catch (InterruptedException e) {
                                 log.error(e.getMessage(), e);
                             }
