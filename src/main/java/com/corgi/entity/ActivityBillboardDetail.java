@@ -13,10 +13,6 @@ import java.util.List;
 @Data
 public class ActivityBillboardDetail extends CorgiActivity {
 
-    private List<UserProfile> signUpUsers;
-    private Integer signUpCount;
-    private String lastTime;
-
     public static ActivityBillboardDetail getResult(CorgiActivity corgiActivity) {
         ActivityBillboardDetail result = new ActivityBillboardDetail();
         BeanUtils.copyProperties(corgiActivity, result);
