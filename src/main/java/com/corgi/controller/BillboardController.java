@@ -91,7 +91,7 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("add_activity_billboard")
+    @GetMapping("update_activity_billboard")
     public JsonResult updateActivityBillboard(@RequestParam("oldActivityId") String oldActivityId,
                                               @RequestParam("activityId") String activityId,
                                               @RequestParam("date")String date,
