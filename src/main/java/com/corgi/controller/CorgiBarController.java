@@ -261,6 +261,7 @@ public class CorgiBarController extends BaseController {
         CorgiActivity activity = new CorgiActivity();
         activity.setId(activityId);
         activity.setRecommend("enable");
+        activity.setRecommend("enable");
         corgiActivityService.updateCorgiActivityStatus(activity);
         return new JsonResult();
     }
