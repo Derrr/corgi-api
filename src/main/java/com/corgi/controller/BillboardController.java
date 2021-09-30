@@ -61,62 +61,62 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("get_activity_billboard")
-    public JsonResult getActivityBillboard() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String date = sdf.format(new Date());
-        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
-        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(buildActivityBillboard(activities));
-    }
-
-    @GetMapping("get_activity_billboard_by_date")
-    public JsonResult getAllActivityBillboard(@RequestParam("date")String date) {
-        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
-        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(buildActivityBillboard(activities));
-    }
-
-    @GetMapping("add_activity_billboard")
-    public JsonResult addActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date")String date,
-                                           @RequestParam("order")Integer order) {
-        if (!hasUserId()) {
-            ActivityBillboard activityBillboard = new ActivityBillboard();
-            activityBillboard.setActivityId(activityId);
-            activityBillboard.setDate(date);
-            activityBillboard.setOrder(order);
-            corgiBillboardService.addActivityBillboard(activityBillboard);
-        }
-        return new JsonResult();
-    }
-
-    @GetMapping("add_activity_billboard")
-    public JsonResult updateActivityBillboard(@RequestParam("oldActivityId") String oldActivityId,
-                                              @RequestParam("activityId") String activityId,
-                                              @RequestParam("date")String date,
-                                           @RequestParam("order")Integer order) {
-        if (!hasUserId()) {
-            ActivityBillboard activityBillboard = new ActivityBillboard();
-            activityBillboard.setActivityId(oldActivityId);
-            activityBillboard.setDate(date);
-            activityBillboard.setOrder(order);
-            corgiBillboardService.deleteActivityBillboard(activityBillboard);
-            activityBillboard.setActivityId(activityId);
-            corgiBillboardService.addActivityBillboard(activityBillboard);
-        }
-        return new JsonResult();
-    }
-
-    @GetMapping("delete_activity_billboard")
-    public JsonResult deleteActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date")String date) {
-        if (!hasUserId()) {
-            ActivityBillboard activityBillboard = new ActivityBillboard();
-            activityBillboard.setActivityId(activityId);
-            activityBillboard.setDate(date);
-            corgiBillboardService.deleteActivityBillboard(activityBillboard);
-        }
-        return new JsonResult();
-    }
+//    @GetMapping("get_activity_billboard")
+//    public JsonResult getActivityBillboard() {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        String date = sdf.format(new Date());
+//        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
+//        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+//        return new JsonResult(buildActivityBillboard(activities));
+//    }
+//
+//    @GetMapping("get_activity_billboard_by_date")
+//    public JsonResult getAllActivityBillboard(@RequestParam("date")String date) {
+//        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
+//        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+//        return new JsonResult(buildActivityBillboard(activities));
+//    }
+//
+//    @GetMapping("add_activity_billboard")
+//    public JsonResult addActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date")String date,
+//                                           @RequestParam("order")Integer order) {
+//        if (!hasUserId()) {
+//            ActivityBillboard activityBillboard = new ActivityBillboard();
+//            activityBillboard.setActivityId(activityId);
+//            activityBillboard.setDate(date);
+//            activityBillboard.setOrder(order);
+//            corgiBillboardService.addActivityBillboard(activityBillboard);
+//        }
+//        return new JsonResult();
+//    }
+//
+//    @GetMapping("add_activity_billboard")
+//    public JsonResult updateActivityBillboard(@RequestParam("oldActivityId") String oldActivityId,
+//                                              @RequestParam("activityId") String activityId,
+//                                              @RequestParam("date")String date,
+//                                           @RequestParam("order")Integer order) {
+//        if (!hasUserId()) {
+//            ActivityBillboard activityBillboard = new ActivityBillboard();
+//            activityBillboard.setActivityId(oldActivityId);
+//            activityBillboard.setDate(date);
+//            activityBillboard.setOrder(order);
+//            corgiBillboardService.deleteActivityBillboard(activityBillboard);
+//            activityBillboard.setActivityId(activityId);
+//            corgiBillboardService.addActivityBillboard(activityBillboard);
+//        }
+//        return new JsonResult();
+//    }
+//
+//    @GetMapping("delete_activity_billboard")
+//    public JsonResult deleteActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date")String date) {
+//        if (!hasUserId()) {
+//            ActivityBillboard activityBillboard = new ActivityBillboard();
+//            activityBillboard.setActivityId(activityId);
+//            activityBillboard.setDate(date);
+//            corgiBillboardService.deleteActivityBillboard(activityBillboard);
+//        }
+//        return new JsonResult();
+//    }
 
 
     private List<CorgiActivityDetail> buildActivityBillboard(List<CorgiActivity> activityList) {
