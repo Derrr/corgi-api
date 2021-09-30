@@ -12,6 +12,7 @@ import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +42,7 @@ public class BillboardController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiLikeService corgiLikeService;
-    @Reference
+    @Autowired
     private AliyunGreenService aliyunGreenService;
 
     @GetMapping("get_by_date")
