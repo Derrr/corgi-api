@@ -182,6 +182,24 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @PostMapping("update_topic")
+    public JsonResult upadteActivityTopic(@RequestBody CorgiActivityDetail corgiActivity) {
+        corgiToolService.updateActivityTopic(corgiActivity.getActivityId(), corgiActivity.getTopics());
+        return new JsonResult();
+    }
+
+    @GetMapping("sticky_top")
+    public JsonResult stickyTop(@RequestParam("activityId") String activityId) {
+        corgiToolService.updateActivityTopicWeight(activityId, 1);
+        return new JsonResult();
+    }
+
+    @GetMapping("undo_sticky_top")
+    public JsonResult undoStickyTop(@RequestParam("activityId") String activityId) {
+        corgiToolService.updateActivityTopicWeight(activityId, 0);
+        return new JsonResult();
+    }
+
     @GetMapping("get_check_sound")
     public JsonResult getCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String
                                             status, @RequestParam("page") int page, @RequestParam("pageSize") int size) {
