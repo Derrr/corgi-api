@@ -962,14 +962,16 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_range_image")
     public PageResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
-        activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
-        if (StringUtils.isEmpty(activityQuery.getUserId())) {
-            activityQuery.setUserId(userId);
-        }
-        List<CorgiActivity> activities;
-        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
-        activities = page.getCorgiActivityList();
-        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
+//        activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
+//        if (StringUtils.isEmpty(activityQuery.getUserId())) {
+//            activityQuery.setUserId(userId);
+//        }
+//        List<CorgiActivity> activities;
+//        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
+//        activities = page.getCorgiActivityList();
+//        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
+        List<String> activityIds = corgiToolService.getActivityIdsByTopic(activityQuery.getTopic(),activityQuery.getPage(),activityQuery.getPageSize());
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activities, userId);
         return new PageResult(detailList, activityQuery.getTPage(), activityQuery.getDPage());
     }
