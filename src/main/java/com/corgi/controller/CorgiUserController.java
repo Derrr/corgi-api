@@ -567,8 +567,8 @@ public class CorgiUserController extends BaseController {
         } else {
             //为空则为第一次注册，发送注册推送
             corgiUserService.updateUserPosition(userPosition);
-            mqService.sendRegisterMessage(PushMessage.builder()
-                    .targetUserId(userPosition.getUserId()).build());
+           // mqService.sendRegisterMessage(PushMessage.builder()
+           //         .targetUserId(userPosition.getUserId()).build());
         }
 
         return new JsonResult(result);
