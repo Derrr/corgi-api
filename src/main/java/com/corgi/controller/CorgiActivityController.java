@@ -1364,7 +1364,7 @@ public class CorgiActivityController extends BaseController {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
-                if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
+                if (!StringUtils.isEmpty(activity.getUserId()) && activity.getUserId().startsWith("B")) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
