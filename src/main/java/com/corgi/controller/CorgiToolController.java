@@ -182,7 +182,7 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
-    @PostMapping("update_topic")
+    @PostMapping("update_activity_topic")
     public JsonResult upadteActivityTopic(@RequestBody CorgiActivityDetail corgiActivity) {
         corgiToolService.updateActivityTopic(corgiActivity.getActivityId(), corgiActivity.getTopics());
         return new JsonResult();
