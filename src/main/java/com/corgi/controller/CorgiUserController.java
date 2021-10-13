@@ -519,7 +519,7 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user_position")
     public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) throws PermissionException {
-        log.info("updating version:{} ", getVersion());
+        log.info("updating version:{} ", userPosition);
         HashMap result = new HashMap();
         result.put("freq", 1);
         try {
@@ -538,7 +538,6 @@ public class CorgiUserController extends BaseController {
                         throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "用户不存在:" + jwtUserId + " v:" + userPosition.getVersion());
                     }
                     Date expireDate = decodedJWT.getExpiresAt();
-                    log.info("expireAt:{} ", expireDate);
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
                     }
