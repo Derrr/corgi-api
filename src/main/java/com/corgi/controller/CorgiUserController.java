@@ -874,6 +874,15 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiUserService.searchInfluencer(userDetail, null, page, pageSize));
     }
 
+    @GetMapping("set_influencer_character")
+    public JsonResult setInfluencerCharacter(@RequestParam(name = "userId") String userId,
+                                             @RequestParam(name = "character", required = false) String character) {
+        UserDetail userDetail = new UserDetail();
+        userDetail.setUserId(userId);
+        userDetail.setCharacter(character);
+        return new JsonResult(corgiUserService.updateDetail(userDetail));
+    }
+
     @GetMapping("/call_user_city")
     public JsonResult callCity(@RequestParam("city") String city, @RequestParam(required = false, name = "userId") String userId) {
         if (hasUserId()) {
