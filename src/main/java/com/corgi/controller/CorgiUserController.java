@@ -519,7 +519,12 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user_position")
     public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) throws PermissionException {
-        log.info("updating version:{} ", userPosition);
+        if (userPosition.getLat() == null) {
+            userPosition.setLat(1000.0);
+        }
+        if (userPosition.getLng() == null) {
+            userPosition.setLng(1000.0);
+        }
         HashMap result = new HashMap();
         result.put("freq", 1);
         try {
