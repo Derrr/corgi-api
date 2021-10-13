@@ -538,6 +538,7 @@ public class CorgiUserController extends BaseController {
                         throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "用户不存在:" + jwtUserId + " v:" + userPosition.getVersion());
                     }
                     Date expireDate = decodedJWT.getExpiresAt();
+                    log.info("expireAt:{} ", expireDate);
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {
                         result.put("jwt", JWTUtils.createJWT(jwtUserId, userPosition.getVersion()));
                     }
@@ -567,8 +568,8 @@ public class CorgiUserController extends BaseController {
         } else {
             //为空则为第一次注册，发送注册推送
             corgiUserService.updateUserPosition(userPosition);
-           // mqService.sendRegisterMessage(PushMessage.builder()
-           //         .targetUserId(userPosition.getUserId()).build());
+            // mqService.sendRegisterMessage(PushMessage.builder()
+            //         .targetUserId(userPosition.getUserId()).build());
         }
 
         return new JsonResult(result);
