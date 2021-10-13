@@ -1015,7 +1015,7 @@ public class CorgiUserController extends BaseController {
     public JsonResult getVerifyResult(@RequestParam("requestId") String requestId) throws PermissionException {
         DescribeVerifyResultResponse response = aliyunGreenService.getDescribeVerifyResult(requestId);
         String userId = getUserId();
-        log.info("user:{} verity result: {} ", userId, response);
+        log.info("user:{} verity result: {} ", userId, response.getFaceComparisonScore());
         Float score = response.getFaceComparisonScore();
         if (score != null && score > 40) {
             UserDetail userDetail = new UserDetail();
