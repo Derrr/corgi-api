@@ -210,7 +210,10 @@ public class EvaluateController extends BaseController {
         if (!StringUtils.isEmpty(evaluationId)) {
             UserEvaluation evaluation = corgiEvaluationService.getEvaluationById(evaluationId);
             for (UserEvaluation tag : tags) {
-                if (evaluation.getTag().equals(tag.getTag())) {
+                if (tag != null
+                        && evaluation != null
+                        && evaluation.getTag() != null
+                        && evaluation.getTag().equals(tag.getTag())) {
                     tag.setHasLike(1);
                 }
             }
