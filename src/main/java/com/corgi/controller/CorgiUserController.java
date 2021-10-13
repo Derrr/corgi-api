@@ -866,11 +866,13 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_influencer")
     public JsonResult getInfluencer(@RequestParam(name = "tel", required = false) String telNo,
                                     @RequestParam(name = "nickname", required = false) String nickname,
+                                    @RequestParam(name = "character", required = false) String character,
                                     @RequestParam("page") Integer page,
                                     @RequestParam("pageSize") Integer pageSize) {
         UserDetail userDetail = new UserDetail();
         userDetail.setTelNo(telNo);
         userDetail.setNickname(nickname);
+        userDetail.setCharacter(character);
         return new JsonResult(corgiUserService.searchInfluencer(userDetail, null, page, pageSize));
     }
 
