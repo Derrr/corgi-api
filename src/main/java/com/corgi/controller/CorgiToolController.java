@@ -182,6 +182,26 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @PostMapping("update_activity_topic")
+    public JsonResult upadteActivityTopic(@RequestBody CorgiActivityDetail corgiActivity) {
+        log.info("id:{} ",corgiActivity.getId());
+        corgiToolService.updateActivityTopic(corgiActivity.getId(), corgiActivity.getTopics());
+        corgiActivityService.updateByColumnn(corgiActivity.getId(), "topics", corgiActivity.getTopics().get(0));
+        return new JsonResult();
+    }
+
+    @GetMapping("sticky_top")
+    public JsonResult stickyTop(@RequestParam("activityId") String activityId) {
+        corgiToolService.updateActivityTopicWeight(activityId, 1);
+        return new JsonResult();
+    }
+
+    @GetMapping("undo_sticky_top")
+    public JsonResult undoStickyTop(@RequestParam("activityId") String activityId) {
+        corgiToolService.updateActivityTopicWeight(activityId, 0);
+        return new JsonResult();
+    }
+
     @GetMapping("get_check_sound")
     public JsonResult getCheckSound(@RequestParam(required = false, name = "status", defaultValue = "") String
                                             status, @RequestParam("page") int page, @RequestParam("pageSize") int size) {
@@ -223,9 +243,6 @@ public class CorgiToolController extends BaseController {
                                   @RequestParam("page") int page, @RequestParam("pageSize") int size,
                                   @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         List<CheckPic> checkPics = corgiPicService.getCheckPic(userId, status, type, page, size);
-        if (CheckPic.USER.equals(type)) {
-            checkPics.addAll(0, corgiPicService.getCheckPic(userId, status, CheckPic.BACKGROUND, page, size));
-        }
         return new JsonResult(checkPics);
     }
 

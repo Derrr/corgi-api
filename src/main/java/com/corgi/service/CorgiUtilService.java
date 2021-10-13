@@ -186,7 +186,7 @@ public class CorgiUtilService {
                 detail.setLikeUsers(activityLikes);
                 detail.setCommentCount(commentCount);
                 detail.setBarDetail(barProfile);
-                if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory())) {
+                if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory()) && activity.getUserId() != null && !activity.getUserId().startsWith("B")) {
                     UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
                     if (userDetail != null) {
                         detail.setUserDetail(userDetail);

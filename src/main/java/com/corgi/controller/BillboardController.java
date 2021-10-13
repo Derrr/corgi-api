@@ -62,65 +62,85 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
-//    @GetMapping("get_activity_billboard")
-//    public JsonResult getActivityBillboard() {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        String date = sdf.format(new Date());
-//        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
-//        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-//        return new JsonResult(buildActivityBillboard(activities));
-//    }
-//
-//    @GetMapping("get_activity_billboard_by_date")
-//    public JsonResult getAllActivityBillboard(@RequestParam("date")String date) {
-//        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
-//        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-//        return new JsonResult(buildActivityBillboard(activities));
-//    }
-//
-//    @GetMapping("add_activity_billboard")
-//    public JsonResult addActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date")String date,
-//                                           @RequestParam("order")Integer order) {
-//        if (!hasUserId()) {
-//            ActivityBillboard activityBillboard = new ActivityBillboard();
-//            activityBillboard.setActivityId(activityId);
-//            activityBillboard.setDate(date);
-//            activityBillboard.setOrder(order);
-//            corgiBillboardService.addActivityBillboard(activityBillboard);
-//        }
-//        return new JsonResult();
-//    }
-//
-//    @GetMapping("add_activity_billboard")
-//    public JsonResult updateActivityBillboard(@RequestParam("oldActivityId") String oldActivityId,
-//                                              @RequestParam("activityId") String activityId,
-//                                              @RequestParam("date")String date,
-//                                           @RequestParam("order")Integer order) {
-//        if (!hasUserId()) {
-//            ActivityBillboard activityBillboard = new ActivityBillboard();
-//            activityBillboard.setActivityId(oldActivityId);
-//            activityBillboard.setDate(date);
-//            activityBillboard.setOrder(order);
-//            corgiBillboardService.deleteActivityBillboard(activityBillboard);
-//            activityBillboard.setActivityId(activityId);
-//            corgiBillboardService.addActivityBillboard(activityBillboard);
-//        }
-//        return new JsonResult();
-//    }
-//
-//    @GetMapping("delete_activity_billboard")
-//    public JsonResult deleteActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date")String date) {
-//        if (!hasUserId()) {
-//            ActivityBillboard activityBillboard = new ActivityBillboard();
-//            activityBillboard.setActivityId(activityId);
-//            activityBillboard.setDate(date);
-//            corgiBillboardService.deleteActivityBillboard(activityBillboard);
-//        }
-//        return new JsonResult();
-//    }
+    @GetMapping("get_activity_billboard")
+    public JsonResult getActivityBillboard() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(new Date());
+        List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        return new JsonResult(buildActivity(activities));
+    }
 
+    @GetMapping("get_activity_billboard_by_date")
+    public JsonResult getAllActivityBillboard(@RequestParam("startTime") String date, @RequestParam("endTime") String endTime) {
+        ActivityBillboard activityBillboard = new ActivityBillboard();
+        activityBillboard.setDate(date);
+        activityBillboard.setCtime(endTime);
+        List<ActivityBillboard> activityBillboards = corgiBillboardService.getAllActivityBillboard(activityBillboard);
+        return new JsonResult(buildActivityBillboard(activityBillboards));
+    }
 
-    private List<CorgiActivityDetail> buildActivityBillboard(List<CorgiActivity> activityList) {
+    @GetMapping("add_activity_billboard")
+    public JsonResult addActivityBillboard(@RequestParam("activityId") String activityId,
+                                           @RequestParam("userId") String userId,
+                                           @RequestParam("date") String date,
+                                           @RequestParam("order") Integer order) {
+        if (!hasUserId()) {
+            ActivityBillboard activityBillboard = new ActivityBillboard();
+            activityBillboard.setActivityId(activityId);
+            activityBillboard.setUserId(userId);
+            activityBillboard.setDate(date);
+            activityBillboard.setOrder(order);
+            corgiBillboardService.addActivityBillboard(activityBillboard);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("update_activity_billboard")
+    public JsonResult updateActivityBillboard(@RequestParam("oldActivityId") String oldActivityId,
+                                              @RequestParam("activityId") String activityId,
+                                              @RequestParam("date") String date,
+                                              @RequestParam("order") Integer order) {
+        if (!hasUserId()) {
+            ActivityBillboard activityBillboard = new ActivityBillboard();
+            activityBillboard.setActivityId(oldActivityId);
+            activityBillboard.setDate(date);
+            activityBillboard.setOrder(order);
+            corgiBillboardService.deleteActivityBillboard(activityBillboard);
+            activityBillboard.setActivityId(activityId);
+            corgiBillboardService.addActivityBillboard(activityBillboard);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("delete_activity_billboard")
+    public JsonResult deleteActivityBillboard(@RequestParam("activityId") String activityId, @RequestParam("date") String date) {
+        if (!hasUserId()) {
+            ActivityBillboard activityBillboard = new ActivityBillboard();
+            activityBillboard.setActivityId(activityId);
+            activityBillboard.setDate(date);
+            corgiBillboardService.deleteActivityBillboard(activityBillboard);
+        }
+        return new JsonResult();
+    }
+
+    private List<ActivityBillboardDetail> buildActivityBillboard(List<ActivityBillboard> billboards) {
+        List<ActivityBillboardDetail> detailList = new ArrayList<>();
+        for (ActivityBillboard billboard : billboards) {
+            List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(billboard.getActivityId()));
+            if (!CollectionUtils.isEmpty(corgiActivities)) {
+                ActivityBillboardDetail detail = ActivityBillboardDetail.getResult(corgiActivities.get(0));
+                detail.setDate(billboard.getDate());
+                detail.setOnBoardCount(billboard.getCount());
+                detail.setOrder(billboard.getOrder());
+                detail.setUserDetail(corgiUserService.getUserDetailBasic(detail.getUserId()));
+                detailList.add(detail);
+            }
+        }
+        return detailList;
+    }
+
+    private List<CorgiActivityDetail> buildActivity(List<CorgiActivity> activityList) {
 
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());

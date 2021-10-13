@@ -261,6 +261,7 @@ public class CorgiBarController extends BaseController {
         CorgiActivity activity = new CorgiActivity();
         activity.setId(activityId);
         activity.setRecommend("enable");
+        activity.setRecommend("enable");
         corgiActivityService.updateCorgiActivityStatus(activity);
         return new JsonResult();
     }
@@ -280,7 +281,7 @@ public class CorgiBarController extends BaseController {
         BarLogin login = new BarLogin();
         if (profile != null && !StringUtils.isEmpty(profile.getBarId())) {
             BeanUtils.copyProperties(profile, login);
-            login.setJwt(JWTUtils.createJWT(profile.getBarId(), "1.0.0", 24 * 3600 * 1000L));
+            login.setJwt(JWTUtils.createJWT(profile.getBarId(), "1.0.0", 12 * 3600 * 1000L));
         } else {
             throw new PermissionException(Constants.PERMISSION_ERROR_CODE, "账号密码错误");
         }

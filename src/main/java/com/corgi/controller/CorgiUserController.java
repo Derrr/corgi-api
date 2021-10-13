@@ -443,15 +443,15 @@ public class CorgiUserController extends BaseController {
             }
             userDetail.setMatch(0.0);
             if (getUserId().equals(userId)) {
-                if (CorgiPic.NEED_CHECK.equals(userDetail.getAvatarCheckStatus())){
+                if (CorgiPic.NEED_CHECK.equals(userDetail.getAvatarCheckStatus())) {
                     CheckPic pic = corgiPicService.getCheckPicByDataId(userDetail.getAvatarDataId());
-                    if(pic != null) {
+                    if (pic != null) {
                         userDetail.setAvatar(pic.getPicUrl());
                     }
                 }
-                if (CorgiPic.NEED_CHECK.equals(userDetail.getBgCheckStatus())){
+                if (CorgiPic.NEED_CHECK.equals(userDetail.getBgCheckStatus())) {
                     CheckPic pic = corgiPicService.getCheckPicByDataId(userDetail.getBgDataId());
-                    if(pic != null) {
+                    if (pic != null) {
                         userDetail.setBackground(pic.getPicUrl());
                     }
                 }
@@ -864,8 +864,25 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_influencer")
-    public JsonResult getInfluencer(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiUserService.searchInfluencer(null, null, page, pageSize));
+    public JsonResult getInfluencer(@RequestParam(name = "tel", required = false) String telNo,
+                                    @RequestParam(name = "nickname", required = false) String nickname,
+                                    @RequestParam(name = "character", required = false) String character,
+                                    @RequestParam("page") Integer page,
+                                    @RequestParam("pageSize") Integer pageSize) {
+        UserDetail userDetail = new UserDetail();
+        userDetail.setTelNo(telNo);
+        userDetail.setNickname(nickname);
+        userDetail.setCharacter(character);
+        return new JsonResult(corgiUserService.searchInfluencer(userDetail, null, page, pageSize));
+    }
+
+    @GetMapping("set_influencer_character")
+    public JsonResult setInfluencerCharacter(@RequestParam(name = "userId") String userId,
+                                             @RequestParam(name = "character", required = false) String character) {
+        UserDetail userDetail = new UserDetail();
+        userDetail.setUserId(userId);
+        userDetail.setCharacter(character);
+        return new JsonResult(corgiUserService.updateDetail(userDetail));
     }
 
     @GetMapping("/call_user_city")

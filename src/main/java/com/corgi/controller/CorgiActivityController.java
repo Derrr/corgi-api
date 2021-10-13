@@ -962,16 +962,21 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_range_image")
     public PageResult getRangeImage(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
-        activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
-        if (StringUtils.isEmpty(activityQuery.getUserId())) {
-            activityQuery.setUserId(userId);
+//        activityQuery.setCategory(CorgiActivity.CAT_IMAGE);
+//        if (StringUtils.isEmpty(activityQuery.getUserId())) {
+//            activityQuery.setUserId(userId);
+//        }
+//        List<CorgiActivity> activities;
+//        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
+//        activities = page.getCorgiActivityList();
+//        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
+        if (activityQuery.getTPage() < 1) {
+            activityQuery.setTPage(1);
         }
-        List<CorgiActivity> activities;
-        ActivityPage page = corgiActivityService.getRecommendActivity(lat, lng, activityQuery);
-        activities = page.getCorgiActivityList();
-        activityQuery.setTPage(activityQuery.getTPage() + activityQuery.getPageSize());
+        List<String> activityIds = corgiToolService.getActivityIdsByTopic(activityQuery.getTopic(), activityQuery.getTPage(), activityQuery.getPageSize());
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activities, userId);
-        return new PageResult(detailList, activityQuery.getTPage(), activityQuery.getDPage());
+        return new PageResult(detailList, activityQuery.getTPage() + 1, activityQuery.getDPage());
     }
 
     @GetMapping("get_by_topic")
@@ -1359,7 +1364,7 @@ public class CorgiActivityController extends BaseController {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
-                if (CorgiActivity.CAT_BUSINESS.equals(detail.getCategory())) {
+                if (!StringUtils.isEmpty(activity.getUserId()) && activity.getUserId().startsWith("B")) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());

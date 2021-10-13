@@ -6,6 +6,7 @@ import com.corgi.user.api.CorgiOpenPageService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiOpenPage;
 import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.UserPosition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -96,8 +97,16 @@ public class CorgiOpenPageController extends BaseController {
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
+        UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
+        String version = userPosition.getVersion().replaceAll("android", "");
+        if("2.0.3".compareTo(version) > 0){
+            corgiOpenPage.setPicType("image");
+        }
         List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
         String province = corgiOpenPage.getProvince();
+        if(StringUtils.isEmpty(province)){
+            province = userPosition.getProvince();
+        }
         if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
             province = corgiUserService.getProvince(corgiOpenPage.getCity());
         }
