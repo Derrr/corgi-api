@@ -701,7 +701,10 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("is_followed")
-    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam(name = "targetUserId", required = false) String targetUserId) {
+        if (StringUtils.isEmpty(targetUserId)) {
+            return new JsonResult(0);
+        }
         int result = corgiUserFollowService.isFollowed(userId, targetUserId);
         return new JsonResult(result);
     }
