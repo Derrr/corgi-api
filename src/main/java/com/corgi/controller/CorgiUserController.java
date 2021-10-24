@@ -121,7 +121,6 @@ public class CorgiUserController extends BaseController {
         if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())) {
             try {
                 corgiUtilService.lock(lockKey);
-
                 if (StringUtils.isEmpty(userLogin.getUserId())) {
                     userLogin = corgiUserService.login(userLogin);
                     if ("-1".equals(userLogin.getStatus())) {
@@ -134,6 +133,12 @@ public class CorgiUserController extends BaseController {
                 } else if (StringUtils.isEmpty(userLogin.getTelNo())) {
                     return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号");
                 } else {
+                    UserDetail search = new UserDetail();
+                    search.setTelNo(userLogin.getTelNo());
+                    if (!CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
+                        return new JsonResult(Constants.API_ERROR_CODE, "手机号已被注册");
+                    }
+                    userLogin.setUserId(getUserId());
                     corgiUserService.updateUserLogin(userLogin);
                     return new JsonResult("更新手机号成功");
                 }
