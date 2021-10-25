@@ -98,13 +98,15 @@ public class CorgiOpenPageController extends BaseController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
         UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
-        String version = userPosition.getVersion().replaceAll("android", "");
-        if("2.0.3".compareTo(version) > 0){
-            corgiOpenPage.setPicType("image");
+        if (userPosition != null && userPosition.getVersion() != null) {
+            String version = userPosition.getVersion().replaceAll("android", "");
+            if ("2.0.3".compareTo(version) > 0) {
+                corgiOpenPage.setPicType("image");
+            }
         }
         List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
         String province = corgiOpenPage.getProvince();
-        if(StringUtils.isEmpty(province)){
+        if (StringUtils.isEmpty(province)) {
             province = userPosition.getProvince();
         }
         if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {

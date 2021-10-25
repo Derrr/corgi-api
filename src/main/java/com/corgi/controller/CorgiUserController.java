@@ -524,7 +524,12 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_user_position")
     public JsonResult updateUserPosition(@RequestBody UserPosition userPosition) throws PermissionException {
-        log.info("updating version:{} ", getVersion());
+        if (userPosition.getLat() == null) {
+            userPosition.setLat(1000.0);
+        }
+        if (userPosition.getLng() == null) {
+            userPosition.setLng(1000.0);
+        }
         HashMap result = new HashMap();
         result.put("freq", 1);
         try {
@@ -705,7 +710,10 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("is_followed")
-    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam(name = "targetUserId", required = false) String targetUserId) {
+        if (StringUtils.isEmpty(targetUserId)) {
+            return new JsonResult(0);
+        }
         int result = corgiUserFollowService.isFollowed(userId, targetUserId);
         return new JsonResult(result);
     }
@@ -1012,7 +1020,7 @@ public class CorgiUserController extends BaseController {
     public JsonResult getVerifyResult(@RequestParam("requestId") String requestId) throws PermissionException {
         DescribeVerifyResultResponse response = aliyunGreenService.getDescribeVerifyResult(requestId);
         String userId = getUserId();
-        log.info("user:{} verity result: {} ", userId, response);
+        log.info("user:{} verity result: {} ", userId, response.getFaceComparisonScore());
         Float score = response.getFaceComparisonScore();
         if (score != null && score > 40) {
             UserDetail userDetail = new UserDetail();
