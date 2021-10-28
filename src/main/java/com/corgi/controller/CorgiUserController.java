@@ -689,6 +689,9 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        if(corgiUserFollowService.isFollowed(userId,targetUserId) > 0){
+            return new JsonResult();
+        }
         corgiUserFollowService.follow(userId, targetUserId);
         HashMap extra = new HashMap();
         mqService.sendMessage(PushMessage.builder()
