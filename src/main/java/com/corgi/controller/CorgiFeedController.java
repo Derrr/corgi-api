@@ -115,19 +115,16 @@ public class CorgiFeedController extends BaseController {
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-            log.info("user_feeds:{} ", userActivities.size());
             try {
                 userActivities = this.mergeComment(userActivities, commentFuture.get(), size);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-            log.info("user_feeds:{} ", userActivities.size());
             try {
                 userActivities = this.mergeLike(userActivities, likeFuture.get(), size);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-            log.info("user_feeds:{} ", userActivities.size());
             userActivities = this.populateUserActivity(userActivities);
             if (!CollectionUtils.isEmpty(userActivities) && userActivities.size() == 1) {
                 UserActivity tmp = userActivities.get(0);
@@ -374,7 +371,6 @@ public class CorgiFeedController extends BaseController {
     }
 
     private List<UserActivity> mergeCreate(List<UserActivity> userActivities, List<CorgiActivity> activityList, Integer size) {
-        log.info("user_feeds:{} ", activityList);
         if (activityList == null) {
             return userActivities;
         }
