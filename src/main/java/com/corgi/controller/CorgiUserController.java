@@ -134,6 +134,12 @@ public class CorgiUserController extends BaseController {
                 } else if (StringUtils.isEmpty(userLogin.getTelNo())) {
                     return new JsonResult(Constants.API_ERROR_CODE, "无法获取到手机号");
                 } else {
+                    UserDetail search = new UserDetail();
+                    search.setTelNo(userLogin.getTelNo());
+                    if (!CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
+                        return new JsonResult(Constants.API_ERROR_CODE, "手机号已被注册");
+                    }
+                    userLogin.setUserId(getUserId());
                     corgiUserService.updateUserLogin(userLogin);
                     return new JsonResult("更新手机号成功");
                 }
@@ -683,6 +689,9 @@ public class CorgiUserController extends BaseController {
     public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
         if (hasUserId()) {
             userId = getUserId();
+        }
+        if(corgiUserFollowService.isFollowed(userId,targetUserId) > 0){
+            return new JsonResult();
         }
         corgiUserFollowService.follow(userId, targetUserId);
         HashMap extra = new HashMap();
