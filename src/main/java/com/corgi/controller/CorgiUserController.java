@@ -690,7 +690,8 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
-        if(corgiUserFollowService.isFollowed(userId,targetUserId) > 0){
+        int follow = corgiUserFollowService.isFollowed(userId,targetUserId);
+        if(follow == 1 || follow > 2){
             return new JsonResult();
         }
         corgiUserFollowService.follow(userId, targetUserId);
