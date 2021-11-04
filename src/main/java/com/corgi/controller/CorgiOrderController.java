@@ -1,27 +1,19 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.fastjson.JSON;
-import com.alipay.api.AlipayConfig;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
-import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiPayService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
