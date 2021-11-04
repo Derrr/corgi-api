@@ -1,4 +1,4 @@
-package com.corgi.common.configuration;
+package com.corgi.common.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
