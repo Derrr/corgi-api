@@ -7,6 +7,7 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.corgi.common.wxpay.sdk.WXPay;
 import com.corgi.user.api.CorgiOrderService;
 import com.corgi.user.entity.CorgiMerchandise;
 import com.corgi.user.entity.CorgiOrder;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -25,8 +27,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class CorgiPayService {
-    @Autowired
-    private RestTemplate restTemplate;
+    private static WXPay wxPay = new WXPay();
     @Reference
     private CorgiOrderService corgiOrderService;
 
@@ -46,7 +47,7 @@ public class CorgiPayService {
     //String APP_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqcvu02wXRlYW2kIQDpGJNW+Myox9lObDUIJ6vXP3yO+Mpx6gk16MfLfeXte9RiDdR+WKJ509UR6v1BPBZynL0QpDQ7MJKaPCCwH9CipRYHzdZKkK3ySvcUk/fINQilPn2dlliJO24MjK7OlRFmtPSiXW+LpvGAJ1L293g0/dQoAjKRYiCKTJfUwYjdPqnBvtjkbSayZgqPEL3lKWbTpdw8DtvI7/uGFeYl14Hb9E7SC1UElP0JxrZiF82z3AgA/Rbi2zi5z9xyTUaRpljtb5EIS5s3VQ/Z92NDgegc4wb7VkgdfP6Avb5gFPrxetPzmi8VjljUNCxVORHI8lRwDInwIDAQAB";
     public static final String ALIPAY_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPhoJ5557xk1l5k9zLslYbTYb0TfO/c+51FyV+wN4F7VCadppxrOLdEean23gYw4+6qM4A3LvNBCptnrXuRlyb80j0pbYK8hPf5l8i5VSwERXf72kbOxwgKGZPurbBSvZM+QWXxY8yrjXbHqTNKJxIhIAVDWSJqxB2KPtxeJZlylJ1YhUfSEoxbYHKeW7JJWaZzzuVfYkCwAdWFX0wKAAeEVlXmD8dAjwvXjD4a0JFrQJFT7w2fsZXbiFjdu3ufcQzGZUw4oJ5wHwMrblcOPhYmUDbbRgriVUU9VpoMfXdK8LBUtnC3UXHz823XPEgIsXniCSKXp23r+iJxi9jA+0wIDAQAB";
 
-    public static final String WX_URL = "https://api.mch.weixin.qq.com/v3/pay/transactions/app";
+    public static final String WX_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder";
 
     public String getAlipayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
         String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
@@ -63,16 +64,14 @@ public class CorgiPayService {
         model.setBody(merchandise.getContent());
         request.setBizModel(model);
         request.setNotifyUrl("https://api.corgi.org.cn/order/alipay_callback");
-        AlipayTradeAppPayResponse response = null;
         try {
-            response = alipayClient.sdkExecute(request);
+            AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
+            log.info(response.getBody());
         } catch (AlipayApiException e) {
             log.error(e.getErrMsg(), e);
         }
-
         /** response.getBody()打印结果就是orderString，可以直接给客户端请求，无需再做处理。 如果传值客户端失败，可根据返回错误信息到该文档寻找排查方案：https://opensupport.alipay.com/support/helpcenter/89 **/
-        log.info(response.getBody());
-        return response.getBody();
+        return "";
     }
 
     public String getWXPayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
@@ -80,19 +79,20 @@ public class CorgiPayService {
         order.setTradeNo(tradeNo);
         corgiOrderService.addOrder(order);
 
-        HashMap<String, Object> body = new HashMap<>();
-        body.put("appid", "wx19ea9b13f4eb65d4");
-        body.put("mchid", "1588297071");
-        body.put("description", merchandise.getTitle());
+        Map<String, String> body = new HashMap<>();
+        body.put("body", merchandise.getTitle());
         body.put("out_trade_no", tradeNo);
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
-        HashMap<String, Object> money = new HashMap<>();
-        money.put("total", merchandise.getPrice() * 100);
-        money.put("currency", "CNY");
-        body.put("amount", money);
-        ResponseEntity<String> response = restTemplate.postForEntity(WX_URL, body, String.class);
-        log.info("reponse:{} ", response.getBody());
-        return response.getBody();
+        body.put("total_fee", merchandise.getPrice() * 100 + "");
+        body.put("spbill_create_ip", "123.12.12.12");
+        body.put("trade_type", "APP");
+        try {
+            Map<String, String> response = wxPay.unifiedOrder(body);
+            log.info("reponse:{} ", response);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return "";
     }
 
 }
