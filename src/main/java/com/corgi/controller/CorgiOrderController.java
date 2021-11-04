@@ -1,6 +1,9 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
+import com.alipay.api.AlipayConfig;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.exception.PermissionException;
@@ -15,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,7 +80,35 @@ public class CorgiOrderController extends BaseController {
 
     @PostMapping("alipay_callback")
     public JsonResult alipayCallback(HttpServletRequest request) {
-        log.info("callback:{} ", this.convertRequestParamsToMap(request));
+        Map<String, String> params = this.convertRequestParamsToMap(request);
+        log.info("callback:{} ", params);
+
+        try {
+            // 调用SDK验证签名
+            boolean signVerified = AlipaySignature.rsaCheckV1(params, CorgiPayService.ALIPAY_PUBLIC_KEY,
+                    params.get("charset"), params.get("sign_type"));
+            if (signVerified) {
+                log.info("支付宝回调签名认证成功");
+                // 另起线程处理业务
+                String trade_status = params.get("trade_status");
+                // 支付成功
+                if (trade_status.equals("TRADE_SUCCESS")
+                        || trade_status.equals("TRADE_FINISHED")) {
+                    // TODO 处理支付成功逻辑
+                    try {
+
+                    } catch (Exception e) {
+                        log.error("支付宝回调业务处理报错,params:" + params, e);
+                    }
+                } else {
+                    log.error("没有处理支付宝回调业务，支付宝交易状态：{},params:{}", trade_status, params);
+                }
+            } else {
+                log.info("支付宝回调签名认证失败，signVerified=false, paramsJson:{}", params);
+            }
+        } catch (Exception e) {
+            log.error("支付宝回调签名认证失败,paramsJson:{},errorMsg:{}", params, e.getMessage());
+        }
         return new JsonResult();
     }
 
