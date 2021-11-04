@@ -87,7 +87,7 @@ public class CorgiPayService {
         body.put("spbill_create_ip", "123.12.12.12");
         body.put("trade_type", "APP");
         try {
-            Map<String, String> response = wxPay.unifiedOrder(body);
+            Map<String, Object> response = wxPay.unifiedOrder(body);
             log.info("reponse:{} ", response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
