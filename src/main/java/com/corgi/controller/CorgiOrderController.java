@@ -25,7 +25,7 @@ import java.util.*;
 public class CorgiOrderController extends BaseController {
     @Reference
     private CorgiOrderService corgiOrderService;
-    @Reference
+    @Autowired
     private CorgiPayService corgiPayService;
 
     @Autowired
