@@ -7,7 +7,7 @@ public class CorgiWXPayConfig extends WXPayConfig {
 
     public static WXPayConfig config = new CorgiWXPayConfig();
     private IWXPayDomain domain = new IWXPayDomain() {
-        private DomainInfo domainInfo = new DomainInfo("https://api.mch.weixin.qq.com/pay/unifiedorder", true);
+        private DomainInfo domainInfo = new DomainInfo("api.mch.weixin.qq.com", true);
         @Override
         public void report(String domain, long elapsedTimeMillis, Exception ex) {
 
