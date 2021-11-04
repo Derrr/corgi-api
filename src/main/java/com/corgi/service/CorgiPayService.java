@@ -1,5 +1,6 @@
 package com.corgi.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class CorgiPayService {
     @Autowired
     private RestTemplate restTemplate;
-    @Resource
+    @Reference
     private CorgiOrderService corgiOrderService;
 
     public static final String ALI_URL = "https://openapi.alipay.com/gateway.do";

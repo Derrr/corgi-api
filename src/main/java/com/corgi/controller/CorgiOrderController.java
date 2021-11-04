@@ -5,7 +5,6 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.service.CorgiPayService;
-import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +26,6 @@ public class CorgiOrderController extends BaseController {
     private CorgiOrderService corgiOrderService;
     @Autowired
     private CorgiPayService corgiPayService;
-
-    @Autowired
-    private MQService mqService;
 
 
     @GetMapping("pay")
