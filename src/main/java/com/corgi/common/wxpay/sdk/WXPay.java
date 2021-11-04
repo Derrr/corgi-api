@@ -51,7 +51,7 @@ public class WXPay {
      * @return
      * @throws Exception
      */
-    public Map<String, String> fillRequestData(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> fillRequestData(Map<String, Object> reqData) throws Exception {
         reqData.put("appid", config.getAppID());
         reqData.put("mch_id", config.getMchID());
         reqData.put("nonce_str", WXPayUtil.generateNonceStr());
@@ -72,7 +72,7 @@ public class WXPay {
      * @return 签名是否有效
      * @throws Exception
      */
-    public boolean isResponseSignatureValid(Map<String, String> reqData) throws Exception {
+    public boolean isResponseSignatureValid(Map<String, Object> reqData) throws Exception {
         // 返回数据的签名方式和请求中给定的签名方式是一致的
         return WXPayUtil.isSignatureValid(reqData, this.config.getKey(), this.signType);
     }
@@ -84,8 +84,8 @@ public class WXPay {
      * @return 签名是否有效
      * @throws Exception
      */
-    public boolean isPayResultNotifySignatureValid(Map<String, String> reqData) throws Exception {
-        String signTypeInData = reqData.get(WXPayConstants.FIELD_SIGN_TYPE);
+    public boolean isPayResultNotifySignatureValid(Map<String, Object> reqData) throws Exception {
+        String signTypeInData = (String) reqData.get(WXPayConstants.FIELD_SIGN_TYPE);
         SignType signType;
         if (signTypeInData == null) {
             signType = SignType.MD5;
@@ -118,9 +118,9 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public String requestWithoutCert(String urlSuffix, Map<String, String> reqData,
+    public String requestWithoutCert(String urlSuffix, Map<String, Object> reqData,
                                      int connectTimeoutMs, int readTimeoutMs) throws Exception {
-        String msgUUID = reqData.get("nonce_str");
+        String msgUUID = (String) reqData.get("nonce_str");
         String reqBody = WXPayUtil.mapToXml(reqData);
 
         String resp = this.wxPayRequest.requestWithoutCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs, readTimeoutMs, autoReport);
@@ -137,9 +137,9 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public String requestWithCert(String urlSuffix, Map<String, String> reqData,
+    public String requestWithCert(String urlSuffix, Map<String, Object> reqData,
                                   int connectTimeoutMs, int readTimeoutMs) throws Exception {
-        String msgUUID= reqData.get("nonce_str");
+        String msgUUID= (String) reqData.get("nonce_str");
         String reqBody = WXPayUtil.mapToXml(reqData);
 
         String resp = this.wxPayRequest.requestWithCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs, readTimeoutMs, this.autoReport);
@@ -152,12 +152,12 @@ public class WXPay {
      * @return Map类型数据
      * @throws Exception
      */
-    public Map<String, String> processResponseXml(String xmlStr) throws Exception {
+    public Map<String, Object> processResponseXml(String xmlStr) throws Exception {
         String RETURN_CODE = "return_code";
         String return_code;
-        Map<String, String> respData = WXPayUtil.xmlToMap(xmlStr);
+        Map<String, Object> respData = WXPayUtil.xmlToMap(xmlStr);
         if (respData.containsKey(RETURN_CODE)) {
-            return_code = respData.get(RETURN_CODE);
+            return_code = (String) respData.get(RETURN_CODE);
         }
         else {
             throw new Exception(String.format("No `return_code` in XML: %s", xmlStr));
@@ -186,7 +186,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> microPay(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> microPay(Map<String, Object> reqData) throws Exception {
         return this.microPay(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -200,7 +200,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> microPay(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> microPay(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_MICROPAY_URL_SUFFIX;
@@ -219,7 +219,7 @@ public class WXPay {
      * @return
      * @throws Exception
      */
-    public Map<String, String> microPayWithPos(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> microPayWithPos(Map<String, Object> reqData) throws Exception {
         return this.microPayWithPos(reqData, this.config.getHttpConnectTimeoutMs());
     }
 
@@ -231,10 +231,10 @@ public class WXPay {
      * @return
      * @throws Exception
      */
-    public Map<String, String> microPayWithPos(Map<String, String> reqData, int connectTimeoutMs) throws Exception {
+    public Map<String, Object> microPayWithPos(Map<String, Object> reqData, int connectTimeoutMs) throws Exception {
         int remainingTimeMs = 60*1000;
         long startTimestampMs = 0;
-        Map<String, String> lastResult = null;
+        Map<String, Object> lastResult = null;
         Exception lastException = null;
 
         while (true) {
@@ -243,10 +243,10 @@ public class WXPay {
             if (readTimeoutMs > 1000) {
                 try {
                     lastResult = this.microPay(reqData, connectTimeoutMs, readTimeoutMs);
-                    String returnCode = lastResult.get("return_code");
+                    String returnCode = (String) lastResult.get("return_code");
                     if (returnCode.equals("SUCCESS")) {
-                        String resultCode = lastResult.get("result_code");
-                        String errCode = lastResult.get("err_code");
+                        String resultCode = (String) lastResult.get("result_code");
+                        String errCode = (String) lastResult.get("err_code");
                         if (resultCode.equals("SUCCESS")) {
                             break;
                         }
@@ -304,7 +304,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> unifiedOrder(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> unifiedOrder(Map<String, Object> reqData) throws Exception {
         return this.unifiedOrder(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -318,7 +318,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> unifiedOrder(Map<String, String> reqData,  int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> unifiedOrder(Map<String, Object> reqData,  int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_UNIFIEDORDER_URL_SUFFIX;
@@ -341,7 +341,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> orderQuery(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> orderQuery(Map<String, Object> reqData) throws Exception {
         return this.orderQuery(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -355,7 +355,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> orderQuery(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> orderQuery(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_ORDERQUERY_URL_SUFFIX;
@@ -375,7 +375,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> reverse(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> reverse(Map<String, Object> reqData) throws Exception {
         return this.reverse(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -390,7 +390,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> reverse(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> reverse(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_REVERSE_URL_SUFFIX;
@@ -410,7 +410,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> closeOrder(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> closeOrder(Map<String, Object> reqData) throws Exception {
         return this.closeOrder(reqData, config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -424,7 +424,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> closeOrder(Map<String, String> reqData,  int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> closeOrder(Map<String, Object> reqData,  int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_CLOSEORDER_URL_SUFFIX;
@@ -444,7 +444,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> refund(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> refund(Map<String, Object> reqData) throws Exception {
         return this.refund(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -459,7 +459,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> refund(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> refund(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_REFUND_URL_SUFFIX;
@@ -479,7 +479,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> refundQuery(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> refundQuery(Map<String, Object> reqData) throws Exception {
         return this.refundQuery(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -493,7 +493,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> refundQuery(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> refundQuery(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_REFUNDQUERY_URL_SUFFIX;
@@ -513,7 +513,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> downloadBill(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> downloadBill(Map<String, Object> reqData) throws Exception {
         return this.downloadBill(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -529,7 +529,7 @@ public class WXPay {
      * @return 经过封装的API返回数据
      * @throws Exception
      */
-    public Map<String, String> downloadBill(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> downloadBill(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_DOWNLOADBILL_URL_SUFFIX;
@@ -538,14 +538,14 @@ public class WXPay {
             url = WXPayConstants.DOWNLOADBILL_URL_SUFFIX;
         }
         String respStr = this.requestWithoutCert(url, this.fillRequestData(reqData), connectTimeoutMs, readTimeoutMs).trim();
-        Map<String, String> ret;
+        Map<String, Object> ret;
         // 出现错误，返回XML数据
         if (respStr.indexOf("<") == 0) {
             ret = WXPayUtil.xmlToMap(respStr);
         }
         else {
             // 正常返回csv数据
-            ret = new HashMap<String, String>();
+            ret = new HashMap<String, Object>();
             ret.put("return_code", WXPayConstants.SUCCESS);
             ret.put("return_msg", "ok");
             ret.put("data", respStr);
@@ -561,7 +561,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> report(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> report(Map<String, Object> reqData) throws Exception {
         return this.report(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -575,7 +575,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> report(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> report(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_REPORT_URL_SUFFIX;
@@ -595,7 +595,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> shortUrl(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> shortUrl(Map<String, Object> reqData) throws Exception {
         return this.shortUrl(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -607,7 +607,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> shortUrl(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> shortUrl(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_SHORTURL_URL_SUFFIX;
@@ -627,7 +627,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> authCodeToOpenid(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> authCodeToOpenid(Map<String, Object> reqData) throws Exception {
         return this.authCodeToOpenid(reqData, this.config.getHttpConnectTimeoutMs(), this.config.getHttpReadTimeoutMs());
     }
 
@@ -641,7 +641,7 @@ public class WXPay {
      * @return API返回数据
      * @throws Exception
      */
-    public Map<String, String> authCodeToOpenid(Map<String, String> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
+    public Map<String, Object> authCodeToOpenid(Map<String, Object> reqData, int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String url;
         if (this.useSandbox) {
             url = WXPayConstants.SANDBOX_AUTHCODETOOPENID_URL_SUFFIX;

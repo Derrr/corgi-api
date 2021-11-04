@@ -79,11 +79,11 @@ public class CorgiPayService {
         order.setTradeNo(tradeNo);
         corgiOrderService.addOrder(order);
 
-        Map<String, String> body = new HashMap<>();
+        Map<String, Object> body = new HashMap<>();
         body.put("body", merchandise.getTitle());
         body.put("out_trade_no", tradeNo);
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
-        body.put("total_fee", merchandise.getPrice() * 100 + "");
+        body.put("total_fee", merchandise.getPrice() * 100);
         body.put("spbill_create_ip", "123.12.12.12");
         body.put("trade_type", "APP");
         try {
