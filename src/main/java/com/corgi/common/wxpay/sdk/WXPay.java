@@ -11,7 +11,7 @@ import java.util.Map;
 public class WXPay {
 
     private WXPayConfig config = CorgiWXPayConfig.config;
-    private SignType signType = SignType.HMACSHA256;
+    private SignType signType = SignType.MD5;
     private boolean autoReport = false;
     private boolean useSandbox = false;
     private String notifyUrl = "https://api.corgi.org.cn/order/wx_callback";
