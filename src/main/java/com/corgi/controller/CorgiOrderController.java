@@ -37,19 +37,22 @@ public class CorgiOrderController extends BaseController {
         if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已过期");
         }
+        HashMap<String, String> result = new HashMap<>();
         CorgiOrder order = CorgiOrder.builder()
                 .userId(getUserId())
                 .payType(payType)
                 .marketId("-")
                 .sellerId("corgi")
                 .build();
+        result.put("orderString", "");
         if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
-            return new JsonResult(corgiPayService.getAlipayOrder(merchandise, order));
+            result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
         }
         if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
-            return new JsonResult(corgiPayService.getWXPayOrder(merchandise, order));
+            result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
         }
-        return new JsonResult();
+        result.put("orderNo", order.getTradeNo());
+        return new JsonResult(result);
     }
 
     @GetMapping("get_merchandises")
