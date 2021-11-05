@@ -76,6 +76,14 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
     }
 
+    @GetMapping("search_order")
+    public JsonResult searchOrders(@RequestParam("order") CorgiOrder order, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (hasUserId()) {
+            order.setUserId(getUserId());
+        }
+        return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
+    }
+
     @PostMapping("wx_callback")
     public JsonResult wxCallback(HttpServletRequest request) {
         Map<String, String> params = this.convertRequestParamsToMap(request);
