@@ -1,9 +1,14 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.constant.PayConstans;
+import com.corgi.common.wxpay.sdk.CorgiWXPayConfig;
+import com.corgi.common.wxpay.sdk.WXPayConfig;
+import com.corgi.common.wxpay.sdk.WXPayUtil;
 import com.corgi.service.CorgiPayService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
@@ -12,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -62,9 +68,36 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult(corgiOrderService.getMerchandise(query));
     }
 
+    @GetMapping("list_order")
+    public JsonResult getOrders(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        CorgiOrder order = CorgiOrder.builder()
+                .userId(getUserId())
+                .build();
+        return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
+    }
+
     @PostMapping("wx_callback")
     public JsonResult wxCallback(HttpServletRequest request) {
-        log.info("callback:{} ", this.convertRequestParamsToMap(request));
+        Map<String, String> params = this.convertRequestParamsToMap(request);
+        log.info("callback:{} ", params);
+        CorgiOrder order = buildWXOrder(params);
+        try {
+            if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
+                log.info("微信回调签名认证失败，signVerified=false, paramsJson:{}", params);
+                order.setStatus(PayConstans.FAIL);
+            } else if (PayConstans.WX.FAIL.equals(params.get("return_code"))) {
+                order.setStatus(PayConstans.FAIL);
+            } else if (PayConstans.WX.FAIL.equals(params.get("result_code"))) {
+                order.setStatus(PayConstans.FAIL);
+            } else {
+                order.setStatus(PayConstans.SUCCESS);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            order.setStatus(PayConstans.FAIL);
+        }
+        order.setResult(JSON.toJSONString(params));
+        corgiOrderService.updateOrder(order);
         return new JsonResult();
     }
 
@@ -73,7 +106,7 @@ public class CorgiOrderController extends BaseController {
     public JsonResult alipayCallback(HttpServletRequest request) {
         Map<String, String> params = this.convertRequestParamsToMap(request);
         log.info("callback:{} ", params);
-
+        CorgiOrder order = buildAlipayOrder(params);
         try {
             // 调用SDK验证签名
             boolean signVerified = AlipaySignature.rsaCheckV1(params, CorgiPayService.ALIPAY_PUBLIC_KEY,
@@ -83,24 +116,40 @@ public class CorgiOrderController extends BaseController {
                 // 另起线程处理业务
                 String trade_status = params.get("trade_status");
                 // 支付成功
-                if (trade_status.equals("TRADE_SUCCESS")
-                        || trade_status.equals("TRADE_FINISHED")) {
+                if (trade_status.equals(PayConstans.ALIPAY.TRADE_SUCCESS)
+                        || trade_status.equals(PayConstans.ALIPAY.TRADE_FINISHED)) {
                     // TODO 处理支付成功逻辑
-                    try {
-
-                    } catch (Exception e) {
-                        log.error("支付宝回调业务处理报错,params:" + params, e);
-                    }
+                    order.setStatus(PayConstans.SUCCESS);
+                    corgiOrderService.updateOrder(order);
                 } else {
-                    log.error("没有处理支付宝回调业务，支付宝交易状态：{},params:{}", trade_status, params);
+                    order.setStatus(PayConstans.CLOSE);
                 }
             } else {
-                log.info("支付宝回调签名认证失败，signVerified=false, paramsJson:{}", params);
+                order.setStatus(PayConstans.FAIL);
             }
         } catch (Exception e) {
-            log.error("支付宝回调签名认证失败,paramsJson:{},errorMsg:{}", params, e.getMessage());
+            log.error(e.getMessage(), e);
+            order.setStatus(PayConstans.FAIL);
         }
+        order.setResult(JSON.toJSONString(params));
+        corgiOrderService.updateOrder(order);
         return new JsonResult();
+    }
+
+    private CorgiOrder buildWXOrder(Map<String, String> params) {
+        return CorgiOrder.builder()
+                .tradeNo(params.get("out_trade_no"))
+                .buyerId(params.get("buyer_logon_id"))
+                .payTime(params.get("gmt_payment"))
+                .build();
+    }
+
+    private CorgiOrder buildAlipayOrder(Map<String, String> params) {
+        return CorgiOrder.builder()
+                .tradeNo(params.get("out_trade_no"))
+                .buyerId(params.get("buyer_logon_id"))
+                .payTime(params.get("gmt_payment"))
+                .build();
     }
 
     // 将request中的参数转换成Map

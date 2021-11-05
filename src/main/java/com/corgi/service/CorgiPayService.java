@@ -47,8 +47,6 @@ public class CorgiPayService {
     //String APP_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqcvu02wXRlYW2kIQDpGJNW+Myox9lObDUIJ6vXP3yO+Mpx6gk16MfLfeXte9RiDdR+WKJ509UR6v1BPBZynL0QpDQ7MJKaPCCwH9CipRYHzdZKkK3ySvcUk/fINQilPn2dlliJO24MjK7OlRFmtPSiXW+LpvGAJ1L293g0/dQoAjKRYiCKTJfUwYjdPqnBvtjkbSayZgqPEL3lKWbTpdw8DtvI7/uGFeYl14Hb9E7SC1UElP0JxrZiF82z3AgA/Rbi2zi5z9xyTUaRpljtb5EIS5s3VQ/Z92NDgegc4wb7VkgdfP6Avb5gFPrxetPzmi8VjljUNCxVORHI8lRwDInwIDAQAB";
     public static final String ALIPAY_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPhoJ5557xk1l5k9zLslYbTYb0TfO/c+51FyV+wN4F7VCadppxrOLdEean23gYw4+6qM4A3LvNBCptnrXuRlyb80j0pbYK8hPf5l8i5VSwERXf72kbOxwgKGZPurbBSvZM+QWXxY8yrjXbHqTNKJxIhIAVDWSJqxB2KPtxeJZlylJ1YhUfSEoxbYHKeW7JJWaZzzuVfYkCwAdWFX0wKAAeEVlXmD8dAjwvXjD4a0JFrQJFT7w2fsZXbiFjdu3ufcQzGZUw4oJ5wHwMrblcOPhYmUDbbRgriVUU9VpoMfXdK8LBUtnC3UXHz823XPEgIsXniCSKXp23r+iJxi9jA+0wIDAQAB";
 
-    public static final String WX_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-
     public String getAlipayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
         String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
         order.setTradeNo(tradeNo);

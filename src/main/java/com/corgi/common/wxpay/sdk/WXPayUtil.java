@@ -141,7 +141,7 @@ public class WXPayUtil {
         if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
             return false;
         }
-        String sign = data.get(WXPayConstants.FIELD_SIGN).toString();
+        String sign = data.get(WXPayConstants.FIELD_SIGN);
         return generateSignature(data, key).equals(sign);
     }
 

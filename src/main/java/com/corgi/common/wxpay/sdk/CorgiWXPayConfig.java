@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 public class CorgiWXPayConfig extends WXPayConfig {
 
-    public static WXPayConfig config = new CorgiWXPayConfig();
+    public static final WXPayConfig config = new CorgiWXPayConfig();
     private IWXPayDomain domain = new IWXPayDomain() {
         private DomainInfo domainInfo = new DomainInfo("api.mch.weixin.qq.com", true);
         @Override
