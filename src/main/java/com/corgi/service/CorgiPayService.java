@@ -84,7 +84,7 @@ public class CorgiPayService {
         body.put("out_trade_no", tradeNo);
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
-        body.put("spbill_create_ip", "123.12.12.12");
+        //body.put("spbill_create_ip", "123.12.12.12");
         body.put("trade_type", "APP");
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
