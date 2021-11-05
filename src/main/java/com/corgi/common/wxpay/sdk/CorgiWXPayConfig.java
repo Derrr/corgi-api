@@ -35,7 +35,8 @@ public class CorgiWXPayConfig extends WXPayConfig {
 
     @Override
     public String getKey() {
-        return "6b61f80a7b4ff075c563fc923725c157";
+        return "sIZeaIwGecFb5byfHVAGm0p7Yf9GZg73";
+        //return "6b61f80a7b4ff075c563fc923725c157";
     }
 
     @Override
