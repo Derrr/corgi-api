@@ -89,6 +89,7 @@ public class CorgiPayService {
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
             log.info("reponse:{} ", response);
+            return response.get("prepay_id");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
