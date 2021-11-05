@@ -79,15 +79,15 @@ public class CorgiPayService {
         order.setTradeNo(tradeNo);
         corgiOrderService.addOrder(order);
 
-        Map<String, Object> body = new HashMap<>();
+        Map<String, String> body = new HashMap<>();
         body.put("body", merchandise.getTitle());
         body.put("out_trade_no", tradeNo);
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
-        body.put("total_fee", Long.parseUnsignedLong((long)(merchandise.getPrice() * 100) + ""));
+        body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
         body.put("spbill_create_ip", "123.12.12.12");
         body.put("trade_type", "APP");
         try {
-            Map<String, Object> response = wxPay.unifiedOrder(body);
+            Map<String, String> response = wxPay.unifiedOrder(body);
             log.info("reponse:{} ", response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

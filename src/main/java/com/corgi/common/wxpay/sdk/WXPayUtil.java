@@ -1,6 +1,7 @@
 package com.corgi.common.wxpay.sdk;
 
 import com.corgi.common.wxpay.sdk.WXPayConstants.SignType;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -35,9 +36,9 @@ public class WXPayUtil {
      * @return XML数据转换后的Map
      * @throws Exception
      */
-    public static Map<String, Object> xmlToMap(String strXML) throws Exception {
+    public static Map<String, String> xmlToMap(String strXML) throws Exception {
         try {
-            Map<String, Object> data = new HashMap();
+            Map<String, String> data = new HashMap();
             DocumentBuilder documentBuilder = WXPayXmlUtil.newDocumentBuilder();
             InputStream stream = new ByteArrayInputStream(strXML.getBytes("UTF-8"));
             org.w3c.dom.Document doc = documentBuilder.parse(stream);
@@ -70,7 +71,7 @@ public class WXPayUtil {
      * @return XML格式的字符串
      * @throws Exception
      */
-    public static String mapToXml(Map<String, Object> data) throws Exception {
+    public static String mapToXml(Map<String, String> data) throws Exception {
         org.w3c.dom.Document document = WXPayXmlUtil.newDocument();
         org.w3c.dom.Element root = document.createElement("xml");
         document.appendChild(root);
@@ -108,7 +109,7 @@ public class WXPayUtil {
      * @param key  API密钥
      * @return 含有sign字段的XML
      */
-    public static String generateSignedXml(final Map<String, Object> data, String key) throws Exception {
+    public static String generateSignedXml(final Map<String, String> data, String key) throws Exception {
         return generateSignedXml(data, key, SignType.MD5);
     }
 
@@ -120,7 +121,7 @@ public class WXPayUtil {
      * @param signType 签名类型
      * @return 含有sign字段的XML
      */
-    public static String generateSignedXml(final Map<String, Object> data, String key, SignType signType) throws Exception {
+    public static String generateSignedXml(final Map<String, String> data, String key, SignType signType) throws Exception {
         String sign = generateSignature(data, key, signType);
         data.put(WXPayConstants.FIELD_SIGN, sign);
         return mapToXml(data);
@@ -136,7 +137,7 @@ public class WXPayUtil {
      * @throws Exception
      */
     public static boolean isSignatureValid(String xmlStr, String key) throws Exception {
-        Map<String, Object> data = xmlToMap(xmlStr);
+        Map<String, String> data = xmlToMap(xmlStr);
         if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
             return false;
         }
@@ -152,7 +153,7 @@ public class WXPayUtil {
      * @return 签名是否正确
      * @throws Exception
      */
-    public static boolean isSignatureValid(Map<String, Object> data, String key) throws Exception {
+    public static boolean isSignatureValid(Map<String, String> data, String key) throws Exception {
         return isSignatureValid(data, key, SignType.MD5);
     }
 
@@ -165,11 +166,11 @@ public class WXPayUtil {
      * @return 签名是否正确
      * @throws Exception
      */
-    public static boolean isSignatureValid(Map<String, Object> data, String key, SignType signType) throws Exception {
+    public static boolean isSignatureValid(Map<String, String> data, String key, SignType signType) throws Exception {
         if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
             return false;
         }
-        String sign = data.get(WXPayConstants.FIELD_SIGN).toString();
+        String sign = data.get(WXPayConstants.FIELD_SIGN);
         return generateSignature(data, key, signType).equals(sign);
     }
 
@@ -180,7 +181,7 @@ public class WXPayUtil {
      * @param key  API密钥
      * @return 签名
      */
-    public static String generateSignature(final Map<String, Object> data, String key) throws Exception {
+    public static String generateSignature(final Map<String, String> data, String key) throws Exception {
         return generateSignature(data, key, SignType.MD5);
     }
 
@@ -192,7 +193,7 @@ public class WXPayUtil {
      * @param signType 签名方式
      * @return 签名
      */
-    public static String generateSignature(final Map<String, Object> data, String key, SignType signType) throws Exception {
+    public static String generateSignature(final Map<String, String> data, String key, SignType signType) throws Exception {
         Set<String> keySet = data.keySet();
         String[] keyArray = keySet.toArray(new String[keySet.size()]);
         Arrays.sort(keyArray);
@@ -201,8 +202,8 @@ public class WXPayUtil {
             if (k.equals(WXPayConstants.FIELD_SIGN)) {
                 continue;
             }
-            if (data.get(k).toString().trim().length() > 0) // 参数值为空，则不参与签名
-                sb.append(k).append("=").append(data.get(k).toString().trim()).append("&");
+            if (data.get(k).trim().length() > 0) // 参数值为空，则不参与签名
+                sb.append(k).append("=").append(data.get(k).trim()).append("&");
         }
         sb.append("key=").append(key);
         if (SignType.MD5.equals(signType)) {
