@@ -9,6 +9,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.*;
+import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
@@ -143,6 +144,12 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(topics);
     }
 
+    @GetMapping("get_hashtags")
+    public JsonResult getHashtags() {
+        List<CorgiHashtag> hashtags = corgiToolService.searchHashtag(null, "release");
+        return new JsonResult(hashtags);
+    }
+
     @GetMapping("search_topics")
     public JsonResult getAllTopics(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false, name = "topic") String key) {
         List<CorgiTopic> topics = corgiToolService.searchTopic(key, status);
@@ -153,6 +160,20 @@ public class CorgiToolController extends BaseController {
             BeanUtils.copyProperties(corgiTopic, topic);
             topic.initCount(countResult);
             result.add(topic);
+        }
+        return new JsonResult(result);
+    }
+
+    @GetMapping("search_hashtags")
+    public JsonResult getAllHashtags(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false, name = "hashtagName") String hashtagName) {
+        List<CorgiHashtag> hashtags = corgiToolService.searchHashtag(hashtagName, status);
+        List<Hashtag> result = new ArrayList<>();
+        for (CorgiHashtag corgiHashtag : hashtags) {
+            CorgiVlog countResult = corgiVlogService.countByHashtag(corgiHashtag.getHashtagId());
+            Hashtag hashtag = new Hashtag();
+            BeanUtils.copyProperties(corgiHashtag, hashtag);
+            hashtag.initCount(countResult);
+            result.add(hashtag);
         }
         return new JsonResult(result);
     }
@@ -176,17 +197,37 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("add_hashtag")
+    public JsonResult addHashtag(CorgiHashtag hashtag) {
+        corgiToolService.addHashtag(hashtag);
+        return new JsonResult();
+    }
+
     @GetMapping("update_topic")
-    public JsonResult upadteTopic(CorgiTopic topic) {
+    public JsonResult updateTopic(CorgiTopic topic) {
         corgiToolService.updateTopic(topic);
+        return new JsonResult();
+    }
+
+    @GetMapping("update_hashtag")
+    public JsonResult updateHashtag(CorgiHashtag hashtag) {
+        corgiToolService.updateHashtag(hashtag);
         return new JsonResult();
     }
 
     @PostMapping("update_activity_topic")
     public JsonResult upadteActivityTopic(@RequestBody CorgiActivityDetail corgiActivity) {
-        log.info("id:{} ",corgiActivity.getId());
+        log.info("id:{} ", corgiActivity.getId());
         corgiToolService.updateActivityTopic(corgiActivity.getId(), corgiActivity.getTopics());
-        corgiActivityService.updateByColumnn(corgiActivity.getId(), "topics", corgiActivity.getTopics().get(0));
+        corgiActivityService.updateByColumn(corgiActivity.getId(), "topics", String.join(",", corgiActivity.getTopics()));
+        return new JsonResult();
+    }
+
+    @PostMapping("update_activity_hashtag")
+    public JsonResult upadteActivityHashtag(@RequestBody CorgiActivityDetail corgiActivity) {
+        log.info("id:{} ", corgiActivity.getId());
+        corgiToolService.updateActivityHashtag(corgiActivity.getId(), corgiActivity.getHashtags());
+        corgiActivityService.updateByColumn(corgiActivity.getId(), "hashtags", String.join(",", corgiActivity.getHashtags()));
         return new JsonResult();
     }
 
@@ -367,7 +408,7 @@ public class CorgiToolController extends BaseController {
     public JsonResult agreeTitle(@RequestParam("activityId") String
                                          activityId, @RequestParam(required = false, name = "title", defaultValue = "") String title) {
         if (!StringUtils.isEmpty(title)) {
-            corgiActivityService.updateByColumnn(activityId, "title", title);
+            corgiActivityService.updateByColumn(activityId, "title", title);
         }
         return new JsonResult();
     }
@@ -376,7 +417,7 @@ public class CorgiToolController extends BaseController {
     public JsonResult agreeType(@RequestParam("activityId") String
                                         activityId, @RequestParam(required = false, name = "type", defaultValue = "") String type) {
         if (!StringUtils.isEmpty(type)) {
-            corgiActivityService.updateByColumnn(activityId, "activityType", type);
+            corgiActivityService.updateByColumn(activityId, "activityType", type);
         }
         return new JsonResult();
     }
@@ -385,7 +426,7 @@ public class CorgiToolController extends BaseController {
     public JsonResult agreeContent(@RequestParam("activityId") String
                                            activityId, @RequestParam(required = false, name = "content", defaultValue = "") String content) {
         if (!StringUtils.isEmpty(content)) {
-            corgiActivityService.updateByColumnn(activityId, "content", content);
+            corgiActivityService.updateByColumn(activityId, "content", content);
         }
         return new JsonResult();
     }
@@ -409,20 +450,20 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("agree_activity")
     public JsonResult agreeActivity(@RequestParam("activityId") String activityId) {
-        corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.PASS);
+        corgiActivityService.updateByColumn(activityId, "checkStatus", AliyunGreenService.PASS);
         corgiUserActivityService.changeActivityCreator(activityId, "normal");
         return new JsonResult();
     }
 
     @GetMapping("fail_activity")
     public JsonResult failActivity(@RequestParam("activityId") String activityId) {
-        corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.FAIL);
+        corgiActivityService.updateByColumn(activityId, "checkStatus", AliyunGreenService.FAIL);
         return new JsonResult();
     }
 
     @GetMapping("downgrade_activity")
     public JsonResult downgradeActivity(@RequestParam("activityId") String activityId) {
-        corgiActivityService.updateByColumnn(activityId, "checkStatus", AliyunGreenService.NOT_GOOD);
+        corgiActivityService.updateByColumn(activityId, "checkStatus", AliyunGreenService.NOT_GOOD);
         return new JsonResult();
     }
 

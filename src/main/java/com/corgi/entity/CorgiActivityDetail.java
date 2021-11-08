@@ -15,7 +15,6 @@ import java.util.List;
  */
 @Data
 public class CorgiActivityDetail extends CorgiActivity {
-    private List<CorgiActivityDetail> similarActivity;
     private UserDetail userDetail;
     private BarProfile barDetail;
     private Integer signUpStatus;
@@ -86,11 +85,6 @@ public class CorgiActivityDetail extends CorgiActivity {
     public CorgiActivityDetail initSize(Long height, Long width) {
         this.setHeight(height);
         this.setWidth(width);
-        return this;
-    }
-
-    public CorgiActivityDetail initSimilarActivity(List<CorgiActivityDetail> similarActivity) {
-        this.similarActivity = similarActivity;
         return this;
     }
 
