@@ -1,11 +1,12 @@
 package com.corgi.entity.tool;
 
 import com.corgi.entity.CorgiTopic;
+import com.corgi.user.entity.CorgiHashtag;
 import com.corgi.user.entity.CorgiVlog;
 import lombok.Data;
 
 @Data
-public class Hashtag extends CorgiTopic {
+public class Hashtag extends CorgiHashtag {
 
     private Integer likeCount;
     private Integer viewCount;

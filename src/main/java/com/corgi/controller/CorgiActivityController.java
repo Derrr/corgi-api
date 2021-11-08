@@ -13,6 +13,7 @@ import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.AddAttendResult;
+import com.corgi.entity.tool.Hashtag;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunVodService;
 import com.corgi.service.CorgiUtilService;
@@ -21,6 +22,7 @@ import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -270,7 +272,7 @@ public class CorgiActivityController extends BaseController {
             corgiVlogHot.setExpectView(3000);
             corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
             corgiVlogService.addHotVlog(corgiVlogHot);
-            corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+            corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
 
 //        extra.put("type", "201");
@@ -825,20 +827,20 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
         CorgiActivityDetail detail = details.get(0);
-        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
-            List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
-            if (!CollectionUtils.isEmpty(similarActivities)) {
-                Iterator<CorgiActivity> it = similarActivities.iterator();
-                while (it.hasNext()) {
-                    CorgiActivity corgiActivity = it.next();
-                    if (activityId.equals(corgiActivity.getId())) {
-                        it.remove();
-                    }
-                }
-            }
-            List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
-            detail.setSimilarActivity(similarActivity);
-        }
+//        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
+//            List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
+//            if (!CollectionUtils.isEmpty(similarActivities)) {
+//                Iterator<CorgiActivity> it = similarActivities.iterator();
+//                while (it.hasNext()) {
+//                    CorgiActivity corgiActivity = it.next();
+//                    if (activityId.equals(corgiActivity.getId())) {
+//                        it.remove();
+//                    }
+//                }
+//            }
+//            List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
+//            detail.setSimilarActivity(similarActivity);
+//        }
         detail.setCanCallCity("69548".equals(getUserId()) || (activity.getUserId().equals(getUserId()) && !StringUtils.isEmpty(getCallCityKey(getUserId()))));
         detail.setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activityId)));
         return new JsonResult(detail);
@@ -996,6 +998,28 @@ public class CorgiActivityController extends BaseController {
         }
         CorgiTopic topicDetail = corgiToolService.getTopic(topic);
         return new JsonResult(new CorgiTopicList(topicDetail, result));
+    }
+
+    @GetMapping("get_by_hashtag")
+    public JsonResult getByTopic(@RequestParam("hashtagId") String hashtagId, @RequestParam("page") Integer page, @RequestParam("pageSIze") Integer pageSize) {
+        CorgiActivity query = new CorgiActivity();
+        query.setHashtags(Arrays.asList(hashtagId));
+        List<String> activityIds = corgiUserActivityService.getHeatActivity(query, page, pageSize);
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        List<CorgiActivity> result = new ArrayList<>();
+        if (activities != null) {
+            for (CorgiActivity activity : activities) {
+                if (!AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                    result.add(activity);
+                }
+            }
+        }
+        CorgiHashtag corgiHashtag = corgiToolService.getHashtag(hashtagId);
+        Hashtag hashtag = new Hashtag();
+        BeanUtils.copyProperties(corgiHashtag, hashtag);
+        CorgiVlog countResult = corgiVlogService.countByHashtag(hashtagId);
+        hashtag.initCount(countResult);
+        return new JsonResult(new CorgiHashtagList(hashtag, result));
     }
 
 
