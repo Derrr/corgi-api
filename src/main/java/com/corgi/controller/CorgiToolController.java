@@ -169,7 +169,7 @@ public class CorgiToolController extends BaseController {
         List<CorgiHashtag> hashtags = corgiToolService.searchHashtag(hashtagName, status);
         List<Hashtag> result = new ArrayList<>();
         for (CorgiHashtag corgiHashtag : hashtags) {
-            CorgiVlog countResult = corgiVlogService.countByHashtag(corgiHashtag.getHashtagId());
+            CorgiVlog countResult = corgiVlogService.countByHashtag(corgiHashtag.getHashtagId(), "real");
             Hashtag hashtag = new Hashtag();
             BeanUtils.copyProperties(corgiHashtag, hashtag);
             hashtag.initCount(countResult);

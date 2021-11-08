@@ -1017,7 +1017,7 @@ public class CorgiActivityController extends BaseController {
         CorgiHashtag corgiHashtag = corgiToolService.getHashtag(hashtagId);
         Hashtag hashtag = new Hashtag();
         BeanUtils.copyProperties(corgiHashtag, hashtag);
-        CorgiVlog countResult = corgiVlogService.countByHashtag(hashtagId);
+        CorgiVlog countResult = corgiVlogService.countByHashtag(hashtagId, null);
         hashtag.initCount(countResult);
         return new JsonResult(new CorgiHashtagList(hashtag, result));
     }
