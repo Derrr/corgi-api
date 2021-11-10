@@ -1,6 +1,7 @@
 package com.corgi.service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
@@ -87,7 +88,7 @@ public class CorgiPayService {
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
             log.info("reponse:{} ", response);
-            return response.get("prepay_id");
+            return JSON.toJSONString(response);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
