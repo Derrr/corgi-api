@@ -76,7 +76,7 @@ public class CorgiHotVlogController extends BaseController {
         }
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
-        corgiActivityService.updateByColumnn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+        corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         return new JsonResult();
     }
 
