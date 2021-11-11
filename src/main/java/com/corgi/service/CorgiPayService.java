@@ -99,7 +99,7 @@ public class CorgiPayService {
             result.put("package", "Sign=WXPay");
             result.put("signType", "MD5");
             result.put("sign", response.get("sign"));
-            result.put("newSign", WXPayUtil.generateSignatureWithSign(result, CorgiWXPayConfig.config.getKey()));
+            result.put("sign", WXPayUtil.generateSignatureWithSign(result, CorgiWXPayConfig.config.getKey()));
             return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
