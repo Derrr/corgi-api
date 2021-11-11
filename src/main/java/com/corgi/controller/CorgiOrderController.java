@@ -1,5 +1,6 @@
 package com.corgi.controller;
 
+import com.alibaba.dubbo.common.utils.IOUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.internal.util.AlipaySignature;
@@ -17,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -86,6 +89,17 @@ public class CorgiOrderController extends BaseController {
 
     @PostMapping("wx_callback")
     public JsonResult wxCallback(HttpServletRequest request) {
+
+        String str = request.getQueryString();
+        String bodyStr = null;
+        try {
+            BufferedReader bufferedReader = request.getReader();
+            bodyStr = IOUtils.read(bufferedReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log.info("bodyStr:{} queryStr:{} ", bodyStr, str);
+
         Map<String, String> params = this.convertRequestParamsToMap(request);
         log.info("callback:{} ", params);
         CorgiOrder order = buildWXOrder(params);
