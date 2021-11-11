@@ -91,14 +91,14 @@ public class CorgiPayService {
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
             Map<String, String> result = new HashMap<>();
-            result.put("appId", response.get("appid"));
-            result.put("partnerId", response.get("mch_id"));
-            result.put("timeStamp", System.currentTimeMillis() / 1000 + "");
-            result.put("nonceStr", response.get("nonce_str"));
-            result.put("prepayId", response.get("prepay_id"));
+            result.put("appid", response.get("appid"));
+            result.put("partnerid", response.get("mch_id"));
+            result.put("timestamp", System.currentTimeMillis() / 1000 + "");
+            result.put("noncestr", response.get("nonce_str"));
+            result.put("prepayid", response.get("prepay_id"));
             result.put("package", "Sign=WXPay");
             result.put("signType", "MD5");
-            result.put("sign", response.get("sign"));
+            //result.put("sign", response.get("sign"));
             result.put("sign", WXPayUtil.generateSignatureWithSign(result, CorgiWXPayConfig.config.getKey()));
             return result;
         } catch (Exception e) {
