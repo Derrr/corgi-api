@@ -97,7 +97,7 @@ public class CorgiPayService {
             result.put("noncestr", response.get("nonce_str"));
             result.put("prepayid", response.get("prepay_id"));
             result.put("package", "Sign=WXPay");
-            result.put("signType", "MD5");
+            //result.put("signType", "MD5");
             //result.put("sign", response.get("sign"));
             result.put("sign", WXPayUtil.generateSignatureWithSign(result, CorgiWXPayConfig.config.getKey()));
             return result;
