@@ -199,9 +199,9 @@ public class WXPayUtil {
         Arrays.sort(keyArray);
         StringBuilder sb = new StringBuilder();
         for (String k : keyArray) {
-            if (k.equals(WXPayConstants.FIELD_SIGN)) {
-                continue;
-            }
+//            if (k.equals(WXPayConstants.FIELD_SIGN)) {
+//                continue;
+//            }
             if (data.get(k).trim().length() > 0) // 参数值为空，则不参与签名
                 sb.append(k).append("=").append(data.get(k).trim()).append("&");
         }
