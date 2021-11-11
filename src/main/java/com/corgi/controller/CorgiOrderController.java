@@ -43,7 +43,7 @@ public class CorgiOrderController extends BaseController {
         if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已过期");
         }
-        HashMap<String, String> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
         CorgiOrder order = CorgiOrder.builder()
                 .userId(getUserId())
                 .payType(payType)

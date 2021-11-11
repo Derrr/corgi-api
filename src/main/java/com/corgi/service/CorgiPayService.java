@@ -8,7 +8,10 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.corgi.common.wxpay.sdk.CorgiWXPayConfig;
 import com.corgi.common.wxpay.sdk.WXPay;
+import com.corgi.common.wxpay.sdk.WXPayConstants;
+import com.corgi.common.wxpay.sdk.WXPayUtil;
 import com.corgi.user.api.CorgiOrderService;
 import com.corgi.user.entity.CorgiMerchandise;
 import com.corgi.user.entity.CorgiOrder;
@@ -73,7 +76,7 @@ public class CorgiPayService {
         return "";
     }
 
-    public String getWXPayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
+    public Map<String, String> getWXPayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
         String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
         order.setTradeNo(tradeNo);
         corgiOrderService.addOrder(order);
@@ -87,12 +90,20 @@ public class CorgiPayService {
         body.put("trade_type", "APP");
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
-            log.info("reponse:{} ", response);
-            return JSON.toJSONString(response);
+            Map<String, String> result = new HashMap<>();
+            result.put("appId", response.get("appid"));
+            result.put("partnerId", response.get("mch_id"));
+            result.put("timeStamp", System.currentTimeMillis()/1000 + "");
+            result.put("nonceStr", response.get("nonce_str"));
+            result.put("prepayId", response.get("prepay_id"));
+            result.put("package", "Sign=WXPay");
+            result.put("signType", "MD5");
+            result.put("sign", WXPayUtil.generateSignature(result, CorgiWXPayConfig.config.getKey(), WXPayConstants.SignType.MD5));
+            return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return "";
+        return new HashMap<>();
     }
 
 }
