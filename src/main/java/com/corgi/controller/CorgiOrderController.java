@@ -9,6 +9,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.wxpay.sdk.*;
+import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiPayService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
@@ -92,21 +93,22 @@ public class CorgiOrderController extends BaseController {
     public JsonResult wxCallback(HttpServletRequest request) {
         CorgiOrder order = CorgiOrder.builder().build();
         Map<String, String> params = new HashMap<>();
+        String bodyStr = "";
         try {
             BufferedReader bufferedReader = request.getReader();
-            String bodyStr = IOUtils.read(bufferedReader);
-            log.info("bodyStr:{} queryStr:{} ", bodyStr);
+            bodyStr = IOUtils.read(bufferedReader);
             params = wxPay.processResponseXml(bodyStr);
-            log.info("callback:{} ", params);
             order = buildWXOrder(params);
         } catch (Exception e) {
+            params.put("getError", e.getMessage());
+            params.put("bodyStr", bodyStr);
             log.error(e.getMessage(), e);
         }
 
         try {
             if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
-                log.info("微信回调签名认证失败，signVerified=false, paramsJson:{}", params);
                 order.setStatus(CorgiOrder.STATUS.CREATED);
+                throw new PermissionException("微信回调签名认证失败");
             } else if (WXPayConstants.FAIL.equals(params.get("return_code"))) {
                 order.setStatus(CorgiOrder.STATUS.CREATED);
             } else if (WXPayConstants.FAIL.equals(params.get("result_code"))) {
@@ -116,7 +118,7 @@ public class CorgiOrderController extends BaseController {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            params.put("errorMsg", e.getMessage());
+            params.put("checkError", e.getMessage());
             order.setStatus(CorgiOrder.STATUS.FAIL);
         }
         order.setResult(JSON.toJSONString(params));
