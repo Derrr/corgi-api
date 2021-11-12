@@ -8,10 +8,7 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
-import com.corgi.common.wxpay.sdk.CorgiWXPayConfig;
-import com.corgi.common.wxpay.sdk.WXPay;
-import com.corgi.common.wxpay.sdk.WXPayConfig;
-import com.corgi.common.wxpay.sdk.WXPayUtil;
+import com.corgi.common.wxpay.sdk.*;
 import com.corgi.service.CorgiPayService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
@@ -110,9 +107,9 @@ public class CorgiOrderController extends BaseController {
             if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
                 log.info("微信回调签名认证失败，signVerified=false, paramsJson:{}", params);
                 order.setStatus(PayConstans.FAIL);
-            } else if (PayConstans.WX.FAIL.equals(params.get("return_code"))) {
+            } else if (WXPayConstants.FAIL.equals(params.get("return_code"))) {
                 order.setStatus(PayConstans.FAIL);
-            } else if (PayConstans.WX.FAIL.equals(params.get("result_code"))) {
+            } else if (WXPayConstants.FAIL.equals(params.get("result_code"))) {
                 order.setStatus(PayConstans.FAIL);
             } else {
                 order.setStatus(PayConstans.SUCCESS);
