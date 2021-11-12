@@ -3,6 +3,7 @@ package com.corgi.controller;
 import com.alibaba.dubbo.common.utils.IOUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
@@ -100,7 +101,7 @@ public class CorgiOrderController extends BaseController {
         }
         log.info("bodyStr:{} queryStr:{} ", bodyStr, str);
 
-        Map<String, String> params = this.convertRequestParamsToMap(request);
+        Map<String, String> params = JSON.parseObject(bodyStr,HashMap.class);//this.convertRequestParamsToMap(request);
         log.info("callback:{} ", params);
         CorgiOrder order = buildWXOrder(params);
         try {
