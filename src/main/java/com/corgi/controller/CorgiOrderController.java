@@ -9,6 +9,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.wxpay.sdk.CorgiWXPayConfig;
+import com.corgi.common.wxpay.sdk.WXPay;
 import com.corgi.common.wxpay.sdk.WXPayConfig;
 import com.corgi.common.wxpay.sdk.WXPayUtil;
 import com.corgi.service.CorgiPayService;
@@ -36,6 +37,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiOrderService corgiOrderService;
     @Autowired
     private CorgiPayService corgiPayService;
+    @Autowired
+    private WXPay wxPay;
 
 
     @GetMapping("pay")
@@ -90,20 +93,19 @@ public class CorgiOrderController extends BaseController {
 
     @PostMapping("wx_callback")
     public JsonResult wxCallback(HttpServletRequest request) {
-
-        String str = request.getQueryString();
-        String bodyStr = null;
+        CorgiOrder order = CorgiOrder.builder().build();
+        Map<String, String> params = new HashMap<>();
         try {
             BufferedReader bufferedReader = request.getReader();
-            bodyStr = IOUtils.read(bufferedReader);
-        } catch (IOException e) {
-            e.printStackTrace();
+            String bodyStr = IOUtils.read(bufferedReader);
+            log.info("bodyStr:{} queryStr:{} ", bodyStr);
+            params = wxPay.processResponseXml(bodyStr);
+            log.info("callback:{} ", params);
+            order = buildWXOrder(params);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-        log.info("bodyStr:{} queryStr:{} ", bodyStr, str);
 
-        Map<String, String> params = JSON.parseObject(bodyStr,HashMap.class);//this.convertRequestParamsToMap(request);
-        log.info("callback:{} ", params);
-        CorgiOrder order = buildWXOrder(params);
         try {
             if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
                 log.info("微信回调签名认证失败，signVerified=false, paramsJson:{}", params);
