@@ -689,18 +689,18 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
-        int follow = corgiUserFollowService.isFollowed(userId,targetUserId);
-        if(follow == 1 || follow > 2){
-            return new JsonResult();
-        }
+        int follow = corgiUserFollowService.isFollowed(userId, targetUserId);
         corgiUserFollowService.follow(userId, targetUserId);
-        HashMap extra = new HashMap();
-        mqService.sendMessage(PushMessage.builder()
-                .type(PushMessage.FOLLOW)
-                .sourceUserId(userId)
-                .targetUserId(targetUserId)
-                .extra(extra)
-                .build());
+        if (follow != 1 && follow != 3) {
+            HashMap extra = new HashMap();
+            mqService.sendMessage(PushMessage.builder()
+                    .type(PushMessage.FOLLOW)
+                    .sourceUserId(userId)
+                    .targetUserId(targetUserId)
+                    .extra(extra)
+                    .build());
+        }
+
         return new JsonResult();
     }
 
