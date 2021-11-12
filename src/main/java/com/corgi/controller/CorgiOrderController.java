@@ -106,17 +106,17 @@ public class CorgiOrderController extends BaseController {
         try {
             if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
                 log.info("微信回调签名认证失败，signVerified=false, paramsJson:{}", params);
-                order.setStatus(PayConstans.FAIL);
+                order.setStatus(CorgiOrder.STATUS.FAIL);
             } else if (WXPayConstants.FAIL.equals(params.get("return_code"))) {
-                order.setStatus(PayConstans.FAIL);
+                order.setStatus(CorgiOrder.STATUS.FAIL);
             } else if (WXPayConstants.FAIL.equals(params.get("result_code"))) {
-                order.setStatus(PayConstans.FAIL);
+                order.setStatus(CorgiOrder.STATUS.FAIL);
             } else {
-                order.setStatus(PayConstans.SUCCESS);
+                order.setStatus(CorgiOrder.STATUS.SUCCESS);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            order.setStatus(PayConstans.FAIL);
+            order.setStatus(CorgiOrder.STATUS.FAIL);
         }
         order.setResult(JSON.toJSONString(params));
         corgiOrderService.updateOrder(order);
