@@ -90,7 +90,10 @@ public class CorgiFeedController extends BaseController {
             List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
             List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
             for (String feed : feedIds) {
-                corgiFeedService.viewFeed(userId, feed);
+                CorgiFeed view = new CorgiFeed();
+                view.setUserId(userId);
+                view.setFeed(feed);
+                corgiFeedService.viewFeed(view);
             }
             mqService.refreshFeed(userId);
             return new JsonResult(details);
@@ -195,10 +198,17 @@ public class CorgiFeedController extends BaseController {
     }
 
     @GetMapping("browse")
-    public JsonResult viewVideo(@RequestParam("activityId") String activityId) {
+    public JsonResult viewVideo(@RequestParam("activityId") String activityId,
+                                @RequestParam("source")String source,
+                                @RequestParam("creatorId")String creatorId) {
         if (corgiUtilService.lock("view_" + activityId)) {
             try {
-                corgiFeedService.viewFeed(getUserId(), activityId);
+                CorgiFeed feed = new CorgiFeed();
+                feed.setUserId(getUserId());
+                feed.setFeed(activityId);
+                feed.setFeedUserId(creatorId);
+                feed.setSource(source);
+                corgiFeedService.viewFeed(feed);
             } finally {
                 corgiUtilService.unlock("view_" + activityId);
             }
