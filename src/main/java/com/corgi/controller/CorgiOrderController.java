@@ -1,5 +1,6 @@
 package com.corgi.controller;
 
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.IOUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
@@ -13,6 +14,7 @@ import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiPayService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
+import com.corgi.user.enums.MerchandiseEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -70,7 +73,20 @@ public class CorgiOrderController extends BaseController {
     public JsonResult getMerchandise(@RequestParam("type") String type) {
         CorgiMerchandise query = new CorgiMerchandise();
         query.setType(type);
-        return new JsonResult(corgiOrderService.getMerchandise(query));
+        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
+        if (type.equals(CorgiMerchandise.SUBSCRIBE)) {
+            CorgiOrder orderQuery = CorgiOrder.builder()
+                    .status(CorgiOrder.STATUS.SUCCESS)
+                    .merchType(CorgiMerchandise.SUBSCRIBE)
+                    .build();
+            List<CorgiOrder> orders = corgiOrderService.getOrderByPage(orderQuery, 1, 1);
+            if (CollectionUtils.isNotEmpty(orders)) {
+                merchandises = merchandises.stream().filter(m -> !MerchandiseEnum.isFirst(m.getId())).collect(Collectors.toList());
+            } else {
+                merchandises = merchandises.stream().filter(m -> MerchandiseEnum.isFirst(m.getId())).collect(Collectors.toList());
+            }
+        }
+        return new JsonResult(merchandises);
     }
 
     @GetMapping("list_order")
