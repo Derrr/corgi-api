@@ -315,9 +315,18 @@ public class CorgiActivityController extends BaseController {
 
     @PostMapping("add_comment")
     public JsonResult addComment(@RequestBody ActivityComment activityComment) {
+        String key = "comment_abandon_" + getUserId();
+        if (!StringUtils.isEmpty(redisTemplate.opsForValue().get(key))) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
+        }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityComment.getActivityId()));
         if (CollectionUtils.isEmpty(activityList)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论失败，活动不存在");
+        }
+        List<ActivityComment> comments = corgiCommentService.getActivityComment(activityList.get(0).getId(), null, null, "");
+        if (!corgiUtilService.checkComment(comments, getUserId())) {
+            redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 1l, TimeUnit.HOURS);
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
         }
         if (!aliyunGreenService.checkText(activityComment.getContent())) {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
