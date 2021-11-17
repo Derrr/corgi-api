@@ -12,6 +12,7 @@ import com.corgi.common.constant.PayConstans;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiPayService;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import com.corgi.user.enums.MerchandiseEnum;
@@ -39,42 +40,50 @@ public class CorgiOrderController extends BaseController {
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
+    private CorgiUtilService corgiUtilService;
+    @Autowired
     private WXPay wxPay;
 
 
     @GetMapping("pay")
     public JsonResult pay(@RequestParam("merchId") String merchId, @RequestParam("payType") String payType) {
-        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId);
-        CorgiOrder orderQuery = CorgiOrder.builder()
-                .status(CorgiOrder.STATUS.CREATED)
-                .merchType(merchandise.getType())
-                .build();
-        List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
-        if (CollectionUtils.isNotEmpty(postOrders)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品");
+        String key = "user_pay_" + getUserId();
+        corgiUtilService.lock(key);
+        try {
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId);
+            CorgiOrder orderQuery = CorgiOrder.builder()
+                    .status(CorgiOrder.STATUS.CREATED)
+                    .merchType(merchandise.getType())
+                    .build();
+            List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
+            if (CollectionUtils.isNotEmpty(postOrders)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品");
+            }
+            if (merchandise == null) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
+            }
+            if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已失效");
+            }
+            HashMap<String, Object> result = new HashMap<>();
+            CorgiOrder order = CorgiOrder.builder()
+                    .userId(getUserId())
+                    .payType(payType)
+                    .marketId("-")
+                    .sellerId("corgi")
+                    .build();
+            result.put("orderString", "");
+            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
+                result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
+            }
+            if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
+                result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
+            }
+            result.put("orderNo", order.getTradeNo());
+            return new JsonResult(result);
+        } finally {
+            corgiUtilService.unlock(key);
         }
-        if (merchandise == null) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
-        }
-        if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已失效");
-        }
-        HashMap<String, Object> result = new HashMap<>();
-        CorgiOrder order = CorgiOrder.builder()
-                .userId(getUserId())
-                .payType(payType)
-                .marketId("-")
-                .sellerId("corgi")
-                .build();
-        result.put("orderString", "");
-        if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
-            result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
-        }
-        if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
-            result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
-        }
-        result.put("orderNo", order.getTradeNo());
-        return new JsonResult(result);
     }
 
     @GetMapping("get_merchandises")
