@@ -5,6 +5,7 @@ import com.alibaba.dubbo.common.utils.IOUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.corgi.common.JsonResult;
@@ -152,10 +153,26 @@ public class CorgiOrderController extends BaseController {
         JSONObject receiptResult = result.getJSONObject("receipt");
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
-            JSONObject inApp = receiptResult.getJSONObject("in_app");
-            if (inApp != null) {
-                order.setBuyerId(inApp.getString("original_transaction_id"));
-                order.setPayTime(inApp.getString("original_purchase_date_ms"));
+            String creationDateMs = result.getString("receipt_creation_date_ms");
+            JSONArray inApps = receiptResult.getJSONArray("in_app");
+            if (inApps != null) {
+                JSONObject inApp = null;
+                if (1 == inApps.size()) {
+                    inApp = inApps.getJSONObject(0);
+                } else {
+                    for (int i = 0; i < inApps.size(); i++) {
+                        JSONObject orderItem = inApps.getJSONObject(i);
+                        if (orderItem.getString("purchase_date_ms").equals(creationDateMs)) {
+                            inApp = orderItem;
+                        }
+                    }
+                }
+                if (null == inApp) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
+                } else {
+                    order.setBuyerId(inApp.getString("original_transaction_id"));
+                    order.setPayTime(inApp.getString("original_purchase_date_ms"));
+                }
             }
         }
         corgiOrderService.updateOrder(order);
