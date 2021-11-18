@@ -122,6 +122,29 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
     }
 
+    @PostMapping("apple_pay_verify")
+    public JsonResult applyPayVerify(@RequestBody HashMap<String, String> receipt) {
+        String receiptData = receipt.get("receipt-data");
+        String tradeNo = receipt.get("tradeNo");
+        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
+        if (order == null) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
+        }
+        JSONObject result = corgiPayService.verifyApplePay(receiptData);
+        order.setResult(result.toJSONString());
+        if ("0".equals(result.getString("status"))) {
+            order.setStatus(CorgiOrder.STATUS.SUCCESS);
+        } else {
+            order.setStatus(CorgiOrder.STATUS.FAIL);
+        }
+        JSONObject receiptResult = result.getJSONObject("receipt");
+        if (receiptResult != null) {
+            order.setPayTime(result.getString("original_purchase_date_ms"));
+        }
+        corgiOrderService.updateOrder(order);
+        return new JsonResult();
+    }
+
     @PostMapping("wx_callback")
     public JsonResult wxCallback(HttpServletRequest request) {
         CorgiOrder order = CorgiOrder.builder().build();

@@ -2,6 +2,7 @@ package com.corgi.service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
@@ -21,6 +22,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -105,6 +111,40 @@ public class CorgiPayService {
             log.error(e.getMessage(), e);
         }
         return new HashMap<>();
+    }
+
+    public JSONObject verifyApplePay(String receipt) {
+        String url = "https://buy.itunes.apple.com/verifyReceipt";
+        return verifyApplePay(url, receipt);
+    }
+
+    public JSONObject verifyApplePay(String url, String receipt) {
+        try {
+            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setAllowUserInteraction(false);
+            PrintStream ps = new PrintStream(connection.getOutputStream());
+            ps.print("{\"receipt-data\": \"" + receipt + "\"}");
+            ps.close();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String str;
+            StringBuffer sb = new StringBuffer();
+            while ((str = br.readLine()) != null) {
+                sb.append(str);
+            }
+            br.close();
+            String resultStr = sb.toString();
+            JSONObject result = JSONObject.parseObject(resultStr);
+            if (result != null && result.getInteger("status") == 21007) {   //递归，以防漏单
+                return verifyApplePay("https://sandbox.itunes.apple.com/verifyReceipt", receipt);
+            }
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+
     }
 
 }
