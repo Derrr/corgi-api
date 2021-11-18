@@ -2,6 +2,7 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.common.utils.IOUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -122,10 +123,21 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
     }
 
+    @PostMapping("receipt_update")
+    public JsonResult updateReceipt(@RequestBody HashMap<String, String> receipt) {
+        String tradeNo = receipt.get("tradeNo");
+        String receiptString = receipt.get("receipt");
+        corgiOrderService.updateReceipt(tradeNo, receiptString);
+        return new JsonResult();
+    }
+
     @PostMapping("apple_pay_verify")
     public JsonResult applyPayVerify(@RequestBody HashMap<String, String> receipt) {
-        String receiptData = receipt.get("receipt-data");
         String tradeNo = receipt.get("tradeNo");
+        String receiptData = corgiOrderService.getReceipt(tradeNo);
+        if (StringUtils.isEmpty(receiptData)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "票据不存在");
+        }
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
@@ -140,6 +152,11 @@ public class CorgiOrderController extends BaseController {
         JSONObject receiptResult = result.getJSONObject("receipt");
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
+            JSONObject inApp = receiptResult.getJSONObject("in_app");
+            if (inApp != null) {
+                order.setBuyerId(inApp.getString("original_transaction_id"));
+                order.setPayTime(inApp.getString("original_purchase_date_ms"));
+            }
         }
         corgiOrderService.updateOrder(order);
         return new JsonResult();
