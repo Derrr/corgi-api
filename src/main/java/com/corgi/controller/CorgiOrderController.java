@@ -156,6 +156,9 @@ public class CorgiOrderController extends BaseController {
         }
         order.setResult(JSON.toJSONString(params));
         corgiOrderService.updateOrder(order);
+        if (CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
+            corgiOrderService.buy(order.getTradeNo());
+        }
         return new JsonResult();
     }
 
@@ -191,6 +194,9 @@ public class CorgiOrderController extends BaseController {
         }
         order.setResult(JSON.toJSONString(params));
         corgiOrderService.updateOrder(order);
+        if (CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
+            corgiOrderService.buy(order.getTradeNo());
+        }
         return new JsonResult();
     }
 
