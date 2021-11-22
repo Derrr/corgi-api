@@ -2,7 +2,6 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.aliyuncs.vod.model.v20170321.GetMezzanineInfoResponse;
-import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
 import com.aliyuncs.vod.model.v20170321.GetVideoInfoResponse;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.*;
@@ -69,6 +68,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiVlogService corgiVlogService;
     @Reference
     private CorgiFeedService corgiFeedService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -275,41 +276,136 @@ public class CorgiActivityController extends BaseController {
             corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
 
-//        extra.put("type", "201");
-//        mqService.sendSilentMessage(PushMessage.builder()
-//                .type(PushMessage.FOLLOW)
-//                .sourceUserId(getUserId())
-//                .message("你关注的人发动态啦")
-//                .extra(extra)
-//                .build());
         if (CollectionUtils.isEmpty(activity.getMentionUserIds())) {
-            new JsonResult(AddActivityResult.getResult(activity));
+            return new JsonResult(AddActivityResult.getResult(activity));
         }
         HashMap extra = new HashMap();
         extra.put("activityId", activity.getId());
         extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
         UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
-        if (activity.getMentionUserIds() != null) {
-            for (String mentionUserId : activity.getMentionUserIds()) {
-                if (!getUserId().equals(mentionUserId)) {
-                    mqService.sendMessage(PushMessage.builder()
-                            .type(PushMessage.DEFAULT)
-                            .sourceUserId(getUserId())
-                            .targetUserId(mentionUserId)
-                            .message(PushMessage.ACTIVITY_AT)
-                            .extra(extra)
-                            .build());
-                    corgiToolService.addActivityMessage(ActivityMessage.builder()
-                            .activityId(activity.getId())
-                            .fromUserAvatar(userDetail.getAvatar())
-                            .fromUserName(userDetail.getNickname())
-                            .fromUserId(getUserId())
-                            .toUserId(mentionUserId)
-                            .time(System.currentTimeMillis())
-                            .content("@了你")
-                            .messageType(ActivityMessage.COMMENT)
-                            .build());
+        for (String mentionUserId : activity.getMentionUserIds()) {
+            if (!getUserId().equals(mentionUserId)) {
+                mqService.sendMessage(PushMessage.builder()
+                        .type(PushMessage.DEFAULT)
+                        .sourceUserId(getUserId())
+                        .targetUserId(mentionUserId)
+                        .message(PushMessage.ACTIVITY_AT)
+                        .extra(extra)
+                        .build());
+                corgiToolService.addActivityMessage(ActivityMessage.builder()
+                        .activityId(activity.getId())
+                        .fromUserAvatar(userDetail.getAvatar())
+                        .fromUserName(userDetail.getNickname())
+                        .fromUserId(getUserId())
+                        .toUserId(mentionUserId)
+                        .time(System.currentTimeMillis())
+                        .content("@了你")
+                        .messageType(ActivityMessage.COMMENT)
+                        .build());
+            }
+        }
+        return new JsonResult(AddActivityResult.getResult(activity));
+    }
+
+    @PostMapping("add_paying_activity")
+    public JsonResult addPayingActivity(@RequestBody CorgiActivity activity) {
+        if (hasUserId()) {
+            activity.setUserId(getUserId());
+        }
+        if (!redisTemplate.opsForValue().setIfAbsent("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
+        }
+        String merchId = activity.getMerchId();
+        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId);
+        if (merchandise == null) {
+            return new JsonResult(Constants.API_ERROR_CODE, "价格不存在或者已失效，请重新选择");
+        }
+        if (StringUtils.isEmpty(activity.getCategory())) {
+            activity.setCategory(CorgiActivity.CAT_PAYING);
+        }
+        if (!StringUtils.isEmpty(activity.getVideoId())) {
+            GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
+            GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
+            if (mezzanine != null) {
+                activity.setHeight(mezzanine.getHeight());
+                activity.setWidth(mezzanine.getWidth());
+                activity.setVideoUrl(mezzanine.getFileURL().split("\\?Expires")[0]);
+                GetVideoInfoResponse infoResponse = aliyunVodService.getVideoUrl(activity.getVideoId());
+                if (infoResponse != null && infoResponse.getVideo() != null) {
+                    if (StringUtils.isEmpty(activity.getCoverUrl())) {
+                        activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
+                    }
+                    if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
+                        activity.setCheckStatus(AliyunGreenService.FAIL);
+                    }
                 }
+            }
+        }
+        activity.setCheckStatus(AliyunGreenService.PASS);
+        if (activity.getLat() == 0 && activity.getLng() == 0) {
+            UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
+            if (userPosition != null) {
+                if (userPosition.getLng() != null && userPosition.getLng() < 200 && userPosition.getLat() != null && userPosition.getLat() < 200) {
+                    activity.setLng(userPosition.getLng());
+                    activity.setLat(userPosition.getLat());
+                } else if (userPosition.getRealLng() != null && userPosition.getRealLng() < 200 && userPosition.getRealLat() != null && userPosition.getRealLat() < 200) {
+                    activity.setLng(userPosition.getRealLng());
+                    activity.setLat(userPosition.getRealLat());
+                }
+            }
+        }
+        activity = aliyunGreenService.checkImageActivity(activity);
+        if (!CollectionUtils.isEmpty(activity.getPics())) {
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
+            if (!checkActivityPic(activityPics)) {
+                activity.setCheckStatus(AliyunGreenService.CHECK);
+            }
+            activity.setPics(activityPics);
+        }
+        activity = corgiActivityService.addCorgiActivity(activity);
+        CorgiUserMarket market = CorgiUserMarket.builder()
+                .userId(getUserId())
+                .sourceId(activity.getId())
+                .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                .merchId(merchId)
+                .build();
+        corgiOrderService.addUserMarket(market);
+        if (!StringUtils.isEmpty(activity.getVideoId())) {
+            CorgiVlog corgiVlog = new CorgiVlog();
+            corgiVlog.setActivityId(activity.getId());
+            corgiVlog.setUserId(activity.getUserId());
+            corgiVlog.setVideoId(activity.getVideoId());
+            corgiVlog.setType(CorgiVlog.TYPE.USER);
+            corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
+            corgiVlogService.addVlog(corgiVlog);
+        }
+
+        if (CollectionUtils.isEmpty(activity.getMentionUserIds())) {
+            return new JsonResult(AddActivityResult.getResult(activity));
+        }
+        HashMap extra = new HashMap();
+        extra.put("activityId", activity.getId());
+        extra.put("type", PushMessage.LIKE_COMMENT_TYPE);
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
+        for (String mentionUserId : activity.getMentionUserIds()) {
+            if (!getUserId().equals(mentionUserId)) {
+                mqService.sendMessage(PushMessage.builder()
+                        .type(PushMessage.DEFAULT)
+                        .sourceUserId(getUserId())
+                        .targetUserId(mentionUserId)
+                        .message(PushMessage.ACTIVITY_AT)
+                        .extra(extra)
+                        .build());
+                corgiToolService.addActivityMessage(ActivityMessage.builder()
+                        .activityId(activity.getId())
+                        .fromUserAvatar(userDetail.getAvatar())
+                        .fromUserName(userDetail.getNickname())
+                        .fromUserId(getUserId())
+                        .toUserId(mentionUserId)
+                        .time(System.currentTimeMillis())
+                        .content("@了你")
+                        .messageType(ActivityMessage.COMMENT)
+                        .build());
             }
         }
         return new JsonResult(AddActivityResult.getResult(activity));

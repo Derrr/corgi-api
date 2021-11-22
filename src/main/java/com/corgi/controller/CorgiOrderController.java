@@ -116,6 +116,37 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
     }
 
+    @GetMapping("close_order")
+    public JsonResult closeOrder(@RequestParam("tradeNo") String tradeNo) {
+        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
+        if (order == null) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
+        }
+        if (!order.getStatus().equals(CorgiOrder.STATUS.CREATED)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单无法关闭");
+        }
+        try {
+            if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayTime())) {
+                corgiPayService.wxCloseOrder(order);
+                corgiOrderService.updateOrder(order);
+                return new JsonResult();
+            }
+            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayTime())) {
+                corgiPayService.alipayCloseOrder(order);
+                corgiOrderService.updateOrder(order);
+                return new JsonResult();
+            }
+        } catch (Exception e) {
+            order.setResult(e.getMessage());
+            corgiOrderService.updateOrder(order);
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单关闭失败");
+        }
+        order.setResult("直接关闭订单");
+        order.setStatus(CorgiOrder.STATUS.CLOSE);
+        corgiOrderService.updateOrder(order);
+        return new JsonResult();
+    }
+
     @GetMapping("search_order")
     public JsonResult searchOrders(@RequestParam("order") CorgiOrder order, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         if (hasUserId()) {

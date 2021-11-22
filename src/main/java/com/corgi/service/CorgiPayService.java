@@ -8,7 +8,9 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.alipay.api.response.AlipayTradeCloseResponse;
 import com.corgi.common.wxpay.sdk.CorgiWXPayConfig;
 import com.corgi.common.wxpay.sdk.WXPay;
 import com.corgi.common.wxpay.sdk.WXPayConstants;
@@ -57,6 +59,21 @@ public class CorgiPayService {
     //String APP_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqcvu02wXRlYW2kIQDpGJNW+Myox9lObDUIJ6vXP3yO+Mpx6gk16MfLfeXte9RiDdR+WKJ509UR6v1BPBZynL0QpDQ7MJKaPCCwH9CipRYHzdZKkK3ySvcUk/fINQilPn2dlliJO24MjK7OlRFmtPSiXW+LpvGAJ1L293g0/dQoAjKRYiCKTJfUwYjdPqnBvtjkbSayZgqPEL3lKWbTpdw8DtvI7/uGFeYl14Hb9E7SC1UElP0JxrZiF82z3AgA/Rbi2zi5z9xyTUaRpljtb5EIS5s3VQ/Z92NDgegc4wb7VkgdfP6Avb5gFPrxetPzmi8VjljUNCxVORHI8lRwDInwIDAQAB";
     public static final String ALIPAY_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPhoJ5557xk1l5k9zLslYbTYb0TfO/c+51FyV+wN4F7VCadppxrOLdEean23gYw4+6qM4A3LvNBCptnrXuRlyb80j0pbYK8hPf5l8i5VSwERXf72kbOxwgKGZPurbBSvZM+QWXxY8yrjXbHqTNKJxIhIAVDWSJqxB2KPtxeJZlylJ1YhUfSEoxbYHKeW7JJWaZzzuVfYkCwAdWFX0wKAAeEVlXmD8dAjwvXjD4a0JFrQJFT7w2fsZXbiFjdu3ufcQzGZUw4oJ5wHwMrblcOPhYmUDbbRgriVUU9VpoMfXdK8LBUtnC3UXHz823XPEgIsXniCSKXp23r+iJxi9jA+0wIDAQAB";
 
+    public void alipayCloseOrder(CorgiOrder order) throws AlipayApiException {
+        AlipayClient alipayClient = new DefaultAlipayClient(ALI_URL, APP_ID, APP_PRIVATE_KEY, "json", "UTF-8", ALIPAY_PUBLIC_KEY, "RSA2");
+        AlipayTradeCloseRequest request = new AlipayTradeCloseRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("trade_no", "2013112611001004680073956707");
+        request.setBizContent(bizContent.toString());
+        AlipayTradeCloseResponse response = alipayClient.execute(request);
+        if (response.isSuccess()) {
+            order.setResult("订单关闭");
+            order.setStatus(CorgiOrder.STATUS.CLOSE);
+        } else {
+            order.setResult(response.getMsg());
+        }
+    }
+
     public String getAlipayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
         String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
         order.setTradeNo(tradeNo);
@@ -80,6 +97,15 @@ public class CorgiPayService {
         }
         /** response.getBody()打印结果就是orderString，可以直接给客户端请求，无需再做处理。 如果传值客户端失败，可根据返回错误信息到该文档寻找排查方案：https://opensupport.alipay.com/support/helpcenter/89 **/
         return "";
+    }
+
+    public Map<String, String> wxCloseOrder(CorgiOrder order) throws Exception {
+        Map<String, String> orderQuery = new HashMap<>();
+        orderQuery.put("out_trade_no", order.getTradeNo());
+        Map<String, String> result = wxPay.closeOrder(orderQuery);
+        order.setResult("订单关闭");
+        order.setStatus(CorgiOrder.STATUS.CLOSE);
+        return result;
     }
 
     public Map<String, String> getWXPayOrder(CorgiMerchandise merchandise, CorgiOrder order) {

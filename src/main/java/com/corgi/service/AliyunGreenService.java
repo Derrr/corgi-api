@@ -373,7 +373,6 @@ public class AliyunGreenService {
         //服务端接收到请求，并完成处理返回的结果
         if (httpResponse != null && httpResponse.isSuccess()) {
             JSONObject scrResponse = JSON.parseObject(org.apache.commons.codec.binary.StringUtils.newStringUtf8(httpResponse.getHttpContent()));
-            System.out.println(JSON.toJSONString(scrResponse, true));
             int requestCode = scrResponse.getIntValue("code");
             //每一张图片的检测结果
             JSONArray taskResults = scrResponse.getJSONArray("data");
