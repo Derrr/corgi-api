@@ -101,6 +101,7 @@ public class CorgiOrderController extends BaseController {
                     .marketId(marketId)
                     .tradeNo(tradeNo)
                     .sellerId(sellerId)
+                    .payAmount(merchandise.getPrice())
                     .build();
             result.put("orderString", "");
             if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
