@@ -280,16 +280,16 @@ public class CorgiOrderController extends BaseController {
         String receipt = request.get("receipt");
         String vipStatus = request.get("vipStatus");
         String vipDate = request.get("vipDate");
+        String payAmount = request.get("payAmount");
         String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
         CorgiOrder order = CorgiOrder.builder()
                 .userId(getUserId())
+                .payAmount(Double.parseDouble(payAmount))
                 .payType(CorgiOrder.PAY_TYPE.APP_STORE)
                 .tradeNo(tradeNo)
                 .marketId("-")
                 .sellerId("corgi")
                 .status(CorgiOrder.STATUS.SUCCESS)
-                .build();
-        CorgiUserGoods goods = CorgiUserGoods.builder()
                 .build();
         JSONObject result = corgiPayService.verifyApplePay(receipt);
         order.setResult(result.toJSONString());
@@ -323,6 +323,14 @@ public class CorgiOrderController extends BaseController {
                 }
             }
         }
+        CorgiUserGoods goods = CorgiUserGoods.builder()
+                .userId(order.getUserId())
+                .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
+                .currency(CorgiUserGoods.CURRENCY.CNY)
+                .traderId("corgi")
+                .price(order.getPayAmount())
+                .tradeNo(order.getTradeNo())
+                .build();
         corgiOrderService.subscribe(order, goods, vipStatus, vipDate);
         return new JsonResult();
     }
