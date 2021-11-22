@@ -8,6 +8,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
 public class CorgiOrderController extends BaseController {
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiActivityService corgiActivityService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -48,11 +52,23 @@ public class CorgiOrderController extends BaseController {
 
 
     @GetMapping("pay")
-    public JsonResult pay(@RequestParam("merchId") String merchId, @RequestParam("payType") String payType) {
+    public JsonResult pay(@RequestParam("merchId") String merchId,
+                          @RequestParam(required = false, name = "goodsId") String goodsId,
+                          @RequestParam("payType") String payType) {
         String key = "user_pay_" + getUserId();
         corgiUtilService.lock(key);
         try {
             CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId);
+            if (StringUtils.isEmpty(goodsId) && !CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "参数错误");
+            }
+            if (merchandise == null) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
+            }
+            if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已失效");
+            }
+
             CorgiOrder orderQuery = CorgiOrder.builder()
                     .status(CorgiOrder.STATUS.CREATED)
                     .merchType(merchandise.getType())
@@ -61,18 +77,28 @@ public class CorgiOrderController extends BaseController {
             if (CollectionUtils.isNotEmpty(postOrders)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品");
             }
-            if (merchandise == null) {
-                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
+
+            String marketId = "-";
+            String sellerId = "corgi";
+            if (StringUtils.isNotEmpty(goodsId)) {
+                List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
+                if (CollectionUtils.isEmpty(corgiActivities)) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
+                }
+                CorgiActivity activity = corgiActivities.get(0);
+                if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态不是付费动态");
+                }
+                marketId = activity.getMarketId();
+                sellerId = activity.getUserId();
             }
-            if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
-                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已失效");
-            }
+
             HashMap<String, Object> result = new HashMap<>();
             CorgiOrder order = CorgiOrder.builder()
                     .userId(getUserId())
                     .payType(payType)
-                    .marketId("-")
-                    .sellerId("corgi")
+                    .marketId(marketId)
+                    .sellerId(sellerId)
                     .build();
             result.put("orderString", "");
             if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
