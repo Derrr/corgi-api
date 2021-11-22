@@ -94,10 +94,12 @@ public class CorgiOrderController extends BaseController {
             }
 
             HashMap<String, Object> result = new HashMap<>();
+            String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
             CorgiOrder order = CorgiOrder.builder()
                     .userId(getUserId())
                     .payType(payType)
                     .marketId(marketId)
+                    .tradeNo(tradeNo)
                     .sellerId(sellerId)
                     .build();
             result.put("orderString", "");
@@ -270,6 +272,58 @@ public class CorgiOrderController extends BaseController {
         }
         order.setResult(JSON.toJSONString(params));
         corgiOrderService.updateOrder(order);
+        return new JsonResult();
+    }
+
+    @PostMapping("applepay_subscribe")
+    public JsonResult applepaySubscribe(@RequestBody HashMap<String, String> request) {
+        String receipt = request.get("receipt");
+        String vipStatus = request.get("vipStatus");
+        String vipDate = request.get("vipDate");
+        String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
+        CorgiOrder order = CorgiOrder.builder()
+                .userId(getUserId())
+                .payType(CorgiOrder.PAY_TYPE.APP_STORE)
+                .tradeNo(tradeNo)
+                .marketId("-")
+                .sellerId("corgi")
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .build();
+        CorgiUserGoods goods = CorgiUserGoods.builder()
+                .build();
+        JSONObject result = corgiPayService.verifyApplePay(receipt);
+        order.setResult(result.toJSONString());
+        if ("0".equals(result.getString("status"))) {
+            order.setStatus(CorgiOrder.STATUS.SUCCESS);
+        } else {
+            order.setStatus(CorgiOrder.STATUS.FAIL);
+        }
+        JSONObject receiptResult = result.getJSONObject("receipt");
+        if (receiptResult != null) {
+            order.setPayTime(result.getString("original_purchase_date_ms"));
+            String creationDateMs = result.getString("receipt_creation_date_ms");
+            JSONArray inApps = receiptResult.getJSONArray("in_app");
+            if (inApps != null) {
+                JSONObject inApp = null;
+                if (1 == inApps.size()) {
+                    inApp = inApps.getJSONObject(0);
+                } else {
+                    for (int i = 0; i < inApps.size(); i++) {
+                        JSONObject orderItem = inApps.getJSONObject(i);
+                        if (orderItem.getString("purchase_date_ms").equals(creationDateMs)) {
+                            inApp = orderItem;
+                        }
+                    }
+                }
+                if (null == inApp) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
+                } else {
+                    order.setBuyerId(inApp.getString("original_transaction_id"));
+                    order.setPayTime(inApp.getString("original_purchase_date_ms"));
+                }
+            }
+        }
+        corgiOrderService.subscribe(order, goods, vipStatus, vipDate);
         return new JsonResult();
     }
 

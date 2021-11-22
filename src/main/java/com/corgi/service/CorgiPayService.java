@@ -75,14 +75,13 @@ public class CorgiPayService {
     }
 
     public String getAlipayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
-        String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
-        order.setTradeNo(tradeNo);
+
         corgiOrderService.addOrder(order);
 
         AlipayClient alipayClient = new DefaultAlipayClient(ALI_URL, APP_ID, APP_PRIVATE_KEY, "json", "UTF-8", ALIPAY_PUBLIC_KEY, "RSA2");
         AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
         AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
-        model.setOutTradeNo(tradeNo);
+        model.setOutTradeNo(order.getTradeNo());
         model.setSubject(merchandise.getTitle());
         model.setProductCode("QUICK_MSECURITY_PAY");
         model.setTotalAmount(merchandise.getPrice() + "");
@@ -109,13 +108,11 @@ public class CorgiPayService {
     }
 
     public Map<String, String> getWXPayOrder(CorgiMerchandise merchandise, CorgiOrder order) {
-        String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
-        order.setTradeNo(tradeNo);
         corgiOrderService.addOrder(order);
 
         Map<String, String> body = new HashMap<>();
         body.put("body", merchandise.getTitle());
-        body.put("out_trade_no", tradeNo);
+        body.put("out_trade_no", order.getTradeNo());
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
         //body.put("spbill_create_ip", "123.12.12.12");
