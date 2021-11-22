@@ -1449,7 +1449,9 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!(CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) || CorgiActivity.CAT_TEXT.equals(activity.getCategory())) && CollectionUtils.isEmpty(activity.getPics())) {
+                if (!(CorgiActivity.CAT_VIDEO.equals(activity.getCategory())
+                        || CorgiActivity.CAT_TEXT.equals(activity.getCategory())
+                        || CorgiActivity.CAT_PAYING.equals(activity.getCategory())) && CollectionUtils.isEmpty(activity.getPics())) {
                     it.remove();
                     continue;
                 }
@@ -1457,6 +1459,22 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
+
+                if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                            .userId(getUserId())
+                            .traderId(activity.getUserId())
+                            .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                            .goodsId(activity.getId())
+                            .build()))) {
+                        activity.setPics(new ArrayList<>());
+                        activity.setVideoUrl("");
+                    } else if (!CollectionUtils.isEmpty(activity.getPics())) {
+                        String picUrl = activity.getPics().get(0).getPicUrl();
+                        activity.setCoverUrl(picUrl);
+                    }
+                }
+
                 activity.setCurrentTime(now);
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
