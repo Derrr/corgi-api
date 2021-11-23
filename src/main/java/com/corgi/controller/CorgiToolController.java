@@ -703,6 +703,27 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_top_9")
+    public JsonResult getTop9(@RequestParam("userId") String userId) {
+        ActivityQuery query = new ActivityQuery();
+        query.setStartTime("2021-01-01");
+        query.setUserId(userId);
+        query.setPageSize(9);
+        List<String> activityIds = corgiUserActivityService.queryHotActivity(query);
+        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
+        List<String> picUrls = new ArrayList<>();
+        for (CorgiActivity activity : activities) {
+            if (StringUtils.isEmpty(activity.getCoverUrl())) {
+                if (!CollectionUtils.isEmpty(activity.getPics())) {
+                    picUrls.add(activity.getPics().get(0).getPicUrl());
+                }
+            } else {
+                picUrls.add(activity.getCoverUrl());
+            }
+        }
+        return new JsonResult(picUrls);
+    }
+
     @GetMapping("get_share_token")
     public JsonResult getShareToken(@RequestParam("type") String type, @RequestParam(required = false, name = "sourceId", defaultValue = "-") String activityId) {
         return new JsonResult(corgiShareService.getShareToken(getUserId(), type, activityId));
