@@ -8,11 +8,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
+import com.corgi.common.util.JWTUtils;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiPayService;
@@ -192,13 +194,10 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult();
     }
 
-    @PostMapping("apple_pay_verify")
+    @PostMapping("applepay_verify")
     public JsonResult applyPayVerify(@RequestBody HashMap<String, String> receipt) {
         String tradeNo = receipt.get("tradeNo");
-        String receiptData = corgiOrderService.getReceipt(tradeNo);
-        if (StringUtils.isEmpty(receiptData)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "票据不存在");
-        }
+        String receiptData = receipt.get("receipt");
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
@@ -232,10 +231,12 @@ public class CorgiOrderController extends BaseController {
                 } else {
                     order.setBuyerId(inApp.getString("original_transaction_id"));
                     order.setPayTime(inApp.getString("original_purchase_date_ms"));
+                    order.setOrderId(inApp.getString("transaction_id"));
                 }
             }
         }
         corgiOrderService.updateOrder(order);
+        corgiOrderService.updateReceipt(tradeNo, receiptData);
         return new JsonResult();
     }
 
@@ -276,13 +277,37 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult();
     }
 
+    @PostMapping("applepay_callback")
+    public JsonResult applepayCallback(@RequestBody HashMap<String, String> request) {
+        String payload = request.get("notification_type");
+        try {
+            DecodedJWT decodedJWT = JWTUtils.verifyToken(payload);
+            String notificationType = decodedJWT.getClaim("notificationType").asString();
+            if ("REFUND".equals(notificationType)) {
+                String originalTransactionId = decodedJWT.getClaim("originalTransactionId").asString();
+                CorgiOrder order = CorgiOrder.builder()
+                        .orderId(originalTransactionId)
+                        .result(JSON.toJSONString(decodedJWT))
+                        .build();
+                corgiOrderService.subscribe(order, null, "0", "");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return new JsonResult();
+    }
+
     @PostMapping("applepay_subscribe")
     public JsonResult applepaySubscribe(@RequestBody HashMap<String, String> request) {
         String receipt = request.get("receipt");
         String vipStatus = request.get("vipStatus");
         String vipDate = request.get("vipDate");
         String payAmount = request.get("payAmount");
-        String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
+        String tradeNo = corgiOrderService.getReceipt(receipt);
+        if (StringUtils.isNotEmpty(tradeNo)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "票据已存在 ");
+        }
+        tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
         CorgiOrder order = CorgiOrder.builder()
                 .userId(getUserId())
                 .payAmount(Double.parseDouble(payAmount))
@@ -321,6 +346,7 @@ public class CorgiOrderController extends BaseController {
                 } else {
                     order.setBuyerId(inApp.getString("original_transaction_id"));
                     order.setPayTime(inApp.getString("original_purchase_date_ms"));
+                    order.setOrderId(inApp.getString("transaction_id"));
                 }
             }
         }
@@ -333,6 +359,7 @@ public class CorgiOrderController extends BaseController {
                 .tradeNo(order.getTradeNo())
                 .build();
         corgiOrderService.subscribe(order, goods, vipStatus, vipDate);
+        corgiOrderService.updateReceipt(tradeNo, receipt);
         return new JsonResult();
     }
 
@@ -372,19 +399,33 @@ public class CorgiOrderController extends BaseController {
     }
 
     private CorgiOrder buildWXOrder(Map<String, String> params) {
-        return CorgiOrder.builder()
+        CorgiOrder order = CorgiOrder.builder()
                 .tradeNo(params.get("out_trade_no"))
-                .buyerId(params.get("buyer_logon_id"))
-                .payTime(params.get("gmt_payment"))
+                .buyerId(params.get("openid"))
+                .payTime(params.get("time_end"))
+                .orderId(params.get("transaction_id"))
                 .build();
+        try {
+            order.setPayAmount(Integer.valueOf(params.get("total_fee")) / 100.0);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return order;
     }
 
     private CorgiOrder buildAlipayOrder(Map<String, String> params) {
-        return CorgiOrder.builder()
+        CorgiOrder order = CorgiOrder.builder()
                 .tradeNo(params.get("out_trade_no"))
                 .buyerId(params.get("buyer_logon_id"))
                 .payTime(params.get("gmt_payment"))
+                .orderId(params.get("trade_no"))
                 .build();
+        try {
+            order.setPayAmount(Double.valueOf(params.get("total_amount")));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return order;
     }
 
     // 将request中的参数转换成Map

@@ -14,6 +14,7 @@ public class JWTUtils {
     public static long expireTime = 30 * 60 * 1000;
     private static long maxAge = 2 * 60 * 60 * 1000;
     private static final String SECRET = "Corgi-5DS4kfiL";
+    private static final String APPLE_SECRET = "28XXHZ2FCY";
     public static final String JWT_USER = "jwtUser";
     public static final String JWT_HEADER = "jwt";
     public static final String ADMIN_ID = "-1";
@@ -51,6 +52,19 @@ public class JWTUtils {
      */
     public static DecodedJWT verifyToken(String token) throws UnsupportedEncodingException {
         Algorithm algorithm = Algorithm.HMAC256(SECRET);
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        DecodedJWT jwt = verifier.verify(token);
+        return jwt;
+    }
+
+    /**
+     * 解析验证苹果token
+     *
+     * @param token 加密后的token字符串
+     * @return
+     */
+    public static DecodedJWT verifyAppleToken(String token) throws UnsupportedEncodingException {
+        Algorithm algorithm = Algorithm.HMAC256(APPLE_SECRET);
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT jwt = verifier.verify(token);
         return jwt;
