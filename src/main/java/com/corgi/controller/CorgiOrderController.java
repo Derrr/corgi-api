@@ -16,6 +16,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.wxpay.sdk.*;
+import com.corgi.entity.CorgiUserOrder;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiPayService;
 import com.corgi.service.CorgiUtilService;
@@ -23,6 +24,7 @@ import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import com.corgi.user.enums.MerchandiseEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -139,12 +141,37 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult(merchandises);
     }
 
-    @GetMapping("list_order")
-    public JsonResult getOrders(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        CorgiOrder order = CorgiOrder.builder()
-                .userId(getUserId())
+    @GetMapping("count_order")
+    public JsonResult countOrder(@RequestParam("type") String type,
+                                 @RequestParam("status") String status,
+                                 @RequestParam("userId") String userId) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        CorgiOrder query = CorgiOrder.builder()
+                .userId(userId)
+                .payType(type)
+                .status(status)
                 .build();
-        return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
+        return new JsonResult(corgiOrderService.countOrder(query));
+    }
+
+    @GetMapping("list_order")
+    public JsonResult getOrders(
+            @RequestParam("type") String type,
+            @RequestParam("status") String status,
+            @RequestParam("userId") String userId,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
+        CorgiOrder query = CorgiOrder.builder()
+                .userId(userId)
+                .payType(type)
+                .status(status)
+                .build();
+        return new JsonResult(this.buildOrder(corgiOrderService.getOrderByPage(query, page, pageSize)));
     }
 
     @GetMapping("close_order")
@@ -311,7 +338,7 @@ public class CorgiOrderController extends BaseController {
         CorgiOrder order = CorgiOrder.builder()
                 .userId(getUserId())
                 .payAmount(Double.parseDouble(payAmount))
-                .payType(CorgiOrder.PAY_TYPE.APP_STORE)
+                .payType(CorgiOrder.PAY_TYPE.IN_APP)
                 .tradeNo(tradeNo)
                 .marketId("-")
                 .sellerId("corgi")
@@ -453,6 +480,21 @@ public class CorgiOrderController extends BaseController {
         }
 
         return retMap;
+    }
+
+    List<CorgiUserOrder> buildOrder(List<CorgiOrder> orders) {
+        List<CorgiUserOrder> result = new ArrayList<>();
+        HashMap<String, CorgiMerchandise> merchandiseHashMap = new HashMap<>();
+        for (CorgiOrder order : orders) {
+            CorgiUserOrder corgiUserOrder = new CorgiUserOrder();
+            BeanUtils.copyProperties(order, corgiUserOrder);
+            if (merchandiseHashMap.get(order.getMerchId()) == null) {
+                corgiOrderService.getMerchandiseById(order.getMerchId());
+            }
+            corgiUserOrder.setMerchandise(merchandiseHashMap.get(order.getMerchId()));
+            result.add(corgiUserOrder);
+        }
+        return result;
     }
 
 }
