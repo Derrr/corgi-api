@@ -30,8 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -210,6 +208,20 @@ public class CorgiOrderController extends BaseController {
                 .status(status)
                 .build();
         return new JsonResult(this.buildOrder(corgiOrderService.getOrderByPage(query, page, pageSize)));
+    }
+
+    @GetMapping("success_order")
+    public JsonResult updateOrder(@RequestParam("tradeNo") String tradeNo) {
+        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
+        if (CorgiOrder.STATUS.CREATED.equals(order.getStatus())) {
+            if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
+                corgiPayService.queryWXOrder(order);
+            }
+            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayType())) {
+                corgiPayService.queryAlipayOrder(order);
+            }
+        }
+        return new JsonResult();
     }
 
     @GetMapping("close_order")
@@ -534,6 +546,8 @@ public class CorgiOrderController extends BaseController {
         }
         return result;
     }
+
+
 
 }
 

@@ -9,8 +9,10 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.request.AlipayTradeCloseRequest;
+import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeCloseResponse;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.corgi.common.wxpay.sdk.CorgiWXPayConfig;
 import com.corgi.common.wxpay.sdk.WXPay;
 import com.corgi.common.wxpay.sdk.WXPayConstants;
@@ -29,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -168,6 +172,79 @@ public class CorgiPayService {
         }
         return null;
 
+    }
+
+    public void queryAlipayOrder(CorgiOrder order) {
+        AlipayClient alipayClient = new DefaultAlipayClient(ALI_URL, APP_ID, APP_PRIVATE_KEY, "json", "GBK", ALIPAY_PUBLIC_KEY, "RSA2");
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", order.getTradeNo());
+        request.setBizContent(bizContent.toString());
+        AlipayTradeQueryResponse response = null;
+        try {
+            response = alipayClient.execute(request);
+            order.setResult(JSON.toJSONString(JSONObject.toJSONString(response)));
+            if (response.isSuccess()) {
+                order.setBuyerId(response.getBuyerLogonId());
+                if (response.getSendPayDate() != null) {
+                    order.setPayTime(sdf.format(response.getSendPayDate()));
+                }
+                String tradeStatus = response.getTradeStatus();
+                if ("TRADE_FINISHED".equals(tradeStatus) || "TRADE_SUCCESS".equals(tradeStatus)) {
+                    order.setStatus(CorgiOrder.STATUS.SUCCESS);
+                } else if ("TRADE_CLOSED".equals(tradeStatus)) {
+                    order.setStatus(CorgiOrder.STATUS.CLOSE);
+                } else {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.MINUTE, -5);
+                    if (order.getCtime().compareTo(sdf.format(calendar.getTime())) < 0) {
+                        AlipayTradeCloseRequest closeRequest = new AlipayTradeCloseRequest();
+                        closeRequest.setBizContent(bizContent.toString());
+                        alipayClient.execute(closeRequest);
+                    }
+                }
+            }
+        } catch (AlipayApiException e) {
+            log.error(e.getErrMsg(), e);
+            order.setResult(e.getErrMsg());
+        }
+        corgiOrderService.updateOrder(order);
+    }
+
+    public void queryWXOrder(CorgiOrder order) {
+        Map<String, String> orderQuery = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        orderQuery.put("out_trade_no", order.getTradeNo());
+        try {
+            Map<String, String> result = wxPay.orderQuery(orderQuery);
+            order.setResult(JSON.toJSONString(result));
+            if (WXPayConstants.FAIL.equals(result.get("return_code"))
+                    || WXPayConstants.FAIL.equals(result.get("result_code"))) {
+                corgiOrderService.updateOrder(order);
+                return;
+            }
+            String tradeStatus = result.get("trade_state");
+            order.setPayTime(result.get("time_end"));
+            order.setBuyerId(result.get("openid"));
+            if ("SUCCESS".equals(tradeStatus)) {
+                order.setStatus(CorgiOrder.STATUS.SUCCESS);
+            } else if ("CLOSED".equals(tradeStatus)) {
+                order.setStatus(CorgiOrder.STATUS.CLOSE);
+            } else if ("PAYERROR".equals(tradeStatus)) {
+                order.setStatus(CorgiOrder.STATUS.FAIL);
+            } else {
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.MINUTE, -5);
+                if (order.getCtime().compareTo(sdf.format(calendar.getTime())) < 0) {
+                    wxPay.closeOrder(orderQuery);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            order.setResult(e.getMessage());
+        }
+        corgiOrderService.updateOrder(order);
     }
 
 }
