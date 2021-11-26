@@ -54,6 +54,43 @@ public class CorgiOrderController extends BaseController {
     @Autowired
     private WXPay wxPay;
 
+    @PostMapping("update")
+    public JsonResult update(@RequestParam CorgiOrder order) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        corgiOrderService.updateOrder(order);
+        return new JsonResult();
+    }
+
+    @PostMapping("withdraw")
+    public JsonResult withdraw(@RequestBody CorgiOrder order) {
+        String key = "withdraw_" + getUserId();
+        corgiUtilService.lock(key);
+        try {
+            CorgiOrder orderQuery = CorgiOrder.builder()
+                    .status(CorgiOrder.STATUS.CREATED)
+                    .userId(getUserId())
+                    .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
+                    .build();
+            List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
+            if (CollectionUtils.isNotEmpty(postOrders)) {
+                return new JsonResult(postOrders.get(0));
+            }
+            order.setUserId(getUserId());
+            order.setOrderId(UUID.randomUUID().toString().split("-")[0].toUpperCase());
+            order.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
+            order.setTradeNo(UUID.randomUUID().toString().replaceAll("-", ""));
+            order.setSellerId("corgi");
+            order.setMarketId("-");
+            order.setMerchId("-");
+            order.setDesc("提现申请");
+            corgiOrderService.addOrder(order);
+            return new JsonResult(order);
+        } finally {
+            corgiUtilService.unlock(key);
+        }
+    }
 
     @GetMapping("pay")
     public JsonResult pay(@RequestParam("merchId") String merchId,
@@ -74,6 +111,7 @@ public class CorgiOrderController extends BaseController {
             }
 
             CorgiOrder orderQuery = CorgiOrder.builder()
+                    .userId(getUserId())
                     .status(CorgiOrder.STATUS.CREATED)
                     .merchType(merchandise.getType())
                     .build();
