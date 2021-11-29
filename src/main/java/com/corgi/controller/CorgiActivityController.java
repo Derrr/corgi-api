@@ -70,6 +70,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -916,6 +918,9 @@ public class CorgiActivityController extends BaseController {
         if (CollectionUtils.isEmpty(corgiActivities) || corgiActivities.get(0) == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
+        if (hasUserId()) {
+            userId = getUserId();
+        }
         CorgiActivity activity = corgiActivities.get(0);
         List<CorgiActivity> activities = new ArrayList<>();
         activities.add(corgiActivities.get(0));
@@ -924,6 +929,15 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
         }
         CorgiActivityDetail detail = details.get(0);
+        Integer blackCount = corgiBlacklistService.isBlacked(detail.getUserId(), userId);
+        if (blackCount > 0) {
+            detail = new CorgiActivityDetail();
+            if (blackCount == 1) {
+                detail.setCheckStatus("blocked");
+            } else {
+                detail.setCheckStatus("block");
+            }
+        }
 //        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
 //            List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
 //            if (!CollectionUtils.isEmpty(similarActivities)) {
