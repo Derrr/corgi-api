@@ -256,7 +256,7 @@ public class CorgiOrderController extends BaseController {
     }
 
     @GetMapping("search_order")
-    public JsonResult searchOrders(@RequestParam("order") CorgiOrder order, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult searchOrders(CorgiOrder order, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         if (hasUserId()) {
             order.setUserId(getUserId());
         }
