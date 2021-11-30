@@ -1484,6 +1484,7 @@ public class CorgiActivityController extends BaseController {
                             .build()))) {
                         activity.setPics(new ArrayList<>());
                         activity.setVideoUrl("");
+                        activity.setStatus("unpay");
                     } else if (!CollectionUtils.isEmpty(activity.getPics())) {
                         String picUrl = activity.getPics().get(0).getPicUrl();
                         activity.setCoverUrl(picUrl);
