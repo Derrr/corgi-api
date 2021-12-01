@@ -428,6 +428,17 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activityComment.setCommentUserId(getUserId());
         }
+        activityComment.setStatus(ActivityComment.NORMAL);
+        if (CorgiActivity.CAT_PAYING.equals(activityList.get(0).getCategory())) {
+            if (!CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                    .userId(getUserId())
+                    .traderId(activityList.get(0).getUserId())
+                    .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                    .goodsId(activityComment.getActivityId())
+                    .build()))) {
+                activityComment.setStatus(ActivityComment.PAY);
+            }
+        }
         activityComment = corgiCommentService.addActivityComment(activityComment);
         HashMap extra = new HashMap();
         extra.put("activityId", activityComment.getActivityId());
@@ -1474,23 +1485,36 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
-
+                List<UserDetail> buyers = new ArrayList<>();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-                    if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
-                            .userId(getUserId())
+                    List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
-                            .build()))) {
+                            .build());
+                    if (!CollectionUtils.isEmpty(goods)) {
+                        for (CorgiUserGoods good : goods) {
+                            buyers.add(corgiUserService.getUserDetailBasic(good.getUserId()));
+                        }
+                        if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                                .userId(getUserId())
+                                .traderId(activity.getUserId())
+                                .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                                .goodsId(activity.getId())
+                                .build()))) {
+                            activity.setPics(new ArrayList<>());
+                            activity.setVideoUrl("");
+                            activity.setStatus("unpay");
+                        } else if (!CollectionUtils.isEmpty(activity.getPics())) {
+                            String picUrl = activity.getPics().get(0).getPicUrl();
+                            activity.setCoverUrl(picUrl);
+                        }
+                    } else {
                         activity.setPics(new ArrayList<>());
                         activity.setVideoUrl("");
                         activity.setStatus("unpay");
-                    } else if (!CollectionUtils.isEmpty(activity.getPics())) {
-                        String picUrl = activity.getPics().get(0).getPicUrl();
-                        activity.setCoverUrl(picUrl);
                     }
                 }
-
                 activity.setCurrentTime(now);
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
@@ -1515,6 +1539,7 @@ public class CorgiActivityController extends BaseController {
                         .initLikeUsers(users)
                         .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
+                detail.setBuyers(buyers);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);

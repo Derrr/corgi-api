@@ -27,6 +27,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private Integer signUpCount;
     private List<ActivityLike> likeUsers;
     private List<SignUpUser> signUpUsers;
+    private List<UserDetail> buyers;
     private boolean hasCallCity;
     private boolean canCallCity;
     private Integer isFollowed;
