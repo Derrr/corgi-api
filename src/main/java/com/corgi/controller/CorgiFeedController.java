@@ -74,19 +74,17 @@ public class CorgiFeedController extends BaseController {
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
         String userId = "1";
+        if (hasUserId()) {
+            userId = getUserId();
+        }
+        String key = "get_feeds-" + userId;
+        corgiUtilService.lock(key);
         try {
-            if (hasUserId()) {
-                userId = getUserId();
-            }
-            String key = "get_feeds-" + userId;
-            if (!redisTemplate.opsForValue().setIfAbsent(key, "1", 1L, TimeUnit.SECONDS)) {
-                Thread.sleep(100L);
-            }
             if (size > 10) {
                 size = 8;
             }
             List<String> feedIds = corgiFeedService.getUnviewFeed(userId, size);
-            log.info(feedIds+"");
+            log.info(feedIds + "");
             List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
             List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
             for (String feed : feedIds) {
@@ -97,9 +95,8 @@ public class CorgiFeedController extends BaseController {
             }
             mqService.refreshFeed(userId);
             return new JsonResult(details);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+        } finally {
+            corgiUtilService.unlock(key);
         }
     }
 
@@ -199,8 +196,8 @@ public class CorgiFeedController extends BaseController {
 
     @GetMapping("browse")
     public JsonResult viewVideo(@RequestParam("activityId") String activityId,
-                                @RequestParam("source")String source,
-                                @RequestParam("creatorId")String creatorId) {
+                                @RequestParam("source") String source,
+                                @RequestParam("creatorId") String creatorId) {
         if (corgiUtilService.lock("view_" + activityId)) {
             try {
                 CorgiFeed feed = new CorgiFeed();
