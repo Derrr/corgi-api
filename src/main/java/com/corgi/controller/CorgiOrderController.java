@@ -111,7 +111,6 @@ public class CorgiOrderController extends BaseController {
             CorgiOrder orderQuery = CorgiOrder.builder()
                     .userId(getUserId())
                     .status(CorgiOrder.STATUS.CREATED)
-                    .merchId(merchId)
                     .merchType(merchandise.getType())
                     .build();
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
@@ -140,6 +139,7 @@ public class CorgiOrderController extends BaseController {
                     .userId(getUserId())
                     .payType(payType)
                     .marketId(marketId)
+                    .merchId(merchId)
                     .tradeNo(tradeNo)
                     .sellerId(sellerId)
                     .payAmount(merchandise.getPrice())
