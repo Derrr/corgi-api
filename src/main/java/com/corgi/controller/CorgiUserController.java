@@ -432,6 +432,16 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(userPic);
     }
 
+    @GetMapping("/get_vip_info")
+    public JsonResult getVipInfo(@RequestParam("userId") String userId) {
+        String expireDate = corgiUserService.getUserVipExpire(userId);
+        CorgiUserVipDetail detail = new CorgiUserVipDetail();
+        if ("-".equals(expireDate)) {
+            return new JsonResult(detail);
+        }
+        return new JsonResult(detail);
+    }
+
     @GetMapping("/get_user_detail")
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
         try {
