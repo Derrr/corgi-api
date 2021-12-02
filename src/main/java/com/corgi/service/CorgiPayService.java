@@ -97,8 +97,9 @@ public class CorgiPayService {
             return response.getBody();
         } catch (AlipayApiException e) {
             log.error(e.getErrMsg(), e);
-            return e.getMessage();
+            return e.getErrMsg();
         }
+        /** response.getBody()打印结果就是orderString，可以直接给客户端请求，无需再做处理。 如果传值客户端失败，可根据返回错误信息到该文档寻找排查方案：https://opensupport.alipay.com/support/helpcenter/89 **/
     }
 
     public Map<String, String> wxCloseOrder(CorgiOrder order) throws Exception {
