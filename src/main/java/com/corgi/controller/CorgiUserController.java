@@ -40,8 +40,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import sun.util.calendar.CalendarUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -437,6 +439,14 @@ public class CorgiUserController extends BaseController {
         String expireDate = corgiUserService.getUserVipExpire(userId);
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
         if ("-".equals(expireDate)) {
+            return new JsonResult(detail);
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = sdf.parse(expireDate);
+            detail.setRemainDate((int) (new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
+            detail.setExpireDate(expireDate);
+        } catch (ParseException e) {
             return new JsonResult(detail);
         }
         return new JsonResult(detail);

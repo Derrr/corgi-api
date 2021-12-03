@@ -469,6 +469,7 @@ public class CorgiOrderController extends BaseController {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            order.setResult(e.getMessage());
             order.setStatus(PayConstans.FAIL);
         }
         order.setResult(JSON.toJSONString(params));
