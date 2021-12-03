@@ -195,7 +195,7 @@ public class CorgiOrderController extends BaseController {
 
     @GetMapping("list_order")
     public JsonResult getOrders(
-            @RequestParam("type") String type,
+            @RequestParam(required = false, name = "type") String type,
             @RequestParam(required = false, name = "status") String status,
             @RequestParam(required = false, name = "userId") String userId,
             @RequestParam("page") Integer page,
