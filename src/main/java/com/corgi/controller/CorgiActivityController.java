@@ -372,6 +372,7 @@ public class CorgiActivityController extends BaseController {
                 .merchId(merchId)
                 .build();
         String marketId = corgiOrderService.addUserMarket(market);
+        log.info("marketId:{} ", marketId);
         activity.setMarketId(marketId);
         if (!StringUtils.isEmpty(activity.getVideoId())) {
             CorgiVlog corgiVlog = new CorgiVlog();
