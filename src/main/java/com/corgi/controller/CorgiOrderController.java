@@ -110,6 +110,7 @@ public class CorgiOrderController extends BaseController {
 
             CorgiOrder orderQuery = CorgiOrder.builder()
                     .userId(getUserId())
+                    .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
                     .status(CorgiOrder.STATUS.CREATED)
                     .merchType(merchandise.getType())
                     .build();

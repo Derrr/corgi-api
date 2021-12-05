@@ -1,5 +1,6 @@
 package com.corgi.entity;
 
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.CorgiMerchandise;
 import lombok.Data;
 
@@ -14,4 +15,5 @@ public class CorgiUserOrder {
     private String desc;
     private String ctime;
     private CorgiMerchandise merchandise;
+    private CorgiActivity activity;
 }
