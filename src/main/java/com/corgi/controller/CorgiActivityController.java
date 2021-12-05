@@ -366,7 +366,7 @@ public class CorgiActivityController extends BaseController {
         }
         activity = corgiActivityService.addCorgiActivity(activity);
         CorgiUserMarket market = CorgiUserMarket.builder()
-                .userId(getUserId())
+                .userId(activity.getUserId())
                 .sourceId(activity.getId())
                 .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                 .merchId(merchId)
