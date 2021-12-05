@@ -43,6 +43,8 @@ public class CorgiFeedController extends BaseController {
     @Reference
     private CorgiActivityFeedService corgiActivityFeedService;
     @Reference
+    private CorgiOrderService corgiOrderService;
+    @Reference
     private CorgiVlogService corgiVlogService;
     @Reference
     private CorgiUserService corgiUserService;
@@ -508,7 +510,21 @@ public class CorgiFeedController extends BaseController {
                 activity.setCurrentTime(now);
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
-
+                if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                            .userId(getUserId())
+                            .traderId(activity.getUserId())
+                            .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                            .goodsId(activity.getId())
+                            .build()))) {
+                        activity.setPics(new ArrayList<>());
+                        activity.setVideoUrl("");
+                        activity.setStatus("unpay");
+                    } else if (!CollectionUtils.isEmpty(activity.getPics())) {
+                        String picUrl = activity.getPics().get(0).getPicUrl();
+                        activity.setCoverUrl(picUrl);
+                    }
+                }
                 if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
@@ -530,6 +546,10 @@ public class CorgiFeedController extends BaseController {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
+                if (!StringUtils.isEmpty(activity.getMerchId())) {
+                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId()));
+                }
+
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     detail.setUserDetail(corgiUtilService.checkUserDetail(userDetail, userId));
                     detail.setIsFollowed(corgiUserFollowService.isFollowed(userId, activity.getUserId()));

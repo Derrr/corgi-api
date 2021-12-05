@@ -34,6 +34,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private String timeShow;
     private String picUrl;
     private String activityId;
+    private CorgiMerchandise merchandise;
 
     public CorgiActivityDetail() {
         super();

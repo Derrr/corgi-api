@@ -1543,6 +1543,9 @@ public class CorgiActivityController extends BaseController {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
+                if (!StringUtils.isEmpty(activity.getMerchId())) {
+                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId()));
+                }
                 if (!StringUtils.isEmpty(activity.getUserId()) && activity.getUserId().startsWith("B")) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
