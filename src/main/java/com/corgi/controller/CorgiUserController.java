@@ -600,7 +600,20 @@ public class CorgiUserController extends BaseController {
             mqService.sendRegisterMessage(PushMessage.builder()
                     .targetUserId(userPosition.getUserId()).build());
         }
+        String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
+        CorgiUserVipDetail detail = new CorgiUserVipDetail();
+        if (!"-".equals(expireDate)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                Date date = sdf.parse(expireDate);
+                detail.setRemainDate((int) (new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
+                detail.setExpireDate(expireDate);
+            } catch (ParseException e) {
 
+            }
+        }
+        result.put("remainDate", detail.getRemainDate());
+        result.put("expireDate", detail.getExpireDate());
         return new JsonResult(result);
     }
 
