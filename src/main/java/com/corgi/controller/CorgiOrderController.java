@@ -541,7 +541,8 @@ public class CorgiOrderController extends BaseController {
             CorgiUserOrder corgiUserOrder = new CorgiUserOrder();
             BeanUtils.copyProperties(order, corgiUserOrder);
             if (merchandiseHashMap.get(order.getMerchId()) == null) {
-                corgiOrderService.getMerchandiseById(order.getMerchId());
+                CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId());
+                merchandiseHashMap.put(order.getMerchId(), merchandise);
             }
             corgiUserOrder.setMerchandise(merchandiseHashMap.get(order.getMerchId()));
             result.add(corgiUserOrder);
