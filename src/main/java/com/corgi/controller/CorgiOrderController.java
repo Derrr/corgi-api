@@ -214,7 +214,7 @@ public class CorgiOrderController extends BaseController {
     @GetMapping("success_order")
     public JsonResult updateOrder(@RequestParam("tradeNo") String tradeNo) {
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
-        if (CorgiOrder.STATUS.CREATED.equals(order.getStatus())) {
+        if (order != null && CorgiOrder.STATUS.CREATED.equals(order.getStatus())) {
             if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
                 corgiPayService.queryWXOrder(order);
             }
