@@ -704,10 +704,13 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_top_9")
-    public JsonResult getTop9(@RequestParam("userId") String userId) {
+    public JsonResult getTop9(@RequestParam("telNo") String telNo) {
+        UserLogin login = new UserLogin();
+        login.setTelNo(telNo);
+        login = corgiUserService.login(login);
         ActivityQuery query = new ActivityQuery();
         query.setStartTime("2021-01-01");
-        query.setUserId(userId);
+        query.setUserId(login.getUserId());
         query.setPageSize(9);
         List<String> activityIds = corgiUserActivityService.queryHotActivity(query);
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
