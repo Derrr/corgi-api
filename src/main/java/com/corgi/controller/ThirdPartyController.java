@@ -2,13 +2,11 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.util.TimeUtil;
-import com.corgi.entity.ActivityBillboardDetail;
-import com.corgi.entity.ActivityQuery;
-import com.corgi.entity.CorgiActivityDetail;
-import com.corgi.entity.PicInfo;
+import com.corgi.entity.*;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityBillboard;
@@ -38,6 +36,8 @@ public class ThirdPartyController extends BaseController {
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
+    private CorgiStatisticService corgiStatisticService;
+    @Reference
     private CorgiUserActivityService corgiUserActivityService;
 
     @GetMapping("get_top_9")
@@ -51,17 +51,23 @@ public class ThirdPartyController extends BaseController {
         query.setPageSize(9);
         List<String> activityIds = corgiUserActivityService.queryHotActivity(query);
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        List<String> picUrls = new ArrayList<>();
+        List<ActivityPic> picUrls = new ArrayList<>();
         for (CorgiActivity activity : activities) {
             if (StringUtils.isEmpty(activity.getCoverUrl())) {
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
-                    picUrls.add(activity.getPics().get(0).getPicUrl());
+                    picUrls.add(activity.getPics().get(0));
                 }
             } else {
-                picUrls.add(activity.getCoverUrl());
+                ActivityPic pic = new ActivityPic();
+                pic.setPicUrl(activity.getCoverUrl());
+                picUrls.add(pic);
             }
         }
-        return new JsonResult(picUrls);
+        CorgiActivityDetail activity = new CorgiActivityDetail();
+        activity.setPics(picUrls);
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(login.getUserId());
+        activity.setUserDetail(userDetail);
+        return new JsonResult(activity);
     }
 
 }
