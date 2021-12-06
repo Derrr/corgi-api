@@ -201,7 +201,6 @@ public class CorgiOrderController extends BaseController {
     @GetMapping("list_order")
     public JsonResult getOrders(
             @RequestParam(required = false, name = "type") String type,
-            @RequestParam(required = false, name = "status") String status,
             @RequestParam(required = false, name = "userId") String userId,
             @RequestParam("page") Integer page,
             @RequestParam("pageSize") Integer pageSize) {
@@ -211,7 +210,7 @@ public class CorgiOrderController extends BaseController {
         CorgiOrder query = CorgiOrder.builder()
                 .userId(userId)
                 .payType(type)
-                .status(status)
+                .status(CorgiOrder.STATUS.SUCCESS)
                 .build();
         return new JsonResult(this.buildOrder(corgiOrderService.getOrderByPage(query, page, pageSize)));
     }
@@ -549,7 +548,17 @@ public class CorgiOrderController extends BaseController {
                 CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId());
                 merchandiseHashMap.put(order.getMerchId(), merchandise);
             }
+            CorgiUserGoods query = new CorgiUserGoods();
+            query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+            query.setTradeNo(order.getTradeNo());
+            List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
             corgiUserOrder.setMerchandise(merchandiseHashMap.get(order.getMerchId()));
+            if (CollectionUtils.isNotEmpty(goods)) {
+                List<CorgiActivity> activities = corgiActivityService.getActivityByIds(Arrays.asList(goods.get(0).getId()));
+                if (CollectionUtils.isNotEmpty(activities)) {
+                    corgiUserOrder.setActivity(activities.get(0));
+                }
+            }
             result.add(corgiUserOrder);
         }
         return result;
