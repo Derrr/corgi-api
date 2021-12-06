@@ -1124,7 +1124,10 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_by_hashtag")
-    public JsonResult getByTopic(@RequestParam("hashtagId") String hashtagId, @RequestParam("page") Integer page, @RequestParam("pageSIze") Integer pageSize) {
+    public JsonResult getByTopic(
+            @RequestParam("hashtagId") String hashtagId,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize) {
         CorgiActivity query = new CorgiActivity();
         query.setHashtags(Arrays.asList(hashtagId));
         List<String> activityIds = corgiUserActivityService.getHeatActivity(query, page, pageSize);
