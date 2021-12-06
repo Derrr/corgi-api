@@ -516,7 +516,7 @@ public class CorgiFeedController extends BaseController {
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
-                            .build()))) {
+                            .build())) && !activity.getUserId().equals(getUserId())) {
                         activity.setPics(new ArrayList<>());
                         activity.setVideoUrl("");
                         activity.setStatus("unpay");

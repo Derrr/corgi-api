@@ -1493,7 +1493,7 @@ public class CorgiActivityController extends BaseController {
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
                             .build());
-                    if (!CollectionUtils.isEmpty(goods)) {
+                    if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
                         for (CorgiUserGoods good : goods) {
                             buyers.add(corgiUserService.getUserDetailBasic(good.getUserId()));
                         }
@@ -1502,7 +1502,7 @@ public class CorgiActivityController extends BaseController {
                                 .traderId(activity.getUserId())
                                 .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                                 .goodsId(activity.getId())
-                                .build()))) {
+                                .build())) && !activity.getUserId().equals(getUserId())) {
                             activity.setPics(new ArrayList<>());
                             activity.setVideoUrl("");
                             activity.setStatus("unpay");
