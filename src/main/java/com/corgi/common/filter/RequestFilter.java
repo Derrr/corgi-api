@@ -63,6 +63,7 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "get_nearby_user")
                 || checkURI(servletRequest, "clear_influencer")
                 || checkURI(servletRequest, "set_influencer")
+                || checkURI(servletRequest, "external")
                 || checkURI(servletRequest, "callback")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         } else {
