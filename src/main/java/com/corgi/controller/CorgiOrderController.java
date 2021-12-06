@@ -152,6 +152,9 @@ public class CorgiOrderController extends BaseController {
             if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
                 result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
             }
+            if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType)) {
+                corgiOrderService.addOrder(order);
+            }
             result.put("orderNo", order.getTradeNo());
             return new JsonResult(result);
         } finally {
