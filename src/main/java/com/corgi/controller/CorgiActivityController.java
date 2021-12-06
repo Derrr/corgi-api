@@ -322,6 +322,7 @@ public class CorgiActivityController extends BaseController {
         if (merchandise == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "价格不存在或者已失效，请重新选择");
         }
+        activity.setAppMerchId(merchandise.getAppMerchId());
         if (StringUtils.isEmpty(activity.getCategory())) {
             activity.setCategory(CorgiActivity.CAT_PAYING);
         }
