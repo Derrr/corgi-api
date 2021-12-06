@@ -156,6 +156,7 @@ public class CorgiOrderController extends BaseController {
                 corgiOrderService.addOrder(order);
             }
             result.put("orderNo", order.getTradeNo());
+            result.put("merchandise", merchandise);
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
