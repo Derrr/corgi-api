@@ -38,6 +38,8 @@ public class ThirdPartyController extends BaseController {
     @Reference
     private CorgiStatisticService corgiStatisticService;
     @Reference
+    private CorgiLikeService corgiLikeService;
+    @Reference
     private CorgiUserActivityService corgiUserActivityService;
 
     @GetMapping("get_top_9")
@@ -67,6 +69,8 @@ public class ThirdPartyController extends BaseController {
         activity.setPics(picUrls);
         UserDetail userDetail = corgiUserService.getUserDetailBasic(login.getUserId());
         activity.setUserDetail(userDetail);
+        userDetail.setCtime("2021-01-01");
+        activity.setLikeCount(corgiLikeService.countLikeByUser(userDetail));
         return new JsonResult(activity);
     }
 
