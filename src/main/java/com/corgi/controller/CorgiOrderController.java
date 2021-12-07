@@ -79,12 +79,11 @@ public class CorgiOrderController extends BaseController {
             order.setOrderId(UUID.randomUUID().toString().split("-")[0].toUpperCase());
             order.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
             order.setTradeNo(UUID.randomUUID().toString().replaceAll("-", ""));
-            order.setSellerId("corgi");
+            order.setSellerId("Corgi-app");
             order.setMarketId("-");
             order.setMerchId("-");
             order.setDesc("提现申请");
             corgiOrderService.addOrder(order);
-            order.setUserId("Corgi-app");
             return new JsonResult(order);
         } finally {
             corgiUtilService.unlock(key);
