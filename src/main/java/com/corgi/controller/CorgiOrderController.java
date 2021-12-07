@@ -84,6 +84,7 @@ public class CorgiOrderController extends BaseController {
             order.setMerchId("-");
             order.setDesc("提现申请");
             corgiOrderService.addOrder(order);
+            order.setUserId("Corgi-app");
             return new JsonResult(order);
         } finally {
             corgiUtilService.unlock(key);
