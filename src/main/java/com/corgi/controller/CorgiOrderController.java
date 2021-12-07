@@ -212,6 +212,9 @@ public class CorgiOrderController extends BaseController {
                 .payType(type)
                 .status(CorgiOrder.STATUS.SUCCESS)
                 .build();
+        if (CorgiOrder.PAY_TYPE.WITHDRAW.equals(type)) {
+            query.setStatus(null);
+        }
         return new JsonResult(this.buildOrder(corgiOrderService.getOrderByPage(query, page, pageSize)));
     }
 
