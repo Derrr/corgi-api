@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,7 +75,23 @@ public class CorgiOrderController extends BaseController {
                     .build();
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
             if (CollectionUtils.isNotEmpty(postOrders)) {
-                return new JsonResult(postOrders.get(0));
+                return new JsonResult(Constants.API_ERROR_CODE, "已有进行中提现订单");
+            }
+            orderQuery.setStatus(null);
+            SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM");
+            SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+            String dateStr = sdf1.format(new Date());
+            Date nowDate = sdf1.parse(dateStr);
+            orderQuery.setCtime(sdf2.format(nowDate));
+            postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
+            int i = 0;
+            for (CorgiOrder nowMonthOrder : postOrders) {
+                if (nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.CLOSE) || nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.SUCCESS)) {
+                    i++;
+                }
+                if (i > 4) {
+                    return new JsonResult(Constants.API_ERROR_CODE, "这个月提现次数已满");
+                }
             }
             order.setUserId(getUserId());
             order.setOrderId(UUID.randomUUID().toString().split("-")[0].toUpperCase());
@@ -85,6 +103,9 @@ public class CorgiOrderController extends BaseController {
             order.setDesc("提现申请");
             corgiOrderService.addOrder(order);
             return new JsonResult(order);
+        } catch (ParseException e) {
+            log.error(e.getMessage(), e);
+            return new JsonResult(Constants.API_ERROR_CODE, "提现失败");
         } finally {
             corgiUtilService.unlock(key);
         }
