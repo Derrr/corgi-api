@@ -444,7 +444,7 @@ public class CorgiUserController extends BaseController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = sdf.parse(expireDate);
-            detail.setRemainDate((int) (new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
+            detail.setRemainDate((int) (date.getTime() - new Date().getTime()) / (1000 * 3600 * 24));
             detail.setExpireDate(expireDate);
         } catch (ParseException e) {
             return new JsonResult(detail);
@@ -606,7 +606,7 @@ public class CorgiUserController extends BaseController {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 Date date = sdf.parse(expireDate);
-                detail.setRemainDate((int) (new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
+                detail.setRemainDate((int) (date.getTime() - new Date().getTime()) / (1000 * 3600 * 24));
                 detail.setExpireDate(expireDate);
             } catch (ParseException e) {
 
