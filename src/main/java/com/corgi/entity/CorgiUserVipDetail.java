@@ -9,5 +9,5 @@ import lombok.Data;
 @Data
 public class CorgiUserVipDetail extends CorgiActivity {
     private String expireDate = "-";
-    private Integer remainDate = 0;
+    private Long remainDate = 0l;
 }
