@@ -1000,6 +1000,14 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiVisitService.countVisit(userId));
     }
 
+    @GetMapping("count_visit_unread")
+    public JsonResult countVisitUnread(@RequestParam(required = false, name = "userId") String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            userId = getUserId();
+        }
+        return new JsonResult(corgiVisitService.countVisitUnread(userId));
+    }
+
 
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
