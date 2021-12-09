@@ -1095,6 +1095,7 @@ public class CorgiActivityController extends BaseController {
         query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
         query.setStart((page - 1) * pageSize);
         query.setSize(pageSize);
+        log.info("goods:{}", query);
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
         if (CollectionUtils.isEmpty(goods)) {
             return new JsonResult(new ArrayList<>());
