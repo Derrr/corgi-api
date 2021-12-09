@@ -3,6 +3,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
 import org.junit.Test;
+import org.springframework.util.DigestUtils;
 
 import java.util.StringJoiner;
 
@@ -32,9 +33,16 @@ public class CorgiTest {
 
     @Test
     public void test() {
-        String jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJXbnI2UFFPNCIsImlhdCI6MTYyMDk2MTMwNCwiZXhwIjoxNjIwOTY4NTA0LCJhdWQiOiI1azAzZDlyZXc3Iiwib3Blbl9pZCI6IjVkenZuMHB3NTVqMzJwMXgiLCJ1c2VyX2lkIjoiNWR6dm4wcHc1NWozMnAxeCIsIm5hbWUiOiJcdTkwZWRcdTRlMDBcdTY2MGUiLCJhdmF0YXIiOiJodHRwczovL3VzaHUub3NzLWNuLWJlaWppbmcuYWxpeXVuY3MuY29tL1ducjZQUU80L2F2YXRhci82YTg3ZjFmYTA4ZjA2YWE2MzQ5Y2EyMzE5NjY1MWQ1Ny5qcGVnIiwidmVyc2lvbiI6InYxIn0.AMQenDoqbiaRJDbYltqy3urat3kG1FzobqlZAPndk17Vusc7JEaYZP8R2h2YBocywWm634sKBsfyXgeHJdZtBf4e91_toaBHc2rX-NoWHwar9_pD2CizBGp9YEosU4RXyNLJEZ4n8pukp5lgvWraSC4LhO-i0yoveHLcGER2FrvX0Q-ihEBlaR0tfhzpWrMomvAgCH3cFs5UI5OzGnxBMxDj0OR9QEKi2Z3CNOJ9xu-1pnpwXSzhXr9OjzubNtbTot0cqCNCuAfaP1YIrmV4dnaCN9z4pvd0nQfKye3DO44Vm5GnIRgc_sFFU9Co_hITHTpOwOx18VNiS4nLLoqZ1A";
-        DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
-        System.out.println(decodedJWT.getClaim("user_id").asString());
+        String jwt = "2";
+        //DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
+        //System.out.println(decodedJWT.getClaim("user_id").asString());
+        String old = DigestUtils.md5DigestAsHex(jwt.getBytes());
+        String high1 = old.substring(0, 8);
+        String high2 = old.substring(8, 16);
+        String low1 = old.substring(16, 24);
+        String low2 = old.substring(24, 32);
+        Long new1 = Long.parseLong(high1, 16) ^ Long.parseLong(high2, 16) ^ Long.parseLong(low1, 16) ^ Long.parseLong(low2, 16);
+        System.out.println(new1%9999999);
     }
 
     @Test

@@ -15,6 +15,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.util.JWTUtils;
+import com.corgi.common.util.UuidUtil;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.entity.CorgiUserOrder;
 import com.corgi.exception.PermissionException;
@@ -96,7 +97,7 @@ public class CorgiOrderController extends BaseController {
             order.setUserId(getUserId());
             order.setOrderId(UUID.randomUUID().toString().split("-")[0].toUpperCase());
             order.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-            order.setTradeNo(UUID.randomUUID().toString().replaceAll("-", ""));
+            order.setTradeNo(UuidUtil.getTradeNo(getUserId()));
             order.setSellerId("Corgi-app");
             order.setMarketId("-");
             order.setMerchId("-");
@@ -155,7 +156,7 @@ public class CorgiOrderController extends BaseController {
             }
 
             HashMap<String, Object> result = new HashMap<>();
-            String tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
+            String tradeNo = UuidUtil.getTradeNo(getUserId());
             CorgiOrder order = CorgiOrder.builder()
                     .userId(getUserId())
                     .payType(payType)
@@ -434,7 +435,7 @@ public class CorgiOrderController extends BaseController {
         if (StringUtils.isNotEmpty(tradeNo)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "票据已存在 ");
         }
-        tradeNo = UUID.randomUUID().toString().replaceAll("-", "");
+        tradeNo = UuidUtil.getTradeNo(getUserId());
         CorgiOrder order = CorgiOrder.builder()
                 .userId(getUserId())
                 .payAmount(Double.parseDouble(payAmount))
