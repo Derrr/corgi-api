@@ -73,6 +73,17 @@ public class CorgiFeedController extends BaseController {
     @Autowired
     private AsyncTaskService asyncTaskService;
 
+    @PostMapping("search_feeds")
+    public JsonResult searchFeeds(@RequestBody ActivityQuery query) {
+        if (hasUserId()) {
+            query.setUserId(getUserId());
+        }
+        List<String> feedIds = corgiFeedService.searchFeed(query);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
+        List<CorgiActivityDetail> details = convertDetail(corgiActivities, query.getUserId());
+        return new JsonResult(details);
+    }
+
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
         String userId = "1";
