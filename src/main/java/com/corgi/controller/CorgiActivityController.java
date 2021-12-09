@@ -1177,7 +1177,13 @@ public class CorgiActivityController extends BaseController {
         String userId = getUserId();
         activityQuery.setUserId(null);
         activityQuery.setLoginUserId(userId);
-        List<CorgiActivity> activityList = corgiActivityService.getFeedActivity(activityQuery);
+        List<CorgiActivity> activityList;
+        if (activityQuery.checkUser()) {
+            List<String> activityIds = corgiUserActivityService.searchFeedActivity(activityQuery);
+            activityList = corgiActivityService.getActivityByIds(activityIds);
+        } else {
+            activityList = corgiActivityService.getFeedActivity(activityQuery);
+        }
         if (!CollectionUtils.isEmpty(activityList) && activityList.size() >= 5) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             CorgiVlog query = new CorgiVlog();
