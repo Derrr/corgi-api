@@ -1525,6 +1525,8 @@ public class CorgiActivityController extends BaseController {
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
+                            .start(0)
+                            .size(1)
                             .build());
                     if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
                         for (CorgiUserGoods good : goods) {
