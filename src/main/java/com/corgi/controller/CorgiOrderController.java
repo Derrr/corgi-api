@@ -346,6 +346,27 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_income_info")
+    public JsonResult getIncomeInfo(@RequestParam("userId") String userId) {
+        if (hasUserId()) {
+            userId = getUserId();
+        }
+        HashMap result = new HashMap();
+        CorgiOrder query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .sellerId(userId)
+                .build();
+        Double totalIncome = corgiOrderService.countIncome(query);
+        query.setSellerId(null);
+        query.setUserId(userId);
+        query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
+        Double totalWithdraw = corgiOrderService.countIncome(query);
+        result.put("totalIncome", totalIncome);
+        result.put("totalWithdraw", totalWithdraw);
+        result.put("remainWithdraw", totalIncome * 0.7 - totalWithdraw);
+        return new JsonResult(result);
+    }
+
     @PostMapping("wx_callback")
     public JsonResult wxCallback(HttpServletRequest request) {
         CorgiOrder order = CorgiOrder.builder().build();
@@ -575,6 +596,8 @@ public class CorgiOrderController extends BaseController {
             CorgiUserGoods query = new CorgiUserGoods();
             query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
             query.setTradeNo(order.getTradeNo());
+            query.setStart(0);
+            query.setSize(1);
             List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
             corgiUserOrder.setMerchandise(merchandiseHashMap.get(order.getMerchId()));
             if (CollectionUtils.isNotEmpty(goods)) {

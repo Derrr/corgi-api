@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -436,6 +437,8 @@ public class CorgiActivityController extends BaseController {
                     .traderId(activityList.get(0).getUserId())
                     .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                     .goodsId(activityComment.getActivityId())
+                    .start(0)
+                    .size(1)
                     .build()))) {
                 activityComment.setStatus(ActivityComment.PAY);
             }
@@ -1084,6 +1087,23 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
+    @GetMapping("get_pay_activity")
+    public JsonResult getPayActivity(@RequestParam("page") Integer page,
+                                     @RequestParam("pageSize") Integer pageSize) {
+        CorgiUserGoods query = new CorgiUserGoods();
+        query.setUserId(getUserId());
+        query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+        query.setStart((page - 1) * pageSize);
+        query.setSize(pageSize);
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
+        if (CollectionUtils.isEmpty(goods)) {
+            return new JsonResult(new ArrayList<>());
+        }
+        return new JsonResult(convertDetail(
+                corgiActivityService.getActivityByIds(goods.stream()
+                        .map(CorgiUserGoods::getGoodsId).collect(Collectors.toList())),
+                getUserId()));
+    }
 
     @GetMapping("get_activity_by_hashtag")
     public PageResult getActivityByHashtag(@RequestParam("userId") String userId,
@@ -1507,6 +1527,8 @@ public class CorgiActivityController extends BaseController {
                                 .userId(getUserId())
                                 .traderId(activity.getUserId())
                                 .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                                .start(0)
+                                .size(1)
                                 .goodsId(activity.getId())
                                 .build())) && !activity.getUserId().equals(getUserId())) {
                             activity.setPics(new ArrayList<>());

@@ -516,6 +516,8 @@ public class CorgiFeedController extends BaseController {
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
+                            .start(0)
+                            .size(3)
                             .build())) && !activity.getUserId().equals(getUserId())) {
                         activity.setPics(new ArrayList<>());
                         activity.setVideoUrl("");
