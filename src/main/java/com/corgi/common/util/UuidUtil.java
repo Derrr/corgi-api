@@ -15,7 +15,7 @@ public class UuidUtil {
         String low2 = md5Id.substring(24, 32);
         Long new1 = Long.parseLong(high1, 16) ^ Long.parseLong(high2, 16)
                 ^ Long.parseLong(low1, 16) ^ Long.parseLong(low2, 16);
-        String newMd5Id = (new1 % 10000000) + "";
+        String newMd5Id = (new1 & (1 << 23) - 1) + "";
         while (7 < newMd5Id.length()) {
             newMd5Id = "0" + newMd5Id;
         }

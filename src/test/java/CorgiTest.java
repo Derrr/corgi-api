@@ -42,7 +42,7 @@ public class CorgiTest {
         String low1 = old.substring(16, 24);
         String low2 = old.substring(24, 32);
         Long new1 = Long.parseLong(high1, 16) ^ Long.parseLong(high2, 16) ^ Long.parseLong(low1, 16) ^ Long.parseLong(low2, 16);
-        System.out.println(new1%9999999);
+        System.out.println(new1 & (1 << 23) - 1);
     }
 
     @Test
