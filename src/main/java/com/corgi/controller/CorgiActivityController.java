@@ -1171,9 +1171,13 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(new CorgiHashtagList(hashtag, result));
     }
 
+    @PostMapping("get_city_activity")
+    public JsonResult getCityActivity(@RequestBody ActivityQuery activityQuery) {
+        return getRangeActivity(activityQuery);
+    }
 
     @GetMapping("get_city_activity")
-    public JsonResult getRangeActivity(@RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, ActivityQuery activityQuery) {
+    public JsonResult getRangeActivity(ActivityQuery activityQuery) {
         String userId = getUserId();
         activityQuery.setUserId(null);
         activityQuery.setLoginUserId(userId);
