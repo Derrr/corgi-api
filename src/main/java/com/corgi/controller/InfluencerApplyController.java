@@ -34,7 +34,7 @@ public class InfluencerApplyController extends BaseController {
     @PostMapping("apply")
     public JsonResult apply(@RequestBody JSONObject content) {
         InfluencerApply apply = new InfluencerApply();
-        apply.setContent(content.toJSONString());
+        apply.setDetail(content.toJSONString());
         corgiInfluencerApplyService.addApply(apply);
         return new JsonResult();
     }
@@ -45,13 +45,14 @@ public class InfluencerApplyController extends BaseController {
         List<JSONObject> result = new ArrayList<>();
         if (CollectionUtils.isEmpty(applies)) {
             for (InfluencerApply apply : applies) {
-                if (StringUtils.isEmpty(apply.getContent())) {
+                log.info("apply:{} ", apply);
+                if (StringUtils.isEmpty(apply.getDetail())) {
                     continue;
                 }
                 try {
-                    result.add(JSONObject.parseObject(apply.getContent()));
+                    result.add(JSONObject.parseObject(apply.getDetail()));
                 } catch (Exception e) {
-                    log.error("apply:{} ", apply.getContent());
+                    log.error("apply:{} ", apply.getDetail());
                 }
             }
         }
