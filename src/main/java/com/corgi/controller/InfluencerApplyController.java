@@ -43,7 +43,7 @@ public class InfluencerApplyController extends BaseController {
     public JsonResult getApplies(@RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(page, size);
         List<JSONObject> result = new ArrayList<>();
-        if (CollectionUtils.isEmpty(applies)) {
+        if (!CollectionUtils.isEmpty(applies)) {
             for (InfluencerApply apply : applies) {
                 log.info("apply:{} ", apply);
                 if (StringUtils.isEmpty(apply.getDetail())) {
