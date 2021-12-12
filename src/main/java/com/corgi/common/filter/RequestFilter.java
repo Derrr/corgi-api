@@ -79,7 +79,9 @@ public class RequestFilter implements Filter {
 
         filterChain.doFilter(servletRequest, servletResponse);
         String url = ((HttpServletRequest) servletRequest).getRequestURI();
-        log.info("time spent...{}:{}ms:{} ", url, (System.currentTimeMillis() - time));
+        if (!url.contains("tool/count")) {
+            log.info("time spent...{}:{}ms:{} ", url, (System.currentTimeMillis() - time));
+        }
     }
 
 
