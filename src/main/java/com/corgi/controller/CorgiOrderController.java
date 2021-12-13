@@ -195,6 +195,7 @@ public class CorgiOrderController extends BaseController {
                     .status(CorgiOrder.STATUS.SUCCESS)
                     .userId(getUserId())
                     .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
+                    .start(0)
                     .size(1)
                     .build();
             List<CorgiUserGoods> orders = corgiOrderService.getUserGoods(orderQuery);
