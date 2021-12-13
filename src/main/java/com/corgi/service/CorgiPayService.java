@@ -164,6 +164,7 @@ public class CorgiPayService {
             if (!StringUtils.isEmpty(password)) {
                 param.put("password", password);
             }
+            log.info("request：{} ",param.toJSONString());
             HttpEntity<String> formEntity = new HttpEntity(param.toJSONString(), headers);
             String resultStr = restTemplate.postForObject(url, formEntity, String.class);
 //            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
