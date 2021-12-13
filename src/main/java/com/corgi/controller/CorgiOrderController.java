@@ -56,7 +56,7 @@ public class CorgiOrderController extends BaseController {
     private WXPay wxPay;
 
     @PostMapping("update")
-    public JsonResult update(@RequestParam CorgiOrder order) {
+    public JsonResult update(@RequestBody CorgiOrder order) {
         if (hasUserId()) {
             return new JsonResult();
         }
