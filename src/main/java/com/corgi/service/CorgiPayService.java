@@ -163,8 +163,9 @@ public class CorgiPayService {
             param.put("receipt-data", receipt);
             if (!StringUtils.isEmpty(password)) {
                 param.put("password", password);
+                param.put("exclude-old-transactions", true);
             }
-            log.info("request：{} ",param.toJSONString());
+            log.info("request：{} ", param.toJSONString());
             HttpEntity<String> formEntity = new HttpEntity(param.toJSONString(), headers);
             String resultStr = restTemplate.postForObject(url, formEntity, String.class);
 //            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
