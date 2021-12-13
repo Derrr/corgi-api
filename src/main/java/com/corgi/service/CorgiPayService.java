@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -140,19 +141,23 @@ public class CorgiPayService {
         return new HashMap<>();
     }
 
-    public JSONObject verifyApplePay(String receipt) {
+    public JSONObject verifyApplePay(String receipt, String password) {
         String url = "https://buy.itunes.apple.com/verifyReceipt";
-        return verifyApplePay(url, receipt);
+        return verifyApplePay(url, receipt, password);
     }
 
-    public JSONObject verifyApplePay(String url, String receipt) {
+    public JSONObject verifyApplePay(String url, String receipt, String password) {
         try {
             HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setAllowUserInteraction(false);
             PrintStream ps = new PrintStream(connection.getOutputStream());
-            ps.print("{\"receipt-data\": \"" + receipt + "\"}");
+            if (!StringUtils.isEmpty(password)) {
+                ps.print("{\"receipt-data\": \"" + receipt + "\",\"password\": \"" + password + "\"}");
+            } else {
+                ps.print("{\"receipt-data\": \"" + receipt + "\"}");
+            }
             ps.close();
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String str;
@@ -164,7 +169,7 @@ public class CorgiPayService {
             String resultStr = sb.toString();
             JSONObject result = JSONObject.parseObject(resultStr);
             if (result != null && result.getInteger("status") == 21007) {   //递归，以防漏单
-                return verifyApplePay("https://sandbox.itunes.apple.com/verifyReceipt", receipt);
+                return verifyApplePay("https://sandbox.itunes.apple.com/verifyReceipt", receipt, password);
             }
             return result;
         } catch (Exception e) {

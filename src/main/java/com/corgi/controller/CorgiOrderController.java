@@ -192,7 +192,6 @@ public class CorgiOrderController extends BaseController {
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
         if (type.equals(CorgiMerchandise.SUBSCRIBE)) {
             CorgiUserGoods orderQuery = CorgiUserGoods.builder()
-                    .status(CorgiOrder.STATUS.SUCCESS)
                     .userId(getUserId())
                     .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
                     .start(0)
@@ -312,7 +311,12 @@ public class CorgiOrderController extends BaseController {
         if (order == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
         }
-        JSONObject result = corgiPayService.verifyApplePay(receiptData);
+        String password = null;
+        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId());
+        if (CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
+            password = "28XXHZ2FCY";
+        }
+        JSONObject result = corgiPayService.verifyApplePay(receiptData, password);
         order.setResult(result.toJSONString());
         if ("0".equals(result.getString("status"))) {
             order.setStatus(CorgiOrder.STATUS.SUCCESS);
@@ -448,7 +452,7 @@ public class CorgiOrderController extends BaseController {
                 .sellerId("corgi")
                 .status(CorgiOrder.STATUS.SUCCESS)
                 .build();
-        JSONObject result = corgiPayService.verifyApplePay(receipt);
+        JSONObject result = corgiPayService.verifyApplePay(receipt,"28XXHZ2FCY");
         order.setResult(result.toJSONString());
         if ("0".equals(result.getString("status"))) {
             order.setStatus(CorgiOrder.STATUS.SUCCESS);
