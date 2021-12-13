@@ -191,11 +191,13 @@ public class CorgiOrderController extends BaseController {
         query.setType(type);
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
         if (type.equals(CorgiMerchandise.SUBSCRIBE)) {
-            CorgiOrder orderQuery = CorgiOrder.builder()
+            CorgiUserGoods orderQuery = CorgiUserGoods.builder()
                     .status(CorgiOrder.STATUS.SUCCESS)
-                    .merchType(CorgiMerchandise.SUBSCRIBE)
+                    .userId(getUserId())
+                    .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
+                    .size(1)
                     .build();
-            List<CorgiOrder> orders = corgiOrderService.getOrderByPage(orderQuery, 1, 1);
+            List<CorgiUserGoods> orders = corgiOrderService.getUserGoods(orderQuery);
             if (CollectionUtils.isNotEmpty(orders)) {
                 merchandises = merchandises.stream().filter(m -> !MerchandiseEnum.isFirst(m.getId())).collect(Collectors.toList());
             } else {
