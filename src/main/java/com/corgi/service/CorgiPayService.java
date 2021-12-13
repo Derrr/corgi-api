@@ -22,6 +22,9 @@ import com.corgi.user.entity.CorgiMerchandise;
 import com.corgi.user.entity.CorgiOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -47,6 +50,8 @@ public class CorgiPayService {
     private static WXPay wxPay = new WXPay();
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Autowired
+    private RestTemplate restTemplate;
 
     public static final String ALI_URL = "https://openapi.alipay.com/gateway.do";
     /**
@@ -148,25 +153,38 @@ public class CorgiPayService {
 
     public JSONObject verifyApplePay(String url, String receipt, String password) {
         try {
-            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setAllowUserInteraction(false);
-            PrintStream ps = new PrintStream(connection.getOutputStream());
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
+            headers.setContentType(type);
+            headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+
+            JSONObject param = new JSONObject();
+            param.put("receipt-data", receipt);
             if (!StringUtils.isEmpty(password)) {
-                ps.print("{\"receipt-data\": \"" + receipt + "\",\"password\": \"" + password + "\"}");
-            } else {
-                ps.print("{\"receipt-data\": \"" + receipt + "\"}");
+                param.put("password", password);
             }
-            ps.close();
-            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String str;
-            StringBuffer sb = new StringBuffer();
-            while ((str = br.readLine()) != null) {
-                sb.append(str);
-            }
-            br.close();
-            String resultStr = sb.toString();
+            HttpEntity<String> formEntity = new HttpEntity(param.toJSONString(), headers);
+            String resultStr = restTemplate.postForObject(url, formEntity, String.class);
+//            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+//            connection.setRequestMethod("POST");
+//            connection.setDoOutput(true);
+//            connection.setAllowUserInteraction(false);
+//            PrintStream ps = new PrintStream(connection.getOutputStream());
+//            if (!StringUtils.isEmpty(password)) {
+//                ps.print("{\"receipt-data\": \"" + receipt + "\",\"password\": \"" + password + "\"}");
+//            } else {
+//                ps.print("{\"receipt-data\": \"" + receipt + "\"}");
+//            }
+//            ps.close();
+//            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//            String str;
+//            StringBuffer sb = new StringBuffer();
+//            while ((str = br.readLine()) != null) {
+//                sb.append(str);
+//            }
+//            br.close();
+//            String resultStr = sb.toString();
             JSONObject result = JSONObject.parseObject(resultStr);
             if (result != null && result.getInteger("status") == 21007) {   //递归，以防漏单
                 return verifyApplePay("https://sandbox.itunes.apple.com/verifyReceipt", receipt, password);
