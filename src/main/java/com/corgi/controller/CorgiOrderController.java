@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -419,15 +421,18 @@ public class CorgiOrderController extends BaseController {
     }
 
     @PostMapping("applepay_callback")
-    public JsonResult applepayCallback(@RequestBody HashMap<String, String> request) {
-        String payload = request.get("notification_type");
+    public JsonResult applepayCallback(@RequestBody String signedPayload) {
+        log.info("callback:{} ", signedPayload);
         try {
-            DecodedJWT decodedJWT = JWTUtils.verifyToken(payload);
+            DecodedJWT decodedJWT = JWTUtils.verifyToken(signedPayload);
             String notificationType = decodedJWT.getClaim("notificationType").asString();
             if ("REFUND".equals(notificationType)) {
-                String originalTransactionId = decodedJWT.getClaim("originalTransactionId").asString();
+                HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
+                String jws = (String)data.get("signedTransactionInfo");
+                String jwsString = new String(Base64.getDecoder().decode(jws));
+                JSONObject obj = JSONObject.parseObject(jwsString);
                 CorgiOrder order = CorgiOrder.builder()
-                        .orderId(originalTransactionId)
+                        .orderId(obj.getString("transactionId"))
                         .result(JSON.toJSONString(decodedJWT))
                         .build();
                 corgiOrderService.subscribe(order, null, "0", "");
