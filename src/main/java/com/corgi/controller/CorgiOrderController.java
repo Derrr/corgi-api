@@ -325,7 +325,6 @@ public class CorgiOrderController extends BaseController {
         }
         JSONObject receiptResult = result.getJSONObject("receipt");
         order.setResult(result.toJSONString());
-        log.info("result:{} ", result.toJSONString());
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
             String creationDateMs = result.getString("receipt_creation_date_ms");
@@ -343,6 +342,8 @@ public class CorgiOrderController extends BaseController {
                     }
                 }
                 if (null == inApp) {
+                    order.setStatus(CorgiOrder.STATUS.FAIL);
+                    corgiOrderService.updateOrder(order);
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
                 } else {
                     order.setBuyerId(inApp.getString("original_transaction_id"));
