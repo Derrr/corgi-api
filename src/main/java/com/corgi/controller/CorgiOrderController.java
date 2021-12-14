@@ -324,6 +324,7 @@ public class CorgiOrderController extends BaseController {
             order.setStatus(CorgiOrder.STATUS.FAIL);
         }
         JSONObject receiptResult = result.getJSONObject("receipt");
+        order.setResult(receiptResult.toJSONString());
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
             String creationDateMs = result.getString("receipt_creation_date_ms");
@@ -452,7 +453,7 @@ public class CorgiOrderController extends BaseController {
                 .sellerId("corgi")
                 .status(CorgiOrder.STATUS.SUCCESS)
                 .build();
-        JSONObject result = corgiPayService.verifyApplePay(receipt,"28XXHZ2FCY");
+        JSONObject result = corgiPayService.verifyApplePay(receipt, "28XXHZ2FCY");
         order.setResult(result.toJSONString());
         if ("0".equals(result.getString("status"))) {
             order.setStatus(CorgiOrder.STATUS.SUCCESS);
