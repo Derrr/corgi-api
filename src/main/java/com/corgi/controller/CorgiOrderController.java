@@ -307,6 +307,7 @@ public class CorgiOrderController extends BaseController {
     public JsonResult applyPayVerify(@RequestBody HashMap<String, String> receipt) {
         String tradeNo = receipt.get("tradeNo");
         String receiptData = receipt.get("receipt");
+        String transactionId = receipt.get("transactionId");
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
@@ -327,7 +328,6 @@ public class CorgiOrderController extends BaseController {
         order.setResult(result.toJSONString());
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
-            String creationDateMs = result.getString("receipt_creation_date_ms");
             JSONArray inApps = receiptResult.getJSONArray("in_app");
             if (inApps != null) {
                 JSONObject inApp = null;
@@ -336,7 +336,7 @@ public class CorgiOrderController extends BaseController {
                 } else {
                     for (int i = 0; i < inApps.size(); i++) {
                         JSONObject orderItem = inApps.getJSONObject(i);
-                        if (orderItem.getString("purchase_date_ms").equals(creationDateMs)) {
+                        if (orderItem.getString("transaction_id").equals(transactionId)) {
                             inApp = orderItem;
                         }
                     }
