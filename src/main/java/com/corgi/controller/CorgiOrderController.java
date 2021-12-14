@@ -314,7 +314,7 @@ public class CorgiOrderController extends BaseController {
         String password = null;
         CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId());
         if (CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
-            password = "28XXHZ2FCY";
+            password = "e17ba249e26e49f3ac256eb0838903a4";
         }
         JSONObject result = corgiPayService.verifyApplePay(receiptData, password);
         order.setResult(result.toJSONString());
