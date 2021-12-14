@@ -324,7 +324,7 @@ public class CorgiOrderController extends BaseController {
             order.setStatus(CorgiOrder.STATUS.FAIL);
         }
         JSONObject receiptResult = result.getJSONObject("receipt");
-        order.setResult(receiptResult.toJSONString());
+        order.setResult(result.toJSONString());
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
             String creationDateMs = result.getString("receipt_creation_date_ms");
