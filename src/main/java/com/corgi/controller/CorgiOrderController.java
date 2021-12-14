@@ -308,6 +308,7 @@ public class CorgiOrderController extends BaseController {
         String tradeNo = receipt.get("tradeNo");
         String receiptData = receipt.get("receipt");
         String transactionId = receipt.get("transactionId");
+        String buyerId = receipt.get("buyerId");
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
@@ -346,7 +347,9 @@ public class CorgiOrderController extends BaseController {
                     corgiOrderService.updateOrder(order);
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
                 } else {
-                    order.setBuyerId(inApp.getString("original_transaction_id"));
+                    if (StringUtils.isNotEmpty(buyerId)) {
+                        order.setBuyerId(buyerId);
+                    }
                     order.setPayTime(inApp.getString("original_purchase_date_ms"));
                     order.setOrderId(inApp.getString("transaction_id"));
                 }
@@ -441,6 +444,8 @@ public class CorgiOrderController extends BaseController {
         String vipStatus = request.get("vipStatus");
         String vipDate = request.get("vipDate");
         String payAmount = request.get("payAmount");
+        String transactionId = request.get("transactionId");
+        String buyerId = request.get("buyerId");
         String tradeNo = corgiOrderService.getReceipt(receipt);
         if (StringUtils.isNotEmpty(tradeNo)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "票据已存在 ");
@@ -455,7 +460,7 @@ public class CorgiOrderController extends BaseController {
                 .sellerId("corgi")
                 .status(CorgiOrder.STATUS.SUCCESS)
                 .build();
-        JSONObject result = corgiPayService.verifyApplePay(receipt, "28XXHZ2FCY");
+        JSONObject result = corgiPayService.verifyApplePay(receipt, "e17ba249e26e49f3ac256eb0838903a4");
         order.setResult(result.toJSONString());
         if ("0".equals(result.getString("status"))) {
             order.setStatus(CorgiOrder.STATUS.SUCCESS);
@@ -465,7 +470,6 @@ public class CorgiOrderController extends BaseController {
         JSONObject receiptResult = result.getJSONObject("receipt");
         if (receiptResult != null) {
             order.setPayTime(result.getString("original_purchase_date_ms"));
-            String creationDateMs = result.getString("receipt_creation_date_ms");
             JSONArray inApps = receiptResult.getJSONArray("in_app");
             if (inApps != null) {
                 JSONObject inApp = null;
@@ -474,7 +478,7 @@ public class CorgiOrderController extends BaseController {
                 } else {
                     for (int i = 0; i < inApps.size(); i++) {
                         JSONObject orderItem = inApps.getJSONObject(i);
-                        if (orderItem.getString("purchase_date_ms").equals(creationDateMs)) {
+                        if (orderItem.getString("transaction_id").equals(transactionId)) {
                             inApp = orderItem;
                         }
                     }
@@ -482,7 +486,9 @@ public class CorgiOrderController extends BaseController {
                 if (null == inApp) {
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
                 } else {
-                    order.setBuyerId(inApp.getString("original_transaction_id"));
+                    if (StringUtils.isNotEmpty(buyerId)) {
+                        order.setBuyerId(buyerId);
+                    }
                     order.setPayTime(inApp.getString("original_purchase_date_ms"));
                     order.setOrderId(inApp.getString("transaction_id"));
                 }
