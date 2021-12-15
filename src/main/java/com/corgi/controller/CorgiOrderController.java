@@ -381,8 +381,8 @@ public class CorgiOrderController extends BaseController {
         withdrawQuery.setStatus(CorgiOrder.STATUS.CREATED);
         withdrawQuery.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
         withdrawQuery.setUserId(userId);
-        List<CorgiOrder> orders = corgiOrderService.getOrderByPage(withdrawQuery,1,1);
-        if(CollectionUtils.isNotEmpty(orders)){
+        List<CorgiOrder> orders = corgiOrderService.getOrderByPage(withdrawQuery, 1, 1);
+        if (CollectionUtils.isNotEmpty(orders)) {
             result.put("withdrawOrder", orders);
         }
         result.put("totalIncome", totalIncome);
