@@ -78,7 +78,7 @@ public class CorgiOrderController extends BaseController {
                     .build();
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
             if (CollectionUtils.isNotEmpty(postOrders)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "已有进行中提现订单");
+                return new JsonResult(Constants.API_ERROR_CODE, "您有一笔提现尚未完成，完成后可继续提现");
             }
             orderQuery.setStatus(null);
             SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM");
@@ -93,7 +93,7 @@ public class CorgiOrderController extends BaseController {
                     i++;
                 }
                 if (i > 4) {
-                    return new JsonResult(Constants.API_ERROR_CODE, "这个月提现次数已满");
+                    return new JsonResult(Constants.API_ERROR_CODE, "本月提现次数已满");
                 }
             }
             order.setUserId(getUserId());
@@ -108,7 +108,7 @@ public class CorgiOrderController extends BaseController {
             return new JsonResult(order);
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
-            return new JsonResult(Constants.API_ERROR_CODE, "提现失败");
+            return new JsonResult(Constants.API_ERROR_CODE, "提现申请失败");
         } finally {
             corgiUtilService.unlock(key);
         }
