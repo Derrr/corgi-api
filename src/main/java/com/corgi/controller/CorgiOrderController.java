@@ -377,6 +377,14 @@ public class CorgiOrderController extends BaseController {
         query.setUserId(userId);
         query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
         Double totalWithdraw = corgiOrderService.countIncome(query);
+        CorgiOrder withdrawQuery = new CorgiOrder();
+        withdrawQuery.setStatus(CorgiOrder.STATUS.CREATED);
+        withdrawQuery.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
+        withdrawQuery.setUserId(userId);
+        List<CorgiOrder> orders = corgiOrderService.getOrderByPage(withdrawQuery,1,1);
+        if(CollectionUtils.isNotEmpty(orders)){
+            result.put("withdrawOrder", orders);
+        }
         result.put("totalIncome", totalIncome);
         result.put("totalWithdraw", totalWithdraw);
         result.put("remainWithdraw", totalIncome * 0.7 - totalWithdraw);
