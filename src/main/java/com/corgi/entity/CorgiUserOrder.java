@@ -11,6 +11,7 @@ public class CorgiUserOrder {
     private String merchId;
     private String seller;
     private String payType;
+    private Double payAmount;
     private String status;
     private String desc;
     private String ctime;

@@ -428,11 +428,11 @@ public class CorgiOrderController extends BaseController {
             String notificationType = decodedJWT.getClaim("notificationType").asString();
             if ("REFUND".equals(notificationType)) {
                 HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
-                String jws = (String)data.get("signedTransactionInfo");
-                String jwsString = new String(Base64.getDecoder().decode(jws));
-                JSONObject obj = JSONObject.parseObject(jwsString);
+                String jws = (String) data.get("signedTransactionInfo");
+
+                DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
                 CorgiOrder order = CorgiOrder.builder()
-                        .orderId(obj.getString("transactionId"))
+                        .orderId(obj.getClaim("transactionId").asString())
                         .result(JSON.toJSONString(decodedJWT))
                         .build();
                 corgiOrderService.subscribe(order, null, "0", "");
