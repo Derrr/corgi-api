@@ -50,6 +50,10 @@ public class ThirdPartyController extends BaseController {
         if (login == null || StringUtils.isEmpty(login.getUserId())) {
             return new JsonResult();
         }
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(login.getUserId());
+        if(userDetail == null){
+            return new JsonResult();
+        }
         ActivityQuery query = new ActivityQuery();
         query.setStartTime("2021-01-01");
         query.setUserId(login.getUserId());
@@ -70,7 +74,6 @@ public class ThirdPartyController extends BaseController {
         }
         CorgiActivityDetail activity = new CorgiActivityDetail();
         activity.setPics(picUrls);
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(login.getUserId());
         activity.setUserDetail(userDetail);
         userDetail.setCtime("2021-01-01");
         activity.setLikeCount(corgiLikeService.countLikeByUser(userDetail));
