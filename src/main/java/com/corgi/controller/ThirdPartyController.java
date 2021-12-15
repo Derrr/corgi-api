@@ -47,6 +47,9 @@ public class ThirdPartyController extends BaseController {
         UserLogin login = new UserLogin();
         login.setTelNo(telNo);
         login = corgiUserService.login(login);
+        if (login == null || StringUtils.isEmpty(login.getUserId())) {
+            return new JsonResult();
+        }
         ActivityQuery query = new ActivityQuery();
         query.setStartTime("2021-01-01");
         query.setUserId(login.getUserId());
