@@ -9,7 +9,7 @@ import lombok.Data;
 public class Hashtag extends CorgiHashtag {
 
     private Integer likeCount;
-    private Integer viewCount;
+    private Long viewCount;
     private Integer commentCount;
     private Integer vlogCount;
 
