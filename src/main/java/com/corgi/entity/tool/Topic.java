@@ -8,7 +8,7 @@ import lombok.Data;
 public class Topic extends CorgiTopic {
 
     private Integer likeCount;
-    private Integer viewCount;
+    private Long viewCount;
     private Integer commentCount;
     private Integer vlogCount;
 
