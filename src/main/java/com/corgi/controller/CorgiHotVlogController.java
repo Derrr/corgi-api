@@ -85,7 +85,9 @@ public class CorgiHotVlogController extends BaseController {
         detail.setActivityId(hot.getActivityId());
         detail.setId(hot.getId());
         detail.setLikeCount(hot.getLikeCount());
-        detail.setViewCount(hot.getViewCount());
+        if (hot.getViewCount() != null) {
+            detail.setViewCount(hot.getViewCount().longValue());
+        }
         detail.setExpectView(hot.getExpectView());
         detail.setCtime(hot.getCtime());
         detail.setStatus(hot.getStatus());
