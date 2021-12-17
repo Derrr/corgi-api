@@ -41,6 +41,8 @@ public class ThirdPartyController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
 
     @GetMapping("get_top_9")
     public JsonResult getTop9(@RequestParam("telNo") String telNo) {
@@ -51,7 +53,7 @@ public class ThirdPartyController extends BaseController {
             return new JsonResult();
         }
         UserDetail userDetail = corgiUserService.getUserDetailBasic(login.getUserId());
-        if(userDetail == null){
+        if (userDetail == null) {
             return new JsonResult();
         }
         ActivityQuery query = new ActivityQuery();
@@ -64,12 +66,12 @@ public class ThirdPartyController extends BaseController {
         for (CorgiActivity activity : activities) {
             if (StringUtils.isEmpty(activity.getCoverUrl())) {
                 if (!CollectionUtils.isEmpty(activity.getPics())) {
-                    picUrls.add(activity.getPics().get(0));
+                    picUrls.add(convertPic(activity.getPics().get(0)));
                 }
             } else {
                 ActivityPic pic = new ActivityPic();
                 pic.setPicUrl(activity.getCoverUrl());
-                picUrls.add(pic);
+                picUrls.add(convertPic(pic));
             }
         }
         CorgiActivityDetail activity = new CorgiActivityDetail();
@@ -78,6 +80,15 @@ public class ThirdPartyController extends BaseController {
         userDetail.setCtime("2021-01-01");
         activity.setLikeCount(corgiLikeService.countLikeByUser(userDetail));
         return new JsonResult(activity);
+    }
+
+    private ActivityPic convertPic(ActivityPic pic) {
+        String picUrl = pic.getPicUrl();
+        if (!StringUtils.isEmpty(picUrl)) {
+            picUrl += "?x-oss-process=style/top9";
+            pic.setPicUrl(picUrl);
+        }
+        return pic;
     }
 
 }
