@@ -70,8 +70,8 @@ public class ThirdPartyController extends BaseController {
                 }
             } else {
                 ActivityPic pic = new ActivityPic();
-                pic.setPicUrl(activity.getCoverUrl());
-                picUrls.add(convertPic(pic));
+                pic.setPicUrl(activity.getCoverUrl()+"?x-oss-process=image/auto-orient,1/resize,m_fill,w_500,h_500/quality,q_90");
+                picUrls.add(pic);
             }
         }
         CorgiActivityDetail activity = new CorgiActivityDetail();
