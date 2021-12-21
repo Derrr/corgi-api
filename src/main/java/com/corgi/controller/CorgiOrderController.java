@@ -121,7 +121,7 @@ public class CorgiOrderController extends BaseController {
         String key = "user_pay_" + getUserId();
         corgiUtilService.lock(key);
         try {
-            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId);
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
             if (StringUtils.isEmpty(goodsId) && !CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "参数错误");
             }
@@ -241,7 +241,7 @@ public class CorgiOrderController extends BaseController {
         if (CorgiOrder.PAY_TYPE.WITHDRAW.equals(type)) {
             query.setStatus(null);
         }
-        return new JsonResult(this.buildOrder(corgiOrderService.getOrderByPage(query, page, pageSize)));
+        return new JsonResult(this.buildOrder(corgiOrderService.getOrderByPage(query, page, pageSize), getUserId()));
     }
 
     @GetMapping("success_order")
@@ -316,7 +316,7 @@ public class CorgiOrderController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
         }
         String password = null;
-        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId());
+        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId(), getUserId());
         if (CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
             password = "e17ba249e26e49f3ac256eb0838903a4";
         }
@@ -613,14 +613,14 @@ public class CorgiOrderController extends BaseController {
         return retMap;
     }
 
-    List<CorgiUserOrder> buildOrder(List<CorgiOrder> orders) {
+    List<CorgiUserOrder> buildOrder(List<CorgiOrder> orders, String userId) {
         List<CorgiUserOrder> result = new ArrayList<>();
         HashMap<String, CorgiMerchandise> merchandiseHashMap = new HashMap<>();
         for (CorgiOrder order : orders) {
             CorgiUserOrder corgiUserOrder = new CorgiUserOrder();
             BeanUtils.copyProperties(order, corgiUserOrder);
             if (merchandiseHashMap.get(order.getMerchId()) == null) {
-                CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId());
+                CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId(), userId);
                 merchandiseHashMap.put(order.getMerchId(), merchandise);
             }
             CorgiUserGoods query = new CorgiUserGoods();
