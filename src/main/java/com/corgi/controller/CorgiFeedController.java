@@ -560,7 +560,7 @@ public class CorgiFeedController extends BaseController {
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
-                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId()));
+                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(),getUserId()));
                 }
 
                 if (!StringUtils.isEmpty(activity.getUserId())) {

@@ -319,7 +319,7 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
         }
         String merchId = activity.getMerchId();
-        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId);
+        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId,getUserId());
         if (merchandise == null) {
             return new JsonResult(Constants.API_ERROR_CODE, "价格不存在或者已失效，请重新选择");
         }
@@ -1585,7 +1585,7 @@ public class CorgiActivityController extends BaseController {
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
-                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId()));
+                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(),getUserId()));
                 }
                 if (!StringUtils.isEmpty(activity.getUserId()) && activity.getUserId().startsWith("B")) {
                     detail.setBarId(detail.getUserId());
