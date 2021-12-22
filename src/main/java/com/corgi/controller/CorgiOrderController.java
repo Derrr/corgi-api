@@ -69,6 +69,21 @@ public class CorgiOrderController extends BaseController {
     @PostMapping("withdraw")
     public JsonResult withdraw(@RequestBody CorgiOrder order) {
         String key = "withdraw_" + getUserId();
+        if (order.getPayAmount() == null || order.getPayAmount() < 50) {
+            return new JsonResult(Constants.API_ERROR_CODE, "提现金额不可低于50");
+        }
+        CorgiOrder query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .sellerId(getUserId())
+                .build();
+        Double totalIncome = corgiOrderService.countIncome(query);
+        query.setSellerId(null);
+        query.setUserId(getUserId());
+        query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
+        Double totalWithdraw = corgiOrderService.countIncome(query);
+        if (order.getPayAmount() > 0.7 * totalIncome - totalWithdraw) {
+            return new JsonResult(Constants.API_ERROR_CODE, "提现金额超出可提现余额");
+        }
         corgiUtilService.lock(key);
         try {
             CorgiOrder orderQuery = CorgiOrder.builder()
