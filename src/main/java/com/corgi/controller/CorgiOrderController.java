@@ -331,7 +331,7 @@ public class CorgiOrderController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
         }
         String password = null;
-        CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId(), getUserId());
+        //CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId(), getUserId());
         //if (CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
             password = "e17ba249e26e49f3ac256eb0838903a4";
         //}
