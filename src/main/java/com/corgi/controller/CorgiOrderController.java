@@ -179,7 +179,7 @@ public class CorgiOrderController extends BaseController {
                     .payType(payType)
                     .marketId(marketId)
                     .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
-                    .merchId(merchId)
+                    .merchId(merchandise.getId())
                     .tradeNo(tradeNo)
                     .sellerId(sellerId)
                     .payAmount(merchandise.getPrice())
