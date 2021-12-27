@@ -168,6 +168,14 @@ public class CorgiOrderController extends BaseController {
                 if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态不是付费动态");
                 }
+                CorgiUserGoods query = new CorgiUserGoods();
+                query.setUserId(getUserId());
+                query.setGoodsId(goodsId);
+                query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+                List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
+                if (CollectionUtils.isNotEmpty(goods)) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户已付费");
+                }
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
             }
@@ -333,7 +341,7 @@ public class CorgiOrderController extends BaseController {
         String password = null;
         //CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId(), getUserId());
         //if (CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
-            password = "e17ba249e26e49f3ac256eb0838903a4";
+        password = "e17ba249e26e49f3ac256eb0838903a4";
         //}
         JSONObject result = corgiPayService.verifyApplePay(receiptData, password);
         order.setResult(result.toJSONString());
