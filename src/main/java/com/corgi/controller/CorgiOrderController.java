@@ -174,7 +174,7 @@ public class CorgiOrderController extends BaseController {
                 query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
                 List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
                 if (CollectionUtils.isNotEmpty(goods)) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户已付费");
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态已付费");
                 }
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
