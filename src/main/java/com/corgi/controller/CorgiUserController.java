@@ -652,11 +652,11 @@ public class CorgiUserController extends BaseController {
         IAcsClient client = new DefaultAcsClient(profile);
 
         String sign = "SMS_180049529";
-        //String signName = "可基";
-        String signName = "Corgi";
+        String signName = "可基";
+        //String signName = "Corgi";
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
-            signName = "Corgi";
+            //signName = "Corgi";
         }
         log.info("to {} sending code:{}", telNo, code);
         CommonRequest request = new CommonRequest();
