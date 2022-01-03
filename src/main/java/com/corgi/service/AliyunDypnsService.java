@@ -77,13 +77,11 @@ public class AliyunDypnsService {
         String telNo = request.getTelNo();
         telNo = telNo.replaceAll("\\+", "");
         String sign = "SMS_180049529";
-        String signName = "可基";
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
-            signName = "Corgi";
         }
         getSmsAuthTokensRequest.setSmsTemplateCode(sign);
-        getSmsAuthTokensRequest.setSignName(signName);
+        getSmsAuthTokensRequest.setSignName(request.getSignName());
         // 复制代码运行请自行打印 API 的返回值
         GetSmsAuthTokensResponse response = managementClient.getSmsAuthTokens(getSmsAuthTokensRequest);
         return response.getBody();

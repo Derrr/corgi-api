@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class SMSRequest {
+    private String signName;
     private String packageName;
     private String sceneCode;
     private String osType;
