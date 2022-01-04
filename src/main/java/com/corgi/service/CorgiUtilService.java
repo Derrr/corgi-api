@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,30 @@ public class CorgiUtilService {
     public void init() {
         poolConnManager.setMaxTotal(2000);
         poolConnManager.setDefaultMaxPerRoute(1000);
+    }
+
+    public boolean checkComment(List<ActivityComment> comments, String userId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (CollectionUtils.isEmpty(comments)) {
+            return true;
+        }
+        Long nowTime = System.currentTimeMillis();
+        Integer count = 0;
+        Long commentTime = 0l;
+        for (ActivityComment comment : comments) {
+            if (comment.getCommentUserId().equals(userId)) {
+                count++;
+                try {
+                    commentTime = sdf.parse(comment.getCtime()).getTime();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if (count > 2 && nowTime - commentTime < 60000) {
+            return false;
+        }
+        return true;
     }
 
     private CloseableHttpClient getCloseableHttpClient() {
