@@ -74,10 +74,8 @@ public class AliyunDypnsService {
                 .setSceneCode(request.getSceneCode())
                 .setExpire(900L)
                 .setSmsCodeExpire(300);
-        String telNo = request.getTelNo();
-        telNo = telNo.replaceAll("\\+", "");
         String sign = "SMS_180049529";
-        if (telNo.contains("-")) {
+        if (request.getTelNo() != null && !request.getTelNo().equals("+86")) {
             sign = "SMS_188570616";
         }
         getSmsAuthTokensRequest.setSmsTemplateCode(sign);
