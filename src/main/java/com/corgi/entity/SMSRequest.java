@@ -9,5 +9,5 @@ public class SMSRequest {
     private String sceneCode;
     private String osType;
     private String bundleId;
-    private String nationCode;
+    private String telNo;
 }
