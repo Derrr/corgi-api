@@ -79,10 +79,7 @@ public class CorgiLoginController extends BaseController {
 
     @GetMapping("get_sms_token")
     public Object getSMSToken(SMSRequest request) {
-        List<String> blockTel = corgiBlacklistService.getBeBlacked("-1");
-        if (blockTel.contains(request.getTelNo())) {
-            return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
-        }
+
         try {
             return aliyunDypnsService.getSMSToken(request);
         } catch (Exception e) {
@@ -109,6 +106,10 @@ public class CorgiLoginController extends BaseController {
 
     @PostMapping("/sms_login")
     public JsonResult register(@RequestBody UserLogin userLogin) {
+        List<String> blockTel = corgiBlacklistService.getBeBlacked("-1");
+        if (blockTel.contains(userLogin.getTelNo())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
+        }
         if ("00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())
                 || aliyunDypnsService.verifySmsToken(userLogin.getCode(), userLogin.getJwt(), userLogin.getTelNo())) {
             String lockKey = "login_" + userLogin.getTelNo();
