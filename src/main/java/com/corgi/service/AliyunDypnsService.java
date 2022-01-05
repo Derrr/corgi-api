@@ -74,11 +74,7 @@ public class AliyunDypnsService {
                 .setSceneCode(request.getSceneCode())
                 .setExpire(900L)
                 .setSmsCodeExpire(300);
-        String sign = "SMS_180049529";
-        if (request.getNationCode() != null && !request.getNationCode().equals("+86")) {
-            sign = "SMS_188570616";
-        }
-        getSmsAuthTokensRequest.setSmsTemplateCode(sign);
+        getSmsAuthTokensRequest.setSmsTemplateCode("SMS_232165801");
         getSmsAuthTokensRequest.setSignName(request.getSignName());
         // 复制代码运行请自行打印 API 的返回值
         GetSmsAuthTokensResponse response = managementClient.getSmsAuthTokens(getSmsAuthTokensRequest);
