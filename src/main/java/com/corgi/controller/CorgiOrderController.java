@@ -84,7 +84,10 @@ public class CorgiOrderController extends BaseController {
         query.setSellerId(null);
         query.setUserId(getUserId());
         query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-        Double totalWithdraw = corgiOrderService.countIncome(query);
+        Double successWithdraw = corgiOrderService.countIncome(query);
+        query.setStatus(CorgiOrder.STATUS.CREATED);
+        Double withdrawing = corgiOrderService.countIncome(query);
+        Double totalWithdraw = withdrawing + successWithdraw;
         if (order.getPayAmount() > 0.7 * totalIncome - totalWithdraw) {
             return new JsonResult(Constants.API_ERROR_CODE, "提现金额超出可提现余额");
         }
