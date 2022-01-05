@@ -27,6 +27,7 @@ import com.corgi.user.enums.MerchandiseEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +37,7 @@ import java.io.ObjectInputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -56,6 +58,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiUtilService corgiUtilService;
     @Autowired
     private WXPay wxPay;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @PostMapping("update")
     public JsonResult update(@RequestBody CorgiOrder order) {
@@ -134,6 +138,9 @@ public class CorgiOrderController extends BaseController {
                           @RequestParam(required = false, name = "goodsId") String goodsId,
                           @RequestParam("payType") String payType) {
         String key = "user_pay_" + getUserId();
+        if (!redisTemplate.opsForValue().setIfAbsent(key.concat("attack"), "1", 2L, TimeUnit.SECONDS)) {
+            return new JsonResult();
+        }
         corgiUtilService.lock(key);
         try {
             CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
@@ -167,6 +174,9 @@ public class CorgiOrderController extends BaseController {
                 CorgiActivity activity = corgiActivities.get(0);
                 if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态不是付费动态");
+                }
+                if (!merchId.equals(activity.getMerchId()) && !merchId.equals(activity.getAppMerchId())) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态付费状态存在一场");
                 }
                 CorgiUserGoods query = new CorgiUserGoods();
                 query.setUserId(getUserId());
@@ -399,7 +409,10 @@ public class CorgiOrderController extends BaseController {
         query.setSellerId(null);
         query.setUserId(userId);
         query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-        Double totalWithdraw = corgiOrderService.countIncome(query);
+        Double successWithdraw = corgiOrderService.countIncome(query);
+        query.setStatus(CorgiOrder.STATUS.CREATED);
+        Double withdrawing = corgiOrderService.countIncome(query);
+        Double totalWithdraw = successWithdraw + withdrawing;
         CorgiOrder withdrawQuery = new CorgiOrder();
         withdrawQuery.setStatus(CorgiOrder.STATUS.CREATED);
         withdrawQuery.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
