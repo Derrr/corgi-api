@@ -75,7 +75,7 @@ public class AliyunDypnsService {
                 .setExpire(900L)
                 .setSmsCodeExpire(300);
         getSmsAuthTokensRequest.setSmsTemplateCode("SMS_232165801");
-        getSmsAuthTokensRequest.setSignName("Corgi");
+        getSmsAuthTokensRequest.setSignName(request.getSignName());
         // 复制代码运行请自行打印 API 的返回值
         GetSmsAuthTokensResponse response = managementClient.getSmsAuthTokens(getSmsAuthTokensRequest);
         return response.getBody();
