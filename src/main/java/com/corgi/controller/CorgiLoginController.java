@@ -91,7 +91,7 @@ public class CorgiLoginController extends BaseController {
     @PostMapping("mobile_login")
     public JsonResult getMobile(@RequestBody UserLogin userLogin) {
 
-        if (aliyunDypnsService.verifyMobile(userLogin.getTelNo(), userLogin.getJwt())) {
+        if (aliyunDypnsService.verifyMobile(userLogin.getTelNo(), userLogin.getCode())) {
             String lockKey = "login_" + userLogin.getTelNo();
             try {
                 if (redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 5L, TimeUnit.SECONDS)) {
