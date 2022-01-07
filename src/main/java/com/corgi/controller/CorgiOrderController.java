@@ -467,6 +467,7 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult();
     }
 
+    @Deprecated
     @PostMapping("applepay_callback")
     public JsonResult applepayCallback(@RequestBody String signedPayload) {
         log.info("callback:{} ", signedPayload);
@@ -475,8 +476,6 @@ public class CorgiOrderController extends BaseController {
             String notificationType = decodedJWT.getClaim("notificationType").asString();
             if ("REFUND".equals(notificationType)) {
                 HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
-                String jws = (String) data.get("signedTransactionInfo");
-
                 DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
                 CorgiOrder order = CorgiOrder.builder()
                         .orderId(obj.getClaim("transactionId").asString())

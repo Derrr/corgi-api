@@ -277,8 +277,12 @@ public class CorgiFeedController extends BaseController {
             if ("success".equals(status)) {
                 JSONArray snapshots = job.getJSONArray("Snapshots");
                 String cover = snapshots.getString(0).split("\\?Expires")[0];
-                if (!StringUtils.isEmpty(cover)) {
-                    corgiActivityService.updateByColumn(vlog.getActivityId(), "coverUrl", cover);
+                List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(vlog.getActivityId()));
+                if (CollectionUtils.isEmpty(corgiActivities)) {
+                    CorgiActivity activity = corgiActivities.get(0);
+                    if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory()) && !StringUtils.isEmpty(cover)) {
+                        corgiActivityService.updateByColumn(vlog.getActivityId(), "coverUrl", cover);
+                    }
                 }
             }
         }
@@ -560,7 +564,7 @@ public class CorgiFeedController extends BaseController {
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
-                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(),getUserId()));
+                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(), getUserId()));
                 }
 
                 if (!StringUtils.isEmpty(activity.getUserId())) {
