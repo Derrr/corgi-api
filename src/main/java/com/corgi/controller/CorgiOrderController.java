@@ -153,6 +153,18 @@ public class CorgiOrderController extends BaseController {
             if (merchandise == null) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
             }
+            if ("first".equals(merchandise.getDisReason())) {
+                CorgiUserGoods orderQuery = CorgiUserGoods.builder()
+                        .userId(getUserId())
+                        .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
+                        .start(0)
+                        .size(1)
+                        .build();
+                List<CorgiUserGoods> orders = corgiOrderService.getUserGoods(orderQuery);
+                if (CollectionUtils.isNotEmpty(orders)) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "首购折扣商品不能重复购买");
+                }
+            }
             if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已失效");
             }
