@@ -394,6 +394,7 @@ public class CorgiOrderController extends BaseController {
                 }
                 if (null == inApp) {
                     order.setStatus(CorgiOrder.STATUS.FAIL);
+                    order.setOrderId(transactionId);
                     corgiOrderService.updateOrder(order);
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
                 } else {
