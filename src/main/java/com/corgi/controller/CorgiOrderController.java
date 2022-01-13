@@ -99,9 +99,9 @@ public class CorgiOrderController extends BaseController {
                     .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
                     .build();
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
-            if (CollectionUtils.isNotEmpty(postOrders)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "您有一笔提现尚未完成，完成后可继续提现");
-            }
+//            if (CollectionUtils.isNotEmpty(postOrders)) {
+//                return new JsonResult(Constants.API_ERROR_CODE, "您有一笔提现尚未完成，完成后可继续提现");
+//            }
             orderQuery.setStatus(null);
             SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM");
             SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
