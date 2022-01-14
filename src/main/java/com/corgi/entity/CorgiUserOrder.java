@@ -15,7 +15,17 @@ public class CorgiUserOrder {
     private String orderId;
     private String status;
     private String desc;
+
     private String ctime;
     private CorgiMerchandise merchandise;
     private CorgiActivity activity;
+
+
+    public String getCtime() {
+        if (ctime != null) {
+            ctime = ctime.substring(0, 19);
+        }
+        return ctime;
+    }
+
 }

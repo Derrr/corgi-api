@@ -153,7 +153,7 @@ public class CorgiOrderController extends BaseController {
             if (merchandise == null) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
             }
-            if ("first".equals(merchandise.getDisReason())) {
+            if ("首购".equals(merchandise.getDisReason())) {
                 CorgiUserGoods orderQuery = CorgiUserGoods.builder()
                         .userId(getUserId())
                         .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
