@@ -248,6 +248,8 @@ public class CorgiUserController extends BaseController {
         userDetail.setBgCheckStatus(AliyunGreenService.PASS);
         userDetail.setBgDataId("-");
         String result = corgiUserService.addDetail(userDetail);
+        mqService.sendRegisterMessage(PushMessage.builder()
+                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
     }
 
@@ -595,10 +597,7 @@ public class CorgiUserController extends BaseController {
             result.put("city", oldPosition.getCity());
             corgiUserService.updateUserPosition(userPosition);
         } else {
-            //为空则为第一次注册，发送注册推送
             corgiUserService.updateUserPosition(userPosition);
-            mqService.sendRegisterMessage(PushMessage.builder()
-                    .targetUserId(userPosition.getUserId()).build());
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
