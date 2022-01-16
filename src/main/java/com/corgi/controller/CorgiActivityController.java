@@ -435,7 +435,7 @@ public class CorgiActivityController extends BaseController {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
         }
-        Integer blackCount = corgiBlacklistService.isBlacked(activityComment.getUserId(), getUserId());
+        Integer blackCount = corgiBlacklistService.isBlacked(activityList.get(0).getUserId(), getUserId());
         if (blackCount == 1) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "你已被拉黑");
         } else if (blackCount > 0) {
