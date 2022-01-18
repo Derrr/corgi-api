@@ -510,7 +510,7 @@ public class CorgiOrderController extends BaseController {
         String payAmount = request.get("payAmount");
         String transactionId = request.get("transactionId");
         String buyerId = request.get("buyerId");
-        String tradeNo = corgiOrderService.getReceipt(receipt);
+        String tradeNo = corgiOrderService.getReceipt(getUserId(), receipt);
         if (StringUtils.isNotEmpty(tradeNo)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "票据已存在 ");
         }
