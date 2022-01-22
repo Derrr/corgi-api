@@ -530,14 +530,14 @@ public class CorgiFeedController extends BaseController {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
                     }
                     activity.setRefActivityPic(activity.getCoverUrl());
-                    if (!activity.getUserId().equals(getUserId()) && hasUserId() && CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                    if (!activity.getUserId().equals(getUserId()) && (!hasUserId() || CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .userId(getUserId())
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
                             .start(0)
                             .size(3)
-                            .build()))) {
+                            .build())))) {
                         activity.setPics(new ArrayList<>());
                         activity.setVideoUrl("");
                         activity.setStatus("unpay");

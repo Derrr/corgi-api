@@ -1556,18 +1556,18 @@ public class CorgiActivityController extends BaseController {
                             .start(0)
                             .size(3)
                             .build());
-                    if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId()) || !hasUserId()) {
+                    if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
                         for (CorgiUserGoods good : goods) {
                             buyers.add(corgiUserService.getUserDetailBasic(good.getUserId()));
                         }
-                        if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                        if (!activity.getUserId().equals(getUserId()) && (!hasUserId() || CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                                 .userId(getUserId())
                                 .traderId(activity.getUserId())
                                 .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                                 .start(0)
                                 .size(1)
                                 .goodsId(activity.getId())
-                                .build())) && !activity.getUserId().equals(getUserId())) {
+                                .build())))) {
                             activity.setPics(new ArrayList<>());
                             activity.setVideoUrl("");
                             activity.setStatus("unpay");
