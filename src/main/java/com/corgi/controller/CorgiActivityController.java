@@ -1545,6 +1545,9 @@ public class CorgiActivityController extends BaseController {
                 }
                 List<UserDetail> buyers = new ArrayList<>();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    if(activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
+                        activity.setCoverUrl(activity.getCoverUrl()+ "?x-oss-process=style/fuzzyCover");
+                    }
                     activity.setRefActivityPic(activity.getCoverUrl());
                     List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .traderId(activity.getUserId())

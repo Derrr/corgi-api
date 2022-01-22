@@ -526,6 +526,9 @@ public class CorgiFeedController extends BaseController {
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
+                        activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+                    }
                     activity.setRefActivityPic(activity.getCoverUrl());
                     if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .userId(getUserId())
