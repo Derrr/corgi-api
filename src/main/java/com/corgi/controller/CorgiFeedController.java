@@ -526,6 +526,7 @@ public class CorgiFeedController extends BaseController {
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    activity.setRefActivityPic(activity.getCoverUrl());
                     if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .userId(getUserId())
                             .traderId(activity.getUserId())

@@ -1545,6 +1545,7 @@ public class CorgiActivityController extends BaseController {
                 }
                 List<UserDetail> buyers = new ArrayList<>();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    activity.setRefActivityPic(activity.getCoverUrl());
                     List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
