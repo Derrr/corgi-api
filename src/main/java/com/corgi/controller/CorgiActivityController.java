@@ -1545,8 +1545,8 @@ public class CorgiActivityController extends BaseController {
                 }
                 List<UserDetail> buyers = new ArrayList<>();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-                    if(activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
-                        activity.setCoverUrl(activity.getCoverUrl()+ "?x-oss-process=style/fuzzyCover");
+                    if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
+                        activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
                     }
                     activity.setRefActivityPic(activity.getCoverUrl());
                     List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
@@ -1556,7 +1556,7 @@ public class CorgiActivityController extends BaseController {
                             .start(0)
                             .size(3)
                             .build());
-                    if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
+                    if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId()) || !hasUserId()) {
                         for (CorgiUserGoods good : goods) {
                             buyers.add(corgiUserService.getUserDetailBasic(good.getUserId()));
                         }
@@ -1571,9 +1571,13 @@ public class CorgiActivityController extends BaseController {
                             activity.setPics(new ArrayList<>());
                             activity.setVideoUrl("");
                             activity.setStatus("unpay");
-                        } else if (!CollectionUtils.isEmpty(activity.getPics())) {
-                            String picUrl = activity.getPics().get(0).getPicUrl();
-                            activity.setCoverUrl(picUrl);
+                        } else {
+                            if (!CollectionUtils.isEmpty(activity.getPics())) {
+                                String picUrl = activity.getPics().get(0).getPicUrl();
+                                activity.setCoverUrl(picUrl);
+                            } else {
+                                activity.setCoverUrl(activity.getCoverUrl().replaceAll("\\?x-oss-process=style/fuzzyCover",""));
+                            }
                         }
                     } else {
                         activity.setPics(new ArrayList<>());

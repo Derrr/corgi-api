@@ -530,20 +530,24 @@ public class CorgiFeedController extends BaseController {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
                     }
                     activity.setRefActivityPic(activity.getCoverUrl());
-                    if (CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                    if (!activity.getUserId().equals(getUserId()) && hasUserId() && CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .userId(getUserId())
                             .traderId(activity.getUserId())
                             .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
                             .goodsId(activity.getId())
                             .start(0)
                             .size(3)
-                            .build())) && !activity.getUserId().equals(getUserId())) {
+                            .build()))) {
                         activity.setPics(new ArrayList<>());
                         activity.setVideoUrl("");
                         activity.setStatus("unpay");
-                    } else if (!CollectionUtils.isEmpty(activity.getPics())) {
-                        String picUrl = activity.getPics().get(0).getPicUrl();
-                        activity.setCoverUrl(picUrl);
+                    } else {
+                        if (!CollectionUtils.isEmpty(activity.getPics())) {
+                            String picUrl = activity.getPics().get(0).getPicUrl();
+                            activity.setCoverUrl(picUrl);
+                        } else {
+                            activity.setCoverUrl(activity.getCoverUrl().replaceAll("\\?x-oss-process=style/fuzzyCover", ""));
+                        }
                     }
                 }
                 if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
