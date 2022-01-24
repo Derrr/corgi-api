@@ -107,8 +107,10 @@ public class CorgiUtilService {
             return true;
         }
         if (userLogin != null && userLogin.getCtime() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            return userLogin.getCtime().compareTo(sdf.format(new Date())) > 0;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.MINUTE, -10);
+            return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
         }
         return false;
     }
