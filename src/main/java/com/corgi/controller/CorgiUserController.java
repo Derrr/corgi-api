@@ -601,13 +601,13 @@ public class CorgiUserController extends BaseController {
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
-        if (!"-".equals(expireDate)) {
+        if (StringUtils.isNotEmpty(expireDate) && !"-".equals(expireDate)) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 Date date = sdf.parse(expireDate);
                 detail.setRemainDate(((date.getTime() - new Date().getTime()) / (1000 * 3600 * 24)));
                 detail.setExpireDate(expireDate);
-            } catch (ParseException e) {
+            } catch (Exception e) {
 
             }
         }
