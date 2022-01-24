@@ -97,7 +97,8 @@ public class CorgiFeedController extends BaseController {
                 size = 8;
             }
             List<String> feedIds;
-            if (corgiUtilService.isNewUser(userId)) {
+            boolean isNew = corgiUtilService.isNewUser(userId);
+            if (isNew) {
                 feedIds = corgiFeedService.getPopularFeed(userId, size);
             } else {
                 feedIds = corgiFeedService.getUnviewFeed(userId, size);
@@ -111,7 +112,9 @@ public class CorgiFeedController extends BaseController {
                 view.setFeed(feed);
                 corgiFeedService.viewFeed(view);
             }
-            mqService.refreshFeed(userId);
+            if (!isNew) {
+                mqService.refreshFeed(userId);
+            }
             return new JsonResult(details);
         } finally {
             corgiUtilService.unlock(key);
