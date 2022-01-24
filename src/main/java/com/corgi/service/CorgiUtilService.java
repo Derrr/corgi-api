@@ -9,10 +9,7 @@ import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.CorgiPic;
 import com.corgi.entity.PicInfo;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.ActivityComment;
-import com.corgi.user.entity.ActivityLike;
-import com.corgi.user.entity.BarProfile;
-import com.corgi.user.entity.UserDetail;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -102,6 +99,15 @@ public class CorgiUtilService {
                 .build();
 
         return httpClient;
+    }
+
+    public boolean isNewUser(String userId) {
+        UserLogin userLogin = corgiUserService.getUserLogin(userId);
+        if (userLogin != null && userLogin.getCtime() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            return userLogin.getCtime().compareTo(sdf.format(new Date())) > 0;
+        }
+        return false;
     }
 
     public String postJson(String url, HashMap message) {

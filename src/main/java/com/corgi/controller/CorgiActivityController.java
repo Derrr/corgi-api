@@ -1144,7 +1144,12 @@ public class CorgiActivityController extends BaseController {
         if (activityQuery.getTPage() == null || activityQuery.getTPage() < 1) {
             activityQuery.setTPage(1);
         }
-        List<String> activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+        List<String> activityIds;
+        if (corgiUtilService.isNewUser(getUserId())) {
+            activityIds = corgiFeedService.getPopularFeed(userId, activityQuery.getPageSize());
+        } else {
+            activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+        }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activities, getUserId());
         return new PageResult(detailList, activityQuery.getTPage() + 1, activityQuery.getDPage());
@@ -1205,7 +1210,10 @@ public class CorgiActivityController extends BaseController {
         activityQuery.setUserId(null);
         activityQuery.setLoginUserId(userId);
         List<CorgiActivity> activityList;
-        if (activityQuery.checkUser()) {
+        if (corgiUtilService.isNewUser(getUserId())) {
+            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), activityQuery.getPageSize());
+            activityList = corgiActivityService.getActivityByIds(activityIds);
+        } else if (activityQuery.checkUser()) {
             List<String> activityIds = corgiUserActivityService.searchFeedActivity(activityQuery);
             activityList = corgiActivityService.getActivityByIds(activityIds);
         } else {
