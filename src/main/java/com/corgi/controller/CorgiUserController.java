@@ -440,7 +440,7 @@ public class CorgiUserController extends BaseController {
     public JsonResult getVipInfo(@RequestParam("userId") String userId) {
         String expireDate = corgiUserService.getUserVipExpire(userId);
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
-        if ("-".equals(expireDate)) {
+        if (StringUtils.isEmpty(expireDate) || "-".equals(expireDate)) {
             return new JsonResult(detail);
         }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
