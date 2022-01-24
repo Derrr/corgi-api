@@ -338,6 +338,8 @@ public class CorgiActivityController extends BaseController {
                 if (infoResponse != null && infoResponse.getVideo() != null) {
                     if (StringUtils.isEmpty(activity.getCoverUrl())) {
                         activity.setCoverUrl(infoResponse.getVideo().getCoverURL().split("\\?Expires")[0]);
+                    } else {
+                        activity.setCoverUrl(activity.getCoverUrl().split("\\?Expires")[0]);
                     }
                     if ("Blocked".equals(infoResponse.getVideo().getAuditStatus())) {
                         activity.setCheckStatus(AliyunGreenService.FAIL);
@@ -1545,7 +1547,7 @@ public class CorgiActivityController extends BaseController {
                 }
                 List<UserDetail> buyers = new ArrayList<>();
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-                    if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
+                    if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
                     }
                     activity.setRefActivityPic(activity.getCoverUrl());
@@ -1576,7 +1578,7 @@ public class CorgiActivityController extends BaseController {
                                 String picUrl = activity.getPics().get(0).getPicUrl();
                                 activity.setCoverUrl(picUrl);
                             } else {
-                                activity.setCoverUrl(activity.getCoverUrl().replaceAll("\\?x-oss-process=style/fuzzyCover",""));
+                                activity.setCoverUrl(activity.getCoverUrl().replaceAll("\\?x-oss-process=style/fuzzyCover", ""));
                             }
                         }
                     } else {
