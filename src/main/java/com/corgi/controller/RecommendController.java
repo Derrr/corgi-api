@@ -31,6 +31,8 @@ public class RecommendController extends BaseController {
     @Reference
     private CorgiUserRecommendService corgiUserRecommendService;
     @Reference
+    private CorgiFeedService corgiFeedService;
+    @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiActivityService corgiActivityService;
@@ -84,7 +86,12 @@ public class RecommendController extends BaseController {
 
     @GetMapping("get_city_image")
     public JsonResult getCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-        List<String> activityIds = corgiUserRecommendService.getCityRecommendImage(getUserId(), city, page, size);
+        List<String> activityIds;
+        if (corgiUtilService.isNewUser(getUserId())) {
+            activityIds = corgiFeedService.getPopularFeed(getUserId(), size);
+        } else {
+            activityIds = corgiUserRecommendService.getCityRecommendImage(getUserId(), city, page, size);
+        }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         return new JsonResult(convertDetail(activityList, getUserId()));
     }
@@ -101,7 +108,12 @@ public class RecommendController extends BaseController {
 
     @GetMapping("get_not_city_image")
     public JsonResult getNotCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-        List<String> activityIds = corgiUserRecommendService.getNotCityRecommendImage(getUserId(), city, page, size);
+        List<String> activityIds;
+        if (corgiUtilService.isNewUser(getUserId())) {
+            activityIds = corgiFeedService.getPopularFeed(getUserId(), size);
+        } else {
+            activityIds = corgiUserRecommendService.getNotCityRecommendImage(getUserId(), city, page, size);
+        }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
         return new JsonResult(convertDetail(activityList, getUserId()));
     }
