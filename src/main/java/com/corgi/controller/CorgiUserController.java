@@ -216,6 +216,9 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userDetail.setUserId(getUserId());
         }
+        if (StringUtils.isEmpty(userDetail.getBirthday())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请填写你的生日");
+        }
         int count = corgiUserService.countUserNickname(userDetail.getNickname());
         if (count > 0) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
