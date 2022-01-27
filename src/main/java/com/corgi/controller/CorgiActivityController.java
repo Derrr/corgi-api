@@ -1157,10 +1157,15 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_by_topic")
     public JsonResult getByTopic(ActivityQuery activityQuery) {
+        List<String> activityIds;
         String topic = activityQuery.getTopic();
-        CorgiActivity query = new CorgiActivity();
-        query.setTopics(Arrays.asList(topic));
-        List<String> activityIds = corgiUserActivityService.getHeatActivity(query, activityQuery.getPage(), activityQuery.getPageSize());
+        if (corgiUtilService.isNewUser(getUserId())) {
+            activityIds = corgiFeedService.getPopularFeed(getUserId(), activityQuery.getPageSize());
+        } else {
+            CorgiActivity query = new CorgiActivity();
+            query.setTopics(Arrays.asList(topic));
+            activityIds = corgiUserActivityService.getHeatActivity(query, activityQuery.getPage(), activityQuery.getPageSize());
+        }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivity> result = new ArrayList<>();
         if (activities != null) {
