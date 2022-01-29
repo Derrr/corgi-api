@@ -8,6 +8,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.AliyunGreenService;
+import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityBillboard;
 import com.corgi.user.entity.UserDetail;
@@ -41,8 +42,12 @@ public class ThirdPartyController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    CorgiToolService corgiToolService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
+    @Autowired
+    private CorgiUtilService corgiUtilService;
 
     @GetMapping("get_top_9")
     public JsonResult getTop9(@RequestParam("telNo") String telNo) {
@@ -70,7 +75,7 @@ public class ThirdPartyController extends BaseController {
                 }
             } else {
                 ActivityPic pic = new ActivityPic();
-                pic.setPicUrl(activity.getCoverUrl()+"?x-oss-process=image/auto-orient,1/resize,m_fill,w_500,h_500/quality,q_90");
+                pic.setPicUrl(activity.getCoverUrl() + "?x-oss-process=image/auto-orient,1/resize,m_fill,w_500,h_500/quality,q_90");
                 picUrls.add(pic);
             }
         }
@@ -80,6 +85,18 @@ public class ThirdPartyController extends BaseController {
         userDetail.setCtime("2021-01-01");
         activity.setLikeCount(corgiLikeService.countLikeByUser(userDetail));
         return new JsonResult(activity);
+    }
+
+    @GetMapping("count")
+    public JsonResult count(@RequestParam("user") String user) {
+        String lockKey = "count_" + user;
+        corgiUtilService.lock(lockKey);
+        try {
+            corgiToolService.countUserNumber(user);
+        } finally {
+            corgiUtilService.unlock(lockKey);
+        }
+        return new JsonResult();
     }
 
     private ActivityPic convertPic(ActivityPic pic) {
