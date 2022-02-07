@@ -102,16 +102,16 @@ public class CorgiUtilService {
     }
 
     public boolean isNewUser(String userId) {
-        UserLogin userLogin = corgiUserService.getUserLogin(userId);
-        if ("17000000000".equals(userLogin.getTelNo())) {
-            return true;
-        }
-        if (userLogin != null && userLogin.getCtime() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.MINUTE, -10);
-            return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
-        }
+//        UserLogin userLogin = corgiUserService.getUserLogin(userId);
+//        if ("17000000000".equals(userLogin.getTelNo())) {
+//            return true;
+//        }
+//        if (userLogin != null && userLogin.getCtime() != null) {
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            Calendar calendar = Calendar.getInstance();
+//            calendar.add(Calendar.MINUTE, -10);
+//            return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
+//        }
         return false;
     }
 
