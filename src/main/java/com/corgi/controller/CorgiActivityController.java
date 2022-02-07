@@ -1544,7 +1544,7 @@ public class CorgiActivityController extends BaseController {
             Iterator<CorgiActivity> it = activityList.iterator();
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
-                if (activity == null || activity.getUserId() == null || (!userId.equals(activity.getUserId()) && "fail".equals(activity.getCheckStatus()))) {
+                if (activity == null || activity.getUserId() == null || (!userId.equals(activity.getUserId()) && ("fail".equals(activity.getCheckStatus()) || "check".equals(activity.getCheckStatus())))) {
                     it.remove();
                     continue;
                 }
