@@ -234,6 +234,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("sticky_top")
     public JsonResult stickyTop(@RequestParam("activityId") String activityId) {
         corgiToolService.updateActivityTopicWeight(activityId, 1);
+        corgiActivityService.updateByColumn(activityId, "checkActivityType", "stickyTope");
         return new JsonResult();
     }
 
