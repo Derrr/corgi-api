@@ -725,8 +725,8 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         int follow = corgiUserFollowService.isFollowed(userId, targetUserId);
-        corgiUserFollowService.follow(userId, targetUserId);
         if (follow != 1 && follow != 3) {
+            corgiUserFollowService.follow(userId, targetUserId);
             HashMap extra = new HashMap();
             mqService.sendMessage(PushMessage.builder()
                     .type(PushMessage.FOLLOW)
