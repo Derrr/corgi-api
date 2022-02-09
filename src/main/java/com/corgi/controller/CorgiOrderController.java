@@ -52,6 +52,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiOrderService corgiOrderService;
     @Reference
     private CorgiActivityService corgiActivityService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -65,6 +67,10 @@ public class CorgiOrderController extends BaseController {
     public JsonResult update(@RequestBody CorgiOrder order) {
         if (hasUserId()) {
             return new JsonResult();
+        }
+        if ("success".equals(order.getStatus())) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            order.setPayTime(sdf.format(new Date()));
         }
         corgiOrderService.updateOrder(order);
         return new JsonResult();
@@ -119,7 +125,7 @@ public class CorgiOrderController extends BaseController {
 //                }
 //            }
             order.setUserId(getUserId());
-            order.setOrderId(UUID.randomUUID().toString().split("-")[0].toUpperCase());
+            order.setOrderId((Long.toHexString(System.currentTimeMillis() / 1000)).toUpperCase());
             order.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
             order.setTradeNo(UuidUtil.getTradeNo(getUserId()));
             order.setSellerId("Corgi-app");
@@ -342,7 +348,17 @@ public class CorgiOrderController extends BaseController {
         if (hasUserId()) {
             order.setUserId(getUserId());
         }
-        return new JsonResult(corgiOrderService.getOrderByPage(order, page, pageSize));
+        List<CorgiOrder> orders = corgiOrderService.getOrderByPage(order, page, pageSize);
+        if (CollectionUtils.isNotEmpty(orders)) {
+            for (CorgiOrder order1 : orders) {
+                UserDetail detail = corgiUserService.getUserDetailBasic(order1.getUserId());
+                if (detail != null) {
+                    order1.setBuyerId(detail.getNickname());
+                }
+            }
+        }
+        return new JsonResult(orders);
+
     }
 
     @PostMapping("receipt_update")
