@@ -706,10 +706,8 @@ public class CorgiUserController extends BaseController {
         try {
             CommonResponse response = client.getCommonResponse(request);
             log.info(telNo + "-result:" + response.getData());
-        } catch (ServerException e) {
-            e.printStackTrace();
-        } catch (ClientException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
         return new JsonResult();
     }
