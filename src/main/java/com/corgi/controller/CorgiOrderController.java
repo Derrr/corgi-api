@@ -68,7 +68,7 @@ public class CorgiOrderController extends BaseController {
         if (hasUserId()) {
             return new JsonResult();
         }
-        if ("success".equals(order.getStatus())) {
+        if (CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             order.setPayTime(sdf.format(new Date()));
         }
