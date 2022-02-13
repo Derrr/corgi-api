@@ -1028,7 +1028,7 @@ public class CorgiActivityController extends BaseController {
             latestActivityId = activityIds.get(0);
         }
         redisTemplate.opsForValue().set(key, latestActivityId, 3L, TimeUnit.DAYS);
-        return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), activityQuery.getUserId()));
+        return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), activityQuery.getUserId(), true));
     }
 
     @GetMapping("refuse")
@@ -1265,7 +1265,7 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(ActivityQuery query) {
         query.setLoginUserId(getUserId());
-        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), getUserId().equals(query.getUserId())));
+        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), true));
     }
 
     @GetMapping("get_user_video")
