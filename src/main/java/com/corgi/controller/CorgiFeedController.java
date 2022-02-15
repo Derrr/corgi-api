@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -119,6 +120,15 @@ public class CorgiFeedController extends BaseController {
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    @GetMapping("get_paying_activity")
+    public JsonResult getPayingActivity(@RequestParam(required = false, defaultValue = "1") Integer page, @RequestParam(required = false, defaultValue = "30") Integer pageSize) {
+        CorgiVlog query = new CorgiVlog();
+        query.setVideoId(CorgiActivity.CAT_PAYING);
+        List<CorgiVlog> vlogs = corgiVlogService.listHotVlog(query, page, pageSize);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(vlogs.stream().map(v -> v.getActivityId()).collect(Collectors.toList()));
+        return new JsonResult(convertDetail(corgiActivities, getUserId()));
     }
 
     @GetMapping("get_user_feeds")
