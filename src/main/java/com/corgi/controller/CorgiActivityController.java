@@ -362,7 +362,7 @@ public class CorgiActivityController extends BaseController {
         }
         activity = aliyunGreenService.checkImageActivity(activity);
         if (!CollectionUtils.isEmpty(activity.getPics())) {
-            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.PAYING);
             if (!checkActivityPic(activityPics)) {
                 activity.setCheckStatus(AliyunGreenService.CHECK);
             }
