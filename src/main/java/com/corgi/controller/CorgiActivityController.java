@@ -1004,6 +1004,20 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(corgiUserActivityService.countFollowUserActivity(query));
     }
 
+    @GetMapping("get_follow_paying")
+    public JsonResult getFollowPaying() {
+        ActivityQuery query = new ActivityQuery();
+        query.setUserId(getUserId());
+        query.setPage(0);
+        query.setPageSize(1000);
+        query.setCategory(CorgiActivity.CAT_PAYING);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -7);
+        query.setEndTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+        List<String> activityIds = corgiUserActivityService.getFollowUserActivity(query);
+        return new JsonResult(convertFollowActivity(activityIds, getUserId()));
+    }
+
     @GetMapping("get_follow_activity")
     public JsonResult getFollowActivity(ActivityQuery activityQuery) {
         if (hasUserId()) {
@@ -1529,6 +1543,44 @@ public class CorgiActivityController extends BaseController {
             likedActivities.add(likedActivity);
         }
         return likedActivities;
+    }
+
+    private List<FollowShowActivity> convertFollowActivity(List<String> activityIds, String userId) {
+        if (CollectionUtils.isEmpty(activityIds)) {
+            return new ArrayList<>();
+        }
+        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
+        if (CollectionUtils.isEmpty(activityList)) {
+            return new ArrayList<>();
+        }
+        List<FollowShowActivity> activities = new ArrayList<>();
+        List<String> userIds = new ArrayList<>();
+        for (CorgiActivity activity : activityList) {
+            String creator = activity.getUserId();
+            if (creator.equals(userId)) {
+                continue;
+            }
+            if (activity == null || activity.getUserId() == null
+                    || ("fail".equals(activity.getCheckStatus()) || "check".equals(activity.getCheckStatus()))) {
+                continue;
+            }
+            if (AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                continue;
+            }
+            if (userIds.contains(creator)) {
+                continue;
+            }
+            userIds.add(creator);
+            UserDetail detail = corgiUserService.getUserDetailBasic(creator);
+            if (detail != null) {
+                FollowShowActivity showActivity = new FollowShowActivity();
+                showActivity.setUserId(creator);
+                showActivity.setActivityId(activity.getId());
+                showActivity.setAvatar(detail.getAvatar());
+                activities.add(showActivity);
+            }
+        }
+        return activities;
     }
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
