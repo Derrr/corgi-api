@@ -82,6 +82,7 @@ public class CorgiOrderController extends BaseController {
         if (order.getPayAmount() == null || order.getPayAmount() < 50) {
             return new JsonResult(Constants.API_ERROR_CODE, "提现金额不可低于50");
         }
+        UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         CorgiOrder query = CorgiOrder.builder()
                 .status(CorgiOrder.STATUS.SUCCESS)
                 .sellerId(getUserId())
@@ -94,7 +95,11 @@ public class CorgiOrderController extends BaseController {
         query.setStatus(CorgiOrder.STATUS.CREATED);
         Double withdrawing = corgiOrderService.countIncome(query);
         Double totalWithdraw = withdrawing + successWithdraw;
-        if (order.getPayAmount() > 0.7 * totalIncome - totalWithdraw) {
+        Double rate = 0.6;
+        if ("influencer".equals(detail.getAvatarStatus())) {
+            rate = 0.7;
+        }
+        if (order.getPayAmount() > rate * totalIncome - totalWithdraw) {
             return new JsonResult(Constants.API_ERROR_CODE, "提现金额超出可提现余额");
         }
         corgiUtilService.lock(key);
@@ -432,6 +437,7 @@ public class CorgiOrderController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        UserDetail detail = corgiUserService.getUserDetailBasic(userId);
         HashMap result = new HashMap();
         CorgiOrder query = CorgiOrder.builder()
                 .status(CorgiOrder.STATUS.SUCCESS)
@@ -453,9 +459,13 @@ public class CorgiOrderController extends BaseController {
         if (CollectionUtils.isNotEmpty(orders)) {
             result.put("withdrawOrder", orders);
         }
+        Double rate = 0.6;
+        if ("influencer".equals(detail.getAvatarStatus())) {
+            rate = 0.7;
+        }
         result.put("totalIncome", totalIncome);
         result.put("totalWithdraw", totalWithdraw);
-        result.put("remainWithdraw", totalIncome * 0.7 - totalWithdraw);
+        result.put("remainWithdraw", totalIncome * rate - totalWithdraw);
         return new JsonResult(result);
     }
 
