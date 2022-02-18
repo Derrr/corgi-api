@@ -1575,6 +1575,7 @@ public class CorgiActivityController extends BaseController {
             if (detail != null) {
                 FollowShowActivity showActivity = new FollowShowActivity();
                 showActivity.setUserId(creator);
+                showActivity.setNickname(detail.getNickname());
                 showActivity.setActivityId(activity.getId());
                 showActivity.setAvatar(detail.getAvatar());
                 activities.add(showActivity);
