@@ -97,7 +97,7 @@ public class CorgiOrderController extends BaseController {
         Double totalWithdraw = withdrawing + successWithdraw;
         Double rate = 0.6;
         if ("influencer".equals(detail.getAvatarStatus())) {
-            rate = 0.7;
+            rate = 0.65;
         }
         if (order.getPayAmount() > rate * totalIncome - totalWithdraw) {
             return new JsonResult(Constants.API_ERROR_CODE, "提现金额超出可提现余额");
@@ -461,7 +461,7 @@ public class CorgiOrderController extends BaseController {
         }
         Double rate = 0.6;
         if ("influencer".equals(detail.getAvatarStatus())) {
-            rate = 0.7;
+            rate = 0.65;
         }
         result.put("totalIncome", totalIncome);
         result.put("totalWithdraw", totalWithdraw);
