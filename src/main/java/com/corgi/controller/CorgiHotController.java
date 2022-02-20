@@ -16,6 +16,7 @@ import com.corgi.entity.BarActivityDetail;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.CorgiUtilService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiHotActivityService;
 import com.corgi.user.api.CorgiPicService;
@@ -51,6 +52,8 @@ public class CorgiHotController extends BaseController {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiPicService corgiPicService;
+    @Autowired
+    private MQService mqService;
 
     @PostMapping("add_hot_activity")
     public JsonResult addHotActivity(@RequestBody HotActivity hotActivity) {
@@ -58,7 +61,8 @@ public class CorgiHotController extends BaseController {
             corgiHotActivityService.addHotActivity(hotActivity);
             CorgiActivity activity = corgiActivityFeedService.getActivityById(hotActivity.getActivityId());
             if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-
+                mqService.sendMessage(buildCreatorMessage(hotActivity.getActivityId()));
+                mqService.sendMessage(buildFollowerMessage(hotActivity.getActivityId()));
             }
         }
         return new JsonResult();
