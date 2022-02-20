@@ -144,7 +144,6 @@ public class CorgiHotController extends BaseController {
         extra.put("content", content);
         extra.put("urlType", "2");
         extra.put("url", activityId);
-        List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
         if (StringUtils.isNotEmpty(activity.getCoverUrl())) {
             extra.put("picUrl", activity.getCoverUrl());
         }
