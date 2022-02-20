@@ -108,7 +108,7 @@ public class CorgiHotController extends BaseController {
         pushMessage.setTargetUserId(activity.getUserId());
         pushMessage.setMessage("恭喜呀～你获得了平台推荐");
         JSONArray content = new JSONArray();
-        content.add(new JSONObject().fluentPut("text", "恭喜呀～你于\""+activity.getCreateTime()+"\"发布的动态\""+activity.getTitle()+"\"获得了平台推荐，请及时回复粉丝的评论吧！"));
+        content.add(new JSONObject().fluentPut("text", "恭喜呀～你于\"" + activity.getCreateTime() + "\"发布的动态\"" + activity.getTitle() + "\"获得了平台推荐，请及时回复粉丝的评论吧！"));
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "907");
         extra.put("content", content);
@@ -138,16 +138,14 @@ public class CorgiHotController extends BaseController {
         pushMessage.setMessage("你关注的好友发布的付费动态正在被围观快去看看吧！");
         JSONArray content = new JSONArray();
         UserDetail detail = corgiUserService.getUserDetailBasic(activity.getUserId());
-        content.add(new JSONObject().fluentPut("text", "你关注的好友"+detail.getNickname()+"发布的付费动态正在被围观快去看看吧！"));
+        content.add(new JSONObject().fluentPut("text", "你关注的好友" + detail.getNickname() + "发布的付费动态正在被围观快去看看吧！"));
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "907");
         extra.put("content", content);
         extra.put("urlType", "2");
         extra.put("url", activityId);
         List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
-        if (CollectionUtils.isNotEmpty(pics)) {
-            extra.put("picUrl", pics.get(0).getPicUrl());
-        } else if (StringUtils.isNotEmpty(activity.getCoverUrl())) {
+        if (StringUtils.isNotEmpty(activity.getCoverUrl())) {
             extra.put("picUrl", activity.getCoverUrl());
         }
         if (StringUtils.isNotEmpty(activity.getTitle())) {
