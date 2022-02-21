@@ -151,6 +151,7 @@ public class CorgiHotVlogController extends BaseController {
         pushMessage.setType(PushMessage.ACTIVITY);
         pushMessage.setSourceUserId("corgihelper");
         pushMessage.setMessage("你关注的好友发布的付费动态正在被围观快去看看吧！");
+        pushMessage.setTargetUserId(activity.getUserId());
         JSONArray content = new JSONArray();
         UserDetail detail = corgiUserService.getUserDetailBasic(activity.getUserId());
         content.add(new JSONObject().fluentPut("text", "你关注的好友" + detail.getNickname() + "发布的付费动态正在被围观快去看看吧！"));
