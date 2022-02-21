@@ -460,6 +460,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("fail_activity")
     public JsonResult failActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.updateByColumn(activityId, "checkStatus", AliyunGreenService.FAIL);
+        corgiUserActivityService.updateActivityStatus(activityId, "fail");
         return new JsonResult();
     }
 
