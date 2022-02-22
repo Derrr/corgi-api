@@ -163,8 +163,8 @@ public class CorgiHotVlogController extends BaseController {
         extra.put("urlType", "2");
         extra.put("url", activityId);
         extra.put("alertTitle", "热门动态提醒");
-        if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(activity.getCoverUrl())) {
-            extra.put("picUrl", activity.getCoverUrl());
+        if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
+            activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
         }
         if (!CorgiActivity.CAT_PAYING.equals(category)) {
             List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
