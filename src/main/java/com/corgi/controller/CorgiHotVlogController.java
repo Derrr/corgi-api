@@ -19,12 +19,14 @@ import com.corgi.user.entity.CorgiVlogHot;
 import com.corgi.user.entity.UserDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -43,6 +45,8 @@ public class CorgiHotVlogController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Autowired
     private MQService mqService;
 
@@ -83,10 +87,8 @@ public class CorgiHotVlogController extends BaseController {
     @GetMapping("test_add")
     public JsonResult addHot(@RequestParam("activityId") String activityId) {
         CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
-        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-            mqService.sendMessage(buildCreatorMessage(activityId));
-            mqService.sendMessage(buildFollowerMessage(activityId));
-        }
+        mqService.sendMessage(buildCreatorMessage(activityId));
+        mqService.sendMessage(buildFollowerMessage(activityId, activity.getCategory()));
         return new JsonResult();
     }
 
@@ -101,9 +103,9 @@ public class CorgiHotVlogController extends BaseController {
         corgiVlogService.addHotVlog(corgiVlogHot);
         corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
-        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-            mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
-            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId()));
+        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
+        if (redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
+            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
         }
         return new JsonResult();
     }
@@ -131,12 +133,9 @@ public class CorgiHotVlogController extends BaseController {
         PushMessage pushMessage = new PushMessage();
         pushMessage.setSourceUserId("corgihelper");
         pushMessage.setTargetUserId(activity.getUserId());
-        pushMessage.setMessage("恭喜呀～你获得了平台推荐");
-        JSONArray content = new JSONArray();
-        content.add(new JSONObject().fluentPut("text", "恭喜呀～你于\"" + activity.getCreateTime() + "\"发布的动态\"" + (activity.getTitle() == null ? "" : activity.getTitle()) + "\"获得了平台推荐，请及时回复粉丝的评论吧！"));
+        pushMessage.setMessage("您的动态被推荐至热门");
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "907");
-        extra.put("content", content);
         extra.put("urlType", "2");
         extra.put("alertTitle", "您的动态被推荐至热门");
         extra.put("url", activityId);
@@ -146,33 +145,34 @@ public class CorgiHotVlogController extends BaseController {
         } else if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(activity.getCoverUrl())) {
             extra.put("picUrl", activity.getCoverUrl());
         }
-        extra.put("title", activity.getTitle() == null ? "" : activity.getTitle());
-        extra.put("desc", activity.getContent() == null ? "" : activity.getContent());
+        extra.put("desc", "恭喜呀～你于\"" + activity.getCreateTime() + "\"发布的动态\"" + (activity.getTitle() == null ? "" : activity.getTitle()) + "\"获得了平台推荐，请及时回复粉丝的评论吧！");
         pushMessage.setExtra(extra);
         return pushMessage;
     }
 
-    private PushMessage buildFollowerMessage(String activityId) {
+    private PushMessage buildFollowerMessage(String activityId, String category) {
         CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
         PushMessage pushMessage = new PushMessage();
         pushMessage.setType(PushMessage.ACTIVITY);
         pushMessage.setSourceUserId("corgihelper");
-        pushMessage.setMessage("你关注的好友发布的付费动态正在被围观快去看看吧！");
+        pushMessage.setMessage("热门动态提醒");
         pushMessage.setTargetUserId(activity.getUserId());
-        JSONArray content = new JSONArray();
         UserDetail detail = corgiUserService.getUserDetailBasic(activity.getUserId());
-        content.add(new JSONObject().fluentPut("text", "你关注的好友" + detail.getNickname() + "发布的付费动态正在被围观快去看看吧！"));
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "907");
-        extra.put("content", content);
         extra.put("urlType", "2");
         extra.put("url", activityId);
-        extra.put("alertTitle", "您的好友动态被推荐至热门");
+        extra.put("alertTitle", "热门动态提醒");
         if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(activity.getCoverUrl())) {
             extra.put("picUrl", activity.getCoverUrl());
         }
-        extra.put("title", activity.getTitle() == null ? "" : activity.getTitle());
-        extra.put("desc", activity.getContent() == null ? "" : activity.getContent());
+        if (!CorgiActivity.CAT_PAYING.equals(category)) {
+            List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
+            if (CollectionUtils.isNotEmpty(pics)) {
+                extra.put("picUrl", pics.get(0).getPicUrl());
+            }
+        }
+        extra.put("desc", "你关注的好友" + detail.getNickname() + "发布的付费动态正在被围观快去看看吧！");
         pushMessage.setExtra(extra);
         return pushMessage;
     }
