@@ -81,7 +81,7 @@ public class CorgiHotVlogController extends BaseController {
     }
 
     @GetMapping("test_add")
-    public JsonResult addHot(@RequestParam("activityId")String activityId) {
+    public JsonResult addHot(@RequestParam("activityId") String activityId) {
         CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
         if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
             mqService.sendMessage(buildCreatorMessage(activityId));
@@ -133,7 +133,7 @@ public class CorgiHotVlogController extends BaseController {
         pushMessage.setTargetUserId(activity.getUserId());
         pushMessage.setMessage("恭喜呀～你获得了平台推荐");
         JSONArray content = new JSONArray();
-        content.add(new JSONObject().fluentPut("text", "恭喜呀～你于\"" + activity.getCreateTime() + "\"发布的动态\"" + activity.getTitle() + "\"获得了平台推荐，请及时回复粉丝的评论吧！"));
+        content.add(new JSONObject().fluentPut("text", "恭喜呀～你于\"" + activity.getCreateTime() + "\"发布的动态\"" + (activity.getTitle() == null ? "" : activity.getTitle()) + "\"获得了平台推荐，请及时回复粉丝的评论吧！"));
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("type", "907");
         extra.put("content", content);
