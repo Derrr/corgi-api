@@ -163,8 +163,12 @@ public class CorgiHotVlogController extends BaseController {
         extra.put("urlType", "2");
         extra.put("url", activityId);
         extra.put("alertTitle", "热门动态提醒");
-        if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
-            activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+        if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
+            if (StringUtils.isEmpty(activity.getVideoId())) {
+                extra.put("picUrl", activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+            } else {
+                extra.put("picUrl", activity.getCoverUrl());
+            }
         }
         if (!CorgiActivity.CAT_PAYING.equals(category)) {
             List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
