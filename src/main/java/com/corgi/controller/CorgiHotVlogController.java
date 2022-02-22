@@ -80,6 +80,16 @@ public class CorgiHotVlogController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("test_add")
+    public JsonResult addHot(@RequestParam("activityId")String activityId) {
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
+        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+            mqService.sendMessage(buildCreatorMessage(activityId));
+            mqService.sendMessage(buildFollowerMessage(activityId));
+        }
+        return new JsonResult();
+    }
+
     @PostMapping("add")
     public JsonResult addHot(@RequestBody CorgiVlogHot corgiVlogHot) {
         corgiVlogHot.setViewCount(null);
