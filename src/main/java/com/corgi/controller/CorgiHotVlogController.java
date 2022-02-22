@@ -138,6 +138,7 @@ public class CorgiHotVlogController extends BaseController {
         extra.put("type", "907");
         extra.put("content", content);
         extra.put("urlType", "2");
+        extra.put("alertTitle", "您的动态被推荐至热门");
         extra.put("url", activityId);
         List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
         if (CollectionUtils.isNotEmpty(pics)) {
@@ -170,6 +171,7 @@ public class CorgiHotVlogController extends BaseController {
         extra.put("content", content);
         extra.put("urlType", "2");
         extra.put("url", activityId);
+        extra.put("alertTitle", "您的好友动态被推荐至热门");
         if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(activity.getCoverUrl())) {
             extra.put("picUrl", activity.getCoverUrl());
         }
