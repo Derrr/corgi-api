@@ -99,14 +99,14 @@ public class CorgiHotVlogController extends BaseController {
         if (corgiVlogHot.getExpectView() == null || corgiVlogHot.getExpectView() <= 0) {
             corgiVlogHot.setExpectView(3000);
         }
-        corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
-        corgiVlogService.addHotVlog(corgiVlogHot);
-        corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
-        CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
-        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
-        if (redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
-            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
-        }
+//        corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
+//        corgiVlogService.addHotVlog(corgiVlogHot);
+//        corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+//        CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
+//        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
+//        if (redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
+//            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
+//        }
         return new JsonResult();
     }
 
