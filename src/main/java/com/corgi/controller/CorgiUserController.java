@@ -1101,11 +1101,8 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("has_remind_paying")
     public JsonResult hasRemindPaying(@RequestParam("userId") String userId) {
-        String vipExpire = corgiUserService.getUserVipExpire(userId);
-        if (StringUtils.isNotEmpty(vipExpire) && !"-".equals(vipExpire)) {
-            if (redisTemplate.hasKey("remind_paying-" + userId + "-" + getUserId())) {
-                return new JsonResult(true);
-            }
+        if (redisTemplate.hasKey("remind_paying-" + userId + "-" + getUserId())) {
+            return new JsonResult(true);
         }
         return new JsonResult(false);
     }
