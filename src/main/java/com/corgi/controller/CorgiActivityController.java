@@ -1570,6 +1570,9 @@ public class CorgiActivityController extends BaseController {
             if (userIds.contains(creator)) {
                 continue;
             }
+            if (redisTemplate.hasKey("browse_paying-" + activity.getId() + "-" + getUserId())) {
+                continue;
+            }
             userIds.add(creator);
             UserDetail detail = corgiUserService.getUserDetailBasic(creator);
             if (detail != null) {

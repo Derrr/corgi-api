@@ -225,6 +225,12 @@ public class CorgiFeedController extends BaseController {
         return new JsonResult(getVlogDetail(activityId, getUserId()));
     }
 
+    @GetMapping("browse_follow_pay")
+    public JsonResult viewVideo(@RequestParam("activityId") String activityId) {
+        redisTemplate.opsForValue().set("browse_paying-" + activityId + "-" + getUserId(), System.currentTimeMillis() + "", 30L, TimeUnit.DAYS);
+        return new JsonResult();
+    }
+
     @GetMapping("browse")
     public JsonResult viewVideo(@RequestParam("activityId") String activityId,
                                 @RequestParam("source") String source,
