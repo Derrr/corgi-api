@@ -226,20 +226,8 @@ public class CorgiFeedController extends BaseController {
     }
 
     @GetMapping("browse_follow_pay")
-    public JsonResult viewVideo(@RequestParam("activityId") String activityId, @RequestParam("creatorId")String creatorId) {
+    public JsonResult viewVideo(@RequestParam("activityId") String activityId) {
         redisTemplate.opsForValue().set("browse_paying-" + activityId + "-" + getUserId(), System.currentTimeMillis() + "", 30L, TimeUnit.DAYS);
-        if (corgiUtilService.lock("view_" + activityId)) {
-            try {
-                CorgiFeed feed = new CorgiFeed();
-                feed.setUserId(getUserId());
-                feed.setFeed(activityId);
-                feed.setFeedUserId(creatorId);
-                feed.setSource("followPay");
-                corgiFeedService.viewFeed(feed);
-            } finally {
-                corgiUtilService.unlock("view_" + activityId);
-            }
-        }
         return new JsonResult();
     }
 
