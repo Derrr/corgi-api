@@ -227,7 +227,7 @@ public class CorgiFeedController extends BaseController {
 
     @GetMapping("browse_follow_pay")
     public JsonResult viewVideo(@RequestParam("activityId") String activityId) {
-        redisTemplate.opsForValue().set("browse_paying-" + activityId + "-" + getUserId(), System.currentTimeMillis() + "", 30L, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set("browse_paying-" + activityId + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS);
         if (corgiUtilService.lock("view_" + activityId)) {
             try {
                 CorgiFeed feed = new CorgiFeed();

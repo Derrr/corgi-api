@@ -2,6 +2,8 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
@@ -17,6 +19,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
@@ -1094,6 +1097,41 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(UserDetail.NO_FACE);
+    }
+
+    @GetMapping("has_remind_paying")
+    public JsonResult hasRemindPaying(@RequestParam("userId") String userId) {
+        String vipExpire = corgiUserService.getUserVipExpire(userId);
+        if (StringUtils.isNotEmpty(vipExpire) && !"-".equals(vipExpire)) {
+            if (redisTemplate.hasKey("remind_paying-" + userId + "-" + getUserId())) {
+                return new JsonResult(true);
+            }
+        }
+        return new JsonResult(false);
+    }
+
+    @GetMapping("remind_paying")
+    public JsonResult remindPaying(@RequestParam("userId") String userId) {
+        mqService.sendMessage(buildRemindPaying(userId));
+        redisTemplate.opsForValue().set("remind_paying-" + userId + "-" + getUserId(), System.currentTimeMillis() + "", 30L, TimeUnit.DAYS);
+        return new JsonResult(false);
+    }
+
+    private PushMessage buildRemindPaying(String userId) {
+        PushMessage pushMessage = new PushMessage();
+        pushMessage.setSourceUserId("corgihelper");
+        pushMessage.setTargetUserId(userId);
+        pushMessage.setMessage("有人想看到你发布付费动态");
+        HashMap<String, Object> extra = new HashMap<>();
+        extra.put("type", "907");
+        JSONArray content = new JSONArray();
+        UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+        content.add(new JSONObject().fluentPut("text", "@" + detail.getNickname()).fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
+        content.add(new JSONObject().fluentPut("text", " 想看到你发布付费动态"));
+        extra.put("bottomText", "去发布>");
+        extra.put("bottomUrlType", "11");
+        pushMessage.setExtra(extra);
+        return pushMessage;
     }
 
     private UserShare groupByShare(List<UserProfile> userProfiles, String userId) {
