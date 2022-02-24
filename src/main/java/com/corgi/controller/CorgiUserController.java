@@ -1125,6 +1125,7 @@ public class CorgiUserController extends BaseController {
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         content.add(new JSONObject().fluentPut("text", "@" + detail.getNickname()).fluentPut("url", detail.getUserId()).fluentPut("urlType", "4"));
         content.add(new JSONObject().fluentPut("text", " 想看到你发布付费动态"));
+        extra.put("content", content);
         extra.put("bottomText", "去发布>");
         extra.put("bottomUrlType", "11");
         pushMessage.setExtra(extra);
