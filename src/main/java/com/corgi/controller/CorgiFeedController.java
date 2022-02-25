@@ -301,9 +301,9 @@ public class CorgiFeedController extends BaseController {
                     String suggestion = data.getString("Suggestion");
                     log.info("check success...{}:{} ", videoId, suggestion);
                     if (!suggestion.equals("pass")) {
-                        activity.setCheckStatus(AliyunGreenService.FAIL);
+                        activity.setCheckStatus(AliyunGreenService.CHECK);
                         corgiActivityService.updateCorgiActivityStatus(activity);
-                        corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.FAIL);
+                        corgiUserActivityService.changeActivityCreator(activity.getId(), AliyunGreenService.CHECK);
                     }
                 }
             }
