@@ -170,7 +170,7 @@ public class CorgiHotVlogController extends BaseController {
                 extra.put("picUrl", activity.getCoverUrl());
             }
         }
-        if (!CorgiActivity.CAT_PAYING.equals(category)) {
+        if (CorgiActivity.CAT_PAYING.equals(category)) {
             List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
             if (CollectionUtils.isNotEmpty(pics)) {
                 extra.put("picUrl", pics.get(0).getPicUrl());
