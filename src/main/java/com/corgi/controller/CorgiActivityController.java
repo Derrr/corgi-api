@@ -20,6 +20,7 @@ import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1178,7 +1179,15 @@ public class CorgiActivityController extends BaseController {
         } else {
             CorgiActivity query = new CorgiActivity();
             query.setTopics(Arrays.asList(topic));
-            activityIds = corgiUserActivityService.getHeatActivity(query, activityQuery.getPage(), activityQuery.getPageSize());
+            int page = activityQuery.getPage();
+            int size = activityQuery.getPageSize();
+            if (page * size > 21) {
+                size = 21 - (page - 1) * size;
+            }
+            if (size <= 0 || size > 21) {
+                return new JsonResult(Lists.newArrayList());
+            }
+            activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
         }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivity> result = new ArrayList<>();
