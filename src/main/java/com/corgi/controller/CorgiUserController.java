@@ -995,6 +995,14 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiVisitService.getVisited(userId, size));
     }
 
+    @GetMapping("get_visited_by_count")
+    public JsonResult getVisitedByCount(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+        if (StringUtils.isEmpty(userId)) {
+            userId = getUserId();
+        }
+        return new JsonResult(corgiVisitService.getVisitedByCount(userId, size));
+    }
+
     @GetMapping("count_visit")
     public JsonResult countVisit(@RequestParam(required = false, name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
