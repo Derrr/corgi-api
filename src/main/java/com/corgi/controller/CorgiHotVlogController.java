@@ -174,9 +174,9 @@ public class CorgiHotVlogController extends BaseController {
             if (CollectionUtils.isNotEmpty(pics)) {
                 extra.put("picUrl", pics.get(0).getPicUrl());
             }
-            extra.put("desc", "你关注的好友 " + detail.getNickname() + " 发布的付费动态正在被围观快去看看吧！");
-        } else {
             extra.put("desc", "你关注的好友 " + detail.getNickname() + " 发布的动态正在被围观快去看看吧！");
+        } else {
+            extra.put("desc", "你关注的好友 " + detail.getNickname() + " 发布的付费动态正在被围观快去看看吧！");
             extra.put("showPayReadMask", true);
         }
         pushMessage.setExtra(extra);
