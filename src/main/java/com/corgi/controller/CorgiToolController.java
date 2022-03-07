@@ -467,6 +467,7 @@ public class CorgiToolController extends BaseController {
     @GetMapping("downgrade_activity")
     public JsonResult downgradeActivity(@RequestParam("activityId") String activityId) {
         corgiActivityService.updateByColumn(activityId, "checkStatus", AliyunGreenService.NOT_GOOD);
+        corgiUserActivityService.updateActivityStatus(activityId, AliyunGreenService.NOT_GOOD);
         return new JsonResult();
     }
 
