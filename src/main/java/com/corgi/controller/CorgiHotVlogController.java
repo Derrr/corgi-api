@@ -103,7 +103,6 @@ public class CorgiHotVlogController extends BaseController {
         corgiVlogService.addHotVlog(corgiVlogHot);
         CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
         mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
-        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
         if (redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
             mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
         }
