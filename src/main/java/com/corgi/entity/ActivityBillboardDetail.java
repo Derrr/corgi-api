@@ -17,6 +17,7 @@ public class ActivityBillboardDetail extends CorgiActivity {
     private Integer onBoardCount;
     private Integer order;
     private UserDetail userDetail;
+    private String ctime;
     public static ActivityBillboardDetail getResult(CorgiActivity corgiActivity) {
         ActivityBillboardDetail result = new ActivityBillboardDetail();
         BeanUtils.copyProperties(corgiActivity, result);

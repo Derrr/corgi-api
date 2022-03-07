@@ -133,6 +133,7 @@ public class BillboardController extends BaseController {
                 detail.setDate(billboard.getDate());
                 detail.setOnBoardCount(billboard.getCount());
                 detail.setOrder(billboard.getOrder());
+                detail.setCtime(billboard.getCtime());
                 detail.setUserDetail(corgiUserService.getUserDetailBasic(detail.getUserId()));
                 detailList.add(detail);
             }
