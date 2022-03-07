@@ -102,11 +102,12 @@ public class CorgiHotVlogController extends BaseController {
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
         corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
-//        CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
-//        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
-//        if (redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
-//            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
-//        }
+        CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
+        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
+        mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
+        if (redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
+            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
+        }
         return new JsonResult();
     }
 
