@@ -479,7 +479,6 @@ public class CorgiToolController extends BaseController {
                 CorgiActivity corgiActivity = new CorgiActivity();
                 corgiActivity.setCheckStatus(AliyunGreenService.CHECK);
                 corgiActivity.setStatus(CorgiActivity.NOT_DELETED);
-                corgiActivity.setCategory(CorgiActivity.CAT_IMAGE);
                 count = corgiActivityService.countCorgiActivity(corgiActivity);
                 break;
             case USER_TASK:
