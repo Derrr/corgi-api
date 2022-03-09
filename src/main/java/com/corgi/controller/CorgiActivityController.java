@@ -971,20 +971,6 @@ public class CorgiActivityController extends BaseController {
                 detail.setCheckStatus("block");
             }
         }
-//        if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
-//            List<CorgiActivity> similarActivities = corgiActivityService.getSimilarActivity(activity);
-//            if (!CollectionUtils.isEmpty(similarActivities)) {
-//                Iterator<CorgiActivity> it = similarActivities.iterator();
-//                while (it.hasNext()) {
-//                    CorgiActivity corgiActivity = it.next();
-//                    if (activityId.equals(corgiActivity.getId())) {
-//                        it.remove();
-//                    }
-//                }
-//            }
-//            List<CorgiActivityDetail> similarActivity = convertDetail(similarActivities, userId);
-//            detail.setSimilarActivity(similarActivity);
-//        }
         detail.setCanCallCity("69548".equals(getUserId()) || (activity.getUserId().equals(getUserId()) && !StringUtils.isEmpty(getCallCityKey(getUserId()))));
         detail.setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activityId)));
         return new JsonResult(detail);
@@ -1676,8 +1662,9 @@ public class CorgiActivityController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                Integer swiftCommentCount = corgiCommentService.countActivityCommentByStatus(activity.getId(), ActivityComment.SWIFT);
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
-                List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
+                List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 List<UserProfile> signUpUsers = new ArrayList<>();
                 Integer shareCount = corgiShareService.countShare(activity.getId());
@@ -1693,6 +1680,7 @@ public class CorgiActivityController extends BaseController {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
                 detail.setShareCount(shareCount);
+                detail.setHasSwiftComment(swiftCommentCount);
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
                     detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(), getUserId()));
                 }

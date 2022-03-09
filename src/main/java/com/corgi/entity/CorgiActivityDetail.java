@@ -22,6 +22,7 @@ public class CorgiActivityDetail extends CorgiActivity {
     private Long commentCount;
     private Long likeCount = 0L;
     private Integer hasLike = 0;
+    private Integer hasSwiftComment = 0;
     private Integer shareCount = 0;
     private ActivityComment lastComment;
     private Integer signUpCount;
