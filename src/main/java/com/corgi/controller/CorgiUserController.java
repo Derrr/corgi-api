@@ -980,35 +980,43 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_visitors")
-    public JsonResult getVisitor(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+    public JsonResult getVisitor(@RequestParam(required = false, name = "userId") String userId
+            , @RequestParam(name = "page", required = false, defaultValue = "1") Integer page
+            , @RequestParam("size") Integer size) {
         if (StringUtils.isEmpty(userId)) {
             userId = getUserId();
         }
-        return new JsonResult(corgiVisitService.getVisitor(userId, size));
+        return new JsonResult(corgiVisitService.getVisitor(userId, page, size));
     }
 
     @GetMapping("get_visited")
-    public JsonResult getVisited(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+    public JsonResult getVisited(@RequestParam(required = false, name = "userId") String userId
+            , @RequestParam(name = "page", required = false, defaultValue = "1") Integer page
+            , @RequestParam("size") Integer size) {
         if (StringUtils.isEmpty(userId)) {
             userId = getUserId();
         }
-        return new JsonResult(corgiVisitService.getVisited(userId, size));
+        return new JsonResult(corgiVisitService.getVisited(userId, page, size));
     }
 
     @GetMapping("get_visited_by_count")
-    public JsonResult getVisitedByCount(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+    public JsonResult getVisitedByCount(@RequestParam(required = false, name = "userId") String userId
+            , @RequestParam(name = "page", required = false, defaultValue = "1") Integer page
+            , @RequestParam("size") Integer size) {
         if (StringUtils.isEmpty(userId)) {
             userId = getUserId();
         }
-        return new JsonResult(corgiVisitService.getVisitedByCount(userId, size));
+        return new JsonResult(corgiVisitService.getVisitedByCount(userId, page, size));
     }
 
     @GetMapping("get_visitor_by_count")
-    public JsonResult getVisitorByCount(@RequestParam(required = false, name = "userId") String userId, @RequestParam("size") Integer size) {
+    public JsonResult getVisitorByCount(@RequestParam(required = false, name = "userId") String userId
+            , @RequestParam(name = "page", required = false, defaultValue = "1") Integer page
+            , @RequestParam("size") Integer size) {
         if (StringUtils.isEmpty(userId)) {
             userId = getUserId();
         }
-        return new JsonResult(corgiVisitService.getVisitorByCount(userId, size));
+        return new JsonResult(corgiVisitService.getVisitorByCount(userId, page, size));
     }
 
     @GetMapping("count_visit")
