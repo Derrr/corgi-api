@@ -448,7 +448,9 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activityComment.setCommentUserId(getUserId());
         }
-        activityComment.setStatus(ActivityComment.NORMAL);
+        if (StringUtils.isEmpty(activityComment.getStatus())) {
+            activityComment.setStatus(ActivityComment.NORMAL);
+        }
         if (CorgiActivity.CAT_PAYING.equals(activityList.get(0).getCategory())) {
             if (!CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                     .userId(getUserId())
