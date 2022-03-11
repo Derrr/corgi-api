@@ -451,17 +451,17 @@ public class CorgiActivityController extends BaseController {
         if (StringUtils.isEmpty(activityComment.getStatus())) {
             activityComment.setStatus(ActivityComment.NORMAL);
         }
-        if (CorgiActivity.CAT_PAYING.equals(activityList.get(0).getCategory())) {
-            if (!CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
-                    .userId(getUserId())
-                    .traderId(activityList.get(0).getUserId())
-                    .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
-                    .goodsId(activityComment.getActivityId())
-                    .start(0)
-                    .size(1)
-                    .build()))) {
-                activityComment.setStatus(ActivityComment.PAY);
-            }
+        if (ActivityComment.NORMAL.equals(activityComment.getStatus())
+                && CorgiActivity.CAT_PAYING.equals(activityList.get(0).getCategory())
+                && !CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                .userId(getUserId())
+                .traderId(activityList.get(0).getUserId())
+                .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                .goodsId(activityComment.getActivityId())
+                .start(0)
+                .size(1)
+                .build()))) {
+            activityComment.setStatus(ActivityComment.PAY);
         }
         activityComment = corgiCommentService.addActivityComment(activityComment);
         HashMap extra = new HashMap();
