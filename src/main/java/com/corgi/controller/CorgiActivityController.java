@@ -1670,7 +1670,7 @@ public class CorgiActivityController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
-                Integer swiftCommentCount = corgiCommentService.countActivityCommentByStatus(activity.getId(), ActivityComment.SWIFT);
+                Integer swiftCommentCount = corgiCommentService.countActivityCommentByStatus(activity.getId(), getUserId(), ActivityComment.SWIFT);
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
