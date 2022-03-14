@@ -31,9 +31,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-@Component
 @Slf4j
 @ServerEndpoint("/corgiSocket")
+@Component
 public class CorgiSocket {
     @Reference
     private CorgiFeedService corgiFeedService;
