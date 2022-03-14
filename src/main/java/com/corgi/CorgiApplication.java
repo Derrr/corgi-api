@@ -11,6 +11,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 import javax.servlet.Filter;
 
@@ -33,6 +34,14 @@ public class CorgiApplication {
     @Order(2)
     public Filter getRequestFilter() {
         return new RequestFilter();
+    }
+
+    /**
+     * 注入一个ServerEndpointExporter,该Bean会自动注册使用@ServerEndpoint注解申明的websocket endpoint
+     */
+    @Bean
+    public ServerEndpointExporter serverEndpointExporter() {
+        return new ServerEndpointExporter();
     }
 
     @Bean
