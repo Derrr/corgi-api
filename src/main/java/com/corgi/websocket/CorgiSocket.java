@@ -30,7 +30,6 @@ import java.util.HashMap;
 
 @Slf4j
 @ServerEndpoint("/corgiSocket")
-@Service
 @Component
 public class CorgiSocket {
     @Reference
