@@ -47,7 +47,7 @@ public class CorgiSocket {
     @OnOpen
     public void onOpen(Session session) {
         session.setMaxIdleTimeout(600000);
-        log.info("有新连接加入：{}，当前在线人数为：{}", session.getId());
+        log.info("有新连接加入：{}，当前在线人数为：{} {}", session.getId(),corgiUserService,corgiFeedService);
     }
 
     /**
