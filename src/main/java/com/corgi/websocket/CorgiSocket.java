@@ -46,6 +46,7 @@ public class CorgiSocket {
      */
     @OnOpen
     public void onOpen(Session session) {
+        session.setMaxIdleTimeout(600000);
         log.info("有新连接加入：{}，当前在线人数为：{}", session.getId());
     }
 
@@ -174,6 +175,7 @@ public class CorgiSocket {
 
         userPosition.setUserId(messageObj.getString("userId"));
         userPosition.setVersion(messageObj.getString("version"));
+        userPosition.setUserId(messageObj.getString("userId"));
         return userPosition;
     }
 
