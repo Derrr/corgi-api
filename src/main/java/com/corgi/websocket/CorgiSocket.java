@@ -58,7 +58,7 @@ public class CorgiSocket {
      */
     @OnClose
     public void onClose(Session session) {
-        log.info("有一连接关闭：{}，当前在线人数为：{}");
+        log.info("有一连接关闭：{}", session.getId());
     }
 
     /**
