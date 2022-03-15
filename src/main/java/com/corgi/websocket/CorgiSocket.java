@@ -116,6 +116,7 @@ public class CorgiSocket {
                     this.sendMessage(JSONObject.toJSONString(result), session);
                     break;
                 default:
+                    this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, "type not found");
                     break;
             }
         } catch (Exception e) {
