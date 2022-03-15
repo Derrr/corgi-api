@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.corgi.common.config.CorgiSocketSpringConfigurator;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.JWTUtils;
@@ -30,7 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 @Slf4j
-@ServerEndpoint(value = "/corgiSocket",configurator = SpringConfigurator.class)
+@ServerEndpoint(value = "/corgiSocket",configurator = CorgiSocketSpringConfigurator.class)
 @Component
 public class CorgiSocket {
     @Reference

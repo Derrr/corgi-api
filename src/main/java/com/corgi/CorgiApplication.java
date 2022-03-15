@@ -2,6 +2,7 @@ package com.corgi;
 
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.corgi.common.CorgiQueueName;
+import com.corgi.common.config.CorgiSocketSpringConfigurator;
 import com.corgi.common.filter.CorgiCorsFilter;
 import com.corgi.common.filter.RequestFilter;
 import com.corgi.common.wxpay.sdk.WXPayConfig;
@@ -42,6 +43,11 @@ public class CorgiApplication {
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
+    }
+
+    @Bean
+    public CorgiSocketSpringConfigurator corgiSocketSpringConfigurator() {
+        return new CorgiSocketSpringConfigurator();
     }
 
     @Bean
