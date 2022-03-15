@@ -17,7 +17,7 @@ import com.corgi.user.entity.UserLogin;
 import com.corgi.user.entity.UserPosition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.websocket.*;
@@ -29,7 +29,7 @@ import java.util.HashMap;
 
 @Slf4j
 @ServerEndpoint("/corgiSocket")
-@Component
+@Service
 public class CorgiSocket {
     @Reference
     private CorgiFeedService corgiFeedService;
