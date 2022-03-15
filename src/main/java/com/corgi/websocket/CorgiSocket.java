@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 @Slf4j
-@ServerEndpoint(value = "/corgiSocket",configurator = CorgiSocketSpringConfigurator.class)
+@ServerEndpoint(value = "/corgiSocket", configurator = CorgiSocketSpringConfigurator.class)
 @Component
 public class CorgiSocket {
     @Reference
@@ -50,7 +50,7 @@ public class CorgiSocket {
     @OnOpen
     public void onOpen(Session session) {
         session.setMaxIdleTimeout(600000);
-        log.info("有新连接加入：{}，当前在线人数为：{} {}", session.getId(),corgiUserService,corgiFeedService);
+        log.info("有新连接加入：{}", session.getId());
     }
 
     /**
