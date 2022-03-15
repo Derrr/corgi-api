@@ -1,5 +1,6 @@
 package com.corgi.websocket;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.constant.Constants;
@@ -14,7 +15,6 @@ import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.entity.CorgiFeed;
 import com.corgi.user.entity.UserLogin;
 import com.corgi.user.entity.UserPosition;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
