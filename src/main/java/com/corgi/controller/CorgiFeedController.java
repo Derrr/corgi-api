@@ -107,16 +107,12 @@ public class CorgiFeedController extends BaseController {
             log.info(feedIds + "");
             List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
             List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
-            String version = getVersion();
-//            if (!StringUtils.isEmpty(version)
-//                    && version.replaceAll("android", "").compareTo("2.1.0") < 0) {
             for (String feed : feedIds) {
                 CorgiFeed view = new CorgiFeed();
                 view.setUserId(userId);
                 view.setFeed(feed);
                 corgiFeedService.viewFeed(view);
             }
-//            }
             if (!isNew) {
                 mqService.refreshFeed(userId);
             }

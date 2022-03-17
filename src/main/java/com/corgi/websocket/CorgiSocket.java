@@ -14,6 +14,8 @@ import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiFeedService;
 import com.corgi.user.api.CorgiUserService;
+import com.corgi.user.api.CorgiViewService;
+import com.corgi.user.entity.ActivityView;
 import com.corgi.user.entity.CorgiFeed;
 import com.corgi.user.entity.UserLogin;
 import com.corgi.user.entity.UserPosition;
@@ -38,6 +40,8 @@ public class CorgiSocket {
     private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiViewService corgiViewService;
 
     @Autowired
     private CorgiUtilService corgiUtilService;
@@ -100,16 +104,13 @@ public class CorgiSocket {
                         return;
                     }
                     String activityId = messageObj.getString("activityId");
-                    if (corgiUtilService.lock("view_" + activityId)) {
-                        try {
-                            CorgiFeed feed = new CorgiFeed();
-                            feed.setUserId(user.getUserId());
-                            feed.setFeed(activityId);
-                            corgiFeedService.viewFeed(feed);
-                        } finally {
-                            corgiUtilService.unlock("view_" + activityId);
-                        }
+                    if (StringUtils.isEmpty(activityId)) {
+                        break;
                     }
+                    ActivityView view = new ActivityView();
+                    view.setUserId(user.getUserId());
+                    view.setActivityId(activityId);
+                    corgiViewService.addView(view);
                     break;
                 case "position":
                     HashMap result = this.updateUserPosition(this.buildUserPosition(messageObj), jwt);
@@ -119,9 +120,11 @@ public class CorgiSocket {
                     this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, "type not found");
                     break;
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, e.getMessage());
         }
+
     }
 
     @OnError
