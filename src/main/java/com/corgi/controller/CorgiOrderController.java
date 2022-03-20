@@ -269,9 +269,9 @@ public class CorgiOrderController extends BaseController {
     }
 
     @GetMapping("count_order")
-    public JsonResult countOrder(@RequestParam("type") String type,
-                                 @RequestParam("status") String status,
-                                 @RequestParam("userId") String userId) {
+    public JsonResult countOrder(@RequestParam(name = "type",required = false) String type,
+                                 @RequestParam(name = "status", required = false) String status,
+                                 @RequestParam(name = "userId", required = false) String userId) {
         if (hasUserId()) {
             return new JsonResult();
         }
