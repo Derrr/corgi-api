@@ -3,6 +3,7 @@ package com.corgi.service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.CheckPic;
 import com.corgi.entity.CorgiActivityDetail;
@@ -102,16 +103,20 @@ public class CorgiUtilService {
     }
 
     public boolean isNewUser(String userId) {
-//        UserLogin userLogin = corgiUserService.getUserLogin(userId);
-//        if ("17000000000".equals(userLogin.getTelNo())) {
-//            return true;
-//        }
-//        if (userLogin != null && userLogin.getCtime() != null) {
-//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.add(Calendar.MINUTE, -10);
-//            return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
-//        }
+        String version = RequestUtil.getVersion();
+        String channel = RequestUtil.getChannel();
+        if ("2.1.4".equals(version) && "meizu".equals(channel)) {
+            UserLogin userLogin = corgiUserService.getUserLogin(userId);
+            if ("17000000000".equals(userLogin.getTelNo())) {
+                return true;
+            }
+            if (userLogin != null && userLogin.getCtime() != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.HOUR, -24);
+                return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
+            }
+        }
         return false;
     }
 

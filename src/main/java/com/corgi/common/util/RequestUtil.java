@@ -38,6 +38,9 @@ public class RequestUtil {
         return getRequest().getHeader("version");
     }
 
+    public static String getChannel() {
+        return getRequest().getHeader("channel");
+    }
 
     public static String getJwt() {
         return getRequest().getHeader(JWTUtils.JWT_HEADER);
