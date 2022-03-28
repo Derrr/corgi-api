@@ -125,6 +125,10 @@ public class CorgiLoginController extends BaseController {
     }
 
     private JsonResult login(UserLogin userLogin) {
+        List<String> blockTel = corgiBlacklistService.getBeBlacked("-1");
+        if (blockTel.contains(userLogin.getTelNo())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
+        }
         if (StringUtils.isEmpty(userLogin.getUserId())) {
             userLogin = corgiUserService.login(userLogin);
             if ("-1".equals(userLogin.getStatus())) {
