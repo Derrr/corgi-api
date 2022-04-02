@@ -49,6 +49,8 @@ public class ThirdPartyController extends BaseController {
     @Autowired
     private CorgiUtilService corgiUtilService;
 
+    public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
+
     @GetMapping("get_top_9")
     public JsonResult getTop9(@RequestParam("telNo") String telNo) {
         UserLogin login = new UserLogin();
@@ -85,6 +87,15 @@ public class ThirdPartyController extends BaseController {
         userDetail.setCtime("2021-01-01");
         activity.setLikeCount(corgiLikeService.countLikeByUser(userDetail));
         return new JsonResult(activity);
+    }
+
+    @GetMapping("get_character_pic")
+    public JsonResult getPic(@RequestParam(required = false, name = "answer") String character) {
+        if (StringUtils.isEmpty(character) || character.length() < 4) {
+            return new JsonResult(String.format(URL, character + ""));
+        }
+        String type = character.substring(0, 4);
+        return new JsonResult(String.format(URL, type));
     }
 
     @GetMapping("count")

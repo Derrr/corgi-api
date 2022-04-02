@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("tool")
 public class CorgiToolController extends BaseController {
-    public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
 
     @Reference
     private CorgiUserService corgiUserService;
@@ -346,14 +345,6 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(corgiAreas);
     }
 
-    @GetMapping("get_character_pic")
-    public JsonResult getPic(@RequestParam(required = false, name = "answer") String character) {
-        if (StringUtils.isEmpty(character) || character.length() < 4) {
-            return new JsonResult(String.format(URL, character + ""));
-        }
-        String type = character.substring(0, 4);
-        return new JsonResult(String.format(URL, type));
-    }
 
     @PostMapping("push_message")
     public JsonResult pushMessage(@RequestBody PushMessage pushMessage) {
