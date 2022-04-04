@@ -183,6 +183,7 @@ public class CorgiSocket {
         userPosition.setUserId(messageObj.getString("userId"));
         userPosition.setVersion(messageObj.getString("version"));
         userPosition.setUserId(messageObj.getString("userId"));
+        userPosition.setChannel(messageObj.getString("channel"));
         return userPosition;
     }
 
