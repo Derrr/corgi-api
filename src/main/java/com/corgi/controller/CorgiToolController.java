@@ -514,6 +514,17 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(redisTemplate.opsForHash().entries(VERSION_KEY + type));
     }
 
+    @GetMapping("into_darkroom")
+    public JsonResult intoDarkroom(@RequestParam("userId") String userId,
+                                   @RequestParam("hours") Long hours) {
+        if (hours > 0) {
+            redisTemplate.opsForValue().set("darkroom_" + userId, System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
+        } else {
+            redisTemplate.delete("darkroom_" + userId);
+        }
+        return new JsonResult();
+    }
+
     @PostMapping("update_version")
     public JsonResult updateVersion(@RequestBody HashMap version) {
         String type = "";

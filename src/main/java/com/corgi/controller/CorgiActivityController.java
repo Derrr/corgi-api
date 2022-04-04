@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -91,6 +90,9 @@ public class CorgiActivityController extends BaseController {
     public JsonResult addActivity(@RequestBody CorgiActivity activity) {
         if (hasUserId()) {
             activity.setUserId(getUserId());
+        }
+        if(redisTemplate.hasKey("darkroom_"+getUserId())){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
         }
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
         log.info("user {} adding activity", activity.getUserId());
@@ -422,6 +424,9 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("add_comment")
     public JsonResult addComment(@RequestBody ActivityComment activityComment) {
         String key = "comment_abandon_" + getUserId();
+        if(redisTemplate.hasKey("darkroom_"+getUserId())){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止评论");
+        }
         if (ActivityComment.SWIFT.equals(activityComment.getStatus())
                 && !redisTemplate.opsForValue().setIfAbsent("quick_comment-" + activityComment.getActivityId() + "-" + getUserId(), "1", 7L, TimeUnit.DAYS)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不要重复评论哦");

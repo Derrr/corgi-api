@@ -1,7 +1,6 @@
 package com.corgi.websocket;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -22,6 +21,7 @@ import com.corgi.user.entity.UserLogin;
 import com.corgi.user.entity.UserPosition;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.server.standard.SpringConfigurator;
@@ -48,6 +48,8 @@ public class CorgiSocket {
     private CorgiUtilService corgiUtilService;
     @Autowired
     private MQService mqService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 连接建立成功调用的方法
@@ -273,6 +275,10 @@ public class CorgiSocket {
         result.put("freq", 1);
         result.put("remainDate", detail.getRemainDate());
         result.put("expireDate", detail.getExpireDate());
+        result.put("darkroom", false);
+        if(redisTemplate.hasKey("darkroom_"+ userPosition.getUserId())){
+            result.put("darkroom", true);
+        }
         return jsonResult;
     }
 }
