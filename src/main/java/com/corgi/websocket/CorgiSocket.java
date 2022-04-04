@@ -2,6 +2,7 @@ package com.corgi.websocket;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.config.CorgiSocketSpringConfigurator;
@@ -72,57 +73,62 @@ public class CorgiSocket {
      */
     @OnMessage
     public void onMessage(String message, Session session) {
+
+        log.info("websocket message:{} ", message);
+        JSONObject messageObj = null;
         try {
-            log.info("websocket message:{} ", message);
-            JSONObject messageObj = JSONObject.parseObject(message);
-            String jwt = messageObj.getString("jwt");
-            String type = messageObj.getString("type");
-            JwtUser user;
-            switch (type) {
-                case "list":
-                    user = this.verifyToken(jwt, session);
-                    if (user == null) {
-                        return;
-                    }
-                    String[] activityIds = messageObj.getString("activityIds").split(",");
-                    for (int i = 0; i < activityIds.length; i++) {
-                        if (corgiUtilService.lock("view_" + activityIds[i])) {
-                            try {
-                                CorgiFeed feed = new CorgiFeed();
-                                feed.setUserId(user.getUserId());
-                                feed.setFeed(activityIds[i]);
-                                corgiFeedService.viewFeed(feed);
-                            } finally {
-                                corgiUtilService.unlock("view_" + activityIds[i]);
-                            }
+            messageObj = JSONObject.parseObject(message);
+        } catch (JSONException e) {
+            this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, e.getMessage());
+            return;
+        }
+        if (messageObj == null) {
+            this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, "message is null");
+        }
+        String jwt = messageObj.getString("jwt");
+        String type = messageObj.getString("type");
+        JwtUser user;
+        switch (type) {
+            case "list":
+                user = this.verifyToken(jwt, session);
+                if (user == null) {
+                    return;
+                }
+                String[] activityIds = messageObj.getString("activityIds").split(",");
+                for (int i = 0; i < activityIds.length; i++) {
+                    if (corgiUtilService.lock("view_" + activityIds[i])) {
+                        try {
+                            CorgiFeed feed = new CorgiFeed();
+                            feed.setUserId(user.getUserId());
+                            feed.setFeed(activityIds[i]);
+                            corgiFeedService.viewFeed(feed);
+                        } finally {
+                            corgiUtilService.unlock("view_" + activityIds[i]);
                         }
                     }
+                }
+                break;
+            case "detail":
+                user = this.verifyToken(jwt, session);
+                if (user == null) {
+                    return;
+                }
+                String activityId = messageObj.getString("activityId");
+                if (StringUtils.isEmpty(activityId)) {
                     break;
-                case "detail":
-                    user = this.verifyToken(jwt, session);
-                    if (user == null) {
-                        return;
-                    }
-                    String activityId = messageObj.getString("activityId");
-                    if (StringUtils.isEmpty(activityId)) {
-                        break;
-                    }
-                    ActivityView view = new ActivityView();
-                    view.setUserId(user.getUserId());
-                    view.setActivityId(activityId);
-                    corgiViewService.addView(view);
-                    break;
-                case "position":
-                    HashMap result = this.updateUserPosition(this.buildUserPosition(messageObj), jwt);
-                    this.sendMessage(JSONObject.toJSONString(result), session);
-                    break;
-                default:
-                    this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, "type not found");
-                    break;
-            }
-        } catch (
-                Exception e) {
-            this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, e.getMessage());
+                }
+                ActivityView view = new ActivityView();
+                view.setUserId(user.getUserId());
+                view.setActivityId(activityId);
+                corgiViewService.addView(view);
+                break;
+            case "position":
+                HashMap result = this.updateUserPosition(this.buildUserPosition(messageObj), jwt);
+                this.sendMessage(JSONObject.toJSONString(result), session);
+                break;
+            default:
+                this.closeSession(session, CloseReason.CloseCodes.UNEXPECTED_CONDITION, "type not found");
+                break;
         }
 
     }
