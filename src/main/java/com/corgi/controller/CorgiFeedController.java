@@ -140,35 +140,39 @@ public class CorgiFeedController extends BaseController {
         if (lastId == null) {
             lastId = 0L;
         }
-        for (int i = 0; i < 5; i++) {
-            Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);
-            Future<List<ActivityLike>> likeFuture = asyncTaskService.getUserLike(lastId, userId, size);
-            Future<List<ActivityComment>> commentFuture = asyncTaskService.getUserComment(lastId, userId, size);
-            List<UserActivity> userActivities = new ArrayList<>();
-            try {
-                userActivities = this.mergeCreate(userActivities, activityFuture.get(), size);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-            try {
-                userActivities = this.mergeComment(userActivities, commentFuture.get(), size);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-            try {
-                userActivities = this.mergeLike(userActivities, likeFuture.get(), size);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-            userActivities = this.populateUserActivity(userActivities);
-            if (!CollectionUtils.isEmpty(userActivities) && userActivities.size() == 1) {
-                UserActivity tmp = userActivities.get(0);
-                if (tmp.getDetail() == null && tmp.getType() == null) {
-                    lastId = tmp.getOptTime();
-                    continue;
+
+
+        if (!corgiUtilService.isNewUser(getUserId())) {
+            for (int i = 0; i < 5; i++) {
+                Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);
+                Future<List<ActivityLike>> likeFuture = asyncTaskService.getUserLike(lastId, userId, size);
+                Future<List<ActivityComment>> commentFuture = asyncTaskService.getUserComment(lastId, userId, size);
+                List<UserActivity> userActivities = new ArrayList<>();
+                try {
+                    userActivities = this.mergeCreate(userActivities, activityFuture.get(), size);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                 }
+                try {
+                    userActivities = this.mergeComment(userActivities, commentFuture.get(), size);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+                try {
+                    userActivities = this.mergeLike(userActivities, likeFuture.get(), size);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+                userActivities = this.populateUserActivity(userActivities);
+                if (!CollectionUtils.isEmpty(userActivities) && userActivities.size() == 1) {
+                    UserActivity tmp = userActivities.get(0);
+                    if (tmp.getDetail() == null && tmp.getType() == null) {
+                        lastId = tmp.getOptTime();
+                        continue;
+                    }
+                }
+                return new JsonResult(userActivities);
             }
-            return new JsonResult(userActivities);
         }
         return new JsonResult(new ArrayList<>());
     }

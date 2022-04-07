@@ -1282,7 +1282,12 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(ActivityQuery query) {
         query.setLoginUserId(getUserId());
-        return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), true));
+        if (corgiUtilService.isNewUser(getUserId())) {
+            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
+            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
+        }else{
+            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), true));
+        }
     }
 
     @GetMapping("get_user_video")
