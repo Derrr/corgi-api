@@ -405,14 +405,14 @@ public class AliyunGreenService {
                         }
                         addCheckPic(pic, sourceId, type);
                     } else {
-                        if (retry > 0) {
-                            try {
-                                Thread.sleep(1000L);
-                            } catch (InterruptedException e) {
-                                log.error(e.getMessage(), e);
-                            }
-                            return checkPic(urls, sourceId, type, retry--);
-                        }
+//                        if (retry > 0) {
+//                            try {
+//                                Thread.sleep(1000L);
+//                            } catch (InterruptedException e) {
+//                                log.error(e.getMessage(), e);
+//                            }
+//                            return checkPic(urls, sourceId, type, retry--);
+//                        }
                         String result = "task process fail. task response:" + JSON.toJSONString(taskResult);
                         pic.setStatus(CorgiPic.NEED_CHECK);
                         pic.setResult(result);
