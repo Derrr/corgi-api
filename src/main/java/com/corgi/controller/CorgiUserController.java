@@ -599,6 +599,7 @@ public class CorgiUserController extends BaseController {
             throw new PermissionException(Constants.SERVER_ERROR_CODE, e.getMessage());
         }
         UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
+        userPosition.setChannel(RequestUtil.getChannel());
         if (oldPosition != null) {
             result.put("city", oldPosition.getCity());
             corgiUserService.updateUserPosition(userPosition);
