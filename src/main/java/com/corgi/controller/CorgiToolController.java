@@ -579,9 +579,7 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("clear_influencer")
     public JsonResult clearInfluencer(@RequestParam("userId") String userId) {
-        log.info("userId:{}",userId);
         UserDetail userProfile = corgiUserService.getUserDetailBasic(userId);
-        log.info("userProfile:{}",userProfile);
         if (userProfile != null) {
             UserDetail userDetail = new UserDetail();
             userDetail.setAvatarStatus("");
