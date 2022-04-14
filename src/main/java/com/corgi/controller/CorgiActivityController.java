@@ -22,6 +22,7 @@ import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,6 +30,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -91,39 +93,28 @@ public class CorgiActivityController extends BaseController {
         if (hasUserId()) {
             activity.setUserId(getUserId());
         }
-        if(redisTemplate.hasKey("darkroom_"+getUserId())){
+        if (redisTemplate.hasKey("darkroom_" + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
+        }
+        String hashKey = MD5Encoder.encode(activity.getContent().getBytes(StandardCharsets.UTF_8));
+        if(!redisTemplate.opsForValue().setIfAbsent("addActivity-" + hashKey + "-" + getUserId(), System.currentTimeMillis()+"", 10L, TimeUnit.MINUTES)){
+            return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
         }
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
         log.info("user {} adding activity", activity.getUserId());
         activity.setCheckStatus(AliyunGreenService.PASS);
         activity = aliyunGreenService.checkActivity(activity);
-        if (checkDuplicateActivity(activity)) {
-            return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
-        }
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
-        if (CollectionUtils.isEmpty(recommendUser)) {
-            recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
-        }
-        long count = corgiActivityService.countUserActivity(activity.getUserId());
+        //List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
+//        if (CollectionUtils.isEmpty(recommendUser)) {
+//            recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
+//        }
+        //long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
-//        HashMap extra = new HashMap();
-//        extra.put("activityId", activity.getId());
-//        extra.put("type", PushMessage.ACTIVITY_MESSAGE_TYPE);
-//        mqService.sendMessage(PushMessage.builder()
-//                .type(PushMessage.ACTIVITY)
-//                .sourceUserId(activity.getUserId())
-//                .message(user.getNickname().concat("发起了一个活动，快去看看吧"))
-//                .extra(extra)
-//                .build());
         return new JsonResult(AddActivityResult.getResult(activity)
-                .setActivityPics(activityPics)
-                .setRecommend(recommendUser)
-                .setCount(count)
-                .setCanCallCity(getCallCityKey(activity.getUserId()) != null));
+                .setActivityPics(activityPics));
     }
 
     @PostMapping("attend")
@@ -424,7 +415,7 @@ public class CorgiActivityController extends BaseController {
     @PostMapping("add_comment")
     public JsonResult addComment(@RequestBody ActivityComment activityComment) {
         String key = "comment_abandon_" + getUserId();
-        if(redisTemplate.hasKey("darkroom_"+getUserId())){
+        if (redisTemplate.hasKey("darkroom_" + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止评论");
         }
         if (ActivityComment.SWIFT.equals(activityComment.getStatus())
@@ -1290,7 +1281,7 @@ public class CorgiActivityController extends BaseController {
         if (corgiUtilService.isNewUser(getUserId())) {
             List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
             return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
-        }else{
+        } else {
             return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), true));
         }
     }
