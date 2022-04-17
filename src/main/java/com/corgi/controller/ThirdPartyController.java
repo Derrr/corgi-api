@@ -5,6 +5,7 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.Constants;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.AliyunGreenService;
@@ -107,6 +108,15 @@ public class ThirdPartyController extends BaseController {
         } finally {
             corgiUtilService.unlock(lockKey);
         }
+        return new JsonResult();
+    }
+
+    @GetMapping("/check_nickname")
+    public JsonResult checkNickname(@RequestParam("nickname") String nickname) {
+        if (com.alibaba.dubbo.common.utils.StringUtils.isEmpty(nickname)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
+        }
+        log.info(aliyunGreenService.checkText(nickname) + "");
         return new JsonResult();
     }
 
