@@ -555,9 +555,10 @@ public class CorgiToolController extends BaseController {
 
 
     @GetMapping("update_report_status")
-    public JsonResult updateReportStatus(@RequestParam("status") String status, @RequestParam("reportId") String
-            reportId) {
-        corgiBlacklistService.updateStatus(reportId, status);
+    public JsonResult updateReportStatus(@RequestParam("status") String status,
+                                         @RequestParam("reportId") String reportId,
+                                         @RequestParam(value = "result", defaultValue = "") String result) {
+        corgiBlacklistService.updateStatus(reportId, status, result);
         return new JsonResult();
     }
 
