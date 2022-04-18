@@ -18,7 +18,7 @@ public class ReportDetail {
     private String reportStatus;
     private String ctime;
     private String uptime;
-    private Integer accuseTime;
+    private Integer accuseCount;
     private String result;
 
     private List<String> pics;
