@@ -545,7 +545,16 @@ public class CorgiToolController extends BaseController {
     @GetMapping("get_report")
     public JsonResult getReport(CorgiReport corgiReport, @RequestParam("page") Integer
             page, @RequestParam("pageSize") Integer pageSize) {
-        return new JsonResult(corgiBlacklistService.getReport(corgiReport, page, pageSize));
+        List<CorgiReport> reports = corgiBlacklistService.getReport(corgiReport, page, pageSize);
+        List<ReportDetail> reportDetails = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(reports)) {
+            for (CorgiReport report : reports) {
+                ReportDetail detail = new ReportDetail();
+                BeanUtils.copyProperties(report, detail);
+                detail.setAccuseUser(corgiUserService.getUserDetailBasic(report.getAccuseUserId()));
+            }
+        }
+        return new JsonResult(reportDetails);
     }
 
     @GetMapping("count_report")
