@@ -552,6 +552,7 @@ public class CorgiToolController extends BaseController {
                 ReportDetail detail = new ReportDetail();
                 BeanUtils.copyProperties(report, detail);
                 detail.setAccuseUser(corgiUserService.getUserDetailBasic(report.getAccuseUserId()));
+                reportDetails.add(detail);
             }
         }
         return new JsonResult(reportDetails);
