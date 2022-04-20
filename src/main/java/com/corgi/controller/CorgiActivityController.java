@@ -207,6 +207,9 @@ public class CorgiActivityController extends BaseController {
         if (!redisTemplate.opsForValue().setIfAbsent("activity_sent_" + activity.getUserId(), System.currentTimeMillis() + "", 20L, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.API_ERROR_CODE, "发送太频繁了哦");
         }
+        if (redisTemplate.hasKey("darkroom_" + getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
+        }
         if (StringUtils.isEmpty(activity.getCategory())) {
             activity.setCategory(CorgiActivity.CAT_IMAGE);
         }
