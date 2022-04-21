@@ -81,7 +81,7 @@ public class CorgiToolController extends BaseController {
     public static final String VERSION_KEY = "corgi_version";
 
 
-    @GetMapping("get_frontpage_config")
+    @GetMapping("get_config")
     public JsonResult getFrontPageConfig() {
         HashMap<String, Integer> config = new HashMap<>();
         config.put("showPay", 1);
