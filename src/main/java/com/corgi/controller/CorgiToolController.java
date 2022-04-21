@@ -8,6 +8,7 @@ import com.corgi.common.CorgiQueueName;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
@@ -79,6 +80,20 @@ public class CorgiToolController extends BaseController {
     public static final String USER_TASK = "user";
     public static final String VERSION_KEY = "corgi_version";
 
+
+    @GetMapping("get_frontpage_config")
+    public JsonResult getFrontPageConfig() {
+        HashMap<String, Integer> config = new HashMap<>();
+        config.put("showPay", 1);
+        config.put("showDiscovery", 1);
+        config.put("showPurse", 1);
+        if ("meizu".equals(RequestUtil.getChannel())) {
+            config.put("showPay", 0);
+            config.put("showDiscovery", 0);
+            config.put("showPurse", 0);
+        }
+        return new JsonResult(config);
+    }
 
     @GetMapping("query_user")
     public JsonResult queryUser(UserDetail userDetail, @RequestParam(required = false, name = "loginUserId") String userId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {

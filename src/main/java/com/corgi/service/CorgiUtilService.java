@@ -105,7 +105,7 @@ public class CorgiUtilService {
     public boolean isNewUser(String userId) {
         String version = RequestUtil.getVersion();
         String channel = RequestUtil.getChannel();
-        if ("2.1.4".equals(version) && "meizu".equals(channel)) {
+        if ("2.1.4".equals(version) && ("meizu".equals(channel) || "oppo".equals(channel) || "vivo".equals(channel))) {
             UserLogin userLogin = corgiUserService.getUserLogin(userId);
             if ("17000000000".equals(userLogin.getTelNo())) {
                 return true;
