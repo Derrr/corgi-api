@@ -256,7 +256,6 @@ public class CorgiActivityController extends BaseController {
             activity.setPics(activityPics);
         }
         activity = corgiActivityService.addCorgiActivity(activity);
-        mqService.sendActivityPost(activity);
         if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) {
             CorgiVlog corgiVlog = new CorgiVlog();
             corgiVlog.setActivityId(activity.getId());
@@ -266,6 +265,7 @@ public class CorgiActivityController extends BaseController {
             corgiVlog.setStatus(CorgiVlog.STATUS.UNCHECK);
             corgiVlogService.addVlog(corgiVlog);
         }
+        mqService.sendActivityPost(activity);
         if ("69548".equals(getUserId())) {
             CorgiVlogHot corgiVlogHot = new CorgiVlogHot();
             corgiVlogHot.setViewCount(null);
