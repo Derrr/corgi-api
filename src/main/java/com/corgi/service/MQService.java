@@ -1,5 +1,6 @@
 package com.corgi.service;
 
+import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
@@ -86,6 +87,14 @@ public class MQService {
     public void sendDate(PushMessage pushMessage){
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.USER_DATE_QUEUE, pushMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void sendActivityPost(CorgiActivity activity) {
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.ACTIVITY_POST_QUEUE, activity);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

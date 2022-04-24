@@ -97,7 +97,7 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
         }
         String hashKey = MD5Encoder.encode(activity.getContent().getBytes(StandardCharsets.UTF_8));
-        if(!redisTemplate.opsForValue().setIfAbsent("addActivity-" + hashKey + "-" + getUserId(), System.currentTimeMillis()+"", 10L, TimeUnit.MINUTES)){
+        if (!redisTemplate.opsForValue().setIfAbsent("addActivity-" + hashKey + "-" + getUserId(), System.currentTimeMillis() + "", 10L, TimeUnit.MINUTES)) {
             return new JsonResult(Constants.API_ERROR_CODE, "抱歉，同一内容不可重复发布");
         }
         activity.setCategory(CorgiActivity.CAT_ACTIVITY);
@@ -256,6 +256,7 @@ public class CorgiActivityController extends BaseController {
             activity.setPics(activityPics);
         }
         activity = corgiActivityService.addCorgiActivity(activity);
+        mqService.sendActivityPost(activity);
         if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) {
             CorgiVlog corgiVlog = new CorgiVlog();
             corgiVlog.setActivityId(activity.getId());

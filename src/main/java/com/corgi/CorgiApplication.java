@@ -85,4 +85,10 @@ public class CorgiApplication {
         return new Queue(CorgiQueueName.REGISTER_QUEUE);
     }
 
+    @Bean
+    public Queue registerPostActivityQueue() {
+        return new Queue(CorgiQueueName.ACTIVITY_POST_QUEUE);
+    }
+
+
 }
