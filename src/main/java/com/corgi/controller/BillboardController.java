@@ -42,6 +42,8 @@ public class BillboardController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiLikeService corgiLikeService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
 
@@ -168,6 +170,44 @@ public class BillboardController extends BaseController {
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
+                }
+                if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+                    if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
+                        activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+                    }
+                    activity.setRefActivityPic(activity.getCoverUrl());
+                    List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                            .traderId(activity.getUserId())
+                            .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                            .goodsId(activity.getId())
+                            .start(0)
+                            .size(3)
+                            .build());
+                    if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
+                        if (!activity.getUserId().equals(getUserId()) && (!hasUserId() || CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                                .userId(getUserId())
+                                .traderId(activity.getUserId())
+                                .goodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY)
+                                .start(0)
+                                .size(1)
+                                .goodsId(activity.getId())
+                                .build())))) {
+                            activity.setPics(new ArrayList<>());
+                            activity.setVideoUrl("");
+                            activity.setStatus("unpay");
+                        } else {
+                            if (!CollectionUtils.isEmpty(activity.getPics())) {
+                                String picUrl = activity.getPics().get(0).getPicUrl();
+                                activity.setCoverUrl(picUrl);
+                            } else {
+                                activity.setCoverUrl(activity.getCoverUrl().replaceAll("\\?x-oss-process=style/fuzzyCover", ""));
+                            }
+                        }
+                    } else {
+                        activity.setPics(new ArrayList<>());
+                        activity.setVideoUrl("");
+                        activity.setStatus("unpay");
+                    }
                 }
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
