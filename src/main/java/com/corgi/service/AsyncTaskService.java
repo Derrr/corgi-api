@@ -6,8 +6,8 @@ import com.corgi.entity.ActivityQuery;
 import com.corgi.user.api.CorgiCommentService;
 import com.corgi.user.api.CorgiLikeService;
 import com.corgi.user.api.CorgiUserActivityService;
-import com.corgi.user.entity.ActivityComment;
-import com.corgi.user.entity.ActivityLike;
+import com.corgi.user.api.CorgiUserMatchService;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -27,6 +27,8 @@ public class AsyncTaskService {
     private CorgiCommentService corgiCommentService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiUserMatchService corgiUserMatchService;
 
     @Async
     public Future<List<ActivityLike>> getUserLike(Long timestamp, String userId, Integer size) {
@@ -64,4 +66,15 @@ public class AsyncTaskService {
         query.setPageSize(size);
         return new AsyncResult<>(corgiUserActivityService.queryActivity(query));
     }
+
+    @Async
+    public Future<List<UserMatchItem>> getUserMatchItem(UserQuery userQuery) {
+       return new AsyncResult<>(corgiUserMatchService.getUserMatchItem(userQuery));
+    }
+
+    @Async
+    public Future<List<UserMatchRemain>> countUserRemain(String userId) {
+        return new AsyncResult<>(corgiUserMatchService.countUserRemain(userId));
+    }
+
 }

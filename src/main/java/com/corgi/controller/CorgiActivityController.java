@@ -20,7 +20,6 @@ import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
@@ -1182,7 +1181,7 @@ public class CorgiActivityController extends BaseController {
                 size = 21 - (page - 1) * size;
             }
             if (size <= 0 || size > 21) {
-                return new JsonResult(Lists.newArrayList());
+                return new JsonResult(new ArrayList<>());
             }
             activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
         }
