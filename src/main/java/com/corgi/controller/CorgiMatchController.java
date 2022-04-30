@@ -29,6 +29,16 @@ public class CorgiMatchController extends BaseController {
     @Autowired
     private CorgiUtilService corgiUtilService;
 
+    @GetMapping("count_range")
+    public JsonResult countRange(@RequestParam("lat") Double lat, @RequestParam("lng") Double lng) {
+        UserQuery userQuery = new UserQuery();
+        userQuery.setLat(lat);
+        userQuery.setLng(lng);
+        userQuery.setRange(200.0);
+        userQuery.setUserId(getUserId());
+        return new JsonResult(corgiUserMatchService.countAllMatcher(userQuery));
+    }
+
     @PostMapping("get_matches")
     public JsonResult addActivity(@RequestBody UserQuery userQuery) {
         if (hasUserId()) {
