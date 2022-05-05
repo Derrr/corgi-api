@@ -136,8 +136,6 @@ public class CorgiFeedController extends BaseController {
         if (lastId == null) {
             lastId = 0L;
         }
-
-
         if (!corgiUtilService.isNewUser(getUserId())) {
             for (int i = 0; i < 5; i++) {
                 Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);
@@ -174,7 +172,7 @@ public class CorgiFeedController extends BaseController {
     }
 
     @GetMapping("get_feeds_by_activity")
-    public JsonResult getFeeds(@RequestParam("activityId") String activityId, @RequestParam(name"page") Integer page, @RequestParam("pageSize") Integer size) {
+    public JsonResult getFeeds(@RequestParam("activityId") String activityId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer size) {
         String userId = "1";
         if (hasUserId()) {
             userId = getUserId();
