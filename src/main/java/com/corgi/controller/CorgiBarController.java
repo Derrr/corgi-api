@@ -173,7 +173,7 @@ public class CorgiBarController extends BaseController {
     @PostMapping("add_bar")
     public JsonResult addBar(@RequestBody BarProfile barProfile) {
         if (hasUserId()) {
-            return new JsonResult();
+            barProfile.setCuid(getUserId());
         }
         corgiBarService.addBarProfile(barProfile);
         return new JsonResult();

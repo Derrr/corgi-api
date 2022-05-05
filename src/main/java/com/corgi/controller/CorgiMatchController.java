@@ -61,6 +61,15 @@ public class CorgiMatchController extends BaseController {
         if (matchIds == null) {
             matchIds = new ArrayList<>();
         }
+        if ("1".equals(matcher.getType())) {
+            if (!CollectionUtils.isEmpty(matchIds)) {
+                for (String matchId : matchIds) {
+                    corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
+                }
+            }
+            return new JsonResult();
+        }
+
         String key = "count_matching-" + getUserId();
         Integer result = 0;
         try {
