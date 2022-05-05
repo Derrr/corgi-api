@@ -44,6 +44,8 @@ public class ThirdPartyController extends BaseController {
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
+    private CorgiBillboardService corgiBillboardService;
+    @Reference
     CorgiToolService corgiToolService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -51,6 +53,28 @@ public class ThirdPartyController extends BaseController {
     private CorgiUtilService corgiUtilService;
 
     public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
+
+    @GetMapping("recommend_user")
+    public JsonResult getRecommendUser(@RequestParam("userId") String userId) {
+        List<UserDetail> result = new ArrayList<>();
+        ActivityBillboard query = new ActivityBillboard();
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        query.setDate(date);
+        query.setCtime(date);
+        List<ActivityBillboard> activityBillboards = corgiBillboardService.getAllActivityBillboard(query);
+        if (activityBillboards != null) {
+            for (ActivityBillboard billboard : activityBillboards) {
+                UserDetail detail = corgiUserService.getUserDetailBasic(billboard.getUserId());
+                if (detail != null) {
+                    result.add(detail);
+                }
+                if (result.size() >= 8) {
+                    break;
+                }
+            }
+        }
+        return new JsonResult(result);
+    }
 
     @GetMapping("get_top_9")
     public JsonResult getTop9(@RequestParam("telNo") String telNo) {
