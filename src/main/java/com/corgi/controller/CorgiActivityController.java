@@ -209,9 +209,14 @@ public class CorgiActivityController extends BaseController {
         if (redisTemplate.hasKey("darkroom_" + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
         }
+        if (!this.checkRate(activity.getUserId(),
+                !StringUtils.isEmpty(activity.getVideoId()) ? CorgiActivity.CAT_VIDEO : CorgiActivity.CAT_IMAGE, 5)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "一天只能发布5条动态");
+        }
         if (StringUtils.isEmpty(activity.getCategory())) {
             activity.setCategory(CorgiActivity.CAT_IMAGE);
         }
+
         if (!StringUtils.isEmpty(activity.getVideoId())) {
             GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
             GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
@@ -233,6 +238,7 @@ public class CorgiActivityController extends BaseController {
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
             activity.setCategory(CorgiActivity.CAT_TEXT);
         }
+
         activity.setCheckStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
             UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
@@ -317,6 +323,9 @@ public class CorgiActivityController extends BaseController {
         }
         if (redisTemplate.hasKey("darkroom_" + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
+        }
+        if (!this.checkRate(activity.getUserId(), CorgiActivity.CAT_PAYING, 10)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "一天只能发布10条动态");
         }
         String merchId = activity.getMerchId();
         CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
@@ -1781,5 +1790,22 @@ public class CorgiActivityController extends BaseController {
             }
         }
         return null;
+    }
+
+    private boolean checkRate(String userId, String type, int size) {
+        String keyRate = "add_activity_rate-" + type + "-" + userId;
+        String keyList = "add_activity_list-" + type + "-" + userId;
+        if (redisTemplate.opsForValue().setIfAbsent(keyRate, "1", 24L, TimeUnit.HOURS)) {
+            redisTemplate.delete(keyList);
+            redisTemplate.opsForList().rightPush(keyList, "0");
+            redisTemplate.expire(keyList, 24L, TimeUnit.HOURS);
+            return true;
+        }
+        Long sizeNow = redisTemplate.opsForList().size(keyList);
+        if (sizeNow >= size) {
+            return false;
+        }
+        redisTemplate.opsForList().rightPush(keyList, sizeNow + "");
+        return true;
     }
 }
