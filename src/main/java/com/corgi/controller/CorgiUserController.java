@@ -83,6 +83,8 @@ public class CorgiUserController extends BaseController {
     private CorgiFakeService corgiFakeService;
     @Reference
     private CorgiLikeService corgiLikeService;
+    @Reference
+    private CorgiShareService corgiShareService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -155,6 +157,11 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/share")
     public JsonResult shareUser(@RequestParam("userId") String userId) {
         asyncTaskService.initRecommendUser(userId);
+        ActivityShare share = new ActivityShare();
+        share.setUserId(userId);
+        share.setShareUserId(getUserId());
+        share.setActivityId("0");
+        corgiShareService.addShare(share);
         return new JsonResult();
     }
 
