@@ -13,13 +13,11 @@ import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import com.aliyuncs.cloudauth.model.v20190307.CompareFacesResponse;
 import com.aliyuncs.cloudauth.model.v20190307.DescribeVerifyResultResponse;
 import com.aliyuncs.exceptions.ClientException;
-import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
-import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
@@ -69,8 +67,6 @@ public class CorgiUserController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiToolService corgiToolService;
-    //@Reference
-    //private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
@@ -100,6 +96,8 @@ public class CorgiUserController extends BaseController {
     private MailService mailService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private AsyncTaskService asyncTaskService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
@@ -152,6 +150,12 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+    }
+
+    @GetMapping("/share")
+    public JsonResult shareUser(@RequestParam("userId") String userId) {
+        asyncTaskService.initRecommendUser(userId);
+        return new JsonResult();
     }
 
     @GetMapping("/unregister")
