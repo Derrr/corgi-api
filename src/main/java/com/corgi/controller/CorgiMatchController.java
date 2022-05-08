@@ -68,7 +68,7 @@ public class CorgiMatchController extends BaseController {
         if ("1".equals(matcher.getType())) {
             if (!CollectionUtils.isEmpty(matchIds)) {
                 for (String matchId : matchIds) {
-                    redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, System.currentTimeMillis() + "", 14l, TimeUnit.DAYS);
+                    redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, "1", 14l, TimeUnit.DAYS);
                     corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
                 }
             }

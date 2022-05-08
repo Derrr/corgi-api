@@ -1063,7 +1063,7 @@ public class CorgiUserController extends BaseController {
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
-                String time = redisTemplate.opsForValue().get("acceptMatching_" + getUserId() + "-" + ids[i]);
+                String result = redisTemplate.opsForValue().get("acceptMatching_" + getUserId() + "-" + ids[i]);
                 if (StringUtils.isNotEmpty(time)) {
                     userDetail.setMatch(1.0);
                 } else {
