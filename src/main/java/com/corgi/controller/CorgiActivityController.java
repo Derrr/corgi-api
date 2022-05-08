@@ -106,11 +106,6 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        //List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
-//        if (CollectionUtils.isEmpty(recommendUser)) {
-//            recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
-//        }
-        //long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
         return new JsonResult(AddActivityResult.getResult(activity)
                 .setActivityPics(activityPics));

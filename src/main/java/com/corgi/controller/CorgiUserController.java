@@ -1064,7 +1064,7 @@ public class CorgiUserController extends BaseController {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
                 String result = redisTemplate.opsForValue().get("acceptMatching_" + getUserId() + "-" + ids[i]);
-                if (StringUtils.isNotEmpty(time)) {
+                if (StringUtils.isNotEmpty(result)) {
                     userDetail.setMatch(1.0);
                 } else {
                     userDetail.setMatch(0.0);

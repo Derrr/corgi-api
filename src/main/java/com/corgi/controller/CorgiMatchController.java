@@ -4,8 +4,10 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.messages.PushMessage;
 import com.corgi.entity.Matcher;
 import com.corgi.service.CorgiUtilService;
+import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.UserMatchRemain;
 import com.corgi.user.entity.UserQuery;
@@ -16,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +35,8 @@ public class CorgiMatchController extends BaseController {
     private CorgiUtilService corgiUtilService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private MQService mqService;
 
     @GetMapping("count_range")
     public JsonResult countRange(@RequestParam("lat") Double lat, @RequestParam("lng") Double lng) {
@@ -65,11 +70,21 @@ public class CorgiMatchController extends BaseController {
         if (matchIds == null) {
             matchIds = new ArrayList<>();
         }
+        HashMap<String, Object> extra = new HashMap<>();
+        extra.put("userId", getUserId());
+        extra.put("type", PushMessage.QUICK_MATCH_ACCEPT_TYPE);
         if ("1".equals(matcher.getType())) {
             if (!CollectionUtils.isEmpty(matchIds)) {
                 for (String matchId : matchIds) {
                     redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, "1", 14l, TimeUnit.DAYS);
                     corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.DEFAULT)
+                            .sourceUserId(getUserId())
+                            .targetUserId(matchId)
+                            .message("想和你匹配，你是否接受呢")
+                            .extra(extra)
+                            .build());
                 }
             }
             return new JsonResult();
@@ -90,6 +105,7 @@ public class CorgiMatchController extends BaseController {
                 if (result < 0) {
                     return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
                 }
+                extra.put("type", PushMessage.QUICK_MATCH_TYPE);
                 if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
                     int i = 0;
                     for (UserMatchRemain remain1 : remains) {
@@ -100,6 +116,13 @@ public class CorgiMatchController extends BaseController {
                             }
                             String matchId = matchIds.get(i);
                             corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
+                            mqService.sendMessage(PushMessage.builder()
+                                    .type(PushMessage.DEFAULT)
+                                    .sourceUserId(getUserId())
+                                    .targetUserId(matchId)
+                                    .message("想和你匹配，你是否接受呢")
+                                    .extra(extra)
+                                    .build());
                             i++;
                         }
                     }
