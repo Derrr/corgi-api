@@ -11,11 +11,13 @@ import com.corgi.user.entity.UserMatchRemain;
 import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -28,6 +30,8 @@ public class CorgiMatchController extends BaseController {
     private CorgiUserMatchService corgiUserMatchService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @GetMapping("count_range")
     public JsonResult countRange(@RequestParam("lat") Double lat, @RequestParam("lng") Double lng) {
@@ -64,6 +68,7 @@ public class CorgiMatchController extends BaseController {
         if ("1".equals(matcher.getType())) {
             if (!CollectionUtils.isEmpty(matchIds)) {
                 for (String matchId : matchIds) {
+                    redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, System.currentTimeMillis() + "", 14l, TimeUnit.DAYS);
                     corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
                 }
             }
