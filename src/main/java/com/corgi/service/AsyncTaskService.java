@@ -29,7 +29,6 @@ public class AsyncTaskService {
     private CorgiUserService corgiUserService;
 
     @Async
-    @Lazy
     public Future<List<ActivityLike>> getUserLike(Long timestamp, String userId, Integer size) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityLike query = new ActivityLike();
@@ -42,7 +41,6 @@ public class AsyncTaskService {
     }
 
     @Async
-    @Lazy
     public Future<List<ActivityComment>> getUserComment(Long timestamp, String userId, Integer size) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityComment query = new ActivityComment();
@@ -55,7 +53,6 @@ public class AsyncTaskService {
     }
 
     @Async
-    @Lazy
     public Future<List<CorgiActivity>> getUserActivity(Long timestamp, String userId, Integer size) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         ActivityQuery query = new ActivityQuery();
@@ -69,7 +66,6 @@ public class AsyncTaskService {
     }
 
     @Async
-    @Lazy
     public void initRecommendUser(String userId) {
         corgiUserService.initRecommendUserByUserId(userId);
     }
