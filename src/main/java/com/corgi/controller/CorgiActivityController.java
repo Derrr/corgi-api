@@ -1176,9 +1176,6 @@ public class CorgiActivityController extends BaseController {
         } else {
             CorgiActivity query = new CorgiActivity();
             query.setTopics(Arrays.asList(topic));
-//            if ("62".equals(topic)) {
-//                query.setCreateTime("2022-05-01");
-//            }
             int page = activityQuery.getPage();
             int size = activityQuery.getPageSize();
             if (page * size > 21) {
