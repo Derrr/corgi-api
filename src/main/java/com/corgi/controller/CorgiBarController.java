@@ -181,9 +181,6 @@ public class CorgiBarController extends BaseController {
 
     @PostMapping("update_bar")
     public JsonResult updateBar(@RequestBody BarProfile barProfile) {
-        if (hasUserId()) {
-            barProfile.setBarId(getUserId());
-        }
         corgiBarService.updateBarProfile(barProfile);
         return new JsonResult();
     }
