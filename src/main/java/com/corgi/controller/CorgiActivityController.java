@@ -1182,9 +1182,10 @@ public class CorgiActivityController extends BaseController {
                 size = 21 - (page - 1) * size;
             }
             if (size <= 0 || size > 21) {
-                return new JsonResult(Lists.newArrayList());
+                activityIds = new ArrayList<>();
+            } else {
+                activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
             }
-            activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
         }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivity> result = new ArrayList<>();
