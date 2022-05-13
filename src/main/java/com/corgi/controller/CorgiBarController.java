@@ -79,8 +79,25 @@ public class CorgiBarController extends BaseController {
         return new JsonResult(activity);
     }
 
+    @GetMapping("get_bar_around_activity")
+    public JsonResult getBarAroundActivity(@RequestParam("barId") String barId,
+                                           @RequestParam("page") Integer page,
+                                           @RequestParam("pageSize") Integer pageSize,
+                                           @RequestParam(required = false, name = "status") String status) {
+        CorgiActivity corgiActivity = new CorgiActivity();
+        corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
+        corgiActivity.setUserId(barId);
+        if (!StringUtils.isEmpty(status)) {
+            corgiActivity.setStatus(status);
+        }
+        List<String> activityIds = corgiBarService.getBarAroundActivity(barId, page, pageSize);
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(activityIds);
+        return new JsonResult(corgiUtilService.convertUserActivityDetail(corgiActivities, getUserId(), null));
+    }
+
     @GetMapping("get_bar_activity")
-    public JsonResult getBarActivity(@RequestParam("barId") String barId, @RequestParam("page") Integer page,
+    public JsonResult getBarActivity(@RequestParam("barId") String barId,
+                                     @RequestParam("page") Integer page,
                                      @RequestParam("pageSize") Integer pageSize,
                                      @RequestParam(required = false, name = "status") String status) {
         CorgiActivity corgiActivity = new CorgiActivity();
@@ -89,9 +106,8 @@ public class CorgiBarController extends BaseController {
         if (!StringUtils.isEmpty(status)) {
             corgiActivity.setStatus(status);
         }
-        List<String> activityIds = corgiBarService.getBarActivityByPage(barId, page, pageSize);
-        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(corgiUtilService.convertUserActivityDetail(corgiActivities,getUserId(),null));
+        List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(corgiActivity, page, pageSize);
+        return new JsonResult(corgiUtilService.convertUserActivityDetail(corgiActivities, getUserId(), corgiBarService.getBarProfile(barId)));
     }
 
     @GetMapping("get_bar_user_activity")

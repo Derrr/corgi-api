@@ -235,13 +235,7 @@ public class CorgiUtilService {
                 if (barProfile != null) {
                     detail.setBarDetail(barProfile);
                 } else {
-                    barProfile = new BarProfile();
-                    barProfile.setStatus(BarProfile.STATUS_ENABLE);
-                    barProfile.setBarId(activity.getUserId());
-                    List<BarProfile> barProfiles = corgiBarService.searchBar(barProfile);
-                    if (!CollectionUtils.isEmpty(barProfiles)) {
-                        corgiBarService.searchBar(barProfiles.get(0));
-                    }
+                    corgiBarService.searchBar(corgiBarService.getBarProfile(activity.getUserId()));
                 }
                 detailList.add(detail);
             }
