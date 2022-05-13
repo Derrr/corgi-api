@@ -215,7 +215,7 @@ public class CorgiUtilService {
                 }
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
-                List<ActivityLike> activityLikes = corgiLikeService.getFollowUser(userId, activity.getId());
+                //List<ActivityLike> activityLikes = corgiLikeService.getFollowUser(userId, activity.getId());
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
 
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
@@ -223,7 +223,7 @@ public class CorgiUtilService {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
-                detail.setLikeUsers(activityLikes);
+                //detail.setLikeUsers(activityLikes);
                 detail.setCommentCount(commentCount);
                 detail.setBarDetail(barProfile);
                 if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory()) && activity.getUserId() != null && !activity.getUserId().startsWith("B")) {
