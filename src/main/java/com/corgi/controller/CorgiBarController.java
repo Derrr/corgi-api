@@ -89,14 +89,7 @@ public class CorgiBarController extends BaseController {
     @GetMapping("get_bar_around_activity")
     public JsonResult getBarAroundActivity(@RequestParam("barId") String barId,
                                            @RequestParam("page") Integer page,
-                                           @RequestParam("pageSize") Integer pageSize,
-                                           @RequestParam(required = false, name = "status") String status) {
-        CorgiActivity corgiActivity = new CorgiActivity();
-        corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
-        corgiActivity.setUserId(barId);
-        if (!StringUtils.isEmpty(status)) {
-            corgiActivity.setStatus(status);
-        }
+                                           @RequestParam("pageSize") Integer pageSize) {
         List<String> activityIds = corgiBarService.getBarAroundActivity(barId, page, pageSize);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(activityIds);
         return new JsonResult(corgiUtilService.convertUserActivityDetail(corgiActivities, getUserId(), null));
