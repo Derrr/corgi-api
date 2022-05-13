@@ -204,8 +204,10 @@ public class CorgiBarController extends BaseController {
     }
 
     @GetMapping("get_bar_list_by_city")
-    public JsonResult getBarListByCity(@RequestParam(required = false, name = "city") String city) {
-        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city, null, null);
+    public JsonResult getBarListByCity(@RequestParam(required = false, name = "city") String city,
+                                       @RequestParam(required = false, name = "lat") Double lat,
+                                       @RequestParam(required = false, name = "lng") Double lng) {
+        List<BarProfile> barProfiles = corgiBarService.getBarListByCity(city, lat, lng);
         if (CollectionUtils.isEmpty(barProfiles)) {
             UserPosition position = corgiUserService.getUserPosition(getUserId());
             if (position != null) {
