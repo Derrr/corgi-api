@@ -225,11 +225,22 @@ public class CorgiUtilService {
                 detail.setLikeCount(likeCount);
                 //detail.setLikeUsers(activityLikes);
                 detail.setCommentCount(commentCount);
-                detail.setBarDetail(barProfile);
+
                 if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory()) && activity.getUserId() != null && !activity.getUserId().startsWith("B")) {
                     UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
                     if (userDetail != null) {
                         detail.setUserDetail(userDetail);
+                    }
+                }
+                if (barProfile != null) {
+                    detail.setBarDetail(barProfile);
+                } else {
+                    barProfile = new BarProfile();
+                    barProfile.setStatus(BarProfile.STATUS_ENABLE);
+                    barProfile.setBarId(activity.getUserId());
+                    List<BarProfile> barProfiles = corgiBarService.searchBar(barProfile);
+                    if (!CollectionUtils.isEmpty(barProfiles)) {
+                        corgiBarService.searchBar(barProfiles.get(0));
                     }
                 }
                 detailList.add(detail);
