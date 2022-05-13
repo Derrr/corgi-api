@@ -62,11 +62,18 @@ public class CorgiBarController extends BaseController {
         if (hasUserId()) {
             corgiActivity.setUserId(getUserId());
         }
+        BarProfile profile = corgiBarService.getBarProfile(corgiActivity.getUserId());
+        if (corgiActivity.getLat() == 0.0) {
+            corgiActivity.setLat(profile.getLat());
+        }
+        if (corgiActivity.getLng() == 0.0) {
+            corgiActivity.setLat(profile.getLng());
+        }
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         CorgiActivity activity = corgiActivityService.addCorgiActivity(corgiActivity);
         mqService.sendBarActivityMessage(PushMessage.builder()
                 .targetUserId(corgiActivity.getUserId()).build());
-        BarProfile profile = corgiBarService.getBarProfile(corgiActivity.getUserId());
+
         HashMap extra = new HashMap();
         extra.put("type", "202");
         extra.put("city", profile.getCity());
