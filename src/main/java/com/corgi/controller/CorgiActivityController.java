@@ -256,6 +256,7 @@ public class CorgiActivityController extends BaseController {
             activity.setPics(activityPics);
         }
         activity = corgiActivityService.addCorgiActivity(activity);
+        corgiUserActivityService.updateActivityStatus(activity.getId(), activity.getCheckStatus());
         if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) {
             CorgiVlog corgiVlog = new CorgiVlog();
             corgiVlog.setActivityId(activity.getId());
@@ -370,6 +371,7 @@ public class CorgiActivityController extends BaseController {
             activity.setPics(activityPics);
         }
         activity = corgiActivityService.addCorgiActivity(activity);
+        corgiUserActivityService.updateActivityStatus(activity.getId(), activity.getCheckStatus());
         CorgiUserMarket market = CorgiUserMarket.builder()
                 .userId(activity.getUserId())
                 .sourceId(activity.getId())
