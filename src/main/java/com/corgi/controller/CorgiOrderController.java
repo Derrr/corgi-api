@@ -158,7 +158,7 @@ public class CorgiOrderController extends BaseController {
         corgiUtilService.lock(key);
         try {
             CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
-            if (StringUtils.isEmpty(goodsId) && !CorgiMerchandise.SUBSCRIBE.equals(merchandise.getType())) {
+            if (StringUtils.isEmpty(goodsId) && CorgiMerchandise.ACTIVITY.equals(merchandise.getType())) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "参数错误");
             }
             if (merchandise == null) {
