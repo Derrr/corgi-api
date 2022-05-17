@@ -87,7 +87,7 @@ public class ThirdPartyController extends BaseController {
         if (activityBillboards != null) {
             for (ActivityBillboard billboard : activityBillboards) {
                 UserDetail detail = corgiUserService.getUserDetailBasic(billboard.getUserId());
-                if (detail != null) {
+                if (detail != null && !detail.getUserId().equals(userId)) {
                     result.add(detail);
                 }
                 if (result.size() >= 8) {
