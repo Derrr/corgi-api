@@ -202,7 +202,7 @@ public class CorgiOrderController extends BaseController {
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态不是付费动态");
                 }
                 if (!merchId.equals(activity.getMerchId()) && !merchId.equals(activity.getAppMerchId())) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态付费状态存在一场");
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态付费状态存在异常");
                 }
                 CorgiUserGoods query = new CorgiUserGoods();
                 query.setUserId(getUserId());
