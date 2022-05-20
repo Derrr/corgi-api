@@ -273,7 +273,7 @@ public class CorgiBarController extends BaseController {
         BarDetail detail = new BarDetail();
         BeanUtils.copyProperties(barProfiles, detail);
         detail.setAvatars(new ArrayList<>());
-        List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, 1, 300);
+        List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, 1, 1000);
         List<String> userIds = new ArrayList<>();
         for (CorgiActivity attend : corgiActivities) {
             if (userIds.contains(attend.getUserId())) {
