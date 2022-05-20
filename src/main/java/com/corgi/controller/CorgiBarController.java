@@ -7,10 +7,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.JWTUtils;
-import com.corgi.entity.ActivityQuery;
-import com.corgi.entity.BarActivityDetail;
-import com.corgi.entity.BarLogin;
-import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.entity.*;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiUtilService;
@@ -270,7 +267,28 @@ public class CorgiBarController extends BaseController {
             UserVideo video = videos.get(0);
             barProfiles.setVideo(video.getVideoUrl());
         }
-        return new JsonResult(barProfiles);
+        CorgiActivity search = new CorgiActivity();
+        search.setBarId(barId);
+        search.setStatus(CorgiActivity.NOT_DELETED);
+        BarDetail detail = new BarDetail();
+        BeanUtils.copyProperties(barProfiles, detail);
+        detail.setAvatars(new ArrayList<>());
+        List<CorgiActivity> corgiActivities = corgiActivityService.searchCorgiActivity(search, 1, 300);
+        List<String> userIds = new ArrayList<>();
+        for (CorgiActivity attend : corgiActivities) {
+            if (userIds.contains(attend.getUserId())) {
+                continue;
+            }
+            userIds.add(attend.getUserId());
+            if (detail.getAvatars().size() < 3) {
+                UserDetail userDetail = corgiUserService.getUserDetailBasic(attend.getUserId());
+                if (!StringUtils.isEmpty(userDetail.getAvatar())) {
+                    detail.getAvatars().add(userDetail.getAvatar());
+                }
+            }
+        }
+        detail.setCount(userIds.size());
+        return new JsonResult(detail);
     }
 
     @GetMapping("recommend")
