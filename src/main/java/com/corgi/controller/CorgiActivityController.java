@@ -1281,6 +1281,7 @@ public class CorgiActivityController extends BaseController {
         if (activityQuery.getPage() == null) {
             activityQuery.setPage(1);
         }
+        activityQuery.setSort(ActivityQuery.SORT_TIME);
         List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
         return new JsonResult(detailList);
