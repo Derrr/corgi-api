@@ -235,7 +235,7 @@ public class CorgiUtilService {
                 if (barProfile != null) {
                     detail.setBarDetail(barProfile);
                 } else {
-                    corgiBarService.searchBar(corgiBarService.getBarProfile(detail.getUserId()));
+                    detail.setBarDetail(corgiBarService.getBarProfile(detail.getUserId()));
                 }
                 detailList.add(detail);
             }
