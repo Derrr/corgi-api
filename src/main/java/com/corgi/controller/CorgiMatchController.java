@@ -82,7 +82,7 @@ public class CorgiMatchController extends BaseController {
                             .type(PushMessage.DEFAULT)
                             .sourceUserId(getUserId())
                             .targetUserId(matchId)
-                            .message("有一个小哥哥想和你匹配，要去聊聊吗？")
+                            .message("匹配成功，快去聊聊吧")
                             .extra(extra)
                             .build());
                 }
