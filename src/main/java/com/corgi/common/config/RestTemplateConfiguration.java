@@ -1,6 +1,7 @@
 package com.corgi.common.config;
 
-import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter4;
+
+import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import org.apache.http.client.HttpClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -51,7 +52,7 @@ public class RestTemplateConfiguration {
         converterList.add(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
         //加入FastJson转换器
-        converterList.add(new FastJsonHttpMessageConverter4());
+        converterList.add(new FastJsonHttpMessageConverter());
         return restTemplate;
     }
 
