@@ -1645,7 +1645,10 @@ public class CorgiActivityController extends BaseController {
                             .build());
                     if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
                         for (CorgiUserGoods good : goods) {
-                            buyers.add(corgiUserService.getUserDetailBasic(good.getUserId()));
+                            UserDetail d = corgiUserService.getUserDetailBasic(good.getUserId());
+                            if (d != null) {
+                                buyers.add(d);
+                            }
                         }
                         if (!activity.getUserId().equals(getUserId()) && (!hasUserId() || CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                                 .userId(getUserId())
