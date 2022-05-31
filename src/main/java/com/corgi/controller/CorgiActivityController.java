@@ -20,7 +20,6 @@ import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
@@ -107,11 +106,6 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
         activity.setPics(activityPics);
         activity = corgiActivityService.addCorgiActivity(activity);
-        //List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
-//        if (CollectionUtils.isEmpty(recommendUser)) {
-//            recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
-//        }
-        //long count = corgiActivityService.countUserActivity(activity.getUserId());
         redisTemplate.delete("activity_count_" + activity.getUserId());
         return new JsonResult(AddActivityResult.getResult(activity)
                 .setActivityPics(activityPics));
@@ -210,9 +204,14 @@ public class CorgiActivityController extends BaseController {
         if (redisTemplate.hasKey("darkroom_" + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
         }
+        if (!this.checkRate(activity.getUserId(),
+                !StringUtils.isEmpty(activity.getVideoId()) ? CorgiActivity.CAT_VIDEO : CorgiActivity.CAT_IMAGE, 5)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "一天只能发布5条动态");
+        }
         if (StringUtils.isEmpty(activity.getCategory())) {
             activity.setCategory(CorgiActivity.CAT_IMAGE);
         }
+
         if (!StringUtils.isEmpty(activity.getVideoId())) {
             GetMezzanineInfoResponse response = aliyunVodService.getVideoInfo(activity.getVideoId());
             GetMezzanineInfoResponse.Mezzanine mezzanine = response.getMezzanine();
@@ -234,6 +233,7 @@ public class CorgiActivityController extends BaseController {
         } else if (CollectionUtils.isEmpty(activity.getPics())) {
             activity.setCategory(CorgiActivity.CAT_TEXT);
         }
+
         activity.setCheckStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
             UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
@@ -319,6 +319,9 @@ public class CorgiActivityController extends BaseController {
         }
         if (redisTemplate.hasKey("darkroom_" + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "禁止发布");
+        }
+        if (!this.checkRate(activity.getUserId(), CorgiActivity.CAT_PAYING, 10)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "一天只能发布10条动态");
         }
         String merchId = activity.getMerchId();
         CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
@@ -1271,16 +1274,15 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_range_activity")
-    public JsonResult getRangeActivity(@RequestParam("userId") String userId, @RequestParam(name = "lng", required = false, defaultValue = "0") double lng, @RequestParam(name = "lat", required = false, defaultValue = "0") double lat, @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
+    public JsonResult getRangeActivity(@RequestParam("userId") String userId,
+                                       @RequestParam(name = "lng", required = false, defaultValue = "0") double lng,
+                                       @RequestParam(name = "lat", required = false, defaultValue = "0") double lat,
+                                       @RequestParam(name = "range", required = false, defaultValue = "0") double range, ActivityQuery activityQuery) {
         if (activityQuery.getPage() == null) {
             activityQuery.setPage(1);
         }
-        if (hasVersion()) {
-            List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
-            List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
-            return new JsonResult(detailList);
-        }
-        List<CorgiActivity> businessList = corgiActivityService.getCityCorgiActivityByRange(lng, lat, range, activityQuery);
+        activityQuery.setSort(ActivityQuery.SORT_TIME);
+        List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
         return new JsonResult(detailList);
     }
@@ -1643,7 +1645,10 @@ public class CorgiActivityController extends BaseController {
                             .build());
                     if (!CollectionUtils.isEmpty(goods) || activity.getUserId().equals(getUserId())) {
                         for (CorgiUserGoods good : goods) {
-                            buyers.add(corgiUserService.getUserDetailBasic(good.getUserId()));
+                            UserDetail d = corgiUserService.getUserDetailBasic(good.getUserId());
+                            if (d != null) {
+                                buyers.add(d);
+                            }
                         }
                         if (!activity.getUserId().equals(getUserId()) && (!hasUserId() || CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                                 .userId(getUserId())
@@ -1785,5 +1790,22 @@ public class CorgiActivityController extends BaseController {
             }
         }
         return null;
+    }
+
+    private boolean checkRate(String userId, String type, int size) {
+        String keyRate = "add_activity_rate-" + type + "-" + userId;
+        String keyList = "add_activity_list-" + type + "-" + userId;
+        if (redisTemplate.opsForValue().setIfAbsent(keyRate, "1", 24L, TimeUnit.HOURS)) {
+            redisTemplate.delete(keyList);
+            redisTemplate.opsForList().rightPush(keyList, "0");
+            redisTemplate.expire(keyList, 24L, TimeUnit.HOURS);
+            return true;
+        }
+        Long sizeNow = redisTemplate.opsForList().size(keyList);
+        if (sizeNow >= size) {
+            return false;
+        }
+        redisTemplate.opsForList().rightPush(keyList, sizeNow + "");
+        return true;
     }
 }

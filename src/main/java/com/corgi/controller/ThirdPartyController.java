@@ -9,6 +9,7 @@ import com.corgi.common.constant.Constants;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.AliyunGreenService;
+import com.corgi.service.AsyncTaskService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityBillboard;
@@ -16,6 +17,7 @@ import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserLogin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,13 +46,57 @@ public class ThirdPartyController extends BaseController {
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
+    private CorgiBillboardService corgiBillboardService;
+    @Reference
     CorgiToolService corgiToolService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AsyncTaskService asyncTaskService;
 
     public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
+
+    @GetMapping("recommend_user")
+    public JsonResult getRecommendUser(@RequestParam("userId") String userId) {
+        List<UserDetail> result = new ArrayList<>();
+        String key = "recommend_user-" + userId;
+        List<String> userIds = redisTemplate.opsForList().range(key, 0, -1);
+        if (!CollectionUtils.isEmpty(userIds)) {
+            for (String userId1 : userIds) {
+                UserDetail detail = corgiUserService.getUserDetailBasic(userId1);
+                if (detail != null) {
+                    result.add(detail);
+                }
+                if (result.size() >= 8) {
+                    break;
+                }
+            }
+            return new JsonResult(result);
+        }
+
+        asyncTaskService.initRecommendUser(userId);
+        ActivityBillboard query = new ActivityBillboard();
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        query.setDate(date);
+        query.setCtime(date);
+        List<ActivityBillboard> activityBillboards = corgiBillboardService.getAllActivityBillboard(query);
+        if (activityBillboards != null) {
+            for (ActivityBillboard billboard : activityBillboards) {
+                UserDetail detail = corgiUserService.getUserDetailBasic(billboard.getUserId());
+                if (detail != null && !detail.getUserId().equals(userId)) {
+                    result.add(detail);
+                }
+                if (result.size() >= 8) {
+                    break;
+                }
+            }
+        }
+        return new JsonResult(result);
+    }
 
     @GetMapping("get_top_9")
     public JsonResult getTop9(@RequestParam("telNo") String telNo) {

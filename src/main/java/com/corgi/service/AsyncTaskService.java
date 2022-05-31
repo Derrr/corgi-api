@@ -3,12 +3,10 @@ package com.corgi.service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.entity.ActivityQuery;
-import com.corgi.user.api.CorgiCommentService;
-import com.corgi.user.api.CorgiLikeService;
-import com.corgi.user.api.CorgiUserActivityService;
-import com.corgi.user.entity.ActivityComment;
-import com.corgi.user.entity.ActivityLike;
+import com.corgi.user.api.*;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -27,6 +25,8 @@ public class AsyncTaskService {
     private CorgiCommentService corgiCommentService;
     @Reference
     private CorgiUserActivityService corgiUserActivityService;
+    @Reference
+    private CorgiUserService corgiUserService;
 
     @Async
     public Future<List<ActivityLike>> getUserLike(Long timestamp, String userId, Integer size) {
@@ -34,7 +34,7 @@ public class AsyncTaskService {
         ActivityLike query = new ActivityLike();
         query.setLikeUserId(userId);
         query.setCtime(sdf.format(new Date()));
-        if(timestamp > 0) {
+        if (timestamp > 0) {
             query.setCtime(sdf.format(new Date(timestamp)));
         }
         return new AsyncResult<>(corgiLikeService.queryLike(query, size));
@@ -46,7 +46,7 @@ public class AsyncTaskService {
         ActivityComment query = new ActivityComment();
         query.setCommentUserId(userId);
         query.setCtime(sdf.format(new Date()));
-        if(timestamp > 0) {
+        if (timestamp > 0) {
             query.setCtime(sdf.format(new Date(timestamp)));
         }
         return new AsyncResult<>(corgiCommentService.queryComment(query, size));
@@ -58,10 +58,16 @@ public class AsyncTaskService {
         ActivityQuery query = new ActivityQuery();
         query.setUserId(userId);
         query.setEndTime(sdf.format(new Date()));
-        if(timestamp > 0) {
+        if (timestamp > 0) {
             query.setEndTime(sdf.format(new Date(timestamp)));
         }
         query.setPageSize(size);
         return new AsyncResult<>(corgiUserActivityService.queryActivity(query));
     }
+
+    @Async
+    public void initRecommendUser(String userId) {
+        corgiUserService.initRecommendUserByUserId(userId);
+    }
+
 }

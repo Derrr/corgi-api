@@ -13,13 +13,11 @@ import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import com.aliyuncs.cloudauth.model.v20190307.CompareFacesResponse;
 import com.aliyuncs.cloudauth.model.v20190307.DescribeVerifyResultResponse;
 import com.aliyuncs.exceptions.ClientException;
-import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
-import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
@@ -69,8 +67,6 @@ public class CorgiUserController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiToolService corgiToolService;
-    //@Reference
-    //private CorgiUserMatchService corgiUserMatchService;
     @Reference
     private CorgiActivityService corgiActivityService;
     @Reference
@@ -87,6 +83,8 @@ public class CorgiUserController extends BaseController {
     private CorgiFakeService corgiFakeService;
     @Reference
     private CorgiLikeService corgiLikeService;
+    @Reference
+    private CorgiShareService corgiShareService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -100,6 +98,8 @@ public class CorgiUserController extends BaseController {
     private MailService mailService;
     @Autowired
     private CorgiUtilService corgiUtilService;
+    @Autowired
+    private AsyncTaskService asyncTaskService;
 
     @Value("${aliyun.bucketName}")
     private String bucketName;
@@ -152,6 +152,17 @@ public class CorgiUserController extends BaseController {
             }
         }
         return new JsonResult(Constants.API_ERROR_CODE, "验证码错误");
+    }
+
+    @GetMapping("/share")
+    public JsonResult shareUser(@RequestParam("userId") String userId) {
+        asyncTaskService.initRecommendUser(userId);
+        ActivityShare share = new ActivityShare();
+        share.setUserId(userId);
+        share.setShareUserId(getUserId());
+        share.setActivityId("0");
+        corgiShareService.addShare(share);
+        return new JsonResult();
     }
 
     @GetMapping("/unregister")
@@ -727,6 +738,9 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        if (userId.equals(targetUserId)) {
+            return new JsonResult();
+        }
         int follow = corgiUserFollowService.isFollowed(userId, targetUserId);
         if (follow != 1 && follow != 3) {
             corgiUserFollowService.follow(userId, targetUserId);
@@ -1052,6 +1066,12 @@ public class CorgiUserController extends BaseController {
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
+                String result = redisTemplate.opsForValue().get("acceptMatching_" + getUserId() + "-" + ids[i]);
+                if (StringUtils.isNotEmpty(result)) {
+                    userDetail.setMatch(1.0);
+                } else {
+                    userDetail.setMatch(0.0);
+                }
                 profiles.add(userDetail);
             }
         }

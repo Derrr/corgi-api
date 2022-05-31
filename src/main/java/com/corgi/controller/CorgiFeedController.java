@@ -136,8 +136,6 @@ public class CorgiFeedController extends BaseController {
         if (lastId == null) {
             lastId = 0L;
         }
-
-
         if (!corgiUtilService.isNewUser(getUserId())) {
             for (int i = 0; i < 5; i++) {
                 Future<List<CorgiActivity>> activityFuture = asyncTaskService.getUserActivity(lastId, userId, size);

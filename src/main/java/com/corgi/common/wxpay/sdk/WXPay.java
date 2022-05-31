@@ -15,6 +15,8 @@ public class WXPay {
     private boolean autoReport = false;
     private boolean useSandbox = false;
     private String notifyUrl = "https://api.corgi.org.cn/order/wx_callback";
+    //private String notifyUrl = "http://http://139.224.63.240:7888/order/wx_callback";
+
     private WXPayRequest wxPayRequest = new WXPayRequest();
 
     private void checkWXPayConfig() throws Exception {

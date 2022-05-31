@@ -98,6 +98,7 @@ public class CorgiPayService {
         model.setBody(merchandise.getContent());
         request.setBizModel(model);
         request.setNotifyUrl("https://api.corgi.org.cn/order/alipay_callback");
+        //request.setNotifyUrl("http://139.224.63.240:7888/order/alipay_callback");
         try {
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
             return response.getBody();

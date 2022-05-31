@@ -171,6 +171,7 @@ public class BillboardController extends BaseController {
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
                 }
+
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                     if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
@@ -216,6 +217,9 @@ public class BillboardController extends BaseController {
                         .initLikeCount(likeCount)
                         .hasLike(hasLike);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
+                if (!StringUtils.isEmpty(activity.getMerchId())) {
+                    detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(), getUserId()));
+                }
                 if (!StringUtils.isEmpty(activity.getUserId())) {
                     UserDetail userDetail = corgiUserService.getUserDetail(activity.getUserId(), null);
                     detail.setUserDetail(userDetail);
