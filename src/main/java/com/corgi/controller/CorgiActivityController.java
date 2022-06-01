@@ -1282,6 +1282,9 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setPage(1);
         }
         activityQuery.setSort(ActivityQuery.SORT_TIME);
+        if (CorgiActivity.CAT_BUSINESS.equals(activityQuery.getCategory())) {
+            activityQuery.setCity("");
+        }
         List<CorgiActivity> businessList = corgiActivityService.getCorgiActivityByRange(lng, lat, range, activityQuery);
         List<CorgiActivityDetail> detailList = convertDetail(businessList, userId);
         return new JsonResult(detailList);
