@@ -60,6 +60,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
+    public static final List<String> CHANNELS = Arrays.asList("meizu", "oppo", "vivo", "xiaomi", "huawei");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -104,7 +105,7 @@ public class CorgiUtilService {
 
     public boolean isNewUser(String userId) {
         String channel = RequestUtil.getChannel();
-        if ("meizu".equals(channel)) {
+        if (CHANNELS.contains(channel)) {
             UserLogin userLogin = corgiUserService.getUserLogin(userId);
             if ("17000000000".equals(userLogin.getTelNo())) {
                 return true;
