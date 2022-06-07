@@ -257,6 +257,10 @@ public class CorgiActivityController extends BaseController {
         }
         activity = corgiActivityService.addCorgiActivity(activity);
         corgiUserActivityService.updateActivityStatus(activity.getId(), activity.getCheckStatus());
+
+        String latestKey = "global_latest_activity" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        redisTemplate.opsForValue().setIfAbsent(latestKey, activity.getId(), 4L, TimeUnit.DAYS);
+
         if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) {
             CorgiVlog corgiVlog = new CorgiVlog();
             corgiVlog.setActivityId(activity.getId());
@@ -996,12 +1000,16 @@ public class CorgiActivityController extends BaseController {
     public JsonResult countFollowActivity() {
         String key = "latest_activity_" + getUserId();
         String activityId = redisTemplate.opsForValue().get(key);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -3);
-        String endTime = sdf.format(calendar.getTime());
+        if (StringUtils.isEmpty(activityId)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -3);
+            key = "global_latest_activity" + new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime());
+            activityId = redisTemplate.opsForValue().get(key);
+        }
+        if (StringUtils.isEmpty(activityId)) {
+            return new JsonResult(0);
+        }
         ActivityQuery query = new ActivityQuery();
-        query.setEndTime(endTime);
         query.setActivityId(activityId);
         query.setUserId(getUserId());
         return new JsonResult(corgiUserActivityService.countFollowUserActivity(query));
