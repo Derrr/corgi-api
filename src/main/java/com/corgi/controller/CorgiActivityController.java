@@ -693,18 +693,18 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
-    private boolean checkDuplicateActivity(CorgiActivity activity) {
-        CorgiActivity queryActivity = new CorgiActivity();
-        queryActivity.setStatus(CorgiActivity.CREATED);
-        queryActivity.setUserId(activity.getUserId());
-        if (AliyunGreenService.TEXT_FORBIDDEN.equals(activity.getTitle())) {
-            queryActivity.setCheckTitle(activity.getCheckTitle());
-        } else {
-            queryActivity.setTitle(activity.getTitle());
-        }
-        long result = corgiActivityService.countCorgiActivity(queryActivity);
-        return result > 0;
-    }
+//    private boolean checkDuplicateActivity(CorgiActivity activity) {
+//        CorgiActivity queryActivity = new CorgiActivity();
+//        queryActivity.setStatus(CorgiActivity.CREATED);
+//        queryActivity.setUserId(activity.getUserId());
+//        if (AliyunGreenService.TEXT_FORBIDDEN.equals(activity.getTitle())) {
+//            queryActivity.setCheckTitle(activity.getCheckTitle());
+//        } else {
+//            queryActivity.setTitle(activity.getTitle());
+//        }
+//        long result = corgiActivityService.countCorgiActivity(queryActivity);
+//        return result > 0;
+//    }
 
     @GetMapping("test_add_activity")
     public JsonResult testAddActivity() {
