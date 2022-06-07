@@ -643,16 +643,16 @@ public class CorgiUserController extends BaseController {
         corgiActivity.setStatus(CorgiActivity.CREATED);
         try {
             for (UserProfile userProfile : userProfiles) {
-                String key = "activity_count_" + userProfile.getUserId();
-                String count = redisTemplate.opsForValue().get(key);
-                if (StringUtils.isEmpty(count) || !StringUtils.isNumeric(count)) {
-                    corgiActivity.setUserId(userProfile.getUserId());
-                    long finalCount = corgiActivityService.countCorgiActivity(corgiActivity);
-                    userProfile.setActivityCount((int) finalCount);
-                    redisTemplate.opsForValue().set(key, finalCount + "", 1, TimeUnit.HOURS);
-                } else {
-                    userProfile.setActivityCount(Integer.parseInt(count));
-                }
+//                String key = "activity_count_" + userProfile.getUserId();
+//                String count = redisTemplate.opsForValue().get(key);
+//                if (StringUtils.isEmpty(count) || !StringUtils.isNumeric(count)) {
+//                    corgiActivity.setUserId(userProfile.getUserId());
+//                    long finalCount = corgiActivityService.countCorgiActivity(corgiActivity);
+//                    userProfile.setActivityCount((int) finalCount);
+//                    redisTemplate.opsForValue().set(key, finalCount + "", 1, TimeUnit.HOURS);
+//                } else {
+//                    userProfile.setActivityCount(Integer.parseInt(count));
+//                }
                 userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
             }
         } catch (Exception e) {
