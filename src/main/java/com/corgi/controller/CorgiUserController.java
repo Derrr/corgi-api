@@ -653,6 +653,7 @@ public class CorgiUserController extends BaseController {
 //                } else {
 //                    userProfile.setActivityCount(Integer.parseInt(count));
 //                }
+                userProfile.setActivityCount(0);
                 userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
             }
         } catch (Exception e) {
