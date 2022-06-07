@@ -258,8 +258,10 @@ public class CorgiActivityController extends BaseController {
         activity = corgiActivityService.addCorgiActivity(activity);
         corgiUserActivityService.updateActivityStatus(activity.getId(), activity.getCheckStatus());
 
-        String latestKey = "global_latest_activity" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        redisTemplate.opsForValue().setIfAbsent(latestKey, activity.getId(), 4L, TimeUnit.DAYS);
+        if(!StringUtils.isEmpty(activity.getId())) {
+            String latestKey = "global_latest_activity" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            redisTemplate.opsForValue().setIfAbsent(latestKey, activity.getId(), 4L, TimeUnit.DAYS);
+        }
 
         if (CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) {
             CorgiVlog corgiVlog = new CorgiVlog();
