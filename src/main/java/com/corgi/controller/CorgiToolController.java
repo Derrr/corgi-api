@@ -128,7 +128,7 @@ public class CorgiToolController extends BaseController {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
-        String key = "count_activity";
+        String key = "count_activity_status_" + activity.getStatus();
         String countStr = redisTemplate.opsForValue().get(key);
         if (!StringUtils.isEmpty(countStr)) {
             return new JsonResult(Integer.valueOf(countStr));
