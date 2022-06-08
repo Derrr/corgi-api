@@ -508,7 +508,7 @@ public class CorgiToolController extends BaseController {
                 count = corgiUserService.countUsers(userDetail);
                 break;
         }
-        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.MINUTES);
         return new JsonResult(count);
     }
 
