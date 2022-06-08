@@ -105,6 +105,10 @@ public class CorgiToolController extends BaseController {
             userId = getUserId();
         }
         List<UserProfile> profiles = corgiUserService.searchUsers(userDetail, userId, page, pageSize);
+        for (UserProfile profile : profiles) {
+            String expireDate = corgiUserService.getUserVipExpire(profile.getUserId());
+            profile.setVip(!StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
+        }
         return new JsonResult(profiles);
     }
 

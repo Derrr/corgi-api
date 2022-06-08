@@ -524,7 +524,11 @@ public class CorgiFeedController extends BaseController {
         vlogDetail.setActivityDetail(activity);
         vlogDetail.setHasLike(corgiLikeService.countUserLike(vlog.getActivityId(), userId));
         vlogDetail.setShareCount(corgiShareService.countShare(vlog.getActivityId()));
-        vlogDetail.setLikeCount(corgiLikeService.countActivityLike(vlog.getActivityId()).intValue());
+        Long likeCount = activity.getLikeCount();
+        if (likeCount == null) {
+            likeCount = corgiLikeService.countActivityLike(vlog.getActivityId());
+        }
+        vlogDetail.setLikeCount(likeCount.intValue());
         vlogDetail.setCommentCount(corgiCommentService.countActivityComment(vlog.getActivityId()).intValue());
         if (StringUtils.isEmpty(vlog.getVideoId()) && activity != null) {
             vlogDetail.setVideoId(activity.getVideoId());
@@ -600,7 +604,10 @@ public class CorgiFeedController extends BaseController {
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if(likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)
                         .initCommentCount(commentCount)

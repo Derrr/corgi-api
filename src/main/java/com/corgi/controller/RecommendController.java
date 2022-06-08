@@ -157,7 +157,10 @@ public class RecommendController extends BaseController {
                 activity.setCurrentTime(now);
 
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if (likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 Integer signUpCount = Math.toIntExact(corgiUserActivityService.countSignUpUser(activity.getId()));
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());

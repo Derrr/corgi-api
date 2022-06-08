@@ -258,7 +258,7 @@ public class CorgiActivityController extends BaseController {
         activity = corgiActivityService.addCorgiActivity(activity);
         corgiUserActivityService.updateActivityStatus(activity.getId(), activity.getCheckStatus());
 
-        if(!StringUtils.isEmpty(activity.getId())) {
+        if (!StringUtils.isEmpty(activity.getId())) {
             String latestKey = "global_latest_activity" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             redisTemplate.opsForValue().setIfAbsent(latestKey, activity.getId(), 4L, TimeUnit.DAYS);
         }
@@ -1700,7 +1700,10 @@ public class CorgiActivityController extends BaseController {
                 }
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Integer swiftCommentCount = corgiCommentService.countActivityCommentByStatus(activity.getId(), getUserId(), ActivityComment.SWIFT);
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if (likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 List<UserProfile> signUpUsers = new ArrayList<>();
