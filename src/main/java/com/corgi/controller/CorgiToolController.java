@@ -132,13 +132,13 @@ public class CorgiToolController extends BaseController {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
-        String key = "count_activity_status_" + activity.getStatus();
-        String countStr = redisTemplate.opsForValue().get(key);
-        if (!StringUtils.isEmpty(countStr)) {
-            return new JsonResult(Integer.valueOf(countStr));
-        }
+//        String key = "count_activity_status_" + activity.getStatus();
+//        String countStr = redisTemplate.opsForValue().get(key);
+//        if (!StringUtils.isEmpty(countStr)) {
+//            return new JsonResult(Integer.valueOf(countStr));
+//        }
         long count = corgiActivityService.countCorgiActivity(activity);
-        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.HOURS);
+//        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.HOURS);
         return new JsonResult(count);
     }
 
@@ -495,10 +495,10 @@ public class CorgiToolController extends BaseController {
     public JsonResult countTask(@RequestParam("type") String type) {
         long count = 0;
         String key = "task_count_" + type;
-        String countStr = redisTemplate.opsForValue().get(key);
-        if (!StringUtils.isEmpty(countStr)) {
-            return new JsonResult(Integer.valueOf(countStr));
-        }
+//        String countStr = redisTemplate.opsForValue().get(key);
+//        if (!StringUtils.isEmpty(countStr)) {
+//            return new JsonResult(Integer.valueOf(countStr));
+//        }
         switch (type) {
             case ACTIVITY_TASK:
                 CorgiActivity corgiActivity = new CorgiActivity();
@@ -512,7 +512,7 @@ public class CorgiToolController extends BaseController {
                 count = corgiUserService.countUsers(userDetail);
                 break;
         }
-        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.MINUTES);
+//        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.MINUTES);
         return new JsonResult(count);
     }
 
