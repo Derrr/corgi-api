@@ -85,7 +85,7 @@ public class RecommendController extends BaseController {
     }
 
     @GetMapping("get_city_image")
-    public JsonResult getCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+    public JsonResult getCityImage(@RequestParam(name = "city", required = false, defaultValue = "") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         List<String> activityIds;
         if (corgiUtilService.isNewUser(getUserId())) {
             activityIds = corgiFeedService.getPopularFeed(getUserId(), size);
