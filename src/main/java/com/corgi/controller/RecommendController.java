@@ -97,7 +97,7 @@ public class RecommendController extends BaseController {
     }
 
     @GetMapping("get_bar_activity")
-    public JsonResult getBarActivity(@RequestParam("city") String city) {
+    public JsonResult getBarActivity(@RequestParam(name = "city", required = false, defaultValue = "") String city) {
         List<String> activityIds = corgiBarService.getBarActivity(city, 3);
         if (CollectionUtils.isEmpty(activityIds)) {
             return new JsonResult(new ArrayList());
@@ -107,15 +107,16 @@ public class RecommendController extends BaseController {
     }
 
     @GetMapping("get_not_city_image")
-    public JsonResult getNotCityImage(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-        List<String> activityIds;
-        if (corgiUtilService.isNewUser(getUserId())) {
-            activityIds = corgiFeedService.getPopularFeed(getUserId(), size);
-        } else {
-            activityIds = corgiUserRecommendService.getNotCityRecommendImage(getUserId(), city, page, size);
-        }
-        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(convertDetail(activityList, getUserId()));
+    public JsonResult getNotCityImage(@RequestParam(name = "city", required = false, defaultValue = "") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+        return new JsonResult(new ArrayList<>());
+//        List<String> activityIds;
+//        if (corgiUtilService.isNewUser(getUserId())) {
+//            activityIds = corgiFeedService.getPopularFeed(getUserId(), size);
+//        } else {
+//            activityIds = corgiUserRecommendService.getNotCityRecommendImage(getUserId(), city, page, size);
+//        }
+//        List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(activityIds);
+//        return new JsonResult(convertDetail(activityList, getUserId()));
     }
 
     @GetMapping("get_city_user")
