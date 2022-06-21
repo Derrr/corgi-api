@@ -1724,7 +1724,7 @@ public class CorgiActivityController extends BaseController {
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
                     detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(), getUserId()));
                 }
-                if (!StringUtils.isEmpty(activity.getUserId()) && activity.getUserId().startsWith("B")) {
+                if (!StringUtils.isEmpty(activity.getUserId()) && (activity.getUserId().startsWith("B") || activity.getUserId().startsWith("C"))) {
                     detail.setBarId(detail.getUserId());
                     detail.setUserId(null);
                     BarProfile profile = corgiBarService.getBarProfile(detail.getBarId());
