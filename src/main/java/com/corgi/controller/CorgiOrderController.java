@@ -269,7 +269,7 @@ public class CorgiOrderController extends BaseController {
     }
 
     @GetMapping("count_order")
-    public JsonResult countOrder(@RequestParam(name = "type",required = false) String type,
+    public JsonResult countOrder(@RequestParam(name = "type", required = false) String type,
                                  @RequestParam(name = "status", required = false) String status,
                                  @RequestParam(name = "userId", required = false) String userId) {
         if (hasUserId()) {
@@ -379,7 +379,6 @@ public class CorgiOrderController extends BaseController {
         String tradeNo = receipt.get("tradeNo");
         String receiptData = receipt.get("receipt");
         String transactionId = receipt.get("transactionId");
-        String buyerId = receipt.get("buyerId");
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单不存在");
@@ -419,9 +418,7 @@ public class CorgiOrderController extends BaseController {
                     corgiOrderService.updateOrder(order);
                     return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
                 } else {
-                    if (StringUtils.isNotEmpty(buyerId)) {
-                        order.setBuyerId(buyerId);
-                    }
+                    order.setBuyerId(inApp.getString("expires_date_ms"));
                     order.setPayTime(inApp.getString("original_purchase_date_ms"));
                     order.setOrderId(inApp.getString("transaction_id"));
                 }
