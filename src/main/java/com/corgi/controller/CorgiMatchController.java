@@ -74,24 +74,35 @@ public class CorgiMatchController extends BaseController {
         extra.put("userId", getUserId());
         extra.put("type", PushMessage.QUICK_MATCH_ACCEPT_TYPE);
         if ("1".equals(matcher.getType())) {
+            String key = "last_accept_" + getUserId();
+            List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
+            if (lastAcceptList == null) {
+                lastAcceptList = new ArrayList<>();
+            }
             if (!CollectionUtils.isEmpty(matchIds)) {
                 for (String matchId : matchIds) {
-                    redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, "1", 14l, TimeUnit.DAYS);
-                    corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
-                    mqService.sendMessage(PushMessage.builder()
-                            .type(PushMessage.DEFAULT)
-                            .sourceUserId(getUserId())
-                            .targetUserId(matchId)
-                            .message("匹配成功，快去聊聊吧")
-                            .extra(extra)
-                            .build());
+                    if (!lastAcceptList.contains(matchId)) {
+                        redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, "1", 14l, TimeUnit.DAYS);
+                        corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
+                        mqService.sendMessage(PushMessage.builder()
+                                .type(PushMessage.DEFAULT)
+                                .sourceUserId(getUserId())
+                                .targetUserId(matchId)
+                                .message("匹配成功，快去聊聊吧")
+                                .extra(extra)
+                                .build());
+                    }
                 }
+                redisTemplate.delete(key);
+                redisTemplate.opsForList().rightPushAll(key, matchIds);
+                redisTemplate.expire(key, 20l, TimeUnit.HOURS);
             }
             return new JsonResult();
         }
 
         String key = "count_matching-" + getUserId();
         Integer result = 0;
+        String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
                 List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
@@ -107,6 +118,14 @@ public class CorgiMatchController extends BaseController {
                 }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
                 if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
+
+                    List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
+                    redisTemplate.delete(matchKey);
+
+
+                    if (lastMatchList == null) {
+                        lastMatchList = new ArrayList<>();
+                    }
                     int i = 0;
                     for (UserMatchRemain remain1 : remains) {
                         Integer size = remain1.getRemain();
@@ -115,6 +134,10 @@ public class CorgiMatchController extends BaseController {
                                 return new JsonResult(result);
                             }
                             String matchId = matchIds.get(i);
+                            redisTemplate.opsForList().rightPush(matchKey, matchId);
+                            if (lastMatchList.contains(matchId)) {
+                                continue;
+                            }
                             corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
                             mqService.sendMessage(PushMessage.builder()
                                     .type(PushMessage.DEFAULT)
@@ -129,6 +152,9 @@ public class CorgiMatchController extends BaseController {
                 }
             }
         } finally {
+            if (redisTemplate.hasKey(key)) {
+                redisTemplate.expire(matchKey, 1L, TimeUnit.HOURS);
+            }
             corgiUtilService.unlock(key);
         }
         return new JsonResult(result);
