@@ -102,6 +102,7 @@ public class CorgiMatchController extends BaseController {
 
         String key = "count_matching-" + getUserId();
         Integer result = 0;
+        String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
                 List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
@@ -117,11 +118,11 @@ public class CorgiMatchController extends BaseController {
                 }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
                 if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
-                    String matchKey = "last_match_" + getUserId();
+
                     List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
                     redisTemplate.delete(matchKey);
-                    redisTemplate.opsForList().rightPushAll(matchKey, matchIds);
-                    redisTemplate.expire(matchKey, 20L, TimeUnit.HOURS);
+
+
                     if (lastMatchList == null) {
                         lastMatchList = new ArrayList<>();
                     }
@@ -133,6 +134,7 @@ public class CorgiMatchController extends BaseController {
                                 return new JsonResult(result);
                             }
                             String matchId = matchIds.get(i);
+                            redisTemplate.opsForList().rightPush(matchKey, matchId);
                             if (lastMatchList.contains(matchId)) {
                                 continue;
                             }
@@ -150,7 +152,9 @@ public class CorgiMatchController extends BaseController {
                 }
             }
         } finally {
-
+            if (redisTemplate.hasKey(key)) {
+                redisTemplate.expire(matchKey, 1L, TimeUnit.HOURS);
+            }
             corgiUtilService.unlock(key);
         }
         return new JsonResult(result);
