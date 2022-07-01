@@ -590,6 +590,11 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_comment_by_id")
+    public JsonResult getCommentById(@RequestParam("commentId") String commentId) {
+        return new JsonResult(corgiCommentService.getCommentByCommentId(commentId));
+    }
+
     @GetMapping("get_comments")
     public JsonResult getComment(@RequestParam("activityId") String activityId,
                                  @RequestParam(required = false, name = "lastId") Integer id,
