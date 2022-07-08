@@ -88,14 +88,14 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
-            config.put("showPay", 0);
-            config.put("showDiscovery", 0);
-            config.put("showPurse", 0);
-        }
-        if ("huawei".equals(RequestUtil.getChannel())) {
-            config.put("showMap", 0);
-        }
+//        if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
+//            config.put("showPay", 0);
+//            config.put("showDiscovery", 0);
+//            config.put("showPurse", 0);
+//        }
+//        if ("huawei".equals(RequestUtil.getChannel())) {
+//            config.put("showMap", 0);
+//        }
         return new JsonResult(config);
     }
 
