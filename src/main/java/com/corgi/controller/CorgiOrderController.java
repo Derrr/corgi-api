@@ -146,6 +146,19 @@ public class CorgiOrderController extends BaseController {
             corgiUtilService.unlock(key);
         }
     }
+    @GetMapping("pay_billboard")
+    public JsonResult payBillboard(@RequestParam("merchId") String merchId,
+                          @RequestParam(required = false, name = "goodsId") String goodsId,
+                          @RequestParam("payType") String payType) {
+        String key = "user_pay_" + getUserId();
+        if (!redisTemplate.opsForValue().setIfAbsent(key.concat("attack"), "1", 2L, TimeUnit.SECONDS)) {
+            return new JsonResult();
+        }
+        corgiUtilService.lock(key);
+        try {
+
+        }
+    }
 
     @GetMapping("pay")
     public JsonResult pay(@RequestParam("merchId") String merchId,
