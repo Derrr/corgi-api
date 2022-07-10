@@ -119,16 +119,16 @@ public class CorgiOrderController extends BaseController {
             String dateStr = sdf1.format(new Date());
             Date nowDate = sdf1.parse(dateStr);
             orderQuery.setCtime(sdf2.format(nowDate));
-//            postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
-//            int i = 0;
-//            for (CorgiOrder nowMonthOrder : postOrders) {
-//                if (nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.CLOSE) || nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.SUCCESS)) {
-//                    i++;
-//                }
-//                if (i > 4) {
-//                    return new JsonResult(Constants.API_ERROR_CODE, "本月提现次数已满");
-//                }
-//            }
+            postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
+            int i = 0;
+            for (CorgiOrder nowMonthOrder : postOrders) {
+                if (nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.CLOSE) || nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.SUCCESS)) {
+                    i++;
+                }
+                if (i > 4) {
+                    return new JsonResult(Constants.API_ERROR_CODE, "本月提现次数已满");
+                }
+            }
             order.setUserId(getUserId());
             order.setOrderId((Long.toHexString(System.currentTimeMillis() / 1000)).toUpperCase());
             order.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
