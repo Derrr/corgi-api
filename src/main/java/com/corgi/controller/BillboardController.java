@@ -126,6 +126,30 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_paid_billboard")
+    public JsonResult getPaidBillboar(PaidBillboard paidBillboard) {
+        if (!hasUserId()) {
+            return new JsonResult(corgiBillboardService.queryPaidBillboard(paidBillboard));
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("count_paid_billboard")
+    public JsonResult countPaidBillboard(PaidBillboard paidBillboard) {
+        if (!hasUserId()) {
+            return new JsonResult(corgiBillboardService.countPaiBillboard(paidBillboard));
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("update_paid_billboard")
+    public JsonResult updatePaidBillboard(PaidBillboard paidBillboard) {
+        if (!hasUserId()) {
+            corgiBillboardService.updatePaiBillboard(paidBillboard);
+        }
+        return new JsonResult();
+    }
+
     private List<ActivityBillboardDetail> buildActivityBillboard(List<ActivityBillboard> billboards) {
         List<ActivityBillboardDetail> detailList = new ArrayList<>();
         for (ActivityBillboard billboard : billboards) {

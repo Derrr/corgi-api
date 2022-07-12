@@ -54,6 +54,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiBillboardService corgiBillboardService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -146,17 +148,47 @@ public class CorgiOrderController extends BaseController {
             corgiUtilService.unlock(key);
         }
     }
+
     @GetMapping("pay_billboard")
     public JsonResult payBillboard(@RequestParam("merchId") String merchId,
-                          @RequestParam(required = false, name = "goodsId") String goodsId,
-                          @RequestParam("payType") String payType) {
-        String key = "user_pay_" + getUserId();
-        if (!redisTemplate.opsForValue().setIfAbsent(key.concat("attack"), "1", 2L, TimeUnit.SECONDS)) {
+                                   @RequestParam(name = "goodsId") String goodsId,
+                                   @RequestParam(name = "date") String date,
+                                   @RequestParam("payType") String payType) {
+        String key = "billboard_pay_" + date;
+        if (!redisTemplate.opsForValue().setIfAbsent(key.concat(getUserId()), "1", 2L, TimeUnit.SECONDS)) {
             return new JsonResult();
         }
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
+        }
+        CorgiActivity activity = corgiActivities.get(0);
         corgiUtilService.lock(key);
         try {
-
+            PaidBillboard paidBillboard = new PaidBillboard();
+            paidBillboard.setDate(date);
+            List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard);
+            int count = 0;
+            if (CollectionUtils.isNotEmpty(billboards)) {
+                for (PaidBillboard billboard : billboards) {
+                    if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
+                        count++;
+                        if (count > 1) {
+                            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期上榜动态已满");
+                        }
+                    }
+                    if (goodsId.equals(billboard.getActivityId())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
+                    }
+                }
+            }
+            paidBillboard.setUserId(activity.getUserId());
+            paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
+            HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+            return new JsonResult(result);
+        } finally {
+            corgiUtilService.unlock(key);
         }
     }
 
@@ -229,34 +261,19 @@ public class CorgiOrderController extends BaseController {
                 sellerId = activity.getUserId();
             }
 
-            HashMap<String, Object> result = new HashMap<>();
-            String tradeNo = UuidUtil.getTradeNo(getUserId());
-            CorgiOrder order = CorgiOrder.builder()
-                    .userId(getUserId())
-                    .payType(payType)
-                    .marketId(marketId)
-                    .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
-                    .merchId(merchandise.getId())
-                    .tradeNo(tradeNo)
-                    .sellerId(sellerId)
-                    .payAmount(merchandise.getPrice())
-                    .build();
-            result.put("orderString", "");
-            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
-                result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
-            }
-            if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
-                result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
-            }
-            if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType)) {
-                corgiOrderService.addOrder(order);
-            }
-            result.put("orderNo", order.getTradeNo());
-            result.put("merchandise", merchandise);
+            HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    @GetMapping("get_merchandises_by_date")
+    public JsonResult getMerchandiseByDate(@RequestParam("date") String date) {
+        CorgiMerchandise query = new CorgiMerchandise();
+        query.setType("billboard");
+        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
+        return new JsonResult(merchandises);
     }
 
     @GetMapping("get_merchandises")
@@ -641,6 +658,34 @@ public class CorgiOrderController extends BaseController {
         order.setResult(JSON.toJSONString(params));
         corgiOrderService.updateOrder(order);
         return new JsonResult();
+    }
+
+    private HashMap<String, Object> payResult(String payType, String marketId, String sellerId, CorgiMerchandise merchandise) {
+        HashMap<String, Object> result = new HashMap<>();
+        String tradeNo = UuidUtil.getTradeNo(getUserId());
+        CorgiOrder order = CorgiOrder.builder()
+                .userId(getUserId())
+                .payType(payType)
+                .marketId(marketId)
+                .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
+                .merchId(merchandise.getId())
+                .tradeNo(tradeNo)
+                .sellerId(sellerId)
+                .payAmount(merchandise.getPrice())
+                .build();
+        result.put("orderString", "");
+        if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
+            result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
+        }
+        if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
+            result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
+        }
+        if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType)) {
+            corgiOrderService.addOrder(order);
+        }
+        result.put("orderNo", order.getTradeNo());
+        result.put("merchandise", merchandise);
+        return result;
     }
 
     private CorgiOrder buildWXOrder(Map<String, String> params) {
