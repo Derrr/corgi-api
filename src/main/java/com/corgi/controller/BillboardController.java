@@ -147,18 +147,13 @@ public class BillboardController extends BaseController {
 
     @GetMapping("get_paid_billboard")
     public JsonResult getPaidBillboar(PaidBillboard paidBillboard, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        HashMap<String,Object> result = new HashMap<>();
         if (!hasUserId()) {
-            return new JsonResult(corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
+            result.put("activities",corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
+            result.put("total",corgiBillboardService.countPaiBillboard(paidBillboard));
+            return new JsonResult(result);
         }
-        return new JsonResult();
-    }
-
-    @GetMapping("count_paid_billboard")
-    public JsonResult countPaidBillboard(PaidBillboard paidBillboard) {
-        if (!hasUserId()) {
-            return new JsonResult(corgiBillboardService.countPaiBillboard(paidBillboard));
-        }
-        return new JsonResult();
+        return new JsonResult(result);
     }
 
     @GetMapping("update_paid_billboard")
