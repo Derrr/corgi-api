@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -68,9 +69,27 @@ public class BillboardController extends BaseController {
     public JsonResult getActivityBillboard() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
+        PaidBillboard query = new PaidBillboard();
+        query.setDate(date);
+        query.setStatus(PaidBillboard.PASS);
+        List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(query);
+        List<String> paidIds = new ArrayList<>();
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(billboards)) {
+            for (PaidBillboard paidBillboard : billboards) {
+                paidIds.add(paidBillboard.getActivityId());
+            }
+            detailList = buildActivity(corgiActivityService.getActivityByIds(paidIds));
+            for (CorgiActivityDetail detail : detailList) {
+                detail.setCategory("paidOnboard");
+            }
+        }
+
         List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
+        activityIds = activityIds.stream().filter(a -> !paidIds.contains(a)).collect(Collectors.toList());
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(buildActivity(activities));
+        detailList.addAll(buildActivity(activities));
+        return new JsonResult(detailList);
     }
 
     @GetMapping("get_activity_billboard_by_date")
