@@ -72,7 +72,7 @@ public class BillboardController extends BaseController {
         PaidBillboard query = new PaidBillboard();
         query.setDate(date);
         query.setStatus(PaidBillboard.PASS);
-        List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(query);
+        List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(query, 1, 100);
         List<String> paidIds = new ArrayList<>();
         List<CorgiActivityDetail> detailList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(billboards)) {
@@ -146,9 +146,9 @@ public class BillboardController extends BaseController {
     }
 
     @GetMapping("get_paid_billboard")
-    public JsonResult getPaidBillboar(PaidBillboard paidBillboard) {
+    public JsonResult getPaidBillboar(PaidBillboard paidBillboard, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         if (!hasUserId()) {
-            return new JsonResult(corgiBillboardService.queryPaidBillboard(paidBillboard));
+            return new JsonResult(corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
         }
         return new JsonResult();
     }

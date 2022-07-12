@@ -167,7 +167,7 @@ public class CorgiOrderController extends BaseController {
         try {
             PaidBillboard paidBillboard = new PaidBillboard();
             paidBillboard.setDate(date);
-            List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard);
+            List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
             int count = 0;
             if (CollectionUtils.isNotEmpty(billboards)) {
                 for (PaidBillboard billboard : billboards) {
