@@ -600,12 +600,12 @@ public class CorgiFeedController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
-                List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
+                List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 Long likeCount = activity.getLikeCount();
-                if(likeCount == null) {
+                if (likeCount == null) {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());
                 }
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
