@@ -62,8 +62,8 @@ public class BillboardController extends BaseController {
     }
 
     @GetMapping("update_order")
-    public JsonResult updateOrder(@RequestParam("userId") String userId, @RequestParam("date") String date, @RequestParam("order") Integer order) {
-        corgiBillboardService.updateBillboardOrder(userId, date, order);
+    public JsonResult updateOrder(@RequestParam("activityId") String activityId, @RequestParam("date") String date, @RequestParam("order") Integer order) {
+        corgiBillboardService.updateBillboardOrder(activityId, date, order);
         return new JsonResult();
     }
 
