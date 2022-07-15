@@ -1052,6 +1052,10 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiVisitService.countVisitUnread(userId));
     }
 
+    @GetMapping("get_city_new_user")
+    public JsonResult getCityNewUser(@RequestParam("city") String city) {
+        return new JsonResult(corgiUserService.recommendUser(city,getUserId()));
+    }
 
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
@@ -1067,12 +1071,8 @@ public class CorgiUserController extends BaseController {
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
-                String result = redisTemplate.opsForValue().get("acceptMatching_" + getUserId() + "-" + ids[i]);
-                if (StringUtils.isNotEmpty(result)) {
-                    userDetail.setMatch(1.0);
-                } else {
-                    userDetail.setMatch(0.0);
-                }
+                String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
+                userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
                 profiles.add(userDetail);
             }
         }

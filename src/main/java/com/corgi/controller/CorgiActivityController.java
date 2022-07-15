@@ -698,19 +698,6 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
-//    private boolean checkDuplicateActivity(CorgiActivity activity) {
-//        CorgiActivity queryActivity = new CorgiActivity();
-//        queryActivity.setStatus(CorgiActivity.CREATED);
-//        queryActivity.setUserId(activity.getUserId());
-//        if (AliyunGreenService.TEXT_FORBIDDEN.equals(activity.getTitle())) {
-//            queryActivity.setCheckTitle(activity.getCheckTitle());
-//        } else {
-//            queryActivity.setTitle(activity.getTitle());
-//        }
-//        long result = corgiActivityService.countCorgiActivity(queryActivity);
-//        return result > 0;
-//    }
-
     @GetMapping("test_add_activity")
     public JsonResult testAddActivity() {
         CorgiActivity query = new CorgiActivity();
@@ -753,12 +740,12 @@ public class CorgiActivityController extends BaseController {
         }
         if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
             List<ActivityPic> activitypics = corgiPicService.getActivityPic(activity.getId());
-            List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
-            if (CollectionUtils.isEmpty(recommendUser)) {
-                recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
-            }
+//            List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
+//            if (CollectionUtils.isEmpty(recommendUser)) {
+//                recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
+//            }
             return new JsonResult(AddActivityResult.getResult(activity)
-                    .setRecommend(recommendUser)
+//                    .setRecommend(recommendUser)
                     .setActivityPics(activitypics)
                     .setCanCallCity(getCallCityKey(activity.getUserId()) != null)
                     .setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activity.getId()))));

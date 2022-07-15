@@ -45,6 +45,8 @@ public class BillboardController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
 
@@ -89,6 +91,17 @@ public class BillboardController extends BaseController {
         activityIds = activityIds.stream().filter(a -> !paidIds.contains(a)).collect(Collectors.toList());
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         detailList.addAll(buildActivity(activities));
+        List<UserBasic> userBasics = corgiBlacklistService.getBlackUser(getUserId());
+        if (!CollectionUtils.isEmpty(userBasics)) {
+            List<CorgiActivityDetail> result = new ArrayList<>();
+            List<String> userIds = userBasics.stream().map(b -> b.getUserId()).collect(Collectors.toList());
+            for (CorgiActivityDetail detail : detailList) {
+                if (!userIds.contains(detail.getUserId())) {
+                    result.add(detail);
+                }
+            }
+            return new JsonResult(result);
+        }
         return new JsonResult(detailList);
     }
 
@@ -147,10 +160,10 @@ public class BillboardController extends BaseController {
 
     @GetMapping("get_paid_billboard")
     public JsonResult getPaidBillboar(PaidBillboard paidBillboard, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        HashMap<String,Object> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
         if (!hasUserId()) {
-            result.put("activities",corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
-            result.put("total",corgiBillboardService.countPaiBillboard(paidBillboard));
+            result.put("activities", corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
+            result.put("total", corgiBillboardService.countPaiBillboard(paidBillboard));
             return new JsonResult(result);
         }
         return new JsonResult(result);
@@ -192,11 +205,9 @@ public class BillboardController extends BaseController {
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
                 if (activity == null || activity.getUserId() == null) {
-                    it.remove();
                     continue;
                 }
                 if ("fail".equals(activity.getCheckStatus()) || (!(CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) || CorgiActivity.CAT_TEXT.equals(activity.getCategory())) && CollectionUtils.isEmpty(activity.getPics()))) {
-                    it.remove();
                     continue;
                 }
                 activity.setCurrentTime(now);
