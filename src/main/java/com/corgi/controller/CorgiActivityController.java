@@ -1303,9 +1303,10 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_user_activity")
     public JsonResult getMyRunningActivity(ActivityQuery query) {
         query.setLoginUserId(getUserId());
-        if (corgiUtilService.isNewUser(getUserId())) {
-            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
-            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
+        if (!getUserId().equals(query.getUserId()) && corgiUtilService.isNewUser(getUserId())) {
+            return new JsonResult(new ArrayList());
+//            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
+//            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
         } else {
             return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), true));
         }
