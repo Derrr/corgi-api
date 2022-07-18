@@ -73,6 +73,7 @@ public class CorgiMatchController extends BaseController {
         HashMap<String, Object> extra = new HashMap<>();
         extra.put("userId", getUserId());
         extra.put("type", PushMessage.QUICK_MATCH_ACCEPT_TYPE);
+        extra.put("greeting", matcher.getGreeting());
         if ("1".equals(matcher.getType())) {
             String key = "last_accept_" + getUserId();
             List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
