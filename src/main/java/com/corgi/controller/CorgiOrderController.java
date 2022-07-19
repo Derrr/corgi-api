@@ -78,6 +78,29 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("refund")
+    public JsonResult refund(@RequestParam("tradeNo") String tradeNo) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
+        try {
+            if (!CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
+                return new JsonResult(Constants.API_ERROR_CODE, "无法退单");
+            }
+            if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
+                corgiPayService.wxRefundOrder(order);
+            }
+
+            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayType())) {
+
+            }
+        } catch (Exception e) {
+            order.setResult(e.getMessage());
+        }
+        return new JsonResult();
+    }
+
     @PostMapping("withdraw")
     public JsonResult withdraw(@RequestBody CorgiOrder order) {
         String key = "withdraw_" + getUserId();

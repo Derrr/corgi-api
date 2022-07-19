@@ -1054,7 +1054,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("get_city_new_user")
     public JsonResult getCityNewUser(@RequestParam("city") String city) {
-        return new JsonResult(corgiUserService.recommendUser(city,getUserId()));
+        return new JsonResult(corgiUserService.recommendUser(city, getUserId()));
     }
 
     @GetMapping("get_map_user")
@@ -1068,12 +1068,19 @@ public class CorgiUserController extends BaseController {
     public JsonResult getUserByIds(@RequestParam("userIds") String userIds) {
         String[] ids = userIds.split(",");
         List<UserDetail> profiles = new ArrayList<>();
+        Long threshold = System.currentTimeMillis() - 2 * 60000;
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
                 String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
                 userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
                 profiles.add(userDetail);
+                UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
+                if (position.getUptime() != null && position.getUptime() > threshold) {
+                    userDetail.setOnlineStatus(1);
+                } else {
+                    userDetail.setOnlineStatus(0);
+                }
             }
         }
         return new JsonResult(profiles);

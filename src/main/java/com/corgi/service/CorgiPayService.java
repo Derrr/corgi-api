@@ -109,6 +109,15 @@ public class CorgiPayService {
         /** response.getBody()打印结果就是orderString，可以直接给客户端请求，无需再做处理。 如果传值客户端失败，可根据返回错误信息到该文档寻找排查方案：https://opensupport.alipay.com/support/helpcenter/89 **/
     }
 
+    public Map<String, String> wxRefundOrder(CorgiOrder order) throws Exception {
+        Map<String, String> orderMap = new HashMap<>();
+        orderMap.put("out_trade_no", order.getTradeNo());
+        Map<String, String> result = wxPay.refund(orderMap);
+        order.setResult("订单退款");
+        order.setStatus(CorgiOrder.STATUS.CLOSE);
+        return result;
+    }
+
     public Map<String, String> wxCloseOrder(CorgiOrder order) throws Exception {
         Map<String, String> orderQuery = new HashMap<>();
         orderQuery.put("out_trade_no", order.getTradeNo());
