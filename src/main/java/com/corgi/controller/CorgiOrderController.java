@@ -466,6 +466,9 @@ public class CorgiOrderController extends BaseController {
                     }
                 }
                 if (null == inApp) {
+                    inApp = inApps.getJSONObject(0);
+                }
+                if (null == inApp) {
                     order.setStatus(CorgiOrder.STATUS.FAIL);
                     order.setOrderId(transactionId);
                     corgiOrderService.updateOrder(order);
