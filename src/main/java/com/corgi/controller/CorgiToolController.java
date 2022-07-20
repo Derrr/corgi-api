@@ -93,9 +93,6 @@ public class CorgiToolController extends BaseController {
             config.put("showDiscovery", 0);
             config.put("showPurse", 0);
         }
-        if ("huawei".equals(RequestUtil.getChannel())) {
-            config.put("showMap", 0);
-        }
         return new JsonResult(config);
     }
 
