@@ -402,16 +402,19 @@ public class CorgiOrderController extends BaseController {
             JSONArray inApps = receiptResult.getJSONArray("in_app");
             if (inApps != null) {
                 JSONObject inApp = null;
-//                if (1 == inApps.size()) {
+                if (1 == inApps.size()) {
                     inApp = inApps.getJSONObject(0);
-//                } else {
-//                    for (int i = 0; i < inApps.size(); i++) {
-//                        JSONObject orderItem = inApps.getJSONObject(i);
-//                        if (orderItem.getString("transaction_id").equals(transactionId)) {
-//                            inApp = orderItem;
-//                        }
-//                    }
-//                }
+                } else {
+                    for (int i = 0; i < inApps.size(); i++) {
+                        JSONObject orderItem = inApps.getJSONObject(i);
+                        if (orderItem.getString("transaction_id").equals(transactionId)) {
+                            inApp = orderItem;
+                        }
+                    }
+                }
+                if (null == inApp) {
+                    inApp = inApps.getJSONObject(0);
+                }
                 if (null == inApp) {
                     order.setStatus(CorgiOrder.STATUS.FAIL);
                     order.setOrderId(transactionId);
