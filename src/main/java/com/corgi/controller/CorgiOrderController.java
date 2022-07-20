@@ -561,19 +561,18 @@ public class CorgiOrderController extends BaseController {
 
     @Deprecated
     @PostMapping("applepay_callback")
-    public JsonResult applepayCallback(@RequestBody String signedPayload) {
-        log.info("callback:{} ", signedPayload);
+    public JsonResult applepayCallback(@RequestBody JSONObject object) {
+        log.info("callback:{} ", object);
         try {
-            DecodedJWT decodedJWT = JWTUtils.verifyToken(signedPayload);
-            String notificationType = decodedJWT.getClaim("notificationType").asString();
+            String notificationType = object.getString("notification_type");
             if ("REFUND".equals(notificationType)) {
-                HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
-                DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
-                CorgiOrder order = CorgiOrder.builder()
-                        .orderId(obj.getClaim("transactionId").asString())
-                        .result(JSON.toJSONString(decodedJWT))
-                        .build();
-                corgiOrderService.subscribe(order, null, "0", "");
+//                HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
+//                DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
+//                CorgiOrder order = CorgiOrder.builder()
+//                        .orderId(obj.getClaim("transactionId").asString())
+//                        .result(JSON.toJSONString(decodedJWT))
+//                        .build();
+//                corgiOrderService.subscribe(order, null, "0", "");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
