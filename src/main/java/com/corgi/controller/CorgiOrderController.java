@@ -413,6 +413,7 @@ public class CorgiOrderController extends BaseController {
                     }
                 }
                 if (null == inApp) {
+                    inApps = result.getJSONArray("latest_receipt_info");
                     inApp = inApps.getJSONObject(0);
                 }
                 if (null == inApp) {
