@@ -229,6 +229,9 @@ public class CorgiOrderController extends BaseController {
             if (StringUtils.isEmpty(goodsId) && CorgiMerchandise.ACTIVITY.equals(merchandise.getType())) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "参数错误");
             }
+            if (!hasUserId()) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "参数错误");
+            }
             if (merchandise == null) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
             }
