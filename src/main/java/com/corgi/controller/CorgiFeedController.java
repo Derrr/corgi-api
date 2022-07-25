@@ -519,7 +519,7 @@ public class CorgiFeedController extends BaseController {
 
     private VlogDetail buildVlogDetail(CorgiVlog vlog, String userId) {
         CorgiActivity activity = corgiActivityFeedService.getActivityById(vlog.getActivityId());
-        if (Arrays.asList("check", "not_good", "fail").contains(activity.getCheckStatus())) {
+        if (AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())) {
             return null;
         }
         VlogDetail vlogDetail = VlogDetail.createDetail(vlog);

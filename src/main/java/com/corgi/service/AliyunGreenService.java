@@ -58,6 +58,7 @@ public class AliyunGreenService {
     public static String PASS = "pass";
     public static String FAIL = "fail";
     public static String NOT_GOOD = "not_good";
+    public static List<String> CHECK_LIST = Arrays.asList("check", "not_good", "fail");
 
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
