@@ -380,7 +380,7 @@ public class CorgiOrderController extends BaseController {
     @PostMapping("applepay_verify")
     public JsonResult applyPayVerify(@RequestBody HashMap<String, String> receipt) {
         String tradeNo = receipt.get("tradeNo");
-        String receiptData = receipt.get("receipt");
+        String receiptData = receipt.get("receipt").replace(" ", "+");
         String transactionId = receipt.get("transactionId");
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
@@ -400,39 +400,46 @@ public class CorgiOrderController extends BaseController {
         }
         JSONObject receiptResult = result.getJSONObject("receipt");
         order.setResult(result.toJSONString());
-        if (receiptResult != null) {
-            order.setPayTime(result.getString("original_purchase_date_ms"));
-            JSONArray inApps = receiptResult.getJSONArray("in_app");
-            if (inApps != null) {
-                JSONObject inApp = null;
-                if (1 == inApps.size()) {
-                    inApp = inApps.getJSONObject(0);
-                } else {
-                    for (int i = 0; i < inApps.size(); i++) {
-                        JSONObject orderItem = inApps.getJSONObject(i);
-                        if (orderItem.getString("transaction_id").equals(transactionId)) {
-                            inApp = orderItem;
+        String key = "verify_apple-" + getUserId();
+        try {
+            corgiUtilService.lock(key);
+            if (receiptResult != null) {
+                order.setPayTime(result.getString("original_purchase_date_ms"));
+                JSONArray inApps = receiptResult.getJSONArray("in_app");
+                if (inApps != null) {
+                    JSONObject inApp = null;
+                    if (1 == inApps.size()) {
+                        inApp = inApps.getJSONObject(0);
+                    } else {
+                        for (int i = 0; i < inApps.size(); i++) {
+                            JSONObject orderItem = inApps.getJSONObject(i);
+                            if (orderItem.getString("transaction_id").equals(transactionId)) {
+                                inApp = orderItem;
+                            }
                         }
                     }
-                }
-                if (null == inApp) {
-                    inApps = result.getJSONArray("latest_receipt_info");
-                    inApp = inApps.getJSONObject(0);
-                }
-                if (null == inApp) {
-                    order.setStatus(CorgiOrder.STATUS.FAIL);
-                    order.setOrderId(transactionId);
-                    corgiOrderService.updateOrder(order);
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
-                } else {
-                    order.setBuyerId(inApp.getString("expires_date_ms"));
-                    order.setPayTime(inApp.getString("original_purchase_date_ms"));
-                    order.setOrderId(inApp.getString("transaction_id"));
+                    if (null == inApp) {
+                        inApps = result.getJSONArray("latest_receipt_info");
+                        inApp = inApps.getJSONObject(0);
+                    }
+                    if (null == inApp) {
+                        order.setStatus(CorgiOrder.STATUS.FAIL);
+                        order.setOrderId(transactionId);
+                        corgiOrderService.updateOrder(order);
+                        corgiOrderService.updateReceipt(tradeNo, receiptData);
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
+                    } else {
+                        order.setBuyerId(inApp.getString("expires_date_ms"));
+                        order.setPayTime(inApp.getString("original_purchase_date_ms"));
+                        order.setOrderId(inApp.getString("transaction_id"));
+                    }
                 }
             }
+            corgiOrderService.updateOrder(order);
+            corgiOrderService.updateReceipt(tradeNo, receiptData);
+        } finally {
+            corgiUtilService.unlock(key);
         }
-        corgiOrderService.updateOrder(order);
-        corgiOrderService.updateReceipt(tradeNo, receiptData);
         return new JsonResult();
     }
 
