@@ -19,6 +19,7 @@ import com.corgi.common.util.UuidUtil;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.entity.CorgiUserOrder;
 import com.corgi.exception.PermissionException;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiPayService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
@@ -186,6 +187,12 @@ public class CorgiOrderController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
         }
         CorgiActivity activity = corgiActivities.get(0);
+        if(AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态存在违规，不能上榜");
+        }
+        if(!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())){
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态类型不能上榜");
+        }
         corgiUtilService.lock(key);
         try {
             PaidBillboard paidBillboard = new PaidBillboard();
@@ -263,35 +270,48 @@ public class CorgiOrderController extends BaseController {
 
             String marketId = "-";
             String sellerId = "corgi";
-            if (StringUtils.isNotEmpty(goodsId)) {
-                List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
-                if (CollectionUtils.isEmpty(corgiActivities)) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
-                }
-                CorgiActivity activity = corgiActivities.get(0);
-                if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态不是付费动态");
-                }
-                if (!merchId.equals(activity.getMerchId()) && !merchId.equals(activity.getAppMerchId())) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态付费状态存在异常");
-                }
-                CorgiUserGoods query = new CorgiUserGoods();
-                query.setUserId(getUserId());
-                query.setGoodsId(goodsId);
-                query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
-                List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
-                if (CollectionUtils.isNotEmpty(goods)) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态已付费");
+            if (merchandise.getType().equals(CorgiMerchandise.ACTIVITY)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                CorgiActivity activity = this.checkActivityPay(goodsId, merchId, result);
+                if (activity == null) {
+                    return result;
                 }
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
             }
-
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    private CorgiActivity checkActivityPay(String goodsId, String merchId, JsonResult result) {
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            result.setMessage("动态已不存在");
+            return null;
+        }
+        CorgiActivity activity = corgiActivities.get(0);
+        if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+            result.setMessage("该动态不是付费动态");
+            return null;
+        }
+        if (!merchId.equals(activity.getMerchId()) && !merchId.equals(activity.getAppMerchId())) {
+            result.setMessage("动态付费状态存在异常");
+            return null;
+        }
+        CorgiUserGoods query = new CorgiUserGoods();
+        query.setUserId(getUserId());
+        query.setGoodsId(goodsId);
+        query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
+        if (CollectionUtils.isNotEmpty(goods)) {
+            result.setMessage("该动态已付费");
+            return null;
+        }
+        return activity;
     }
 
     @GetMapping("get_merchandises_by_date")
