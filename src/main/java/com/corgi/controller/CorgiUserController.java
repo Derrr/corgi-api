@@ -1060,7 +1060,6 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
         userQuery.setUserId(getUserId());
-        log.info("userQuery:{} ", userQuery);
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         return new JsonResult(mapUserProfile);
     }
