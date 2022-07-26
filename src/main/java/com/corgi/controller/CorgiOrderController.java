@@ -187,16 +187,17 @@ public class CorgiOrderController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
         }
         CorgiActivity activity = corgiActivities.get(0);
-        if(AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())){
+        if (AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态存在违规，不能上榜");
         }
-        if(!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())){
+        if (!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态类型不能上榜");
         }
         corgiUtilService.lock(key);
         try {
             PaidBillboard paidBillboard = new PaidBillboard();
             paidBillboard.setDate(date);
+            paidBillboard.setActivityId(goodsId);
             List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
             int count = 0;
             if (CollectionUtils.isNotEmpty(billboards)) {
