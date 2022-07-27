@@ -1191,7 +1191,7 @@ public class CorgiActivityController extends BaseController {
             if (size <= 0 || size > 21) {
                 activityIds = new ArrayList<>();
             } else {
-                String key = "heat_topic_" + topic;
+                String key = "heat_topic_" + topic + page + "-" + size;
                 activityIds = redisTemplate.opsForList().range(key, 0, -1);
                 if (CollectionUtils.isEmpty(activityIds)) {
                     activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
