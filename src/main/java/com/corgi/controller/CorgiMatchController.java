@@ -117,7 +117,7 @@ public class CorgiMatchController extends BaseController {
 //                if (result < 0) {
 //                    return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
 //                }
-//                extra.put("type", PushMessage.QUICK_MATCH_TYPE);
+                extra.put("type", PushMessage.QUICK_MATCH_TYPE);
 //                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
 //
 //                    List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
