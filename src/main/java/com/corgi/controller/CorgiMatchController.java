@@ -106,40 +106,41 @@ public class CorgiMatchController extends BaseController {
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
-                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
-                Integer remain = 0;
-                if (!CollectionUtils.isEmpty(remains)) {
-                    for (UserMatchRemain remain1 : remains) {
-                        remain += remain1.getRemain();
-                    }
-                }
-                result = remain - matchIds.size();
-                if (result < 0) {
-                    return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
-                }
-                extra.put("type", PushMessage.QUICK_MATCH_TYPE);
-                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
-
-                    List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
-                    redisTemplate.delete(matchKey);
-
-
-                    if (lastMatchList == null) {
-                        lastMatchList = new ArrayList<>();
-                    }
+//                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
+//                Integer remain = 0;
+//                if (!CollectionUtils.isEmpty(remains)) {
+//                    for (UserMatchRemain remain1 : remains) {
+//                        remain += remain1.getRemain();
+//                    }
+//                }
+//                result = remain - matchIds.size();
+//                if (result < 0) {
+//                    return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
+//                }
+//                extra.put("type", PushMessage.QUICK_MATCH_TYPE);
+//                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
+//
+//                    List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
+//                    redisTemplate.delete(matchKey);
+//
+//
+//                    if (lastMatchList == null) {
+//                        lastMatchList = new ArrayList<>();
+//                    }
                     int i = 0;
-                    for (UserMatchRemain remain1 : remains) {
-                        Integer size = remain1.getRemain();
+//                    for (UserMatchRemain remain1 : remains) {
+//                        Integer size = remain1.getRemain();
+                int size =100;
                         for (int j = size; j > 0; j--) {
                             if (i >= matchIds.size()) {
                                 return new JsonResult(result);
                             }
                             String matchId = matchIds.get(i);
-                            redisTemplate.opsForList().rightPush(matchKey, matchId);
-                            if (lastMatchList.contains(matchId)) {
-                                continue;
-                            }
-                            corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
+//                            redisTemplate.opsForList().rightPush(matchKey, matchId);
+//                            if (lastMatchList.contains(matchId)) {
+//                                continue;
+//                            }
+//                            corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
                             mqService.sendMessage(PushMessage.builder()
                                     .type(PushMessage.DEFAULT)
                                     .sourceUserId(getUserId())
@@ -149,8 +150,8 @@ public class CorgiMatchController extends BaseController {
                                     .build());
                             i++;
                         }
-                    }
-                }
+//                    }
+//                }
             }
         } finally {
             if (redisTemplate.hasKey(key)) {
