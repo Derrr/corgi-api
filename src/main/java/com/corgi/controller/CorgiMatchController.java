@@ -102,18 +102,18 @@ public class CorgiMatchController extends BaseController {
         }
 
         String key = "count_matching-" + getUserId();
-        Integer result = 30;
+        Integer result = 0;
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
-//                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
-//                Integer remain = 0;
-//                if (!CollectionUtils.isEmpty(remains)) {
-//                    for (UserMatchRemain remain1 : remains) {
-//                        remain += remain1.getRemain();
-//                    }
-//                }
-//                result = remain - matchIds.size();
+                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
+                Integer remain = 0;
+                if (!CollectionUtils.isEmpty(remains)) {
+                    for (UserMatchRemain remain1 : remains) {
+                        remain += remain1.getRemain();
+                    }
+                }
+                result = remain - matchIds.size();
 //                if (result < 0) {
 //                    return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
 //                }
