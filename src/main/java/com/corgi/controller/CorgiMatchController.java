@@ -102,7 +102,7 @@ public class CorgiMatchController extends BaseController {
         }
 
         String key = "count_matching-" + getUserId();
-        Integer result = 0;
+        Integer result = 30;
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
