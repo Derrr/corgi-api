@@ -10,6 +10,8 @@ import com.aliyuncs.cloudauth.model.v20190307.*;
 
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.facebody.model.v20191230.RecognizeFaceRequest;
+import com.aliyuncs.facebody.model.v20191230.RecognizeFaceResponse;
 import com.aliyuncs.green.model.v20180509.ImageSyncScanRequest;
 import com.aliyuncs.green.model.v20180509.TextScanRequest;
 import com.aliyuncs.green.model.v20180509.VoiceSyncScanRequest;
@@ -29,6 +31,7 @@ import com.corgi.user.api.CorgiSoundService;
 import com.corgi.user.entity.CorgiSound;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
+import com.aliyuncs.facebody.model.v20191230.DetectFaceRequest;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -177,7 +180,10 @@ public class AliyunGreenService {
             userDetail.setAvatar(null);
             return userDetail;
         }
-        //corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
+        if (UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
+            return userDetail;
+        }
+        corgiPic = (UserPic) checkFace(corgiPic, userDetail.getUserId());
         if (StringUtils.isEmpty(userDetail.getAvatarCheckStatus())) {
             userDetail.setAvatarCheckStatus(corgiPic.getStatus());
         }
@@ -198,24 +204,14 @@ public class AliyunGreenService {
 
     public CorgiPic checkFace(CorgiPic pic, String sourceId) {
         log.info("pics = " + pic.getPicUrl());
-
-        DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
-        request.setRegionId("cn-hangzhou");
-        request.setMaterialValue(pic.getPicUrl());
-        pic.setDataId(getDataId());
+        RecognizeFaceRequest request = new RecognizeFaceRequest();
+        request.setImageURL(pic.getPicUrl());
         try {
-            DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
-            DetectFaceAttributesResponse.Data data = response.getData();
+            RecognizeFaceResponse response = managementClient.getAcsResponse(request);
+            RecognizeFaceResponse.Data data = response.getData();
             log.info(JSONObject.toJSONString(data));
-            if (CollectionUtils.isEmpty(data.getFaceInfos())) {
-                pic.setStatus(UserDetail.NO_FACE);
-                addCheckPic(pic, sourceId, CheckPic.AVATAR);
+            if (data.getFaceCount() > 0) {
                 return pic;
-            }
-            for (DetectFaceAttributesResponse.Data.FaceAttributesDetectInfo detectInfo : data.getFaceInfos()) {
-                if (!"None".equals(detectInfo.getFaceAttributes().getFacetype())) {
-                    return pic;
-                }
             }
             pic.setStatus(UserDetail.NO_FACE);
             addCheckPic(pic, sourceId, CheckPic.AVATAR);
@@ -232,6 +228,43 @@ public class AliyunGreenService {
         }
         return pic;
     }
+
+//    public CorgiPic checkFace(CorgiPic pic, String sourceId) {
+//        log.info("pics = " + pic.getPicUrl());
+//
+//        DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
+//        request.setRegionId("cn-hangzhou");
+//        request.setMaterialValue(pic.getPicUrl());
+//        pic.setDataId(getDataId());
+//        try {
+//            DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
+//            DetectFaceAttributesResponse.Data data = response.getData();
+//            log.info(JSONObject.toJSONString(data));
+//            if (CollectionUtils.isEmpty(data.getFaceInfos())) {
+//                pic.setStatus(UserDetail.NO_FACE);
+//                addCheckPic(pic, sourceId, CheckPic.AVATAR);
+//                return pic;
+//            }
+//            for (DetectFaceAttributesResponse.Data.FaceAttributesDetectInfo detectInfo : data.getFaceInfos()) {
+//                if (!"None".equals(detectInfo.getFaceAttributes().getFacetype())) {
+//                    return pic;
+//                }
+//            }
+//            pic.setStatus(UserDetail.NO_FACE);
+//            addCheckPic(pic, sourceId, CheckPic.AVATAR);
+//        } catch (ServerException e) {
+//            log.error(e.getMessage(), e);
+//            pic.setStatus(UserDetail.NO_FACE);
+//            addCheckPic(pic, sourceId, CheckPic.AVATAR);
+//        } catch (ClientException e) {
+//            log.error("ErrCode:" + e.getErrCode());
+//            log.error("ErrMsg:" + e.getErrMsg());
+//            log.error("RequestId:" + e.getRequestId());
+//            pic.setStatus(UserDetail.NO_FACE);
+//            addCheckPic(pic, sourceId, CheckPic.AVATAR);
+//        }
+//        return pic;
+//    }
 
     public CorgiSound checkSound(String url, String sourceId) {
         if (StringUtils.isEmpty(url)) {
