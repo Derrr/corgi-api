@@ -82,9 +82,9 @@ public class BillboardController extends BaseController {
                 paidIds.add(paidBillboard.getActivityId());
             }
             detailList = buildActivity(corgiActivityService.getActivityByIds(paidIds));
-            for (CorgiActivityDetail detail : detailList) {
-                detail.setCategory("paidOnboard");
-            }
+//            for (CorgiActivityDetail detail : detailList) {
+//                detail.setCategory("paidOnboard");
+//            }
         }
 
         List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
