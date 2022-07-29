@@ -244,7 +244,9 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(userDetail.getAvatarCheckStatus())) {
             userDetail.setAvatarCheckStatus(UserDetail.NO_FACE);
         }
-        userDetail = aliyunGreenService.checkAvatar(userDetail);
+        if (!"default".equals(userDetail.getAvatarCheckStatus())) {
+            userDetail = aliyunGreenService.checkAvatar(userDetail);
+        }
         if (pics.size() == 0) {
             UserPic userPic = new UserPic();
             userPic.setPicUrl(userDetail.getAvatar());
