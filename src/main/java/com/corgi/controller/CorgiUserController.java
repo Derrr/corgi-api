@@ -244,8 +244,10 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(userDetail.getAvatarCheckStatus())) {
             userDetail.setAvatarCheckStatus(UserDetail.NO_FACE);
         }
-        if (!"default".equals(userDetail.getAvatarCheckStatus())) {
+        if (!userDetail.getAvatar().contains("defaultAvatar")) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
+        } else {
+            userDetail.setAvatarCheckStatus("default");
         }
         if (pics.size() == 0) {
             UserPic userPic = new UserPic();
@@ -296,6 +298,9 @@ public class CorgiUserController extends BaseController {
         }
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+        }
+        if (userDetail.getAvatar() != null && userDetail.getAvatar().contains(UserDetail.VERIFIED)) {
+            userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
         }
         if (hasUserId()) {
             userDetail = aliyunGreenService.checkBackground(userDetail);
