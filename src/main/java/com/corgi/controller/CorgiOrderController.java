@@ -202,7 +202,7 @@ public class CorgiOrderController extends BaseController {
             if (CollectionUtils.isNotEmpty(billboards)) {
                 for (PaidBillboard billboard : billboards) {
                     if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
-                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期上榜动态已满");
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
                     }
                     if (goodsId.equals(billboard.getActivityId())) {
                         return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
