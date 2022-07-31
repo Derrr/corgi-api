@@ -199,14 +199,10 @@ public class CorgiOrderController extends BaseController {
             paidBillboard.setDate(date);
             paidBillboard.setActivityId(goodsId);
             List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
-            int count = 0;
             if (CollectionUtils.isNotEmpty(billboards)) {
                 for (PaidBillboard billboard : billboards) {
                     if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
-                        count++;
-                        if (count > 1) {
-                            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期上榜动态已满");
-                        }
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期上榜动态已满");
                     }
                     if (goodsId.equals(billboard.getActivityId())) {
                         return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
