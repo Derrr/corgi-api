@@ -1171,7 +1171,7 @@ public class CorgiActivityController extends BaseController {
         }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activities, getUserId());
-        return new PageResult(detailList, activityQuery.getTPage() + 1, activityQuery.getDPage());
+        return new PageResult(detailList, 1, activityQuery.getDPage());
     }
 
     @GetMapping("get_by_topic")
