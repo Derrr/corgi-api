@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -45,7 +46,13 @@ public class CorgiMatchController extends BaseController {
         userQuery.setLng(lng);
         userQuery.setRange(200.0);
         userQuery.setUserId(getUserId());
-        return new JsonResult(corgiUserMatchService.countAllMatcher(userQuery));
+        String key = "count_range_" + getUserId();
+        String result = redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(result)) {
+            redisTemplate.opsForValue().set(key, corgiUserMatchService.countAllMatcher(userQuery) + "", 12l, TimeUnit.HOURS);
+        }
+        result = redisTemplate.opsForValue().get(key);
+        return new JsonResult(result);
     }
 
     @PostMapping("get_matches")
@@ -127,29 +134,29 @@ public class CorgiMatchController extends BaseController {
 //                    if (lastMatchList == null) {
 //                        lastMatchList = new ArrayList<>();
 //                    }
-                    int i = 0;
+                int i = 0;
 //                    for (UserMatchRemain remain1 : remains) {
 //                        Integer size = remain1.getRemain();
-                int size =100;
-                        for (int j = size; j > 0; j--) {
-                            if (i >= matchIds.size()) {
-                                return new JsonResult(result);
-                            }
-                            String matchId = matchIds.get(i);
+                int size = 100;
+                for (int j = size; j > 0; j--) {
+                    if (i >= matchIds.size()) {
+                        return new JsonResult(result);
+                    }
+                    String matchId = matchIds.get(i);
 //                            redisTemplate.opsForList().rightPush(matchKey, matchId);
 //                            if (lastMatchList.contains(matchId)) {
 //                                continue;
 //                            }
 //                            corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
-                            mqService.sendMessage(PushMessage.builder()
-                                    .type(PushMessage.DEFAULT)
-                                    .sourceUserId(getUserId())
-                                    .targetUserId(matchId)
-                                    .message("有一个小哥哥想和你匹配，要去聊聊吗？")
-                                    .extra(extra)
-                                    .build());
-                            i++;
-                        }
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.DEFAULT)
+                            .sourceUserId(getUserId())
+                            .targetUserId(matchId)
+                            .message("有一个小哥哥想和你匹配，要去聊聊吗？")
+                            .extra(extra)
+                            .build());
+                    i++;
+                }
 //                    }
 //                }
             }
