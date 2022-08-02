@@ -661,7 +661,7 @@ public class CorgiUserController extends BaseController {
 //                    userProfile.setActivityCount(Integer.parseInt(count));
 //                }
                 userProfile.setActivityCount(0);
-                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
+//                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
