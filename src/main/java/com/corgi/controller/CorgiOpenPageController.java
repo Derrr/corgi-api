@@ -69,65 +69,65 @@ public class CorgiOpenPageController extends BaseController {
 
     @GetMapping("get_open_page")
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
-        List<CorgiOpenPage> result ;
-//                = new ArrayList<>();
-//        corgiOpenPage.setUrlType("12");
-//        result.add(corgiOpenPage);
-        if (hasVersion()) {
-            UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
-            SimpleDateFormat sdf = new SimpleDateFormat("/MM/dd");
-            if (detail != null && !StringUtils.isEmpty(detail.getBirthday()) && detail.getBirthday().contains(sdf.format(new Date()))) {
-                CorgiOpenPage page = new CorgiOpenPage();
-                page.setUrl(getUserId());
-                page.setPicUrl(detail.getAvatar());
-                page.setPicType("birthday");
-                page.setUrlType("4");
-                page.setTitle(detail.getNickname());
-                if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
-                    log.info("birthday self:{} ", getUserId());
-                    return new JsonResult(Arrays.asList(page));
-                }
-            }
-            result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
-            if (!CollectionUtils.isEmpty(result)) {
-                for (CorgiOpenPage page : result) {
-                    if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
-                        log.info("birthday from:{},to:{} ", page.getUrl(), getUserId());
-                        return new JsonResult(Arrays.asList(page));
-                    }
-                }
-            }
-        }
-        corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        corgiOpenPage.setStartTime(sdf.format(new Date()));
-        UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
-        if (userPosition != null && userPosition.getVersion() != null) {
-            String version = userPosition.getVersion().replaceAll("android", "");
-            if ("2.0.3".compareTo(version) > 0) {
-                corgiOpenPage.setPicType("image");
-            }
-        }
-        List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
-        String province = corgiOpenPage.getProvince();
-        if (StringUtils.isEmpty(province)) {
-            province = userPosition.getProvince();
-        }
-        if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
-            province = corgiUserService.getProvince(corgiOpenPage.getCity());
-        }
-        if (!StringUtils.isEmpty(province)) {
-            corgiOpenPage.setCity(province);
-            openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
-        }
-        corgiOpenPage.setCity("全国");
-        openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
-
-
-        result = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(openPages)) {
-            result.add(openPages.get(new Random().nextInt(openPages.size())));
-        }
+        List<CorgiOpenPage> result
+                = new ArrayList<>();
+        corgiOpenPage.setUrlType("12");
+        result.add(corgiOpenPage);
+//        if (hasVersion()) {
+//            UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+//            SimpleDateFormat sdf = new SimpleDateFormat("/MM/dd");
+//            if (detail != null && !StringUtils.isEmpty(detail.getBirthday()) && detail.getBirthday().contains(sdf.format(new Date()))) {
+//                CorgiOpenPage page = new CorgiOpenPage();
+//                page.setUrl(getUserId());
+//                page.setPicUrl(detail.getAvatar());
+//                page.setPicType("birthday");
+//                page.setUrlType("4");
+//                page.setTitle(detail.getNickname());
+//                if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
+//                    log.info("birthday self:{} ", getUserId());
+//                    return new JsonResult(Arrays.asList(page));
+//                }
+//            }
+//            result = corgiOpenPageService.getBirthdayOpenPage(getUserId());
+//            if (!CollectionUtils.isEmpty(result)) {
+//                for (CorgiOpenPage page : result) {
+//                    if (redisTemplate.opsForValue().setIfAbsent("birthday_" + getUserId() + "_" + page.getUrl(), System.currentTimeMillis() + "", 24L, TimeUnit.HOURS)) {
+//                        log.info("birthday from:{},to:{} ", page.getUrl(), getUserId());
+//                        return new JsonResult(Arrays.asList(page));
+//                    }
+//                }
+//            }
+//        }
+//        corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        corgiOpenPage.setStartTime(sdf.format(new Date()));
+//        UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
+//        if (userPosition != null && userPosition.getVersion() != null) {
+//            String version = userPosition.getVersion().replaceAll("android", "");
+//            if ("2.0.3".compareTo(version) > 0) {
+//                corgiOpenPage.setPicType("image");
+//            }
+//        }
+//        List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
+//        String province = corgiOpenPage.getProvince();
+//        if (StringUtils.isEmpty(province)) {
+//            province = userPosition.getProvince();
+//        }
+//        if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
+//            province = corgiUserService.getProvince(corgiOpenPage.getCity());
+//        }
+//        if (!StringUtils.isEmpty(province)) {
+//            corgiOpenPage.setCity(province);
+//            openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+//        }
+//        corgiOpenPage.setCity("全国");
+//        openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+//
+//
+//        result = new ArrayList<>();
+//        if (!CollectionUtils.isEmpty(openPages)) {
+//            result.add(openPages.get(new Random().nextInt(openPages.size())));
+//        }
         return new JsonResult(result);
     }
 
