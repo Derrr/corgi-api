@@ -1,6 +1,6 @@
 package com.corgi.controller;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
+import org.apache.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

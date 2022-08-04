@@ -159,7 +159,7 @@ public class ThirdPartyController extends BaseController {
 
     @GetMapping("/check_nickname")
     public JsonResult checkNickname(@RequestParam("nickname") String nickname) {
-        if (com.alibaba.dubbo.common.utils.StringUtils.isEmpty(nickname)) {
+        if (org.apache.dubbo.common.utils.StringUtils.isEmpty(nickname)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
         log.info(aliyunGreenService.checkText(nickname) + "");

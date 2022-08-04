@@ -206,7 +206,7 @@ public class CorgiSocket {
         HashMap result = new HashMap();
         jsonResult.put("data", result);
         try {
-            if (!com.alibaba.dubbo.common.utils.StringUtils.isEmpty(jwt)) {
+            if (!org.apache.dubbo.common.utils.StringUtils.isEmpty(jwt)) {
                 DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
                 String jwtUserId = decodedJWT.getClaim("userId").asString();
                 log.info("updating user:{} ", jwtUserId);
@@ -218,7 +218,7 @@ public class CorgiSocket {
                     return jsonResult;
                 } else {
                     UserLogin u = corgiUserService.getUserLogin(jwtUserId);
-                    if (u == null || com.alibaba.dubbo.common.utils.StringUtils.isEmpty(u.getUserId())) {
+                    if (u == null || org.apache.dubbo.common.utils.StringUtils.isEmpty(u.getUserId())) {
                         jsonResult.put("code", Constants.PERMISSION_ERROR_CODE);
                         jsonResult.put("message", "用户不存在:" + jwtUserId + " v:" + userPosition.getVersion());
                         return jsonResult;
@@ -261,7 +261,7 @@ public class CorgiSocket {
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
-        if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(expireDate) && !"-".equals(expireDate)) {
+        if (org.apache.dubbo.common.utils.StringUtils.isNotEmpty(expireDate) && !"-".equals(expireDate)) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 Date date = sdf.parse(expireDate);
