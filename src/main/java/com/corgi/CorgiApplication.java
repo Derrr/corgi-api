@@ -1,12 +1,12 @@
 package com.corgi;
 
-import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.config.CorgiSocketSpringConfigurator;
 import com.corgi.common.filter.CorgiCorsFilter;
 import com.corgi.common.filter.RequestFilter;
 import com.corgi.common.wxpay.sdk.WXPayConfig;
 import com.corgi.common.wxpay.sdk.WXPayConstants;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubboConfig;
 import org.springframework.amqp.core.Queue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +18,7 @@ import javax.servlet.Filter;
 
 
 @SpringBootApplication
-@EnableDubboConfiguration
+@EnableDubboConfig
 public class CorgiApplication {
 
     public static void main(String[] args) {
