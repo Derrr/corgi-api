@@ -1,6 +1,6 @@
 package com.corgi.controller;
 
-import com.alibaba.dubbo.common.utils.CollectionUtils;
+import org.apache.dubbo.common.utils.CollectionUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -142,7 +142,7 @@ public class CorgiHotVlogController extends BaseController {
         List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
         if (CollectionUtils.isNotEmpty(pics)) {
             extra.put("picUrl", pics.get(0).getPicUrl());
-        } else if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(activity.getCoverUrl())) {
+        } else if (org.apache.dubbo.common.utils.StringUtils.isNotEmpty(activity.getCoverUrl())) {
             extra.put("picUrl", activity.getCoverUrl());
         }
         extra.put("desc", "恭喜呀～你于\"" + activity.getCreateTime() + "\"发布的动态\"" + (activity.getTitle() == null ? "" : activity.getTitle()) + "\"获得了平台推荐，请及时回复粉丝的评论吧！");
