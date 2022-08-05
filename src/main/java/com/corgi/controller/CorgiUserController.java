@@ -1080,7 +1080,7 @@ public class CorgiUserController extends BaseController {
                 userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
                 profiles.add(userDetail);
                 UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
-                if (position.getUptime() != null && position.getUptime() > threshold) {
+                if (position != null && position.getUptime() != null && position.getUptime() > threshold) {
                     userDetail.setOnlineStatus(1);
                 } else {
                     userDetail.setOnlineStatus(0);
