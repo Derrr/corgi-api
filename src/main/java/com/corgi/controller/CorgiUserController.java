@@ -293,7 +293,7 @@ public class CorgiUserController extends BaseController {
             userDetail.setUserId(getUserId());
         }
         String key = "update_user-" + getUserId();
-        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 3l, TimeUnit.SECONDS)) {
+        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
         }
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
