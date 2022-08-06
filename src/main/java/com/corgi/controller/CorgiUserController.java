@@ -292,17 +292,25 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userDetail.setUserId(getUserId());
         }
-        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+        String key = "update_user-" + getUserId();
+        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
         }
-        if (hasUserId()) {
-            userDetail = aliyunGreenService.checkBackground(userDetail);
-            userDetail = aliyunGreenService.checkAvatar(userDetail);
-            userDetail = aliyunGreenService.checkDesc(userDetail);
-            userDetail.setGroup(changeGroup(userDetail.getGroup()));
+        try {
+            if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+            }
+            if (hasUserId()) {
+                userDetail = aliyunGreenService.checkBackground(userDetail);
+                userDetail = aliyunGreenService.checkAvatar(userDetail);
+                userDetail = aliyunGreenService.checkDesc(userDetail);
+                userDetail.setGroup(changeGroup(userDetail.getGroup()));
+            }
+            String result = corgiUserService.updateDetail(userDetail);
+            return getJsonResult(result);
+        } finally {
+            redisTemplate.delete(key);
         }
-        String result = corgiUserService.updateDetail(userDetail);
-        return getJsonResult(result);
     }
 
     @GetMapping("/check_nickname")
