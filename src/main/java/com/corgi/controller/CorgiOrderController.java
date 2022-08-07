@@ -450,7 +450,10 @@ public class CorgiOrderController extends BaseController {
     @PostMapping("applepay_verify")
     public JsonResult applyPayVerify(@RequestBody HashMap<String, String> receipt) {
         String tradeNo = receipt.get("tradeNo");
-        String receiptData = receipt.get("receipt").replace(" ", "+");
+        String receiptData = receipt.get("receipt");
+        if(StringUtils.isEmpty(receiptData)){
+            receiptData = receiptData.replace(" ","+");
+        }
         String transactionId = receipt.get("transactionId");
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order == null) {
