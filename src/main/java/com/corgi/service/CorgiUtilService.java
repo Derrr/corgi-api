@@ -214,7 +214,10 @@ public class CorgiUtilService {
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
                 }
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if(likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
                 //List<ActivityLike> activityLikes = corgiLikeService.getFollowUser(userId, activity.getId());
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());

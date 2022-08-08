@@ -108,7 +108,7 @@ public class RecommendController extends BaseController {
 
     @GetMapping("get_not_city_image")
     public JsonResult getNotCityImage(@RequestParam(name = "city", required = false, defaultValue = "") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-        return new JsonResult(new ArrayList<>());
+        return new JsonResult(new ArrayList());
 //        List<String> activityIds;
 //        if (corgiUtilService.isNewUser(getUserId())) {
 //            activityIds = corgiFeedService.getPopularFeed(getUserId(), size);
@@ -158,7 +158,10 @@ public class RecommendController extends BaseController {
                 activity.setCurrentTime(now);
 
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if (likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 Integer signUpCount = Math.toIntExact(corgiUserActivityService.countSignUpUser(activity.getId()));
                 List<ActivityLike> users = corgiLikeService.getFollowUser(getUserId(), activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());

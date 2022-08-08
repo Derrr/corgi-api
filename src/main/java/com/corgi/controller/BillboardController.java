@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -44,6 +45,8 @@ public class BillboardController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiBlacklistService corgiBlacklistService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
 
@@ -59,8 +62,8 @@ public class BillboardController extends BaseController {
     }
 
     @GetMapping("update_order")
-    public JsonResult updateOrder(@RequestParam("userId") String userId, @RequestParam("date") String date, @RequestParam("order") Integer order) {
-        corgiBillboardService.updateBillboardOrder(userId, date, order);
+    public JsonResult updateOrder(@RequestParam("activityId") String activityId, @RequestParam("date") String date, @RequestParam("order") Integer order) {
+        corgiBillboardService.updateBillboardOrder(activityId, date, order);
         return new JsonResult();
     }
 
@@ -68,9 +71,38 @@ public class BillboardController extends BaseController {
     public JsonResult getActivityBillboard() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
+        PaidBillboard query = new PaidBillboard();
+        query.setDate(date);
+        query.setStatus(PaidBillboard.PASS);
+        List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(query, 1, 100);
+        List<String> paidIds = new ArrayList<>();
+        List<CorgiActivityDetail> detailList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(billboards)) {
+            for (PaidBillboard paidBillboard : billboards) {
+                paidIds.add(paidBillboard.getActivityId());
+            }
+            detailList = buildActivity(corgiActivityService.getActivityByIds(paidIds));
+//            for (CorgiActivityDetail detail : detailList) {
+//                detail.setCategory("paidOnboard");
+//            }
+        }
+
         List<String> activityIds = corgiBillboardService.getActivityBillboard(date);
+        activityIds = activityIds.stream().filter(a -> !paidIds.contains(a)).collect(Collectors.toList());
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        return new JsonResult(buildActivity(activities));
+        detailList.addAll(buildActivity(activities));
+        List<UserBasic> userBasics = corgiBlacklistService.getBlackUser(getUserId());
+        if (!CollectionUtils.isEmpty(userBasics)) {
+            List<CorgiActivityDetail> result = new ArrayList<>();
+            List<String> userIds = userBasics.stream().map(b -> b.getUserId()).collect(Collectors.toList());
+            for (CorgiActivityDetail detail : detailList) {
+                if (!userIds.contains(detail.getUserId())) {
+                    result.add(detail);
+                }
+            }
+            return new JsonResult(result);
+        }
+        return new JsonResult(detailList);
     }
 
     @GetMapping("get_activity_billboard_by_date")
@@ -126,6 +158,25 @@ public class BillboardController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_paid_billboard")
+    public JsonResult getPaidBillboar(PaidBillboard paidBillboard, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        HashMap<String, Object> result = new HashMap<>();
+        if (!hasUserId()) {
+            result.put("activities", corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
+            result.put("total", corgiBillboardService.countPaiBillboard(paidBillboard));
+            return new JsonResult(result);
+        }
+        return new JsonResult(result);
+    }
+
+    @GetMapping("update_paid_billboard")
+    public JsonResult updatePaidBillboard(PaidBillboard paidBillboard) {
+        if (!hasUserId()) {
+            corgiBillboardService.updatePaiBillboard(paidBillboard);
+        }
+        return new JsonResult();
+    }
+
     private List<ActivityBillboardDetail> buildActivityBillboard(List<ActivityBillboard> billboards) {
         List<ActivityBillboardDetail> detailList = new ArrayList<>();
         for (ActivityBillboard billboard : billboards) {
@@ -154,11 +205,9 @@ public class BillboardController extends BaseController {
             while (it.hasNext()) {
                 CorgiActivity activity = it.next();
                 if (activity == null || activity.getUserId() == null) {
-                    it.remove();
                     continue;
                 }
                 if ("fail".equals(activity.getCheckStatus()) || (!(CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) || CorgiActivity.CAT_TEXT.equals(activity.getCategory())) && CollectionUtils.isEmpty(activity.getPics()))) {
-                    it.remove();
                     continue;
                 }
                 activity.setCurrentTime(now);
@@ -210,7 +259,10 @@ public class BillboardController extends BaseController {
                         activity.setStatus("unpay");
                     }
                 }
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if (likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)

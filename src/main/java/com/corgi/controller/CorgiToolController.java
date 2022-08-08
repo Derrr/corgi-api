@@ -88,11 +88,14 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
-            config.put("showPay", 0);
-            config.put("showDiscovery", 0);
-            config.put("showPurse", 0);
-        }
+//        if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
+//            config.put("showPay", 0);
+//            config.put("showDiscovery", 0);
+//            config.put("showPurse", 0);
+//        }
+//        if ("huawei".equals(RequestUtil.getChannel())) {
+//            config.put("showMap", 0);
+//        }
         return new JsonResult(config);
     }
 
@@ -102,6 +105,10 @@ public class CorgiToolController extends BaseController {
             userId = getUserId();
         }
         List<UserProfile> profiles = corgiUserService.searchUsers(userDetail, userId, page, pageSize);
+        for (UserProfile profile : profiles) {
+            String expireDate = corgiUserService.getUserVipExpire(profile.getUserId());
+            profile.setVip(!StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
+        }
         return new JsonResult(profiles);
     }
 
@@ -125,7 +132,13 @@ public class CorgiToolController extends BaseController {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
+//        String key = "count_activity_status_" + activity.getStatus();
+//        String countStr = redisTemplate.opsForValue().get(key);
+//        if (!StringUtils.isEmpty(countStr)) {
+//            return new JsonResult(Integer.valueOf(countStr));
+//        }
         long count = corgiActivityService.countCorgiActivity(activity);
+//        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.HOURS);
         return new JsonResult(count);
     }
 
@@ -481,6 +494,11 @@ public class CorgiToolController extends BaseController {
     @GetMapping("count_task")
     public JsonResult countTask(@RequestParam("type") String type) {
         long count = 0;
+        String key = "task_count_" + type;
+//        String countStr = redisTemplate.opsForValue().get(key);
+//        if (!StringUtils.isEmpty(countStr)) {
+//            return new JsonResult(Integer.valueOf(countStr));
+//        }
         switch (type) {
             case ACTIVITY_TASK:
                 CorgiActivity corgiActivity = new CorgiActivity();
@@ -494,6 +512,7 @@ public class CorgiToolController extends BaseController {
                 count = corgiUserService.countUsers(userDetail);
                 break;
         }
+//        redisTemplate.opsForValue().set(key, count + "", 1l, TimeUnit.MINUTES);
         return new JsonResult(count);
     }
 

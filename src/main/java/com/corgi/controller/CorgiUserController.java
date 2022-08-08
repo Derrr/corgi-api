@@ -245,10 +245,11 @@ public class CorgiUserController extends BaseController {
         if (pics == null) {
             pics = new ArrayList<>();
         }
-        if (StringUtils.isEmpty(userDetail.getAvatarCheckStatus())) {
-            userDetail.setAvatarCheckStatus(UserDetail.NO_FACE);
+        if (!userDetail.getAvatar().contains("defaultAvatar")) {
+            userDetail = aliyunGreenService.checkAvatar(userDetail);
+        } else {
+            userDetail.setAvatarCheckStatus("default");
         }
-        userDetail = aliyunGreenService.checkAvatar(userDetail);
         if (pics.size() == 0) {
             UserPic userPic = new UserPic();
             userPic.setPicUrl(userDetail.getAvatar());
@@ -302,6 +303,9 @@ public class CorgiUserController extends BaseController {
         }
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+        }
+        if (userDetail.getAvatar() != null && userDetail.getAvatar().contains(UserDetail.VERIFIED)) {
+            userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
         }
         if (hasUserId()) {
             userDetail = aliyunGreenService.checkBackground(userDetail);
@@ -662,7 +666,7 @@ public class CorgiUserController extends BaseController {
 //                    userProfile.setActivityCount(Integer.parseInt(count));
 //                }
                 userProfile.setActivityCount(0);
-                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
+//                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -1060,6 +1064,10 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(corgiVisitService.countVisitUnread(userId));
     }
 
+    @GetMapping("get_city_new_user")
+    public JsonResult getCityNewUser(@RequestParam("city") String city) {
+        return new JsonResult(corgiUserService.recommendUser(city, getUserId()));
+    }
 
     @GetMapping("get_map_user")
     public JsonResult getMapUser(UserQuery userQuery) {
@@ -1072,16 +1080,19 @@ public class CorgiUserController extends BaseController {
     public JsonResult getUserByIds(@RequestParam("userIds") String userIds) {
         String[] ids = userIds.split(",");
         List<UserDetail> profiles = new ArrayList<>();
+        Long threshold = System.currentTimeMillis() - 2 * 60000;
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
-                String result = redisTemplate.opsForValue().get("acceptMatching_" + getUserId() + "-" + ids[i]);
-                if (StringUtils.isNotEmpty(result)) {
-                    userDetail.setMatch(1.0);
-                } else {
-                    userDetail.setMatch(0.0);
-                }
+                String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
+                userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
                 profiles.add(userDetail);
+                UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
+                if (position != null && position.getUptime() != null && position.getUptime() > threshold) {
+                    userDetail.setOnlineStatus(1);
+                } else {
+                    userDetail.setOnlineStatus(0);
+                }
             }
         }
         return new JsonResult(profiles);

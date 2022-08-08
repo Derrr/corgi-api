@@ -19,6 +19,7 @@ import com.corgi.common.util.UuidUtil;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.entity.CorgiUserOrder;
 import com.corgi.exception.PermissionException;
+import com.corgi.service.AliyunGreenService;
 import com.corgi.service.CorgiPayService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
@@ -54,6 +55,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiActivityService corgiActivityService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Reference
+    private CorgiBillboardService corgiBillboardService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -73,6 +76,29 @@ public class CorgiOrderController extends BaseController {
             order.setPayTime(sdf.format(new Date()));
         }
         corgiOrderService.updateOrder(order);
+        return new JsonResult();
+    }
+
+    @GetMapping("refund")
+    public JsonResult refund(@RequestParam("tradeNo") String tradeNo) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
+        try {
+            if (!CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
+                return new JsonResult(Constants.API_ERROR_CODE, "无法退单");
+            }
+            if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
+                corgiPayService.wxRefundOrder(order);
+            }
+
+            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayType())) {
+
+            }
+        } catch (Exception e) {
+            order.setResult(e.getMessage());
+        }
         return new JsonResult();
     }
 
@@ -119,16 +145,16 @@ public class CorgiOrderController extends BaseController {
             String dateStr = sdf1.format(new Date());
             Date nowDate = sdf1.parse(dateStr);
             orderQuery.setCtime(sdf2.format(nowDate));
-//            postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
-//            int i = 0;
-//            for (CorgiOrder nowMonthOrder : postOrders) {
-//                if (nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.CLOSE) || nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.SUCCESS)) {
-//                    i++;
-//                }
-//                if (i > 4) {
-//                    return new JsonResult(Constants.API_ERROR_CODE, "本月提现次数已满");
-//                }
-//            }
+            postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
+            int i = 0;
+            for (CorgiOrder nowMonthOrder : postOrders) {
+                if (nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.CLOSE) || nowMonthOrder.getStatus().equals(CorgiOrder.STATUS.SUCCESS)) {
+                    i++;
+                }
+                if (i > 4) {
+                    return new JsonResult(Constants.API_ERROR_CODE, "本月提现次数已满");
+                }
+            }
             order.setUserId(getUserId());
             order.setOrderId((Long.toHexString(System.currentTimeMillis() / 1000)).toUpperCase());
             order.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
@@ -142,6 +168,52 @@ public class CorgiOrderController extends BaseController {
         } catch (ParseException e) {
             log.error(e.getMessage(), e);
             return new JsonResult(Constants.API_ERROR_CODE, "提现申请失败");
+        } finally {
+            corgiUtilService.unlock(key);
+        }
+    }
+
+    @GetMapping("pay_billboard")
+    public JsonResult payBillboard(@RequestParam("merchId") String merchId,
+                                   @RequestParam(name = "goodsId") String goodsId,
+                                   @RequestParam(name = "date") String date,
+                                   @RequestParam("payType") String payType) {
+        String key = "billboard_pay_" + date;
+        if (!redisTemplate.opsForValue().setIfAbsent(key.concat(getUserId()), "1", 2L, TimeUnit.SECONDS)) {
+            return new JsonResult();
+        }
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
+        }
+        CorgiActivity activity = corgiActivities.get(0);
+        if (AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态存在违规，不能上榜");
+        }
+        if (!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态类型不能上榜");
+        }
+        corgiUtilService.lock(key);
+        try {
+            PaidBillboard paidBillboard = new PaidBillboard();
+            paidBillboard.setDate(date);
+            paidBillboard.setActivityId(goodsId);
+            List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
+            if (CollectionUtils.isNotEmpty(billboards)) {
+                for (PaidBillboard billboard : billboards) {
+                    if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
+                    }
+                    if (goodsId.equals(billboard.getActivityId())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
+                    }
+                }
+            }
+            paidBillboard.setUserId(activity.getUserId());
+            paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
+            HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+            return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
         }
@@ -195,58 +267,56 @@ public class CorgiOrderController extends BaseController {
 
             String marketId = "-";
             String sellerId = "corgi";
-            if (StringUtils.isNotEmpty(goodsId)) {
-                List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
-                if (CollectionUtils.isEmpty(corgiActivities)) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
-                }
-                CorgiActivity activity = corgiActivities.get(0);
-                if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态不是付费动态");
-                }
-                if (!merchId.equals(activity.getMerchId()) && !merchId.equals(activity.getAppMerchId())) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态付费状态存在异常");
-                }
-                CorgiUserGoods query = new CorgiUserGoods();
-                query.setUserId(getUserId());
-                query.setGoodsId(goodsId);
-                query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
-                List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
-                if (CollectionUtils.isNotEmpty(goods)) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态已付费");
+            if (merchandise.getType().equals(CorgiMerchandise.ACTIVITY)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                CorgiActivity activity = this.checkActivityPay(goodsId, merchId, result);
+                if (activity == null) {
+                    return result;
                 }
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
             }
-
-            HashMap<String, Object> result = new HashMap<>();
-            String tradeNo = UuidUtil.getTradeNo(getUserId());
-            CorgiOrder order = CorgiOrder.builder()
-                    .userId(getUserId())
-                    .payType(payType)
-                    .marketId(marketId)
-                    .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
-                    .merchId(merchandise.getId())
-                    .tradeNo(tradeNo)
-                    .sellerId(sellerId)
-                    .payAmount(merchandise.getPrice())
-                    .build();
-            result.put("orderString", "");
-            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
-                result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
-            }
-            if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
-                result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
-            }
-            if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType)) {
-                corgiOrderService.addOrder(order);
-            }
-            result.put("orderNo", order.getTradeNo());
-            result.put("merchandise", merchandise);
+            HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    private CorgiActivity checkActivityPay(String goodsId, String merchId, JsonResult result) {
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            result.setMessage("动态已不存在");
+            return null;
+        }
+        CorgiActivity activity = corgiActivities.get(0);
+        if (!CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
+            result.setMessage("该动态不是付费动态");
+            return null;
+        }
+        if (!merchId.equals(activity.getMerchId()) && !merchId.equals(activity.getAppMerchId())) {
+            result.setMessage("动态付费状态存在异常");
+            return null;
+        }
+        CorgiUserGoods query = new CorgiUserGoods();
+        query.setUserId(getUserId());
+        query.setGoodsId(goodsId);
+        query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
+        if (CollectionUtils.isNotEmpty(goods)) {
+            result.setMessage("该动态已付费");
+            return null;
+        }
+        return activity;
+    }
+
+    @GetMapping("get_merchandises_by_date")
+    public JsonResult getMerchandiseByDate(@RequestParam("date") String date) {
+        CorgiMerchandise query = new CorgiMerchandise();
+        query.setType("billboard");
+        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
+        return new JsonResult(merchandises);
     }
 
     @GetMapping("get_merchandises")
@@ -522,19 +592,18 @@ public class CorgiOrderController extends BaseController {
 
     @Deprecated
     @PostMapping("applepay_callback")
-    public JsonResult applepayCallback(@RequestBody String signedPayload) {
-        log.info("callback:{} ", signedPayload);
+    public JsonResult applepayCallback(@RequestBody JSONObject object) {
+        log.info("callback:{} ", object);
         try {
-            DecodedJWT decodedJWT = JWTUtils.verifyToken(signedPayload);
-            String notificationType = decodedJWT.getClaim("notificationType").asString();
+            String notificationType = object.getString("notification_type");
             if ("REFUND".equals(notificationType)) {
-                HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
-                DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
-                CorgiOrder order = CorgiOrder.builder()
-                        .orderId(obj.getClaim("transactionId").asString())
-                        .result(JSON.toJSONString(decodedJWT))
-                        .build();
-                corgiOrderService.subscribe(order, null, "0", "");
+//                HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
+//                DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
+//                CorgiOrder order = CorgiOrder.builder()
+//                        .orderId(obj.getClaim("transactionId").asString())
+//                        .result(JSON.toJSONString(decodedJWT))
+//                        .build();
+//                corgiOrderService.subscribe(order, null, "0", "");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -645,6 +714,34 @@ public class CorgiOrderController extends BaseController {
         order.setResult(JSON.toJSONString(params));
         corgiOrderService.updateOrder(order);
         return new JsonResult();
+    }
+
+    private HashMap<String, Object> payResult(String payType, String marketId, String sellerId, CorgiMerchandise merchandise) {
+        HashMap<String, Object> result = new HashMap<>();
+        String tradeNo = UuidUtil.getTradeNo(getUserId());
+        CorgiOrder order = CorgiOrder.builder()
+                .userId(getUserId())
+                .payType(payType)
+                .marketId(marketId)
+                .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
+                .merchId(merchandise.getId())
+                .tradeNo(tradeNo)
+                .sellerId(sellerId)
+                .payAmount(merchandise.getPrice())
+                .build();
+        result.put("orderString", "");
+        if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
+            result.put("orderString", corgiPayService.getAlipayOrder(merchandise, order));
+        }
+        if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
+            result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
+        }
+        if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType)) {
+            corgiOrderService.addOrder(order);
+        }
+        result.put("orderNo", order.getTradeNo());
+        result.put("merchandise", merchandise);
+        return result;
     }
 
     private CorgiOrder buildWXOrder(Map<String, String> params) {

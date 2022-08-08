@@ -109,6 +109,19 @@ public class CorgiPayService {
         /** response.getBody()打印结果就是orderString，可以直接给客户端请求，无需再做处理。 如果传值客户端失败，可根据返回错误信息到该文档寻找排查方案：https://opensupport.alipay.com/support/helpcenter/89 **/
     }
 
+    public Map<String, String> wxRefundOrder(CorgiOrder order) throws Exception {
+        Map<String, String> orderMap = new HashMap<>();
+        String refundFee = new Double(order.getPayAmount() * 100).intValue() + "";
+        orderMap.put("out_trade_no", order.getTradeNo());
+        orderMap.put("out_refund_no", "r" + order.getTradeNo());
+        orderMap.put("total_fee", refundFee);
+        orderMap.put("refund_fee", refundFee);
+        Map<String, String> result = wxPay.refund(orderMap);
+        order.setResult("订单退款");
+        order.setStatus(CorgiOrder.STATUS.PROCESSING);
+        return result;
+    }
+
     public Map<String, String> wxCloseOrder(CorgiOrder order) throws Exception {
         Map<String, String> orderQuery = new HashMap<>();
         orderQuery.put("out_trade_no", order.getTradeNo());
@@ -126,7 +139,6 @@ public class CorgiPayService {
         body.put("out_trade_no", order.getTradeNo());
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
-        //body.put("spbill_create_ip", "123.12.12.12");
         body.put("trade_type", "APP");
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
@@ -137,8 +149,6 @@ public class CorgiPayService {
             result.put("noncestr", response.get("nonce_str"));
             result.put("prepayid", response.get("prepay_id"));
             result.put("package", "Sign=WXPay");
-            //result.put("signType", "MD5");
-            //result.put("sign", response.get("sign"));
             result.put("sign", WXPayUtil.generateSignature(result, CorgiWXPayConfig.config.getKey()));
             return result;
         } catch (Exception e) {

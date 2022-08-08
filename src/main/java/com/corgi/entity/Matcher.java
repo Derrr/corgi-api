@@ -8,4 +8,5 @@ import java.util.List;
 public class Matcher {
     private List<String> matchIds;
     private String type;
+    private String greeting;
 }

@@ -258,7 +258,7 @@ public class CorgiActivityController extends BaseController {
         activity = corgiActivityService.addCorgiActivity(activity);
         corgiUserActivityService.updateActivityStatus(activity.getId(), activity.getCheckStatus());
 
-        if(!StringUtils.isEmpty(activity.getId())) {
+        if (!StringUtils.isEmpty(activity.getId())) {
             String latestKey = "global_latest_activity" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
             redisTemplate.opsForValue().setIfAbsent(latestKey, activity.getId(), 4L, TimeUnit.DAYS);
         }
@@ -590,6 +590,11 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_comment_by_id")
+    public JsonResult getCommentById(@RequestParam("commentId") String commentId) {
+        return new JsonResult(corgiCommentService.getCommentByCommentId(commentId));
+    }
+
     @GetMapping("get_comments")
     public JsonResult getComment(@RequestParam("activityId") String activityId,
                                  @RequestParam(required = false, name = "lastId") Integer id,
@@ -693,19 +698,6 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult();
     }
 
-//    private boolean checkDuplicateActivity(CorgiActivity activity) {
-//        CorgiActivity queryActivity = new CorgiActivity();
-//        queryActivity.setStatus(CorgiActivity.CREATED);
-//        queryActivity.setUserId(activity.getUserId());
-//        if (AliyunGreenService.TEXT_FORBIDDEN.equals(activity.getTitle())) {
-//            queryActivity.setCheckTitle(activity.getCheckTitle());
-//        } else {
-//            queryActivity.setTitle(activity.getTitle());
-//        }
-//        long result = corgiActivityService.countCorgiActivity(queryActivity);
-//        return result > 0;
-//    }
-
     @GetMapping("test_add_activity")
     public JsonResult testAddActivity() {
         CorgiActivity query = new CorgiActivity();
@@ -748,12 +740,12 @@ public class CorgiActivityController extends BaseController {
         }
         if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
             List<ActivityPic> activitypics = corgiPicService.getActivityPic(activity.getId());
-            List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
-            if (CollectionUtils.isEmpty(recommendUser)) {
-                recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
-            }
+//            List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
+//            if (CollectionUtils.isEmpty(recommendUser)) {
+//                recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
+//            }
             return new JsonResult(AddActivityResult.getResult(activity)
-                    .setRecommend(recommendUser)
+//                    .setRecommend(recommendUser)
                     .setActivityPics(activitypics)
                     .setCanCallCity(getCallCityKey(activity.getUserId()) != null)
                     .setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activity.getId()))));
@@ -1179,7 +1171,7 @@ public class CorgiActivityController extends BaseController {
         }
         List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
         List<CorgiActivityDetail> detailList = convertDetail(activities, getUserId());
-        return new PageResult(detailList, activityQuery.getTPage() + 1, activityQuery.getDPage());
+        return new PageResult(detailList, 1, activityQuery.getDPage());
     }
 
     @GetMapping("get_by_topic")
@@ -1707,7 +1699,10 @@ public class CorgiActivityController extends BaseController {
                 }
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Integer swiftCommentCount = corgiCommentService.countActivityCommentByStatus(activity.getId(), getUserId(), ActivityComment.SWIFT);
-                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
+                Long likeCount = activity.getLikeCount();
+                if (likeCount == null) {
+                    likeCount = corgiLikeService.countActivityLike(activity.getId());
+                }
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 List<UserProfile> signUpUsers = new ArrayList<>();
