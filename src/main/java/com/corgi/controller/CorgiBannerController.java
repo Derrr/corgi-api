@@ -62,10 +62,10 @@ public class CorgiBannerController extends BaseController {
     @GetMapping("get_banner")
     public JsonResult getBanner(CorgiBanner corgiBanner) {
         corgiBanner.setStatus(CorgiBanner.STATUS_ENABLE);
-        corgiBanner.setUrlType("12");
-        return new JsonResult(Arrays.asList(corgiBanner));
-//        List<CorgiBanner> bannerList = corgiBannerService.listBanner(corgiBanner);
-//        return new JsonResult(bannerList);
+//        corgiBanner.setUrlType("12");
+//        return new JsonResult(Arrays.asList(corgiBanner));
+        List<CorgiBanner> bannerList = corgiBannerService.listBanner(corgiBanner);
+        return new JsonResult(bannerList);
     }
 
 //    private boolean containBanner(List<CorgiBanner> bannerList, CorgiBanner singleBanner) {
