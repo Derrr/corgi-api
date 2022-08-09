@@ -183,9 +183,6 @@ public class CorgiFeedController extends BaseController {
         if (corgiUtilService.isNewUser(userId)) {
             return new JsonResult();
         }
-        if (StringUtils.isEmpty(activityId)) {
-            activityId = "";
-        }
         List<String> feedIds = corgiFeedService.getFeedByActivityId(activityId, category, userId, page, size);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, userId);
