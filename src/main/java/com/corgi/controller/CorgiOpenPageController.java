@@ -70,7 +70,7 @@ public class CorgiOpenPageController extends BaseController {
     @GetMapping("get_open_page")
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
         List<CorgiOpenPage> result = new ArrayList<>();
-        if("AppStore".equals(RequestUtil.getChannel()) && "2.2.4".compareTo(RequestUtil.getVersion()) <= 0) {
+        if("AppStore".equals(RequestUtil.getChannel()) && "2.2.5".compareTo(RequestUtil.getVersion()) <= 0) {
             corgiOpenPage.setUrlType("12");
             result.add(corgiOpenPage);
             return new JsonResult(result);
