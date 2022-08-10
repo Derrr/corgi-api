@@ -2,6 +2,7 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.user.api.CorgiBannerService;
 import com.corgi.user.entity.CorgiBanner;
 import lombok.extern.slf4j.Slf4j;
@@ -62,8 +63,10 @@ public class CorgiBannerController extends BaseController {
     @GetMapping("get_banner")
     public JsonResult getBanner(CorgiBanner corgiBanner) {
         corgiBanner.setStatus(CorgiBanner.STATUS_ENABLE);
-//        corgiBanner.setUrlType("12");
-//        return new JsonResult(Arrays.asList(corgiBanner));
+        if("AppStore".equals(RequestUtil.getChannel())) {
+            corgiBanner.setUrlType("12");
+            return new JsonResult(Arrays.asList(corgiBanner));
+        }
         List<CorgiBanner> bannerList = corgiBannerService.listBanner(corgiBanner);
         return new JsonResult(bannerList);
     }
