@@ -63,7 +63,7 @@ public class CorgiBannerController extends BaseController {
     @GetMapping("get_banner")
     public JsonResult getBanner(CorgiBanner corgiBanner) {
         corgiBanner.setStatus(CorgiBanner.STATUS_ENABLE);
-        if("AppStore".equals(RequestUtil.getChannel())) {
+        if("AppStore".equals(RequestUtil.getChannel()) && "2.2.4".equals(RequestUtil.getVersion())) {
             corgiBanner.setUrlType("12");
             return new JsonResult(Arrays.asList(corgiBanner));
         }
