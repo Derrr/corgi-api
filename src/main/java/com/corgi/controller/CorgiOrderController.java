@@ -178,46 +178,45 @@ public class CorgiOrderController extends BaseController {
                                    @RequestParam(name = "goodsId") String goodsId,
                                    @RequestParam(name = "date") String date,
                                    @RequestParam("payType") String payType) {
-        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "功能正在维护中，请明天再试试吧");
-//        String key = "billboard_pay_" + date;
-//        if (!redisTemplate.opsForValue().setIfAbsent(key.concat(getUserId()), "1", 2L, TimeUnit.SECONDS)) {
-//            return new JsonResult();
-//        }
-//        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
-//        if (CollectionUtils.isEmpty(corgiActivities)) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
-//        }
-//        CorgiActivity activity = corgiActivities.get(0);
-//        if (AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态存在违规，不能上榜");
-//        }
-//        if (!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态类型不能上榜");
-//        }
-//        corgiUtilService.lock(key);
-//        try {
-//            PaidBillboard paidBillboard = new PaidBillboard();
-//            paidBillboard.setDate(date);
-//            paidBillboard.setActivityId(goodsId);
-//            List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
-//            if (CollectionUtils.isNotEmpty(billboards)) {
-//                for (PaidBillboard billboard : billboards) {
-//                    if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
-//                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
-//                    }
-//                    if (goodsId.equals(billboard.getActivityId())) {
-//                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
-//                    }
-//                }
-//            }
-//            paidBillboard.setUserId(activity.getUserId());
-//            paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
-//            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
-//            HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
-//            return new JsonResult(result);
-//        } finally {
-//            corgiUtilService.unlock(key);
-//        }
+        String key = "billboard_pay_" + date;
+        if (!redisTemplate.opsForValue().setIfAbsent(key.concat(getUserId()), "1", 2L, TimeUnit.SECONDS)) {
+            return new JsonResult();
+        }
+        List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
+        if (CollectionUtils.isEmpty(corgiActivities)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态已不存在");
+        }
+        CorgiActivity activity = corgiActivities.get(0);
+        if (AliyunGreenService.CHECK_LIST.contains(activity.getCheckStatus())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态存在违规，不能上榜");
+        }
+        if (!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态类型不能上榜");
+        }
+        corgiUtilService.lock(key);
+        try {
+            PaidBillboard paidBillboard = new PaidBillboard();
+            paidBillboard.setDate(date);
+            paidBillboard.setActivityId(goodsId);
+            List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
+            if (CollectionUtils.isNotEmpty(billboards)) {
+                for (PaidBillboard billboard : billboards) {
+                    if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
+                    }
+                    if (goodsId.equals(billboard.getActivityId())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
+                    }
+                }
+            }
+            paidBillboard.setUserId(activity.getUserId());
+            paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
+            HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+            return new JsonResult(result);
+        } finally {
+            corgiUtilService.unlock(key);
+        }
     }
 
     @GetMapping("pay")
