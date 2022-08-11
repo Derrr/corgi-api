@@ -4,7 +4,7 @@ import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.*;
 import lombok.Data;
-import org.apache.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;

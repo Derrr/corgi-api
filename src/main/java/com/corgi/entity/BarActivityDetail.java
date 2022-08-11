@@ -1,6 +1,6 @@
 package com.corgi.entity;
 
-import org.apache.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.user.entity.*;
 import lombok.Data;

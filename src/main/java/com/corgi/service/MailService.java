@@ -1,6 +1,6 @@
 package com.corgi.service;
 
-import org.apache.dubbo.common.utils.StringUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.entity.MailMessage;
 import com.corgi.user.api.CorgiUserService;

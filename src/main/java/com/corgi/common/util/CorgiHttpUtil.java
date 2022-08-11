@@ -1,6 +1,6 @@
 package com.corgi.common.util;
 
-import org.apache.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.common.utils.CollectionUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;

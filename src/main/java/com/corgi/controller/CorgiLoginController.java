@@ -1,6 +1,6 @@
 package com.corgi.controller;
 
-import org.apache.dubbo.common.utils.StringUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
