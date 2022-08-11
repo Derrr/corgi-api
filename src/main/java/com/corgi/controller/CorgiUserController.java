@@ -582,7 +582,6 @@ public class CorgiUserController extends BaseController {
         try {
             String jwt = RequestUtil.getJwt();
             if (!StringUtils.isEmpty(jwt)) {
-                log.info("jwt:{} ", jwt);
                 DecodedJWT decodedJWT = JWTUtils.decodeToken(jwt);
                 String jwtUserId = decodedJWT.getClaim("userId").asString();
                 log.info("updating user:{} ", jwtUserId);
