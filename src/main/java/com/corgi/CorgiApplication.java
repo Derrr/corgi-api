@@ -1,6 +1,6 @@
 package com.corgi;
 
-import com.alibaba.dubbo.config.spring.context.annotation.EnableDubboConfig;
+import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.config.CorgiSocketSpringConfigurator;
 import com.corgi.common.filter.CorgiCorsFilter;
@@ -16,7 +16,7 @@ import javax.servlet.Filter;
 
 
 @SpringBootApplication
-@EnableDubboConfig
+@EnableDubboConfiguration
 public class CorgiApplication {
 
     public static void main(String[] args) {
