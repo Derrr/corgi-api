@@ -1,6 +1,6 @@
 package com.corgi.common.interceptor;
 
-import org.apache.dubbo.rpc.RpcException;
+import com.alibaba.dubbo.rpc.RpcException;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.exception.PermissionException;
