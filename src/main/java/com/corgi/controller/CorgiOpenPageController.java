@@ -70,11 +70,7 @@ public class CorgiOpenPageController extends BaseController {
     @GetMapping("get_open_page")
     public JsonResult getBanner(CorgiOpenPage corgiOpenPage) {
         List<CorgiOpenPage> result = new ArrayList<>();
-        if("AppStore".equals(RequestUtil.getChannel()) && "2.2.5".compareTo(RequestUtil.getVersion()) <= 0) {
-            corgiOpenPage.setUrlType("12");
-            result.add(corgiOpenPage);
-            return new JsonResult(result);
-        }
+
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         SimpleDateFormat sdf = new SimpleDateFormat("/MM/dd");
         if (detail != null && !StringUtils.isEmpty(detail.getBirthday()) && detail.getBirthday().contains(sdf.format(new Date()))) {
@@ -97,6 +93,11 @@ public class CorgiOpenPageController extends BaseController {
                     return new JsonResult(Arrays.asList(page));
                 }
             }
+        }
+        if("AppStore".equals(RequestUtil.getChannel()) && "2.2.5".compareTo(RequestUtil.getVersion()) <= 0) {
+            corgiOpenPage.setUrlType("12");
+            result.add(corgiOpenPage);
+            return new JsonResult(result);
         }
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
