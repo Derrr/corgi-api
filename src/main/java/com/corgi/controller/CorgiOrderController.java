@@ -407,7 +407,7 @@ public class CorgiOrderController extends BaseController {
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
         if (order != null && CorgiOrder.STATUS.CREATED.equals(order.getStatus())) {
             if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
-                corgiPayService.queryWXOrder(order,getUserId());
+                corgiPayService.queryWXOrder(order);
             }
             if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayType())) {
                 corgiPayService.queryAlipayOrder(order);
