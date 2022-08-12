@@ -248,13 +248,13 @@ public class CorgiPayService {
         corgiOrderService.updateOrder(order);
     }
 
-    public void queryWXOrder(CorgiOrder order) {
+    public void queryWXOrder(CorgiOrder order, String userId) {
         Map<String, String> orderQuery = new HashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         orderQuery.put("out_trade_no", order.getTradeNo());
         try {
             Map<String, String> result = wxPay.orderQuery(orderQuery);
-            order.setResult(JSON.toJSONString(result));
+            order.setResult(JSON.toJSONString(result) + "userId:" + userId + " at success");
             if (WXPayConstants.FAIL.equals(result.get("return_code"))
                     || WXPayConstants.FAIL.equals(result.get("result_code"))) {
                 corgiOrderService.updateOrder(order);
