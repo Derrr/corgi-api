@@ -142,6 +142,7 @@ public class CorgiPayService {
         body.put("trade_type", "APP");
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
+            log.info("response:{}", response);
             Map<String, String> result = new HashMap<>();
             result.put("appid", response.get("appid"));
             result.put("partnerid", response.get("mch_id"));
