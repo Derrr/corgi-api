@@ -628,11 +628,11 @@ public class CorgiUserController extends BaseController {
         } else {
             corgiUserService.updateUserPosition(userPosition);
         }
-        //if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
+        if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
             log.info("updating...from url");
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
             corgiMatchService.updateUser(userDetail);
-        //}
+        }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
         if (StringUtils.isNotEmpty(expireDate) && !"-".equals(expireDate)) {

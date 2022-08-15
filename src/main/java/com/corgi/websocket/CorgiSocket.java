@@ -259,11 +259,11 @@ public class CorgiSocket {
         } else {
             corgiUserService.updateUserPosition(userPosition);
         }
-        //if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
+        if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
             log.info("updating...from socket");
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
             corgiMatchService.updateUser(userDetail);
-        //}
+        }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
         if (com.alibaba.dubbo.common.utils.StringUtils.isNotEmpty(expireDate) && !"-".equals(expireDate)) {
