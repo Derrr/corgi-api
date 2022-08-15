@@ -631,6 +631,7 @@ public class CorgiUserController extends BaseController {
         if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
             log.info("updating...from url");
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
+            userDetail.setTime(System.currentTimeMillis());
             corgiMatchService.updateUser(userDetail);
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
