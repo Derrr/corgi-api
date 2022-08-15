@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.common.config.CorgiSocketSpringConfigurator;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
@@ -15,10 +16,7 @@ import com.corgi.service.MQService;
 import com.corgi.user.api.CorgiFeedService;
 import com.corgi.user.api.CorgiUserService;
 import com.corgi.user.api.CorgiViewService;
-import com.corgi.user.entity.ActivityView;
-import com.corgi.user.entity.CorgiFeed;
-import com.corgi.user.entity.UserLogin;
-import com.corgi.user.entity.UserPosition;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,6 +29,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @ServerEndpoint(value = "/corgiSocket", configurator = CorgiSocketSpringConfigurator.class)
@@ -42,7 +41,8 @@ public class CorgiSocket {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiViewService corgiViewService;
-
+    @Reference
+    private CorgiMatchService corgiMatchService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -258,6 +258,12 @@ public class CorgiSocket {
             corgiUserService.updateUserPosition(userPosition);
         } else {
             corgiUserService.updateUserPosition(userPosition);
+        }
+        if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
+            log.info("updating...from socket");
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
+            userDetail.setTime(System.currentTimeMillis());
+            corgiMatchService.updateUser(userDetail);
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();

@@ -18,6 +18,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
@@ -85,6 +86,8 @@ public class CorgiUserController extends BaseController {
     private CorgiLikeService corgiLikeService;
     @Reference
     private CorgiShareService corgiShareService;
+    @Reference
+    private CorgiMatchService corgiMatchService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -629,6 +632,12 @@ public class CorgiUserController extends BaseController {
             corgiUserService.updateUserPosition(userPosition);
         } else {
             corgiUserService.updateUserPosition(userPosition);
+        }
+        if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
+            log.info("updating...from url");
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
+            userDetail.setTime(System.currentTimeMillis());
+            corgiMatchService.updateUser(userDetail);
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
