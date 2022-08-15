@@ -47,7 +47,7 @@ public class ReserveController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("get_reservation_by_order")
+    @GetMapping("get_by_order")
     public JsonResult getReservationByOrder(@RequestParam("orderNo") String orderNo) {
         CorgiOrder order = corgiOrderService.getOrderByTradeNo(orderNo);
         if (order != null && !StringUtils.isEmpty(order.getMarketId())) {
