@@ -211,6 +211,8 @@ public class CorgiOrderController extends BaseController {
             paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
             CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
             HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+            paidBillboard.setTradeNo(result.get("orderNo") + "");
+            corgiBillboardService.updatePaiBillboard(paidBillboard);
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
@@ -286,6 +288,13 @@ public class CorgiOrderController extends BaseController {
                 sellerId = "corgi";
             }
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
+            if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
+                BarReservation update = new BarReservation();
+                update.setId(goodsId);
+                update.setTradeNo(result.get("orderNo") + "");
+                update.setMerchId(merchId);
+                corgiReserveService.updateReservation(update);
+            }
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
@@ -304,7 +313,7 @@ public class CorgiOrderController extends BaseController {
         goodsQuery.setGoodsType(CorgiUserGoods.GOODS_TYPE.RESERVE);
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(goodsQuery);
         if (CollectionUtils.isNotEmpty(goods)) {
-            result.setMessage("该动订座付费");
+            result.setMessage("该订座已付费");
             return false;
         }
         return true;
