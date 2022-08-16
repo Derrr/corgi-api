@@ -232,6 +232,10 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userDetail.setUserId(getUserId());
         }
+        String key = "add_user-" + getUserId();
+        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
+        }
 //        if (StringUtils.isEmpty(userDetail.getBirthday())) {
 //            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请填写你的生日");
 //        }
@@ -632,6 +636,9 @@ public class CorgiUserController extends BaseController {
             log.info("updating...from url");
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
             userDetail.setTime(System.currentTimeMillis());
+            if(!"influencer".equals(userDetail.getAvatarStatus())){
+                userDetail.setAvatarStatus(corgiUserService.getUserVipExpire(userDetail.getUserId()));
+            }
             corgiMatchService.updateUser(userDetail);
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());

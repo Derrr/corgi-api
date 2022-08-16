@@ -259,10 +259,7 @@ public class BillboardController extends BaseController {
                         activity.setStatus("unpay");
                     }
                 }
-                Long likeCount = activity.getLikeCount();
-                if (likeCount == null) {
-                    likeCount = corgiLikeService.countActivityLike(activity.getId());
-                }
+                Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)
