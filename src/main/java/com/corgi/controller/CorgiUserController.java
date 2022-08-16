@@ -637,6 +637,9 @@ public class CorgiUserController extends BaseController {
             log.info("updating...from url");
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
             userDetail.setTime(System.currentTimeMillis());
+            if(!"influencer".equals(userDetail.getAvatarStatus())){
+                userDetail.setAvatarStatus(corgiUserService.getUserVipExpire(userDetail.getUserId()));
+            }
             corgiMatchService.updateUser(userDetail);
         }
         String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
