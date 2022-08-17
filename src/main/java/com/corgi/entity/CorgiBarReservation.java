@@ -10,4 +10,5 @@ public class CorgiBarReservation extends BarReservation {
     private BarProfile barProfile;
     private Double payAmount;
     private String payTime;
+    private String orderNo;
 }

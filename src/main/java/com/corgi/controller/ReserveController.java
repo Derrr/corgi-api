@@ -47,6 +47,7 @@ public class ReserveController extends BaseController {
                 if (order != null) {
                     corgiBarReservation.setPayAmount(order.getPayAmount());
                     corgiBarReservation.setPayTime(order.getCtime());
+                    corgiBarReservation.setOrderNo(reserve.getTradeNo());
                 }
                 corgiBarReservation.setBarProfile(corgiBarService.getBarProfile(reserve.getBarId()));
                 result.add(corgiBarReservation);
