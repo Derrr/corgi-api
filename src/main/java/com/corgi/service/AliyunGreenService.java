@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.aliyun.com.viapi.FileUtils;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.cloudauth.model.v20190307.*;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -204,8 +206,9 @@ public class AliyunGreenService {
 
     public CorgiPic checkFace(CorgiPic pic, String sourceId) {
         log.info("pics = " + pic.getPicUrl());
+
         RecognizeFaceRequest request = new RecognizeFaceRequest();
-        request.setImageURL(pic.getPicUrl());
+        request.setImageURL(this.getUrl(pic.getPicUrl()));
         try {
             RecognizeFaceResponse response = managementClient.getAcsResponse(request);
             RecognizeFaceResponse.Data data = response.getData();
@@ -227,6 +230,16 @@ public class AliyunGreenService {
             addCheckPic(pic, sourceId, CheckPic.AVATAR);
         }
         return pic;
+    }
+
+    public String getUrl(String url) {
+        try {
+            FileUtils fileUtils = FileUtils.getInstance(accessKeyId, accessKeySecret);
+            return fileUtils.upload(url);
+        } catch (ClientException | IOException e) {
+            e.printStackTrace();
+        }
+        return url;
     }
 
 //    public CorgiPic checkFace(CorgiPic pic, String sourceId) {
