@@ -2,13 +2,13 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
-import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
@@ -26,7 +26,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +64,8 @@ public class CorgiToolController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiMatchService corgiMatchService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -458,6 +459,7 @@ public class CorgiToolController extends BaseController {
     public JsonResult deleteUser(@RequestParam("userId") String userId) {
         corgiUserService.deleteUser(userId);
         corgiActivityService.deleteUserActivity(userId);
+        corgiMatchService.deleteUser(userId);
         return new JsonResult();
     }
 
