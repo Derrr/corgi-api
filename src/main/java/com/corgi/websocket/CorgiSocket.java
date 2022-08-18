@@ -136,7 +136,7 @@ public class CorgiSocket {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("发生错误" + error.getMessage(), error);
+        log.info("socket发生错误" + error.getMessage(), error);
     }
 
     /**
