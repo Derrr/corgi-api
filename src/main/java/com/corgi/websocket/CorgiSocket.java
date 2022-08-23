@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.io.EOFException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -136,7 +137,11 @@ public class CorgiSocket {
 
     @OnError
     public void onError(Session session, Throwable error) {
-        log.error("发生错误" + error.getMessage(), error);
+        if (error instanceof EOFException) {
+            this.closeSession(session, CloseReason.CloseCodes.CANNOT_ACCEPT, "no message received");
+            return;
+        }
+        log.info("socket发生错误" + error.getMessage(), error);
     }
 
     /**
@@ -263,7 +268,7 @@ public class CorgiSocket {
             log.info("updating...from socket");
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
             userDetail.setTime(System.currentTimeMillis());
-            if(!"influencer".equals(userDetail.getAvatarStatus())){
+            if (!"influencer".equals(userDetail.getAvatarStatus())) {
                 userDetail.setAvatarStatus(corgiUserService.getUserVipExpire(userDetail.getUserId()));
             }
             corgiMatchService.updateUser(userDetail);
