@@ -101,7 +101,7 @@ public class CorgiHotVlogController extends BaseController {
         }
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
-        //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+        corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
         mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
         if (CorgiActivity.CAT_PAYING.equals(activity.getCategory()) && redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
