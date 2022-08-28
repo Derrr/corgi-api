@@ -281,7 +281,7 @@ public class CorgiActivityController extends BaseController {
             corgiVlogHot.setExpectView(3000);
             corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
             corgiVlogService.addHotVlog(corgiVlogHot);
-            corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+            //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
 
         if (CollectionUtils.isEmpty(activity.getMentionUserIds())) {
