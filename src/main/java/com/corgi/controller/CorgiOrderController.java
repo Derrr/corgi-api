@@ -633,7 +633,13 @@ public class CorgiOrderController extends BaseController {
                 System.out.println("苹果订阅回调.BASE64解密拿到数据============" + fromBASE641);
                 fromBASE641 = fromBASE641.substring(fromBASE641.indexOf("{"), fromBASE641.lastIndexOf("}") + 1);
                 JSONObject jsonBASE64 = JSONObject.parseObject(fromBASE641);
-                corgiOrderService.addLog(jsonBASE64.toJSONString(), jsonBASE64.getString("transactionId"), jsonBASE64.getString("originalTransactionId")+"-"+notificationType);
+                corgiOrderService.addLog(jsonBASE64.toJSONString(), jsonBASE64.getString("transactionId"), jsonBASE64.getString("originalTransactionId") + "-" + notificationType);
+                if ("DID_RENEW".equals(notificationType)) {
+                    CorgiOrder subscribe = new CorgiOrder();
+                    subscribe.setOrderId(jsonBASE64.getString("originalTransactionId"));
+                    Long expireTime = jsonBASE64.getLong("expiresDate");
+                    corgiOrderService.subscribe(subscribe, null, "1", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(expireTime)));
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
