@@ -633,7 +633,7 @@ public class CorgiOrderController extends BaseController {
                 System.out.println("苹果订阅回调.BASE64解密拿到数据============" + fromBASE641);
                 fromBASE641 = fromBASE641.substring(fromBASE641.indexOf("{"), fromBASE641.lastIndexOf("}") + 1);
                 JSONObject jsonBASE64 = JSONObject.parseObject(fromBASE641);
-                corgiOrderService.addLog(jsonBASE64.toJSONString(), jsonBASE64.getString("transactionId"), jsonBASE64.getString("originalTransactionId"));
+                corgiOrderService.addLog(jsonBASE64.toJSONString(), jsonBASE64.getString("transactionId"), jsonBASE64.getString("originalTransactionId")+"-"+notificationType);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
