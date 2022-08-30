@@ -612,25 +612,22 @@ public class CorgiOrderController extends BaseController {
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(signedPayload)) {
                 //第一次解密
                 String fromBASE64 = getFromBASE64(signedPayload);
-                System.out.println("苹果订阅回调.............JWS解密" + fromBASE64);
                 // 解密出来的字符串有时候最后会加特殊符号，所以截取了一下
                 fromBASE64 = fromBASE64.substring(fromBASE64.indexOf("{"), fromBASE64.lastIndexOf("}") + 1);
-                System.out.println("苹果订阅回调.............JWS解密——替换字符串" + fromBASE64);
+                log.info("苹果订阅回调.BASE64解密拿到数据============" + fromBASE64);
                 jsonObject = JSONObject.parseObject(fromBASE64);
                 //判断uuid是否重复调用
                 String s = JSONObject.parseObject(jsonObject.get("data").toString()).get("signedTransactionInfo").toString();
-                System.out.println("苹果订阅回调.拿到加密数据============" + s);
                 //解密拿到数据
                 DecodedJWT sd = JWT.decode(s);
                 String verify = verify(x5c, sd);
-                System.out.println("苹果订阅回调.JWS解密拿到数据============" + verify);
                 //线程池
                 String fromBASE641 = getFromBASE64(verify);
                 //第一标识
                 String notificationType = jsonObject.get("notificationType").toString();
                 //第二标识
                 String subtype = String.valueOf(Optional.ofNullable(jsonObject.get("subtype")).orElse(""));
-                System.out.println("苹果订阅回调.BASE64解密拿到数据============" + fromBASE641);
+
                 fromBASE641 = fromBASE641.substring(fromBASE641.indexOf("{"), fromBASE641.lastIndexOf("}") + 1);
                 JSONObject jsonBASE64 = JSONObject.parseObject(fromBASE641);
                 corgiOrderService.addLog(jsonBASE64.toJSONString(), jsonBASE64.getString("transactionId"), jsonBASE64.getString("originalTransactionId") + "-" + notificationType);
