@@ -60,7 +60,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
-    public static final List<String> CHANNELS = Arrays.asList("xiaomi","oppo");
+    public static final List<String> CHANNELS = Arrays.asList("xiaomi","oppo", "vivo");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
