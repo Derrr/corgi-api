@@ -61,19 +61,7 @@ public class CorgiTest {
 
     @Test
     public void testJoin() {
-        String teamCodes = "01,02";
-        StringJoiner sj = new StringJoiner("','");
-        String[] codes = teamCodes.split(",");
-        for (int i = 0; i < codes.length; i++) {
-            try {
-                if (Integer.valueOf(codes[i]) > 0) {
-                    sj.add(codes[i]);
-                }
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println(sj.toString());
+        System.out.println("aaaa#a".split("#")[1]);
     }
 
     @Test

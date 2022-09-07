@@ -912,6 +912,10 @@ public class CorgiUserController extends BaseController {
         }
         String result = corgiBlacklistService.addBlacklist(userId, blockId);
         if (CorgiConstants.SUCCESS.equals(result)) {
+            String blackKey = "black_cache_" + getUserId();
+            if (redisTemplate.hasKey(blackKey)) {
+                redisTemplate.opsForList().leftPush(blackKey, blockId);
+            }
             return new JsonResult("拉黑成功");
         } else {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请不要重复拉黑");
