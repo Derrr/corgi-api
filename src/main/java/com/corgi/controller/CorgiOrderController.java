@@ -31,6 +31,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -630,15 +637,41 @@ public class CorgiOrderController extends BaseController {
     public JsonResult applepayCallback(@RequestBody JSONObject object) {
         log.info("callback:{} ", object);
         try {
-            String notificationType = object.getString("notification_type");
-            if ("REFUND".equals(notificationType)) {
-//                HashMap data = decodedJWT.getClaim("data").as(HashMap.class);
-//                DecodedJWT obj = JWTUtils.verifyToken(signedPayload);
-//                CorgiOrder order = CorgiOrder.builder()
-//                        .orderId(obj.getClaim("transactionId").asString())
-//                        .result(JSON.toJSONString(decodedJWT))
-//                        .build();
-//                corgiOrderService.subscribe(order, null, "0", "");
+            String payload = object.getString("signedPayload");
+            DecodedJWT decodedJWT = JWT.decode(payload);
+
+            String signedPayload = new String(java.util.Base64.getDecoder().decode(payload.split("\\.")[0]));
+            JSONObject jsonObject = JSONObject.parseObject(signedPayload);
+            String x5c = jsonObject.getJSONArray("x5c").get(0).toString();
+            signedPayload = verify(x5c, decodedJWT);
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(signedPayload)) {
+                //第一次解密
+                String fromBASE64 = getFromBASE64(signedPayload);
+                // 解密出来的字符串有时候最后会加特殊符号，所以截取了一下
+                fromBASE64 = fromBASE64.substring(fromBASE64.indexOf("{"), fromBASE64.lastIndexOf("}") + 1);
+                log.info("苹果订阅回调.BASE64解密拿到数据============" + fromBASE64);
+                jsonObject = JSONObject.parseObject(fromBASE64);
+                //判断uuid是否重复调用
+                String s = JSONObject.parseObject(jsonObject.get("data").toString()).get("signedTransactionInfo").toString();
+                //解密拿到数据
+                DecodedJWT sd = JWT.decode(s);
+                String verify = verify(x5c, sd);
+                //线程池
+                String fromBASE641 = getFromBASE64(verify);
+                //第一标识
+                String notificationType = jsonObject.get("notificationType").toString();
+                //第二标识
+                String subtype = String.valueOf(Optional.ofNullable(jsonObject.get("subtype")).orElse(""));
+
+                fromBASE641 = fromBASE641.substring(fromBASE641.indexOf("{"), fromBASE641.lastIndexOf("}") + 1);
+                JSONObject jsonBASE64 = JSONObject.parseObject(fromBASE641);
+                corgiOrderService.addLog(jsonBASE64.toJSONString(), jsonBASE64.getString("transactionId"), jsonBASE64.getString("originalTransactionId") + "-" + notificationType);
+                if ("DID_RENEW".equals(notificationType)) {
+                    CorgiOrder subscribe = new CorgiOrder();
+                    subscribe.setOrderId(jsonBASE64.getString("originalTransactionId"));
+                    Long expireTime = jsonBASE64.getLong("expiresDate");
+                    corgiOrderService.subscribe(subscribe, null, "1", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(expireTime)));
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -864,6 +897,25 @@ public class CorgiOrderController extends BaseController {
         return result;
     }
 
+    public static String verify(String x5c0, DecodedJWT decodedJWT) throws CertificateException {
+        PublicKey publicKey = getPublicKeyByX5c(x5c0);
+        // 验证 token
+        Algorithm algorithm = Algorithm.ECDSA256((ECPublicKey) publicKey, null);
+        algorithm.verify(decodedJWT);
+        String payload = decodedJWT.getPayload();
 
+        return payload;
+    }
+
+    public static PublicKey getPublicKeyByX5c(String x5c) throws CertificateException {
+        byte[] x5c0Bytes = java.util.Base64.getDecoder().decode(x5c);
+        CertificateFactory fact = CertificateFactory.getInstance("X.509");
+        Certificate cer = fact.generateCertificate(new ByteArrayInputStream(x5c0Bytes));
+        return cer.getPublicKey();
+    }
+
+    public static String getFromBASE64(String jwt) {
+        return new String(java.util.Base64.getDecoder().decode(jwt));
+    }
 }
 

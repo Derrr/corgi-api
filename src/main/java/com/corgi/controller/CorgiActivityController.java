@@ -1506,6 +1506,18 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(convertDetail(activityList, getUserId()));
     }
 
+
+    @GetMapping("uninterested")
+    public JsonResult Uninterested(@RequestParam("creatorId") String creatorId, @RequestParam("activityId") String activityId) {
+        corgiBlacklistService.addUninterested(getUserId(), activityId, creatorId);
+        String blackKey = "black_cache_" + getUserId();
+        if (redisTemplate.hasKey(blackKey)) {
+            redisTemplate.opsForList().leftPush(blackKey, creatorId);
+        }
+        return new JsonResult();
+    }
+
+
     private boolean populateExtra(HashMap extra, String activityId, String userId) {
         extra.put("aId", activityId);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
