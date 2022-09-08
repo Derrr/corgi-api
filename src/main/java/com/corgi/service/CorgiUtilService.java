@@ -60,7 +60,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
-    public static final List<String> CHANNELS = Arrays.asList("xiaomi","oppo", "vivo", "qq");
+    public static final List<String> CHANNELS = Arrays.asList("xiaomi", "oppo", "qq");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -215,7 +215,7 @@ public class CorgiUtilService {
                     width = picInfo.getWidth();
                 }
                 Long likeCount = activity.getLikeCount();
-                if(likeCount == null) {
+                if (likeCount == null) {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());
                 }
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
