@@ -89,7 +89,7 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        if ("android2.2.2".equals(RequestUtil.getVersion())) {
+        if ("2.2.2".equals(RequestUtil.getVersion())) {
             if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
                 config.put("showPay", 0);
                 config.put("showDiscovery", 0);
