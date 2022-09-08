@@ -454,7 +454,7 @@ public class CorgiActivityController extends BaseController {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
             }
         }
-        if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !aliyunGreenService.checkText(activityComment.getContent())) {
+        if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !aliyunGreenService.checkText(activityComment.getContent(), "ad_check")) {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
         }
