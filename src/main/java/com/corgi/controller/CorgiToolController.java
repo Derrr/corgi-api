@@ -98,6 +98,7 @@ public class CorgiToolController extends BaseController {
                 config.put("showPurse", 0);
             }
         }
+        log.info("get_config:{} ", config);
         return new JsonResult(config);
     }
 
