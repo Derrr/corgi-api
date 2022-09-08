@@ -456,6 +456,7 @@ public class CorgiActivityController extends BaseController {
         }
         if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !aliyunGreenService.checkText(activityComment.getContent(), "ad_check")) {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
+            this.checkComment(getUserId());
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
         }
         Integer blackCount = corgiBlacklistService.isBlacked(activityList.get(0).getUserId(), getUserId());
@@ -1629,6 +1630,17 @@ public class CorgiActivityController extends BaseController {
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         return convertDetail(activityList, userId, false);
+    }
+
+    private void checkComment(String userId) {
+        for (int i = 0; i < 3; i++) {
+            String key = "ad_comment_" + userId + "-" + i;
+            if (!redisTemplate.hasKey(key)) {
+                redisTemplate.opsForValue().set(key, "1", 1l, TimeUnit.HOURS);
+                return;
+            }
+        }
+        redisTemplate.opsForValue().set("darkroom_" + userId, "1", 1l, TimeUnit.DAYS);
     }
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId, boolean showNotGood) {
