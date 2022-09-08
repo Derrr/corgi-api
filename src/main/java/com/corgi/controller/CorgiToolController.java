@@ -18,6 +18,7 @@ import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,7 @@ public class CorgiToolController extends BaseController {
                 config.put("showPurse", 0);
             }
         }
-        log.info("get_config:{} ", config);
+        log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
         return new JsonResult(config);
     }
 
