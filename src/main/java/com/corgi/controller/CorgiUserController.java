@@ -699,6 +699,9 @@ public class CorgiUserController extends BaseController {
         if (blockTel.contains(telNo)) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
         }
+        if (redisTemplate.hasKey("suspended_number_" + telNo)) {
+            return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
+        }
         Random random = new Random();
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
