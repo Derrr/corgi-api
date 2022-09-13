@@ -78,6 +78,12 @@ public class CorgiFeedController extends BaseController {
         return new JsonResult(details);
     }
 
+    @PostMapping("query_feed")
+    public JsonResult queryFeed(@RequestBody ActivityQuery query) {
+        List<CorgiActivity> activities = corgiActivityFeedService.queryActivityFeed(query);
+        return new JsonResult(convertDetail(activities, getUserId()));
+    }
+
     @GetMapping("get_feeds")
     public JsonResult getFeeds(@RequestParam("pageSize") Integer size) {
         String userId = "1";
