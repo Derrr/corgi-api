@@ -536,6 +536,10 @@ public class AliyunGreenService {
     }
 
     public boolean checkText(String text) {
+        return checkText(text,"sexy_pic");
+    }
+
+    public boolean checkText(String text, String bussType) {
         if (StringUtils.isEmpty(text)) {
             return true;
         }
@@ -560,7 +564,7 @@ public class AliyunGreenService {
          **/
         data.put("scenes", Arrays.asList("antispam"));
         data.put("tasks", tasks);
-        data.put("bizType", "sexy_pic");
+        data.put("bizType", bussType);
         System.out.println(JSON.toJSONString(data, true));
         // 请务必设置超时时间
         textScanRequest.setConnectTimeout(3000);

@@ -454,8 +454,9 @@ public class CorgiActivityController extends BaseController {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
             }
         }
-        if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !aliyunGreenService.checkText(activityComment.getContent())) {
+        if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !aliyunGreenService.checkText(activityComment.getContent(), "ad_check")) {
             boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
+            this.checkComment(getUserId());
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
         }
         Integer blackCount = corgiBlacklistService.isBlacked(activityList.get(0).getUserId(), getUserId());
@@ -1507,15 +1508,15 @@ public class CorgiActivityController extends BaseController {
     }
 
 
-    @GetMapping("uninterested")
-    public JsonResult Uninterested(@RequestParam("creatorId") String creatorId, @RequestParam("activityId") String activityId) {
-        corgiBlacklistService.addUninterested(getUserId(), activityId, creatorId);
-        String blackKey = "black_cache_" + getUserId();
-        if (redisTemplate.hasKey(blackKey)) {
-            redisTemplate.opsForList().leftPush(blackKey, creatorId);
-        }
-        return new JsonResult();
-    }
+//    @GetMapping("uninterested")
+//    public JsonResult Uninterested(@RequestParam("creatorId") String creatorId, @RequestParam("activityId") String activityId) {
+//        corgiBlacklistService.addUninterested(getUserId(), activityId, creatorId);
+//        String blackKey = "black_cache_" + getUserId();
+//        if (redisTemplate.hasKey(blackKey)) {
+//            redisTemplate.opsForList().leftPush(blackKey, creatorId);
+//        }
+//        return new JsonResult();
+//    }
 
 
     private boolean populateExtra(HashMap extra, String activityId, String userId) {
@@ -1629,6 +1630,17 @@ public class CorgiActivityController extends BaseController {
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId) {
         return convertDetail(activityList, userId, false);
+    }
+
+    private void checkComment(String userId) {
+        for (int i = 0; i < 2; i++) {
+            String key = "ad_comment_" + userId + "-" + i;
+            if (!redisTemplate.hasKey(key)) {
+                redisTemplate.opsForValue().set(key, "1", 1l, TimeUnit.HOURS);
+                return;
+            }
+        }
+        redisTemplate.opsForValue().set("darkroom_" + userId, "1", 1l, TimeUnit.DAYS);
     }
 
     private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList, String userId, boolean showNotGood) {

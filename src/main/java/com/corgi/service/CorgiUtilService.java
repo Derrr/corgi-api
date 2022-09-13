@@ -60,7 +60,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
-    public static final List<String> CHANNELS = Arrays.asList("xiaomi","oppo", "vivo", "qq");
+    public static final List<String> CHANNELS = Arrays.asList("xiaomi", "qq", "huawei");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -105,7 +105,7 @@ public class CorgiUtilService {
 
     public boolean isNewUser(String userId) {
         String channel = RequestUtil.getChannel();
-        if (CHANNELS.contains(channel)) {
+        if (CHANNELS.contains(channel) && "2.2.2".equals(RequestUtil.getVersion())) {
             UserLogin userLogin = corgiUserService.getUserLogin(userId);
             if ("17000000000".equals(userLogin.getTelNo())) {
                 return true;
@@ -215,7 +215,7 @@ public class CorgiUtilService {
                     width = picInfo.getWidth();
                 }
                 Long likeCount = activity.getLikeCount();
-                if(likeCount == null) {
+                if (likeCount == null) {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());
                 }
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
