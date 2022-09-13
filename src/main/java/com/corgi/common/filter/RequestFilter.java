@@ -8,6 +8,8 @@ import com.corgi.common.util.JWTUtils;
 import com.corgi.entity.JwtUser;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.*;
@@ -22,6 +24,9 @@ import java.util.UUID;
 @Slf4j
 @WebFilter(filterName = "myFilter", urlPatterns = "/**")
 public class RequestFilter implements Filter {
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     @Override
     public void init(FilterConfig filterConfig) {
 
@@ -53,6 +58,15 @@ public class RequestFilter implements Filter {
                     .userId(decodedJWT.getClaim(JwtUser.USER_ID).asString())
                     .version(decodedJWT.getClaim(JwtUser.VERSION).asString())
                     .build();
+            if (redisTemplate.hasKey("suspended_user_" + user.getUserId())) {
+                JsonResult jsonResult = new JsonResult("");
+                jsonResult.setCode(Constants.PERMISSION_ERROR_CODE);
+                jsonResult.setMessage("当前无法操作");
+                servletResponse.getWriter().write(JSONObject.toJSONString(jsonResult));
+                servletResponse.setContentType("application/json;charset=UTF-8");
+                return;
+            }
+
             if (user != null) {
                 MDC.put("usrID", user.getUserId());
             }

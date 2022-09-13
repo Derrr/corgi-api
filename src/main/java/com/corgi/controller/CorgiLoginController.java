@@ -108,6 +108,9 @@ public class CorgiLoginController extends BaseController {
         if (blockTel.contains(userLogin.getTelNo())) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
         }
+        if (redisTemplate.hasKey("suspended_number_" + userLogin.getTelNo())) {
+            return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
+        }
         if (StringUtils.isEmpty(userLogin.getUserId())) {
             userLogin = corgiUserService.login(userLogin);
             if ("-1".equals(userLogin.getStatus())) {
