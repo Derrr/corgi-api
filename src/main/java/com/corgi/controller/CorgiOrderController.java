@@ -546,6 +546,25 @@ public class CorgiOrderController extends BaseController {
                         corgiOrderService.updateReceipt(tradeNo, receiptData);
                         return new JsonResult(Constants.PARAMETER_ERROR_CODE, "验证结果中不存在订单信息 ");
                     } else {
+                        String appMerchId = inApp.getString("product_id");
+                        CorgiMerchandise query = new CorgiMerchandise();
+                        query.setAppMerchId(appMerchId);
+                        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
+                        String merchId = order.getMerchId();
+
+                        if (CollectionUtils.isNotEmpty(merchandises) && merchandises.size() < 3) {
+                            CorgiMerchandise lastMerchandise = new CorgiMerchandise();
+                            for (CorgiMerchandise merchandise : merchandises) {
+                                lastMerchandise = merchandise;
+                                if (merchandise.getPrice().equals(merchId)) {
+                                    break;
+                                }
+                            }
+                            order.setMerchId(lastMerchandise.getId());
+                            order.setPayAmount(lastMerchandise.getPrice());
+                        } else {
+                            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "订单信息有误");
+                        }
                         order.setBuyerId(inApp.getString("expires_date_ms"));
                         order.setPayTime(inApp.getString("original_purchase_date_ms"));
                         order.setOrderId(inApp.getString("transaction_id"));
