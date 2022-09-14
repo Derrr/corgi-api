@@ -46,7 +46,7 @@ public class CorgiControllerAdvice {
     @ExceptionHandler(PermissionException.class)
     @ResponseBody
     public ResponseEntity handleControllerPermissionException(HttpServletRequest request, PermissionException ex) {
-        logger.error("Permission exception:" + ex.getMessage(), ex);
+        logger.error("Permission exception:" + ex.getMessage());
         JsonResult jsonResult = new JsonResult("");
         jsonResult.setCode(ex.errorCode);
         jsonResult.setMessage(ex.getMessage());
