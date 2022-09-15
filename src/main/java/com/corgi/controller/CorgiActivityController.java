@@ -1183,6 +1183,7 @@ public class CorgiActivityController extends BaseController {
             activityIds = corgiFeedService.getPopularFeed(getUserId(), activityQuery.getPageSize());
         } else {
             CorgiActivity query = new CorgiActivity();
+            query.setCity(activityQuery.getCity() == null ? "" : activityQuery.getCity());
             query.setTopics(Arrays.asList(topic));
             int page = activityQuery.getPage();
             int size = activityQuery.getPageSize();
@@ -1192,7 +1193,7 @@ public class CorgiActivityController extends BaseController {
             if (size <= 0 || size > 21) {
                 activityIds = new ArrayList<>();
             } else {
-                String key = "heat_topic_" + topic + page + "-" + size;
+                String key = "heat_topic_" + topic + "-" + query.getCity() + page + "-" + size;
                 activityIds = redisTemplate.opsForList().range(key, 0, -1);
                 if (CollectionUtils.isEmpty(activityIds)) {
                     activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
