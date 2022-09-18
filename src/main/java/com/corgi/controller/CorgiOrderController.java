@@ -556,7 +556,7 @@ public class CorgiOrderController extends BaseController {
                             CorgiMerchandise lastMerchandise = new CorgiMerchandise();
                             for (CorgiMerchandise merchandise : merchandises) {
                                 lastMerchandise = merchandise;
-                                if (merchandise.getPrice().equals(merchId)) {
+                                if (merchandise.getId().equals(merchId)) {
                                     break;
                                 }
                             }

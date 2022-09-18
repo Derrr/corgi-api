@@ -595,13 +595,13 @@ public class CorgiUserController extends BaseController {
                 if (JWTUtils.ADMIN_ID.equals(jwtUserId)) {
                     result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
-                    log.error("非当前用户:" + jwtUserId + " v:" + userPosition.getVersion());
-                    return new JsonResult(Constants.PERMISSION_ERROR_CODE,"非当前用户");
+                    log.error("非当前用户");
+                    return new JsonResult(Constants.PERMISSION_ERROR_CODE, "非当前用户");
                 } else {
                     UserLogin u = corgiUserService.getUserLogin(jwtUserId);
                     if (u == null || StringUtils.isEmpty(u.getUserId())) {
                         log.error("用户不存在:" + jwtUserId + " v:" + userPosition.getVersion());
-                        return new JsonResult(Constants.PERMISSION_ERROR_CODE,"用户不存在");
+                        return new JsonResult(Constants.PERMISSION_ERROR_CODE, "用户不存在");
                     }
                     Date expireDate = decodedJWT.getExpiresAt();
                     if (expireDate.getTime() - System.currentTimeMillis() < JWTUtils.expireTime) {

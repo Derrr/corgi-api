@@ -22,6 +22,8 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.util.security.MD5Encoder;
+import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -33,6 +35,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -60,7 +63,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
-    public static final List<String> CHANNELS = Arrays.asList("xiaomi", "qq", "huawei");
+    public static final List<String> CHANNELS = Arrays.asList("xiaomi", "qq", "huawei", "baidu");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -68,6 +71,17 @@ public class CorgiUtilService {
     public void init() {
         poolConnManager.setMaxTotal(2000);
         poolConnManager.setDefaultMaxPerRoute(1000);
+    }
+
+    public boolean checkCommentFrequency(ActivityComment comment, String userId) {
+        String key = "activity_comment_freq_" + userId + MD5Encoder.encode(comment.getContent().getBytes(StandardCharsets.UTF_8)) + "_";
+        for (int i = 0; i < 3; i++) {
+            if (!redisTemplate.hasKey(key + i)) {
+                redisTemplate.opsForValue().set(key + i, comment.getContent(), 1l, TimeUnit.MINUTES);
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean checkComment(List<ActivityComment> comments, String userId) {

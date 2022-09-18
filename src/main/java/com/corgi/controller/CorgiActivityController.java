@@ -449,7 +449,7 @@ public class CorgiActivityController extends BaseController {
         }
         if (!ActivityComment.SWIFT.equals(activityComment.getStatus())) {
             List<ActivityComment> comments = corgiCommentService.getActivityComment(activityList.get(0).getId(), null, null, "");
-            if (!corgiUtilService.checkComment(comments, getUserId())) {
+            if (!corgiUtilService.checkComment(comments, getUserId()) || !corgiUtilService.checkCommentFrequency(activityComment, getUserId())) {
                 redisTemplate.opsForValue().set(key, System.currentTimeMillis() + "", 1l, TimeUnit.HOURS);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
             }
