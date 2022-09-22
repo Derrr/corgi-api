@@ -1201,6 +1201,7 @@ public class CorgiActivityController extends BaseController {
                     redisTemplate.expire(key, 20l, TimeUnit.HOURS);
                 }
                 if ("64".equals(topic)) {
+                    activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
                     redisTemplate.delete(key);
                     redisTemplate.opsForList().rightPushAll(key, activityIds);
                     redisTemplate.expire(key, 1l, TimeUnit.MINUTES);
