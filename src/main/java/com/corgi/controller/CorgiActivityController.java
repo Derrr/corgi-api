@@ -1177,7 +1177,7 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("get_by_topic")
     public JsonResult getByTopic(ActivityQuery activityQuery) {
-        List<String> activityIds;
+        List<String> activityIds = null;
         String topic = activityQuery.getTopic();
         if (corgiUtilService.isNewUser(getUserId())) {
             activityIds = corgiFeedService.getPopularFeed(getUserId(), activityQuery.getPageSize());
@@ -1194,7 +1194,9 @@ public class CorgiActivityController extends BaseController {
                 activityIds = new ArrayList<>();
             } else {
                 String key = "heat_topic_" + topic + "-" + query.getCity() + page + "-" + size;
-                activityIds = redisTemplate.opsForList().range(key, 0, -1);
+                if (!"64".equals(topic)) {
+                    activityIds = redisTemplate.opsForList().range(key, 0, -1);
+                }
                 if (CollectionUtils.isEmpty(activityIds)) {
                     activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
                     redisTemplate.opsForList().rightPushAll(key, activityIds);

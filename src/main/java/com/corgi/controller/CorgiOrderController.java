@@ -631,7 +631,8 @@ public class CorgiOrderController extends BaseController {
             params.put("bodyStr", bodyStr);
             log.error(e.getMessage(), e);
         }
-
+        CorgiOrder oldOrder = corgiOrderService.getOrderByTradeNo(order.getTradeNo());
+        order.setMerchId(oldOrder.getMerchId());
         try {
             if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
                 order.setStatus(CorgiOrder.STATUS.CREATED);
@@ -775,6 +776,8 @@ public class CorgiOrderController extends BaseController {
         Map<String, String> params = this.convertRequestParamsToMap(request);
         log.info("callback:{} ", params);
         CorgiOrder order = buildAlipayOrder(params);
+        CorgiOrder oldOrder = corgiOrderService.getOrderByTradeNo(order.getTradeNo());
+        order.setMerchId(oldOrder.getMerchId());
         try {
             // 调用SDK验证签名
             boolean signVerified = AlipaySignature.rsaCheckV1(params, CorgiPayService.ALIPAY_PUBLIC_KEY,
