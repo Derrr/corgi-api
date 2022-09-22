@@ -1196,12 +1196,13 @@ public class CorgiActivityController extends BaseController {
                 String key = "heat_topic_" + topic + "-" + query.getCity() + page + "-" + size;
                 activityIds = redisTemplate.opsForList().range(key, 0, -1);
                 if (CollectionUtils.isEmpty(activityIds)) {
-                    activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
+
                     redisTemplate.opsForList().rightPushAll(key, activityIds);
                     redisTemplate.expire(key, 20l, TimeUnit.HOURS);
                 }
                 if ("64".equals(topic)) {
                     redisTemplate.delete(key);
+                    activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
                     redisTemplate.opsForList().rightPushAll(key, activityIds);
                     redisTemplate.expire(key, 1l, TimeUnit.MINUTES);
                 }
