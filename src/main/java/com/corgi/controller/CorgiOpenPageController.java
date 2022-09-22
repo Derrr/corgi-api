@@ -95,40 +95,40 @@ public class CorgiOpenPageController extends BaseController {
             }
         }
         //if("AppStore".equals(RequestUtil.getChannel()) && "2.2.5".compareTo(RequestUtil.getVersion()) <= 0) {
-            corgiOpenPage.setUrlType("12");
-            return new JsonResult(Arrays.asList(corgiOpenPage));
+//            corgiOpenPage.setUrlType("12");
+//            return new JsonResult(Arrays.asList(corgiOpenPage));
        // }
-//        corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
-//        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        corgiOpenPage.setStartTime(sdf.format(new Date()));
-//        UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
-//        if (userPosition != null && userPosition.getVersion() != null) {
-//            String version = userPosition.getVersion().replaceAll("android", "");
-//            if ("2.0.3".compareTo(version) > 0) {
-//                corgiOpenPage.setPicType("image");
-//            }
-//        }
-//        List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
-//        String province = corgiOpenPage.getProvince();
-//        if (StringUtils.isEmpty(province)) {
-//            province = userPosition.getProvince();
-//        }
-//        if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
-//            province = corgiUserService.getProvince(corgiOpenPage.getCity());
-//        }
-//        if (!StringUtils.isEmpty(province)) {
-//            corgiOpenPage.setCity(province);
-//            openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
-//        }
-//        corgiOpenPage.setCity("全国");
-//        openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
-//
-//
-//        result = new ArrayList<>();
-//        if (!CollectionUtils.isEmpty(openPages)) {
-//            result.add(openPages.get(new Random().nextInt(openPages.size())));
-//        }
-//        return new JsonResult(result);
+        corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        corgiOpenPage.setStartTime(sdf.format(new Date()));
+        UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
+        if (userPosition != null && userPosition.getVersion() != null) {
+            String version = userPosition.getVersion().replaceAll("android", "");
+            if ("2.0.3".compareTo(version) > 0) {
+                corgiOpenPage.setPicType("image");
+            }
+        }
+        List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
+        String province = corgiOpenPage.getProvince();
+        if (StringUtils.isEmpty(province)) {
+            province = userPosition.getProvince();
+        }
+        if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
+            province = corgiUserService.getProvince(corgiOpenPage.getCity());
+        }
+        if (!StringUtils.isEmpty(province)) {
+            corgiOpenPage.setCity(province);
+            openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+        }
+        corgiOpenPage.setCity("全国");
+        openPages.addAll(corgiOpenPageService.listOpenPage(corgiOpenPage));
+
+
+        result = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(openPages)) {
+            result.add(openPages.get(new Random().nextInt(openPages.size())));
+        }
+        return new JsonResult(result);
     }
 
 }
