@@ -17,7 +17,7 @@ import java.util.List;
 public class CorgiActivityDetail extends CorgiActivity {
     private UserDetail userDetail;
     private BarProfile barDetail;
-    private Integer signUpStatus;
+    private String status = "manual";
     private Double match = 0.0;
     private Long commentCount;
     private Long likeCount = 0L;
@@ -43,14 +43,6 @@ public class CorgiActivityDetail extends CorgiActivity {
 
     public CorgiActivityDetail(CorgiActivity activity) {
         BeanUtils.copyProperties(activity, this);
-    }
-
-    public CorgiActivityDetail initSignUpStatus(Integer signUpStatus) {
-        if (signUpStatus == null) {
-            signUpStatus = -1;
-        }
-        this.signUpStatus = signUpStatus;
-        return this;
     }
 
     public CorgiActivityDetail initCommentCount(Long commentCount) {
