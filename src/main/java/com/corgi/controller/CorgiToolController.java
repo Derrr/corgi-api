@@ -461,7 +461,7 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("suspended_user")
+    @GetMapping("suspend_user")
     public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours")Long hours) {
         UserLogin userLogin = corgiUserService.getUserLogin(userId);
         redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
