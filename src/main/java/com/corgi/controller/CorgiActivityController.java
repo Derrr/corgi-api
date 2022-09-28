@@ -982,8 +982,10 @@ public class CorgiActivityController extends BaseController {
             detail = new CorgiActivityDetail();
             if (blackCount == 1) {
                 detail.setCheckStatus("blocked");
-            } else {
+            } else if (blackCount == 2) {
                 detail.setCheckStatus("block");
+            } else {
+                detail.setCheckStatus("mutual");
             }
         }
         detail.setCanCallCity("69548".equals(getUserId()) || (activity.getUserId().equals(getUserId()) && !StringUtils.isEmpty(getCallCityKey(getUserId()))));
