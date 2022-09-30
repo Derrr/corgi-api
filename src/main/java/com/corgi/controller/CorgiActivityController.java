@@ -1171,9 +1171,12 @@ public class CorgiActivityController extends BaseController {
         if (corgiUtilService.isNewUser(getUserId())) {
             activityIds = corgiFeedService.getPopularFeed(userId, activityQuery.getPageSize());
             activityList = corgiActivityService.getActivityByIds(activityIds);
-        } else {
-            //activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+        } else if (StringUtils.isEmpty(activityQuery.getTopic())) {
+            activityQuery.setUserId("");
             activityList = corgiActivityService.getFeedActivity(activityQuery);
+        } else {
+            activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+            activityList = corgiActivityService.getActivityByIds(activityIds);
         }
         //List<CorgiActivity> activities =
         List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
