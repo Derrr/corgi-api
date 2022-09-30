@@ -1167,13 +1167,16 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setTPage(1);
         }
         List<String> activityIds;
+        List<CorgiActivity> activityList;
         if (corgiUtilService.isNewUser(getUserId())) {
             activityIds = corgiFeedService.getPopularFeed(userId, activityQuery.getPageSize());
+            activityList = corgiActivityService.getActivityByIds(activityIds);
         } else {
-            activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+            //activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+            activityList = corgiActivityService.getFeedActivity(activityQuery);
         }
-        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        List<CorgiActivityDetail> detailList = convertDetail(activities, getUserId());
+        //List<CorgiActivity> activities =
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
         return new PageResult(detailList, 1, activityQuery.getDPage());
     }
 
