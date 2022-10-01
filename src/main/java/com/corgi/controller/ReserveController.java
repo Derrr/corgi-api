@@ -1,0 +1,88 @@
+package com.corgi.controller;
+
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.corgi.common.JsonResult;
+import com.corgi.entity.CorgiBarReservation;
+import com.corgi.user.api.*;
+import com.corgi.user.entity.*;
+import com.corgi.user.enums.MerchandiseEnum;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author tairanliu
+ */
+@Slf4j
+@RestController
+@RequestMapping("reserve")
+public class ReserveController extends BaseController {
+    @Reference
+    private CorgiReserveService corgiReserveService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiBarService corgiBarService;
+
+    @PostMapping("add")
+    public JsonResult add(@RequestBody BarReservation reservation) {
+        reservation.setUserId(getUserId());
+        return new JsonResult(corgiReserveService.addReservation(reservation));
+    }
+
+    @GetMapping("list_reservations")
+    public JsonResult listReservation(BarReservation reservation, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+        List<BarReservation> reservationList = corgiReserveService.listAllReservation(reservation, (page - 1) * size, size);
+        List<CorgiBarReservation> result = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(reservationList)) {
+            for (BarReservation reserve : reservationList) {
+                CorgiBarReservation corgiBarReservation = new CorgiBarReservation();
+                BeanUtils.copyProperties(reserve, corgiBarReservation);
+                CorgiOrder order = corgiOrderService.getOrderByTradeNo(reserve.getTradeNo());
+                if (order != null) {
+                    corgiBarReservation.setPayAmount(order.getPayAmount());
+                    corgiBarReservation.setPayTime(order.getCtime());
+                    corgiBarReservation.setOrderNo(reserve.getTradeNo());
+                }
+                corgiBarReservation.setBarProfile(corgiBarService.getBarProfile(reserve.getBarId()));
+                result.add(corgiBarReservation);
+            }
+        }
+        return new JsonResult(result);
+    }
+
+    @GetMapping("count_reservation")
+    public JsonResult countReservation(BarReservation reservation) {
+        return new JsonResult(corgiReserveService.countReservation(reservation));
+    }
+
+    @PostMapping("update_reservation")
+    public JsonResult updateReservation(@RequestBody BarReservation barReservation) {
+        corgiReserveService.updateReservation(barReservation);
+        return new JsonResult();
+    }
+
+    @GetMapping("get_by_order")
+    public JsonResult getReservationByOrder(@RequestParam("orderNo") String orderNo) {
+        CorgiOrder order = corgiOrderService.getOrderByTradeNo(orderNo);
+        if (order != null && !StringUtils.isEmpty(order.getMarketId())) {
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(order.getMerchId(), getUserId());
+            if (merchandise != null && CorgiMerchandise.RESERVE.equals(merchandise.getType())) {
+                BarReservation reservation = corgiReserveService.getReservationById(order.getMarketId());
+                if (reservation != null) {
+                    CorgiBarReservation corgiBarReservation = new CorgiBarReservation();
+                    BeanUtils.copyProperties(reservation, corgiBarReservation);
+                    corgiBarReservation.setPayAmount(order.getPayAmount());
+                    corgiBarReservation.setBarProfile(corgiBarService.getBarProfile(reservation.getBarId()));
+                }
+            }
+        }
+        return new JsonResult();
+    }
+
+}

@@ -3,31 +3,24 @@ package com.corgi.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.aliyun.oss.common.comm.ResponseMessage;
-import com.aliyuncs.vod.model.v20170321.GetAIMediaAuditJobResponse;
 import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
-import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.rmi.ServerException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -83,6 +76,12 @@ public class CorgiFeedController extends BaseController {
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(feedIds);
         List<CorgiActivityDetail> details = convertDetail(corgiActivities, query.getUserId());
         return new JsonResult(details);
+    }
+
+    @PostMapping("query_feed")
+    public JsonResult queryFeed(@RequestBody ActivityQuery query) {
+        List<CorgiActivity> activities = corgiActivityFeedService.queryActivityFeed(query);
+        return new JsonResult(convertDetail(activities, getUserId()));
     }
 
     @GetMapping("get_feeds")

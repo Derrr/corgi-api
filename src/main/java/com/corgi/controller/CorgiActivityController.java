@@ -281,7 +281,7 @@ public class CorgiActivityController extends BaseController {
             corgiVlogHot.setExpectView(3000);
             corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
             corgiVlogService.addHotVlog(corgiVlogHot);
-            corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
+            //corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
         }
 
         if (CollectionUtils.isEmpty(activity.getMentionUserIds())) {
@@ -982,8 +982,10 @@ public class CorgiActivityController extends BaseController {
             detail = new CorgiActivityDetail();
             if (blackCount == 1) {
                 detail.setCheckStatus("blocked");
-            } else {
+            } else if (blackCount == 2) {
                 detail.setCheckStatus("block");
+            } else {
+                detail.setCheckStatus("mutual");
             }
         }
         detail.setCanCallCity("69548".equals(getUserId()) || (activity.getUserId().equals(getUserId()) && !StringUtils.isEmpty(getCallCityKey(getUserId()))));
@@ -1165,13 +1167,19 @@ public class CorgiActivityController extends BaseController {
             activityQuery.setTPage(1);
         }
         List<String> activityIds;
+        List<CorgiActivity> activityList;
         if (corgiUtilService.isNewUser(getUserId())) {
             activityIds = corgiFeedService.getPopularFeed(userId, activityQuery.getPageSize());
+            activityList = corgiActivityService.getActivityByIds(activityIds);
+        } else if (!StringUtils.isEmpty(activityQuery.getCity())) {
+            activityQuery.setUserId("");
+            activityList = corgiActivityService.getFeedActivity(activityQuery);
         } else {
             activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
+            activityList = corgiActivityService.getActivityByIds(activityIds);
         }
-        List<CorgiActivity> activities = corgiActivityService.getActivityByIds(activityIds);
-        List<CorgiActivityDetail> detailList = convertDetail(activities, getUserId());
+        //List<CorgiActivity> activities =
+        List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
         return new PageResult(detailList, 1, activityQuery.getDPage());
     }
 
@@ -1183,6 +1191,7 @@ public class CorgiActivityController extends BaseController {
             activityIds = corgiFeedService.getPopularFeed(getUserId(), activityQuery.getPageSize());
         } else {
             CorgiActivity query = new CorgiActivity();
+            query.setCity(activityQuery.getCity() == null ? "" : activityQuery.getCity());
             query.setTopics(Arrays.asList(topic));
             int page = activityQuery.getPage();
             int size = activityQuery.getPageSize();
@@ -1203,6 +1212,12 @@ public class CorgiActivityController extends BaseController {
                         redisTemplate.expire(key, 20l, TimeUnit.HOURS);
                     }
 
+                }
+                if ("64".equals(topic)) {
+                    activityIds = corgiUserActivityService.getHeatActivity(query, page, size);
+                    redisTemplate.delete(key);
+                    redisTemplate.opsForList().rightPushAll(key, activityIds);
+                    redisTemplate.expire(key, 1l, TimeUnit.MINUTES);
                 }
             }
         }
@@ -1513,15 +1528,15 @@ public class CorgiActivityController extends BaseController {
     }
 
 
-//    @GetMapping("uninterested")
-//    public JsonResult Uninterested(@RequestParam("creatorId") String creatorId, @RequestParam("activityId") String activityId) {
-//        corgiBlacklistService.addUninterested(getUserId(), activityId, creatorId);
-//        String blackKey = "black_cache_" + getUserId();
-//        if (redisTemplate.hasKey(blackKey)) {
-//            redisTemplate.opsForList().leftPush(blackKey, creatorId);
-//        }
-//        return new JsonResult();
-//    }
+    @GetMapping("uninterested")
+    public JsonResult Uninterested(@RequestParam("creatorId") String creatorId, @RequestParam("activityId") String activityId) {
+        corgiBlacklistService.addUninterested(getUserId(), activityId, creatorId);
+        String blackKey = "black_cache_" + getUserId();
+        if (redisTemplate.hasKey(blackKey)) {
+            redisTemplate.opsForList().leftPush(blackKey, creatorId);
+        }
+        return new JsonResult();
+    }
 
 
     private boolean populateExtra(HashMap extra, String activityId, String userId) {

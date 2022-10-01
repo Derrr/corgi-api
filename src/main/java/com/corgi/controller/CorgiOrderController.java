@@ -1,22 +1,21 @@
 package com.corgi.controller;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import org.apache.dubbo.common.utils.CollectionUtils;
-import org.apache.dubbo.common.utils.IOUtils;
-import org.apache.dubbo.common.utils.StringUtils;
+import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.alibaba.dubbo.common.utils.IOUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
-import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.UuidUtil;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.entity.CorgiUserOrder;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -64,6 +62,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiUserService corgiUserService;
     @Reference
     private CorgiBillboardService corgiBillboardService;
+    @Reference
+    private CorgiReserveService corgiReserveService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -220,6 +220,8 @@ public class CorgiOrderController extends BaseController {
             paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
             CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
             HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+            paidBillboard.setTradeNo(result.get("orderNo") + "");
+            corgiBillboardService.updatePaiBillboard(paidBillboard);
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
@@ -284,11 +286,46 @@ public class CorgiOrderController extends BaseController {
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
             }
+
+            if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                if (!checkReservePay(goodsId, result)) {
+                    return result;
+                }
+                marketId = goodsId;
+                sellerId = "corgi";
+            }
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
+            if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
+                BarReservation update = new BarReservation();
+                update.setId(goodsId);
+                update.setTradeNo(result.get("orderNo") + "");
+                update.setMerchId(merchId);
+                corgiReserveService.updateReservation(update);
+            }
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    private boolean checkReservePay(String goodsId, JsonResult result) {
+        BarReservation query = new BarReservation();
+        query.setId(goodsId);
+        if (corgiReserveService.countReservation(query) == 0) {
+            result.setMessage("订座不存在");
+            return false;
+        }
+        CorgiUserGoods goodsQuery = new CorgiUserGoods();
+        goodsQuery.setGoodsId(goodsId);
+        goodsQuery.setGoodsType(CorgiUserGoods.GOODS_TYPE.RESERVE);
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(goodsQuery);
+        if (CollectionUtils.isNotEmpty(goods)) {
+            result.setMessage("该订座已付费");
+            return false;
+        }
+        return true;
     }
 
     private CorgiActivity checkActivityPay(String goodsId, String merchId, JsonResult result) {

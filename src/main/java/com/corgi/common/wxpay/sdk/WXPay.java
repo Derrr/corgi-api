@@ -3,6 +3,7 @@ package com.corgi.common.wxpay.sdk;
 import com.corgi.common.wxpay.sdk.WXPayConstants.SignType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +15,8 @@ public class WXPay {
     private SignType signType = SignType.MD5;
     private boolean autoReport = false;
     private boolean useSandbox = false;
-    private String notifyUrl = "https://api.corgi.org.cn/order/wx_callback";
-    //private String notifyUrl = "http://http://139.224.63.240:7888/order/wx_callback";
+    //private String notifyUrl = "https://api.corgi.org.cn/order/wx_callback";
+    private String notifyUrl = "http://http://139.224.63.240:7888/order/wx_callback";
 
     private WXPayRequest wxPayRequest = new WXPayRequest();
 
@@ -56,6 +57,7 @@ public class WXPay {
     public Map<String, String> fillRequestData(Map<String, String> reqData) throws Exception {
         reqData.put("appid", config.getAppID());
         reqData.put("mch_id", config.getMchID());
+
         reqData.put("nonce_str", WXPayUtil.generateNonceStr());
         if (SignType.MD5.equals(this.signType)) {
             reqData.put("sign_type", WXPayConstants.MD5);

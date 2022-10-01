@@ -158,14 +158,14 @@ public class CorgiMatchController extends BaseController {
                         }
                     }
                 }
-                    }
-                } finally{
-                    if (redisTemplate.hasKey(key)) {
-                        redisTemplate.expire(matchKey, 1L, TimeUnit.HOURS);
-                    }
-                    corgiUtilService.unlock(key);
-                }
-                return new JsonResult(result);
             }
+        } finally {
+            if (redisTemplate.hasKey(key)) {
+                redisTemplate.expire(matchKey, 1L, TimeUnit.HOURS);
+            }
+            corgiUtilService.unlock(key);
+        }
+        return new JsonResult(result);
+    }
 
         }

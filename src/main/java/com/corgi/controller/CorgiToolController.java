@@ -2,6 +2,7 @@ package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
+import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
@@ -27,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +66,8 @@ public class CorgiToolController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiVlogService corgiVlogService;
+    @Reference
+    private CorgiMatchService corgiMatchService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -459,11 +461,22 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("suspend_user")
+    public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours")Long hours) {
+        UserLogin userLogin = corgiUserService.getUserLogin(userId);
+        redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
+        redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
+        return new JsonResult();
+    }
 
     @GetMapping("delete_user")
     public JsonResult deleteUser(@RequestParam("userId") String userId) {
+        UserLogin userLogin = corgiUserService.getUserLogin(userId);
         corgiUserService.deleteUser(userId);
         corgiActivityService.deleteUserActivity(userId);
+        corgiMatchService.deleteUser(userId);
+        redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", 60l, TimeUnit.DAYS);
+        redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", 1l, TimeUnit.DAYS);
         return new JsonResult();
     }
 
