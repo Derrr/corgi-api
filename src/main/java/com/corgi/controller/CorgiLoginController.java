@@ -93,7 +93,7 @@ public class CorgiLoginController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
         }
 
-        if ("00000".equals(userLogin.getCode()) || "13700000000".equals(userLogin.getTelNo())
+        if (("00000".equals(userLogin.getCode()) && "13700000000".equals(userLogin.getTelNo()))
                 || aliyunDypnsService.verifySmsToken(userLogin.getCode(), userLogin.getJwt(), userLogin.getTelNo())) {
             String lockKey = "login_" + userLogin.getTelNo();
             try {
