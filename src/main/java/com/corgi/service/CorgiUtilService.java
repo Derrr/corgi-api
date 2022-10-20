@@ -63,7 +63,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
-    public static final List<String> CHANNELS = Arrays.asList("xiaomi", "qq", "huawei", "baidu");
+    public static final List<String> CHANNELS = Arrays.asList("xiaomi", "qq", "huawei", "vivo");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -119,7 +119,7 @@ public class CorgiUtilService {
 
     public boolean isNewUser(String userId) {
         String channel = RequestUtil.getChannel();
-        if (CHANNELS.contains(channel) && "2.2.2".equals(RequestUtil.getVersion())) {
+        if (CHANNELS.contains(channel) && "2.2.3".equals(RequestUtil.getVersion())) {
             UserLogin userLogin = corgiUserService.getUserLogin(userId);
             if ("17000000000".equals(userLogin.getTelNo())) {
                 return true;
