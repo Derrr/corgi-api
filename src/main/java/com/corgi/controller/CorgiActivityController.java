@@ -9,6 +9,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.PageResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.AddAttendResult;
@@ -1327,7 +1328,7 @@ public class CorgiActivityController extends BaseController {
 //            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
 //            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
         } else {
-            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), true));
+            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
         }
     }
 
