@@ -1328,7 +1328,7 @@ public class CorgiActivityController extends BaseController {
 //            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
 //            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
         } else {
-            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
+            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), !CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
         }
     }
 
