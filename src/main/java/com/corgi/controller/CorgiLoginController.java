@@ -92,8 +92,10 @@ public class CorgiLoginController extends BaseController {
         if (redisTemplate.hasKey("suspended_number_" + userLogin.getTelNo())) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
         }
-
-        if (("00000".equals(userLogin.getCode()) && ("13700000000".equals(userLogin.getTelNo()) || "99999999999".equals(userLogin.getTelNo())))
+        if (userLogin.getTelNo().startsWith("170") || userLogin.getTelNo().startsWith("171")) {
+            return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许商业虚拟手机号注册，请更换号码后再注册。");
+        }
+        if (("00000".equals(userLogin.getCode()) && "13700000000".equals(userLogin.getTelNo()))
                 || aliyunDypnsService.verifySmsToken(userLogin.getCode(), userLogin.getJwt(), userLogin.getTelNo())) {
             String lockKey = "login_" + userLogin.getTelNo();
             try {
@@ -114,6 +116,9 @@ public class CorgiLoginController extends BaseController {
         }
         if (redisTemplate.hasKey("suspended_number_" + userLogin.getTelNo())) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
+        }
+        if (userLogin.getTelNo().startsWith("170") || userLogin.getTelNo().startsWith("171")) {
+            return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许商业虚拟手机号注册，请更换号码后再注册。");
         }
         if (StringUtils.isEmpty(userLogin.getUserId())) {
             userLogin = corgiUserService.login(userLogin);
