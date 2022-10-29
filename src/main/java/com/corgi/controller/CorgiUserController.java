@@ -704,6 +704,9 @@ public class CorgiUserController extends BaseController {
         if (redisTemplate.hasKey("suspended_number_" + telNo)) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
         }
+        if (telNo.startsWith("170") || telNo.startsWith("171")) {
+            return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许商业虚拟手机号注册，请更换号码后再注册。");
+        }
         Random random = new Random();
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
