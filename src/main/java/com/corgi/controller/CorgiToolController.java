@@ -19,7 +19,6 @@ import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,18 +90,18 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        if ("2.2.3".equals(RequestUtil.getVersion())) {
-            log.info("get_config into version:{}  ", config);
+        //if ("2.2.3".equals(RequestUtil.getVersion())) {
+            //log.info("get_config into version:{}  ", config);
             if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
                 log.info("get_config into channel:{}  ", config);
                 config.put("showPay", 0);
                 config.put("showDiscovery", 0);
             }
-            if ("huawei".equals(RequestUtil.getChannel())) {
-                config.put("showMap", 0);
-                config.put("showPurse", 0);
-            }
-        }
+//            if ("huawei".equals(RequestUtil.getChannel())) {
+//                config.put("showMap", 0);
+//                config.put("showPurse", 0);
+//            }
+        //}
         log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
         return new JsonResult(config);
     }
