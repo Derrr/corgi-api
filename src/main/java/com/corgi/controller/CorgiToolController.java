@@ -97,10 +97,10 @@ public class CorgiToolController extends BaseController {
                 config.put("showPay", 0);
                 config.put("showDiscovery", 0);
             }
-//            if ("huawei".equals(RequestUtil.getChannel())) {
-//                config.put("showMap", 0);
-//                config.put("showPurse", 0);
-//            }
+            if ("huawei".equals(RequestUtil.getChannel())) {
+                config.put("showMap", 0);
+                config.put("showPurse", 0);
+            }
         //}
         log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
         return new JsonResult(config);
