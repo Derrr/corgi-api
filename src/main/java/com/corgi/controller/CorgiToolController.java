@@ -91,18 +91,27 @@ public class CorgiToolController extends BaseController {
         config.put("showPurse", 1);
         config.put("showMap", 1);
         //if ("2.2.3".equals(RequestUtil.getVersion())) {
-            //log.info("get_config into version:{}  ", config);
-            if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
-                log.info("get_config into channel:{}  ", config);
-                config.put("showPay", 0);
-                config.put("showDiscovery", 0);
-            }
-            if ("huawei".equals(RequestUtil.getChannel())) {
-                config.put("showMap", 0);
-                config.put("showPurse", 0);
-            }
+        //log.info("get_config into version:{}  ", config);
+        if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
+            log.info("get_config into channel:{}  ", config);
+            config.put("showPay", 0);
+            config.put("showDiscovery", 0);
+        }
+        if ("huawei".equals(RequestUtil.getChannel())) {
+            config.put("showMap", 0);
+            config.put("showPurse", 0);
+        }
         //}
         log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
+        Enumeration<String> enums = RequestUtil.getRequest().getHeaderNames();
+        for (int i = 0; i < 100; i++) {
+            if (enums.hasMoreElements()) {
+                String name = enums.nextElement();
+                log.info(" get_config key:{} header:{} ", name, RequestUtil.getRequest().getHeader(name));
+            } else {
+                break;
+            }
+        }
         return new JsonResult(config);
     }
 
@@ -461,7 +470,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("suspend_user")
-    public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours")Long hours) {
+    public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours") Long hours) {
         UserLogin userLogin = corgiUserService.getUserLogin(userId);
         redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
         redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
