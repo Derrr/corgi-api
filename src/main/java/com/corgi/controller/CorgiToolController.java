@@ -90,18 +90,18 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        //if ("2.2.3".equals(RequestUtil.getVersion())) {
-        //log.info("get_config into version:{}  ", config);
-        if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
-            log.info("get_config into channel:{}  ", config);
-            config.put("showPay", 0);
-            config.put("showDiscovery", 0);
+        if (StringUtils.isEmpty(RequestUtil.getVersion())) {
+            log.info("get_config into version:{}  ", config);
+            if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
+                log.info("get_config into channel:{}  ", config);
+                config.put("showPay", 0);
+                config.put("showDiscovery", 0);
+            }
+            if ("huawei".equals(RequestUtil.getChannel())) {
+                config.put("showMap", 0);
+                config.put("showPurse", 0);
+            }
         }
-        if ("huawei".equals(RequestUtil.getChannel())) {
-            config.put("showMap", 0);
-            config.put("showPurse", 0);
-        }
-        //}
         log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
         return new JsonResult(config);
     }
