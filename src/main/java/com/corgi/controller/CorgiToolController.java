@@ -103,15 +103,6 @@ public class CorgiToolController extends BaseController {
         }
         //}
         log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
-        Enumeration<String> enums = RequestUtil.getRequest().getHeaderNames();
-        for (int i = 0; i < 100; i++) {
-            if (enums.hasMoreElements()) {
-                String name = enums.nextElement();
-                log.info(" get_config key:{} header:{} ", name, RequestUtil.getRequest().getHeader(name));
-            } else {
-                break;
-            }
-        }
         return new JsonResult(config);
     }
 
