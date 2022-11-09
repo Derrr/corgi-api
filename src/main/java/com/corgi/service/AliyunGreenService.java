@@ -223,9 +223,15 @@ public class AliyunGreenService {
             pic.setStatus(UserDetail.NO_FACE);
             addCheckPic(pic, sourceId, CheckPic.AVATAR);
         } catch (ClientException e) {
-            log.error("ErrCode:" + e.getErrCode());
-            log.error("ErrMsg:" + e.getErrMsg());
-            log.error("RequestId:" + e.getRequestId());
+            if ("InvalidImage.NotFoundFace".equals(e.getErrCode())) {
+                log.info("ErrCode:" + e.getErrCode());
+                log.info("ErrMsg:" + e.getErrMsg());
+                log.info("RequestId:" + e.getRequestId());
+            } else {
+                log.error("ErrCode:" + e.getErrCode());
+                log.error("ErrMsg:" + e.getErrMsg());
+                log.error("RequestId:" + e.getRequestId());
+            }
             pic.setStatus(UserDetail.NO_FACE);
             addCheckPic(pic, sourceId, CheckPic.AVATAR);
         }
@@ -536,7 +542,7 @@ public class AliyunGreenService {
     }
 
     public boolean checkText(String text) {
-        return checkText(text,"sexy_pic");
+        return checkText(text, "sexy_pic");
     }
 
     public boolean checkText(String text, String bussType) {
