@@ -125,8 +125,9 @@ public class CorgiUserController extends BaseController {
     public JsonResult register(@RequestBody UserLogin userLogin) {
         String lockKey = "login_" + userLogin.getTelNo();
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
-        if ((code != null && code.equals(userLogin.getCode())) || ("00000".equals(userLogin.getCode()) && ("13700000000".equals(userLogin.getTelNo()) || "99999999999".equals(userLogin.getTelNo()))))
-        {
+        if ((code != null && code.equals(userLogin.getCode()))
+                || ("0000".equals(userLogin.getCode()) && "13700000000".equals(userLogin.getTelNo()))
+                || ("00000".equals(userLogin.getCode()) && "99999999999".equals(userLogin.getTelNo()))) {
             try {
                 corgiUtilService.lock(lockKey);
                 if (StringUtils.isEmpty(userLogin.getUserId())) {
