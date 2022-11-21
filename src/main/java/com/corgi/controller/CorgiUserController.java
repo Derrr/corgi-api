@@ -261,7 +261,7 @@ public class CorgiUserController extends BaseController {
         }
         userDetail.setUserPics(pics);
         userDetail.setCheckStatus(AliyunGreenService.PASS);
-        if (!aliyunGreenService.checkText(userDetail.getNickname())) {
+        if (!aliyunGreenService.checkText(userDetail.getNickname()).isPass()) {
             userDetail.setCheckStatus(AliyunGreenService.CHECK);
             mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
@@ -366,7 +366,7 @@ public class CorgiUserController extends BaseController {
         }
 
         String result;
-        if (aliyunGreenService.checkText(userDetail.getNickname())) {
+        if (aliyunGreenService.checkText(userDetail.getNickname()).isPass()) {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
             userDetail.setCheckStatus(AliyunGreenService.PASS);
             corgiUserService.updateDetail(userDetail);

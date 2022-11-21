@@ -455,10 +455,11 @@ public class CorgiActivityController extends BaseController {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
             }
         }
-        if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !aliyunGreenService.checkText(activityComment.getContent(), "ad_check")) {
-            boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
+        CheckTextResult textResult = aliyunGreenService.checkText(activityComment.getContent(), "ad_check");
+        if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !textResult.isPass()) {
+            boolean noFilterContent = StringUtils.isEmpty(textResult.getContent());
             this.checkComment(getUserId());
-            activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
+            activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : textResult.getContent());
         }
         Integer blackCount = corgiBlacklistService.isBlacked(activityList.get(0).getUserId(), getUserId());
         if (blackCount == 1) {

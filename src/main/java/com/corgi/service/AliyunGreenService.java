@@ -88,8 +88,6 @@ public class AliyunGreenService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    public static ThreadLocal<String> Filtered_Content = new ThreadLocal<>();
-
     @PostConstruct
     void init() {
         IClientProfile profile = DefaultProfile.getProfile(REGION_ID, accessKeyId, accessKeySecret);
@@ -195,7 +193,7 @@ public class AliyunGreenService {
 
     public UserDetail checkDesc(UserDetail userDetail) {
         String desc = userDetail.getDesc();
-        if (!this.checkText(desc)) {
+        if (!this.checkText(desc).isPass()) {
             userDetail.setCheckDesc(desc);
             userDetail.setDesc(AliyunGreenService.TEXT_FORBIDDEN);
             userDetail.setCheckStatus(CHECK);
@@ -541,13 +539,14 @@ public class AliyunGreenService {
         corgiPicService.addCheckPic(checkPic);
     }
 
-    public boolean checkText(String text) {
+    public CheckTextResult checkText(String text) {
         return checkText(text, "sexy_pic");
     }
 
-    public boolean checkText(String text, String bussType) {
+    public CheckTextResult checkText(String text, String bussType) {
+        CheckTextResult textResult = new CheckTextResult();
         if (StringUtils.isEmpty(text)) {
-            return true;
+            return textResult;
         }
         TextScanRequest textScanRequest = new TextScanRequest();
         textScanRequest.setAcceptFormat(FormatType.JSON);
@@ -587,13 +586,14 @@ public class AliyunGreenService {
                         if (200 == ((JSONObject) taskResult).getInteger("code")) {
                             String filteredContent = ((JSONObject) taskResult).getString("filteredContent");
                             if (!StringUtils.isEmpty(filteredContent)) {
-                                Filtered_Content.set(filteredContent);
+                                textResult.setContent(filteredContent);
                             }
                             JSONArray sceneResults = ((JSONObject) taskResult).getJSONArray("results");
                             for (Object sceneResult : sceneResults) {
                                 String suggestion = ((JSONObject) sceneResult).getString("suggestion");
                                 if (!"pass".equals(suggestion)) {
-                                    return false;
+                                    textResult.setPass(false);
+                                    return textResult;
                                 }
                             }
 
@@ -614,21 +614,22 @@ public class AliyunGreenService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return true;
+        return textResult;
     }
 
     public CorgiActivity checkImageActivity(CorgiActivity activity) {
         String title = activity.getTitle();
         String content = activity.getContent();
-        if (!StringUtils.isEmpty(title) && !checkText(title)) {
-            boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
-            activity.setTitle(noFilterContent ? content.replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
+        CheckTextResult result = checkText(title);
+        if (!StringUtils.isEmpty(title) && !result.isPass()) {
+            boolean noFilterContent = StringUtils.isEmpty(result.getContent());
+            activity.setTitle(noFilterContent ? content.replaceAll(".", "*") : result.getContent());
             activity.setCheckTitle(title);
             activity.setCheckStatus(CHECK);
         }
-        if (!StringUtils.isEmpty(content) && !checkText(content)) {
-            boolean noFilterContent = StringUtils.isEmpty(AliyunGreenService.Filtered_Content.get());
-            activity.setContent(noFilterContent ? content.replaceAll(".", "*") : AliyunGreenService.Filtered_Content.get());
+        if (!StringUtils.isEmpty(content) && !result.isPass()) {
+            boolean noFilterContent = StringUtils.isEmpty(result.getContent());
+            activity.setContent(noFilterContent ? content.replaceAll(".", "*") : result.getContent());
             activity.setCheckContent(content);
             activity.setCheckStatus(CHECK);
         }
@@ -640,19 +641,19 @@ public class AliyunGreenService {
         String content = activity.getContent();
         String type = activity.getActivityType();
         boolean sendMail = false;
-        if (!StringUtils.isEmpty(type) && !checkText(type)) {
+        if (!StringUtils.isEmpty(type) && !checkText(type).isPass()) {
             activity.setActivityType("待审核");
             activity.setCheckActivityType(type);
             activity.setCheckStatus(CHECK);
             sendMail = true;
         }
-        if (!StringUtils.isEmpty(title) && !checkText(title)) {
+        if (!StringUtils.isEmpty(title) && !checkText(title).isPass()) {
             activity.setTitle(TEXT_FORBIDDEN);
             activity.setCheckTitle(title);
             activity.setCheckStatus(CHECK);
             sendMail = true;
         }
-        if (!StringUtils.isEmpty(content) && !checkText(content)) {
+        if (!StringUtils.isEmpty(content) && !checkText(content).isPass()) {
             activity.setContent(TEXT_FORBIDDEN);
             activity.setCheckContent(content);
             activity.setCheckStatus(CHECK);

@@ -157,7 +157,7 @@ public class EvaluateController extends BaseController {
     }
 
     private String addUserEvaluation(UserEvaluation userEvaluation, boolean send) {
-        if (aliyunGreenService.checkText(userEvaluation.getTag())) {
+        if (aliyunGreenService.checkText(userEvaluation.getTag()).isPass()) {
             userEvaluation.setCheckStatus(AliyunGreenService.PASS);
         } else {
             userEvaluation.setCheckStatus(AliyunGreenService.CHECK);
