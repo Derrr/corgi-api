@@ -119,9 +119,9 @@ public class CorgiUtilService {
 
     public boolean isNewUser(String userId) {
         String channel = RequestUtil.getChannel();
-        if (CHANNELS.contains(channel)) {
+        if (CHANNELS.contains(channel) && "2.2.3".equals(RequestUtil.getVersion())) {
             UserLogin userLogin = corgiUserService.getUserLogin(userId);
-            if ("17000000000".equals(userLogin.getTelNo())) {
+            if ("13700000000".equals(userLogin.getTelNo())) {
                 return true;
             }
             if (userLogin != null && userLogin.getCtime() != null) {
