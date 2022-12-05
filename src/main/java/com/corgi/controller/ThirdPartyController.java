@@ -131,7 +131,7 @@ public class ThirdPartyController extends BaseController {
         CorgiActivityDetail activity = new CorgiActivityDetail();
         activity.setPics(picUrls);
         activity.setUserDetail(userDetail);
-        userDetail.setCtime("2021-01-01");
+        userDetail.setCtime("2022-01-01");
         activity.setLikeCount(corgiLikeService.countLikeByUser(userDetail));
         return new JsonResult(activity);
     }
