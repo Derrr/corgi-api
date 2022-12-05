@@ -111,7 +111,7 @@ public class ThirdPartyController extends BaseController {
             return new JsonResult();
         }
         ActivityQuery query = new ActivityQuery();
-        query.setStartTime("2021-01-01");
+        query.setStartTime("2022-01-01");
         query.setUserId(login.getUserId());
         query.setPageSize(9);
         List<String> activityIds = corgiUserActivityService.queryHotActivity(query);
