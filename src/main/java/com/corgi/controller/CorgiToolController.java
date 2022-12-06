@@ -463,7 +463,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("suspend_user")
-    public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours")Long hours) {
+    public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours") Long hours) {
         UserLogin userLogin = corgiUserService.getUserLogin(userId);
         redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
         redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
@@ -657,6 +657,53 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("add_topic_billboard")
+    public JsonResult addTopicBillboard(@RequestParam("topic") String topic,
+                                        @RequestParam("activityId") String activityId) {
+        TopicBillboard query = new TopicBillboard();
+        query.setTopic(topic);
+        query.setActivityId(activityId);
+        query.setOrder(1);
+        corgiBillboardService.addTopicBillboard(query);
+        return new JsonResult();
+    }
+
+    @GetMapping("delete_topic_billboard")
+    public JsonResult deleteTopicBillboard(@RequestParam("topic") String topic,
+                                           @RequestParam("activityId") String activityId) {
+        TopicBillboard query = new TopicBillboard();
+        query.setTopic(topic);
+        query.setActivityId(activityId);
+        query.setStatus(0);
+        corgiBillboardService.updateTopicBillboard(query);
+        return new JsonResult();
+    }
+
+    @GetMapping("stick_topic_billboard_on_top")
+    public JsonResult stickTopicBillboardOnTop(@RequestParam("topic") String topic,
+                                               @RequestParam("activityId") String activityId) {
+        TopicBillboard query = new TopicBillboard();
+        query.setTopic(topic);
+        query.setActivityId(activityId);
+        query.setOrder(0);
+        query.setStatus(1);
+        corgiBillboardService.updateTopicBillboard(query);
+        redisTemplate.opsForValue().set(TopicBillboard.PREFIX.concat(topic), activityId, 7l, TimeUnit.DAYS);
+        return new JsonResult();
+    }
+
+    @GetMapping("change_topic_billboard_order")
+    public JsonResult updateTopicBillboard(@RequestParam("topic") String topic,
+                                           @RequestParam("activityId") String activityId,
+                                           @RequestParam("order") Integer order) {
+        TopicBillboard query = new TopicBillboard();
+        query.setTopic(topic);
+        query.setActivityId(activityId);
+        query.setOrder(order);
+        query.setStatus(1);
+        corgiBillboardService.updateTopicBillboard(query);
+        return new JsonResult();
+    }
 
     @GetMapping("update_billboard")
     public JsonResult updateBillboard(@RequestParam(required = false, name = "from") String

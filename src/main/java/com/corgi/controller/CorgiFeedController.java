@@ -54,6 +54,8 @@ public class CorgiFeedController extends BaseController {
     private CorgiUserFollowService corgiUserFollowService;
     @Reference
     private CorgiCommentService corgiCommentService;
+    @Reference
+    private CorgiToolService corgiToolService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -607,7 +609,6 @@ public class CorgiFeedController extends BaseController {
                 Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
-                Integer shareCount = corgiShareService.countShare(activity.getId());
                 ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                 Long likeCount = activity.getLikeCount();
                 if (likeCount == null) {
@@ -621,7 +622,16 @@ public class CorgiFeedController extends BaseController {
                         .hasLike(hasLike);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setLastComment(activityComment);
-                detail.setShareCount(shareCount);
+                List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(detail.getActivityId());
+                detail.setTopicDetails(topics);
+                if (!CollectionUtils.isEmpty(topics)) {
+                    CorgiTopic topic = topics.get(0);
+                    String topicActivityId = redisTemplate.opsForValue().get(TopicBillboard.PREFIX.concat(topic.getTopicId()));
+                    if (detail.getActivityId().equals(topicActivityId)) {
+                        detail.setStatus("king");
+                    }
+                }
+
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
                     detail.setMerchandise(corgiOrderService.getMerchandiseById(activity.getMerchId(), getUserId()));
                 }
