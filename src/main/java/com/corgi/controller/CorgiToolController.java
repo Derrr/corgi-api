@@ -90,7 +90,7 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        if (StringUtils.isEmpty(RequestUtil.getVersion()) || "2.2.7".equals(RequestUtil.getVersion())) {
+        if ("2.2.7".equals(RequestUtil.getVersion())) {
             log.info("get_config into version:{}  ", config);
             if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
                 log.info("get_config into channel:{}  ", config);
