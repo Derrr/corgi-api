@@ -4,6 +4,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.util.IPUtil;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
@@ -44,6 +45,8 @@ public class CorgiLoginController extends BaseController {
 
     @Autowired
     private AliyunDypnsService aliyunDypnsService;
+    @Autowired
+    private AliyunGreenService aliyunGreenService;
     @Autowired
     private EasemobService easemobService;
     @Autowired
@@ -121,7 +124,15 @@ public class CorgiLoginController extends BaseController {
         if (userLogin.getTelNo().startsWith("170") || userLogin.getTelNo().startsWith("171")) {
             return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许商业虚拟手机号注册，请更换号码后再注册。");
         }
+
         if (StringUtils.isEmpty(userLogin.getUserId())) {
+            UserDetail search = new UserDetail();
+            search.setTelNo(userLogin.getTelNo());
+            if (!CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
+                if (aliyunGreenService.checkAccount(userLogin.getTelNo()) > 65) {
+                    return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许高风险手机号注册，请更换号码后再注册。");
+                }
+            }
             userLogin = corgiUserService.login(userLogin);
             if ("-1".equals(userLogin.getStatus())) {
                 easemobService.registerUser(userLogin.getUserId());
