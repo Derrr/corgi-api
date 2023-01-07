@@ -627,7 +627,7 @@ public class CorgiFeedController extends BaseController {
                 detail.setLastComment(activityComment);
                 List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(detail.getActivityId());
                 detail.setTopicDetails(topics);
-                if (!CollectionUtils.isEmpty(topics)) {
+                if (!CollectionUtils.isEmpty(topics) && topics.get(0) != null && !StringUtils.isEmpty(topics.get(0).getTopicId())) {
                     CorgiTopic topic = topics.get(0);
                     String topicActivityId = redisTemplate.opsForValue().get(TopicBillboard.PREFIX.concat(topic.getTopicId()));
                     if (detail.getActivityId().equals(topicActivityId)) {
