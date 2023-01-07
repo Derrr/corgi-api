@@ -118,6 +118,9 @@ public class CorgiFeedController extends BaseController {
                 mqService.refreshFeed(userId);
             }
             return new JsonResult(details);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return new JsonResult(new ArrayList<>());
         } finally {
             corgiUtilService.unlock(key);
         }
