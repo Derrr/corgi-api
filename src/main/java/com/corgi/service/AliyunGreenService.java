@@ -629,7 +629,7 @@ public class AliyunGreenService {
         return activity;
     }
 
-    public Integer checkAccount(String mobile) {
+    public Double checkAccount(String mobile) {
         RequestAttributes ra = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes sra = (ServletRequestAttributes) ra;
         HttpServletRequest hrequest = sra.getRequest();
@@ -657,7 +657,7 @@ public class AliyunGreenService {
             executeRequestRequest.setHttpContent(JSONObject.toJSONString(serviceParams).getBytes("UTF-8"), "UTF-8", FormatType.JSON);
             ExecuteRequestResponse httpResponse = client.getAcsResponse(executeRequestRequest);
             log.info("no:{} ip:{} result:{}", mobile, ip, JSONObject.toJSONString(httpResponse));
-            return Integer.valueOf(httpResponse.getData().getScore());
+            return Double.valueOf(httpResponse.getData().getScore());
         } catch (Exception e) {
             e.printStackTrace();
         }
