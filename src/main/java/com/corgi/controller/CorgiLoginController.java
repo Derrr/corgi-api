@@ -128,7 +128,7 @@ public class CorgiLoginController extends BaseController {
         if (StringUtils.isEmpty(userLogin.getUserId())) {
             UserDetail search = new UserDetail();
             search.setTelNo(userLogin.getTelNo());
-            if (!CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
+            if (CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
                 if (aliyunGreenService.checkAccount(userLogin.getTelNo()) > 65.0) {
                     return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许高风险手机号注册，请更换号码后再注册。");
                 }
