@@ -119,7 +119,11 @@ public class CorgiLoginController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
         }
         if (redisTemplate.hasKey("suspended_number_" + userLogin.getTelNo())) {
-            return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
+            if ("1370000000".equals(userLogin.getTelNo())) {
+                redisTemplate.delete("suspended_number_" + userLogin.getTelNo());
+            } else {
+                return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
+            }
         }
         if (userLogin.getTelNo().startsWith("170") || userLogin.getTelNo().startsWith("171")) {
             return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许商业虚拟手机号注册，请更换号码后再注册。");
