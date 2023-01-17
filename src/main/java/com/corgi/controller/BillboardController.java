@@ -44,6 +44,8 @@ public class BillboardController extends BaseController {
     @Reference
     private CorgiLikeService corgiLikeService;
     @Reference
+    private CorgiCommentService corgiCommentService;
+    @Reference
     private CorgiOrderService corgiOrderService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
@@ -259,11 +261,13 @@ public class BillboardController extends BaseController {
                         activity.setStatus("unpay");
                     }
                 }
+                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)
                         .initLikeCount(likeCount)
+                        .initCommentCount(commentCount)
                         .hasLike(hasLike);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 if (!StringUtils.isEmpty(activity.getMerchId())) {
