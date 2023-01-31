@@ -510,7 +510,7 @@ public class AliyunGreenService {
         corgiPicService.addCheckPic(checkPic);
     }
 
-    public boolean checkText(String text) {
+    public CheckTextResult checkText(String text) {
         return checkText(text, "sexy_pic");
     }
 
