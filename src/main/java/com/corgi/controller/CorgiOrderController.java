@@ -286,13 +286,13 @@ public class CorgiOrderController extends BaseController {
                 }
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
-            }else if (merchandise.getType().equals(CorgiMerchandise.LOCATION)) {
+            } else if (merchandise.getType().equals(CorgiMerchandise.LOCATION)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
                 if (!checkLocation(goodsId, result)) {
                     return result;
                 }
-            }else if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
+            } else if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
                 if (!checkReservePay(goodsId, result)) {
@@ -380,7 +380,7 @@ public class CorgiOrderController extends BaseController {
     public JsonResult getMerchandise(@RequestParam("type") String type) {
         CorgiMerchandise query = new CorgiMerchandise();
         query.setType(type);
-        if(!RequestUtil.getChannel().equals("AppStore") && type.equals(CorgiMerchandise.SUBSCRIBE)){
+        if (!RequestUtil.getChannel().equals("AppStore") && type.equals(CorgiMerchandise.SUBSCRIBE)) {
             query.setType(type.concat("-android"));
         }
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
@@ -831,7 +831,7 @@ public class CorgiOrderController extends BaseController {
                 .userId(getUserId())
                 .payType(payType)
                 .marketId(marketId)
-                .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
+                .desc(MerchandiseEnum.getByCode(merchandise.getId().replaceAll("SA", "S")).getDesc())
                 .merchId(merchandise.getId())
                 .tradeNo(tradeNo)
                 .sellerId(sellerId)
