@@ -22,9 +22,12 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.http.ProtocolType;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.aliyuncs.saf.model.v20180919.ExecuteRequestRequest;
+import com.aliyuncs.saf.model.v20180919.ExecuteRequestResponse;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.util.CorgiHttpUtil;
+import com.corgi.common.util.IPUtil;
 import com.corgi.entity.*;
 import com.corgi.exception.PermissionException;
 import com.corgi.user.api.CorgiPicService;
@@ -43,10 +46,15 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -245,43 +253,6 @@ public class AliyunGreenService {
         }
         return url;
     }
-
-//    public CorgiPic checkFace(CorgiPic pic, String sourceId) {
-//        log.info("pics = " + pic.getPicUrl());
-//
-//        DetectFaceAttributesRequest request = new DetectFaceAttributesRequest();
-//        request.setRegionId("cn-hangzhou");
-//        request.setMaterialValue(pic.getPicUrl());
-//        pic.setDataId(getDataId());
-//        try {
-//            DetectFaceAttributesResponse response = managementClient.getAcsResponse(request);
-//            DetectFaceAttributesResponse.Data data = response.getData();
-//            log.info(JSONObject.toJSONString(data));
-//            if (CollectionUtils.isEmpty(data.getFaceInfos())) {
-//                pic.setStatus(UserDetail.NO_FACE);
-//                addCheckPic(pic, sourceId, CheckPic.AVATAR);
-//                return pic;
-//            }
-//            for (DetectFaceAttributesResponse.Data.FaceAttributesDetectInfo detectInfo : data.getFaceInfos()) {
-//                if (!"None".equals(detectInfo.getFaceAttributes().getFacetype())) {
-//                    return pic;
-//                }
-//            }
-//            pic.setStatus(UserDetail.NO_FACE);
-//            addCheckPic(pic, sourceId, CheckPic.AVATAR);
-//        } catch (ServerException e) {
-//            log.error(e.getMessage(), e);
-//            pic.setStatus(UserDetail.NO_FACE);
-//            addCheckPic(pic, sourceId, CheckPic.AVATAR);
-//        } catch (ClientException e) {
-//            log.error("ErrCode:" + e.getErrCode());
-//            log.error("ErrMsg:" + e.getErrMsg());
-//            log.error("RequestId:" + e.getRequestId());
-//            pic.setStatus(UserDetail.NO_FACE);
-//            addCheckPic(pic, sourceId, CheckPic.AVATAR);
-//        }
-//        return pic;
-//    }
 
     public CorgiSound checkSound(String url, String sourceId) {
         if (StringUtils.isEmpty(url)) {
@@ -539,7 +510,7 @@ public class AliyunGreenService {
         corgiPicService.addCheckPic(checkPic);
     }
 
-    public CheckTextResult checkText(String text) {
+    public boolean checkText(String text) {
         return checkText(text, "sexy_pic");
     }
 
@@ -664,6 +635,43 @@ public class AliyunGreenService {
         }
         return activity;
     }
+
+    public Double checkAccount(String mobile) {
+        RequestAttributes ra = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes sra = (ServletRequestAttributes) ra;
+        HttpServletRequest hrequest = sra.getRequest();
+        String ip = IPUtil.getIpAddr(hrequest);
+        IClientProfile profile = DefaultProfile.getProfile("cn-shanghai", accessKeyId, accessKeySecret);
+        DefaultProfile.addEndpoint("cn-shanghai", "saf", "saf.cn-shanghai.aliyuncs.com");
+        IAcsClient client = new DefaultAcsClient(profile);
+
+        ExecuteRequestRequest executeRequestRequest = new ExecuteRequestRequest();
+        executeRequestRequest.setMethod(com.aliyuncs.http.MethodType.POST);
+        executeRequestRequest.setService("account_abuse");
+        // 业务详细参数，具体见文档里的业务参数部分,不需要的参数就不需要设置
+        Map<String, Object> serviceParams = new HashMap<String, Object>();
+
+        // 调用参数
+        serviceParams.put("mobile", mobile);
+        serviceParams.put("ip", ip);
+
+        executeRequestRequest.setServiceParameters(JSONObject.toJSONString(serviceParams));
+        /**
+         * 请务必设置超时时间
+         */
+        executeRequestRequest.setReadTimeout(3000);
+        try {
+            executeRequestRequest.setHttpContent(JSONObject.toJSONString(serviceParams).getBytes("UTF-8"), "UTF-8", FormatType.JSON);
+            ExecuteRequestResponse httpResponse = client.getAcsResponse(executeRequestRequest);
+            log.info("no:{} ip:{} result:{}", mobile, ip, JSONObject.toJSONString(httpResponse));
+            return Double.valueOf(httpResponse.getData().getScore());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0.0;
+    }
+
 
     private String getDataId() {
         return UUID.randomUUID().toString() + random.nextInt(100);

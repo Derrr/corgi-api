@@ -16,6 +16,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.UuidUtil;
 import com.corgi.common.wxpay.sdk.*;
 import com.corgi.entity.CorgiUserOrder;
@@ -267,14 +268,14 @@ public class CorgiOrderController extends BaseController {
             CorgiOrder orderQuery = CorgiOrder.builder()
                     .userId(getUserId())
                     .status(CorgiOrder.STATUS.CREATED)
-                    .merchType(merchandise.getType())
+                    .merchType(merchandise.getType().split("-")[0])
                     .build();
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
             if (CollectionUtils.isNotEmpty(postOrders)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品");
             }
 
-            String marketId = "-";
+            String marketId = StringUtils.isEmpty(goodsId) ? "-" : goodsId;
             String sellerId = "corgi";
             if (merchandise.getType().equals(CorgiMerchandise.ACTIVITY)) {
                 JsonResult result = new JsonResult();
@@ -285,16 +286,18 @@ public class CorgiOrderController extends BaseController {
                 }
                 marketId = activity.getMarketId();
                 sellerId = activity.getUserId();
-            }
-
-            if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
+            } else if (merchandise.getType().equals(CorgiMerchandise.LOCATION)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                if (!checkLocation(goodsId, result)) {
+                    return result;
+                }
+            } else if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
                 if (!checkReservePay(goodsId, result)) {
                     return result;
                 }
-                marketId = goodsId;
-                sellerId = "corgi";
             }
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
@@ -308,6 +311,16 @@ public class CorgiOrderController extends BaseController {
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    private boolean checkLocation(String goodsId, JsonResult result) {
+        UserPosition position = corgiUserService.getUserPosition(goodsId);
+        if (position == null || position.getLat() == null || position.getLng() == null
+                || position.getLat() > 200 || position.getLng() > 200 || position.getLat() == 0 || position.getLng() == 0) {
+            result.setMessage("定位失败");
+            return false;
+        }
+        return true;
     }
 
     private boolean checkReservePay(String goodsId, JsonResult result) {
@@ -367,8 +380,11 @@ public class CorgiOrderController extends BaseController {
     public JsonResult getMerchandise(@RequestParam("type") String type) {
         CorgiMerchandise query = new CorgiMerchandise();
         query.setType(type);
+        if (!RequestUtil.getChannel().equals("AppStore") && type.equals(CorgiMerchandise.SUBSCRIBE)) {
+            query.setType(type.concat("-android"));
+        }
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
-        if (type.equals(CorgiMerchandise.SUBSCRIBE)) {
+        if (type.startsWith(CorgiMerchandise.SUBSCRIBE)) {
             CorgiUserGoods orderQuery = CorgiUserGoods.builder()
                     .userId(getUserId())
                     .goodsType(CorgiUserGoods.GOODS_TYPE.SUBSCRIBE)
@@ -377,9 +393,9 @@ public class CorgiOrderController extends BaseController {
                     .build();
             List<CorgiUserGoods> orders = corgiOrderService.getUserGoods(orderQuery);
             if (CollectionUtils.isNotEmpty(orders)) {
-                merchandises = merchandises.stream().filter(m -> !MerchandiseEnum.isFirst(m.getId())).collect(Collectors.toList());
+                merchandises = merchandises.stream().filter(m -> !"首购".equals(m.getDisReason())).collect(Collectors.toList());
             } else {
-                merchandises = merchandises.stream().filter(m -> MerchandiseEnum.isFirst(m.getId())).collect(Collectors.toList());
+                merchandises = merchandises.stream().filter(m -> "首购".equals(m.getDisReason())).collect(Collectors.toList());
             }
         }
         return new JsonResult(merchandises);
@@ -815,7 +831,7 @@ public class CorgiOrderController extends BaseController {
                 .userId(getUserId())
                 .payType(payType)
                 .marketId(marketId)
-                .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
+                .desc(MerchandiseEnum.getByCode(merchandise.getId().replaceAll("SA", "S")).getDesc())
                 .merchId(merchandise.getId())
                 .tradeNo(tradeNo)
                 .sellerId(sellerId)
