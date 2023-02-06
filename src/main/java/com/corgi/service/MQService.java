@@ -99,4 +99,12 @@ public class MQService {
             log.error(e.getMessage(), e);
         }
     }
+
+    public void sendLikePost(CorgiActivity activity) {
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.LIKE_POST_QUEUE, activity);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }
