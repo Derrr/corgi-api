@@ -4,6 +4,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.messages.TraceFollow;
+import com.corgi.user.entity.ActivityLike;
 import com.corgi.user.entity.CorgiDate;
 import com.corgi.user.entity.UserTrace;
 import lombok.extern.slf4j.Slf4j;
@@ -100,9 +101,9 @@ public class MQService {
         }
     }
 
-    public void sendLikePost(CorgiActivity activity) {
+    public void sendLikePost(ActivityLike activityLike) {
         try {
-            rabbitTemplate.convertAndSend(CorgiQueueName.LIKE_POST_QUEUE, activity);
+            rabbitTemplate.convertAndSend(CorgiQueueName.LIKE_POST_QUEUE, activityLike);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

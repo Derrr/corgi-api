@@ -547,7 +547,7 @@ public class CorgiActivityController extends BaseController {
                     .message(PushMessage.USER_LIKE)
                     .extra(extra)
                     .build());
-            mqService.sendLikePost(activity);
+            mqService.sendLikePost(activityLike);
         }
         return new JsonResult();
     }
