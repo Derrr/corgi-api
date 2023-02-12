@@ -67,6 +67,8 @@ public class CorgiToolController extends BaseController {
     private CorgiVlogService corgiVlogService;
     @Reference
     private CorgiMatchService corgiMatchService;
+    @Reference
+    private CorgiFeedService corgiFeedService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -474,6 +476,9 @@ public class CorgiToolController extends BaseController {
         corgiUserService.deleteUser(userId);
         corgiActivityService.deleteUserActivity(userId);
         corgiMatchService.deleteUser(userId);
+        CorgiFeed query = new CorgiFeed();
+        query.setUserId(userId);
+        corgiFeedService.deleteFeed(query);
         redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", 60l, TimeUnit.DAYS);
         redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", 1l, TimeUnit.DAYS);
         return new JsonResult();
