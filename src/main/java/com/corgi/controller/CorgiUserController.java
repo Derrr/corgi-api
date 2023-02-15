@@ -746,7 +746,7 @@ public class CorgiUserController extends BaseController {
         //String signName = "Corgi";
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
-            //signName = "Corgi";
+            signName = "Corgi";
         }
         log.info("to {} sending code:{}", telNo, code);
         CommonRequest request = new CommonRequest();
