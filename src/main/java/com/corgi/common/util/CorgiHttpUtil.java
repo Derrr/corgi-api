@@ -13,6 +13,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
@@ -105,8 +106,8 @@ public class CorgiHttpUtil {
         try {
             URIBuilder uriBuilder = new URIBuilder(url);
             request = new HttpPost(uriBuilder.build());
-            request.setEntity(new StringEntity(JSON.toJSONString(body)));
-        } catch (URISyntaxException | UnsupportedEncodingException e) {
+            request.setEntity(new StringEntity(JSON.toJSONString(body), ContentType.APPLICATION_JSON));
+        } catch (URISyntaxException e) {
             logger.error(e.getMessage(), e);
         }
 
