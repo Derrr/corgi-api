@@ -34,7 +34,7 @@ public class ChatService {
     private Map<String, Object> getBody(String text) {
         Map<String, Object> body = new HashMap<>();
         body.put("model", "text-davinci-003");
-        body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8)));
+        body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8), "ISO8859-1"));
         body.put("temperature", 0);
         body.put("max_tokens", 50);
         return body;
