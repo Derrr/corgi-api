@@ -36,7 +36,7 @@ public class ChatService {
         Map<String, Object> body = new HashMap<>();
         body.put("model", "text-davinci-003");
         try {
-            body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8), "ISO8859-1"));
+            body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
