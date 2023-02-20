@@ -26,7 +26,7 @@ public class ChatService {
 
 
     public String prompt(String text) {
-        String result = CorgiHttpUtil.doPost(host, this.getBody("Answer the following question using Chinese. Question:".concat(text)), getHeader());
+        String result = CorgiHttpUtil.doPost(host, this.getBody("The following question is Chinese, answer the question using Chinese as well. Question:".concat(text)), getHeader());
         return result;
     }
 
