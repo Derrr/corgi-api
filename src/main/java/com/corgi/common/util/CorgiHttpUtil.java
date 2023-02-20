@@ -81,10 +81,9 @@ public class CorgiHttpUtil {
         //request配置
         if (REQUEST_CONFIG == null) {
             RequestConfig defaultRequestConfig = RequestConfig.custom()
-                    .setConnectTimeout(2000)
-                    .setSocketTimeout(5000)
-                    .setConnectionRequestTimeout(500)
-
+                    .setConnectTimeout(20000)
+                    .setSocketTimeout(300000)
+                    .setConnectionRequestTimeout(5000)
                     .build();
             REQUEST_CONFIG = defaultRequestConfig;
         }
