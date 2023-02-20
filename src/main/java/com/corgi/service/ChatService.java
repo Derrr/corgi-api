@@ -6,6 +6,8 @@ import com.aliyun.teaopenapi.models.Config;
 import com.corgi.common.util.CorgiHttpUtil;
 import com.corgi.entity.SMSRequest;
 import com.google.gson.Gson;
+import com.unfbx.chatgpt.OpenAiClient;
+import com.unfbx.chatgpt.entity.completions.CompletionResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,8 +30,11 @@ public class ChatService {
 
 
     public String prompt(String text) {
-        String result = CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
-        return result;
+//        String result = CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
+        String ap = "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";
+        OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
+        CompletionResponse completions = openAiClient.completions(text);
+        return completions.getChoices()[0].getText();
     }
 
     private Map<String, Object> getBody(String text) {

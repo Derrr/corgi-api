@@ -176,6 +176,11 @@
             <version>1.2.19</version>
         </dependency>
         <dependency>
+            <groupId>com.unfbx</groupId>
+            <artifactId>chatgpt-java</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-saf</artifactId>
             <version>1.0.2</version>
