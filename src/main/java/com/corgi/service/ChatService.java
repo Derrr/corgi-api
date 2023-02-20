@@ -41,7 +41,7 @@ public class ChatService {
             e.printStackTrace();
         }
         body.put("temperature", 0);
-        body.put("max_tokens", 50);
+        body.put("max_tokens", 2048);
         return body;
     }
 
