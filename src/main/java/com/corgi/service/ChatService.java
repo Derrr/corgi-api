@@ -32,7 +32,7 @@ public class ChatService {
 
 
     public String prompt(String text) {
-        return CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
+        return CorgiHttpUtil.doPost(host, this.getBody(text.concat("\n")), getHeader());
 //        OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
 //        CompletionResponse completions = openAiClient.completions(text.concat("\n"));
 //        return completions.getChoices()[0].getText();
@@ -41,11 +41,7 @@ public class ChatService {
     private Map<String, Object> getBody(String text) {
         Map<String, Object> body = new HashMap<>();
         body.put("model", "text-davinci-003");
-        try {
-            body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        body.put("prompt", text);
         body.put("temperature", 0.0);
         body.put("top_p", 1);
         body.put("n", 1);

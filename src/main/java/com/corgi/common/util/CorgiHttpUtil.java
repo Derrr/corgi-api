@@ -110,7 +110,7 @@ public class CorgiHttpUtil {
             logger.error(e.getMessage(), e);
         }
 
-        StringBuffer log = new StringBuffer("输入：{ <URL: " + url + "> , <Method: doPost> , <Http Header: " + headers + "> , <Http Body: " + body + ">}");
+        StringBuffer log = new StringBuffer("输入：{ <URL: " + url + "> , <Method: doPost> , <Http Header: " + headers + "> , <Http Body: " + JSON.toJSONString(body) + ">}");
 
         if (headers != null) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
