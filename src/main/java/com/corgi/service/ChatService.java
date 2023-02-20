@@ -1,5 +1,6 @@
 package com.corgi.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.dypnsapi20170525.Client;
 import com.aliyun.dypnsapi20170525.models.*;
 import com.aliyun.teaopenapi.models.Config;
@@ -32,10 +33,10 @@ public class ChatService {
 
 
     public String prompt(String text) {
-        return CorgiHttpUtil.doPost(host, this.getBody(text.concat("\n")), getHeader());
-//        OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
-//        CompletionResponse completions = openAiClient.completions(text.concat("\n"));
-//        return completions.getChoices()[0].getText();
+//        return CorgiHttpUtil.doPost(host, this.getBody(text.concat("\n")), getHeader());
+        OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
+        CompletionResponse completions = openAiClient.completions(text.concat("\n"));
+        return completions.getChoices()[0].getText();
     }
 
     private Map<String, Object> getBody(String text) {
