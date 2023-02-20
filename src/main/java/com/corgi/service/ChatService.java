@@ -40,7 +40,10 @@ public class ChatService {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        body.put("temperature", 0);
+        body.put("temperature", 0.5);
+        body.put("top_p", 1);
+        body.put("frequency_penalty", 0);
+        body.put("pressure_penalty", 0);
         body.put("max_tokens", 2048);
         return body;
     }
