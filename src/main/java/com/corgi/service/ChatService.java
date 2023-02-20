@@ -33,7 +33,7 @@ public class ChatService {
 //        String result = CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
         String ap = "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";
         OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
-        CompletionResponse completions = openAiClient.completions(text);
+        CompletionResponse completions = openAiClient.completions(text.concat("\n"));
         return completions.getChoices()[0].getText();
     }
 
