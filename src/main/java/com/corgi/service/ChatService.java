@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,11 +32,10 @@ public class ChatService {
 
 
     public String prompt(String text) {
-//        String result = CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
-        String ap = "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";
-        OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
-        CompletionResponse completions = openAiClient.completions(text.concat("\n"));
-        return completions.getChoices()[0].getText();
+        return CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
+//        OpenAiClient openAiClient = new OpenAiClient(apiKey, 60, 60, 60);
+//        CompletionResponse completions = openAiClient.completions(text.concat("\n"));
+//        return completions.getChoices()[0].getText();
     }
 
     private Map<String, Object> getBody(String text) {
@@ -45,10 +46,15 @@ public class ChatService {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        body.put("temperature", 0.5);
+        body.put("temperature", 0.0);
         body.put("top_p", 1);
-        body.put("frequency_penalty", 0);
-        body.put("presence_penalty", 0);
+        body.put("n", 1);
+        body.put("stream", false);
+        body.put("echo", false);
+        body.put("stop", Arrays.asList("#"));
+        body.put("frequency_penalty", 0.0);
+        body.put("presence_penalty", 0.0);
+        body.put("best_of", 1);
         body.put("max_tokens", 2048);
         return body;
     }
