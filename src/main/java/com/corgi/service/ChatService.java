@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,14 +27,14 @@ public class ChatService {
 
 
     public String prompt(String text) {
-        String result = CorgiHttpUtil.doPost(host, this.getBody("The following question is Chinese, answer the question using Chinese as well. Question:".concat(text)), getHeader());
+        String result = CorgiHttpUtil.doPost(host, this.getBody(text), getHeader());
         return result;
     }
 
     private Map<String, Object> getBody(String text) {
         Map<String, Object> body = new HashMap<>();
         body.put("model", "text-davinci-003");
-        body.put("prompt", text);
+        body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8)));
         body.put("temperature", 0);
         body.put("max_tokens", 50);
         return body;
