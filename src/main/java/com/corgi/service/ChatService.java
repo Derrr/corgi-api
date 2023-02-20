@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,11 @@ public class ChatService {
     private Map<String, Object> getBody(String text) {
         Map<String, Object> body = new HashMap<>();
         body.put("model", "text-davinci-003");
-        body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8), "ISO8859-1"));
+        try {
+            body.put("prompt", new String(text.getBytes(StandardCharsets.UTF_8), "ISO8859-1"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         body.put("temperature", 0);
         body.put("max_tokens", 50);
         return body;
