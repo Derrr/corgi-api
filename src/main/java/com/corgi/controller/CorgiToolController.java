@@ -839,7 +839,7 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("test")
+    @GetMapping("chat")
     public String test(String text) {
         return chatService.prompt(text);
     }
