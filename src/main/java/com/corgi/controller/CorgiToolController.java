@@ -14,6 +14,7 @@ import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
 import com.corgi.service.AliyunGreenService;
+import com.corgi.service.ChatService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
@@ -77,6 +78,8 @@ public class CorgiToolController extends BaseController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private ChatService chatService;
     @Autowired
     private MQService mqService;
 
@@ -837,16 +840,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("test")
-    public JsonResult test() {
-        CorgiReport corgiReport = new CorgiReport();
-        corgiReport.setReportUserId("1");
-        corgiReport.setReportUserName("嗷嗷");
-        corgiReport.setAccuseId("17");
-        corgiReport.setAccuseType("用户");
-        corgiReport.setReason("dwaegwg");
-        corgiReport.setDesc("描述");
-        corgiReport.setPics(Arrays.asList("daseg", "gawiego"));
-        corgiBlacklistService.report(corgiReport);
-        return new JsonResult();
+    public JsonResult test(String text) {
+        return new JsonResult(chatService.prompt(text));
     }
 }

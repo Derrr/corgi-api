@@ -1,16 +1,19 @@
 package com.corgi.common.util;
 
 import com.alibaba.dubbo.common.utils.CollectionUtils;
+import com.alibaba.fastjson.JSON;
 import org.apache.http.Consts;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.MessageConstraints;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
@@ -21,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.CodingErrorAction;
 import java.util.Date;
@@ -94,6 +98,64 @@ public class CorgiHttpUtil {
                 .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
                 .setConnectionManager(CM).build();
         return httpClient;
+    }
+
+    public static String doPost(String url, Map<String, Object> body, Map<String, String> headers) {
+        Date startTime = new Date();
+        HttpPost request = null;
+        try {
+            URIBuilder uriBuilder = new URIBuilder(url);
+            request = new HttpPost(uriBuilder.build());
+            request.setEntity(new StringEntity(JSON.toJSONString(body)));
+        } catch (URISyntaxException | UnsupportedEncodingException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        StringBuffer log = new StringBuffer("输入：{ <URL: " + url + "> , <Method: doPost> , <Http Header: " + headers + "> , <Http Body: " + body + ">}");
+
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                request.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
+
+        CloseableHttpResponse response = null;
+        String result = "";
+        try {
+            response = getHttpClient().execute(request);
+            // 判断网络连接状态码是否正常(0--200都数正常)
+            if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                result = EntityUtils.toString(response.getEntity(), "utf-8");
+                InputStream in = response.getEntity().getContent();
+                in.close();
+            } else if (response != null) {
+                logger.error("请求" + url + "获取失败, 状态异常：" + response.getStatusLine().getStatusCode());
+                result = EntityUtils.toString(response.getEntity(), "utf-8");
+            }
+        } catch (IOException e) {
+            logger.error("请求地址出错," + url + "错误信息:", e);
+            request.abort();
+        } catch (IllegalArgumentException e) {
+            logger.error("返回参数错误", e);
+            request.abort();
+        } finally {
+            if (response != null) {
+                try {
+
+                    response.close();
+                } catch (IOException e) {
+                    logger.error("请求地址关闭出错," + url + "错误信息:", e);
+                }
+            }
+        }
+
+        Date endTime = new Date();
+        long executeTime = endTime.getTime() - startTime.getTime();
+        logger.info("外部接口调用时间：" + executeTime + "ms");
+        logger.info(log.toString());
+        logger.info("输出：{" + result + "}");
+
+        return result;
     }
 
     public static String doGet(String url, List<NameValuePair> queryParams, Map<String, String> headers) {

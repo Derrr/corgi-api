@@ -3,11 +3,6 @@ package com.corgi.service;
 import com.aliyun.dypnsapi20170525.Client;
 import com.aliyun.dypnsapi20170525.models.*;
 import com.aliyun.teaopenapi.models.Config;
-import com.aliyuncs.DefaultAcsClient;
-import com.aliyuncs.IAcsClient;
-import com.aliyuncs.exceptions.ClientException;
-import com.aliyuncs.exceptions.ServerException;
-import com.aliyuncs.profile.*;
 import com.corgi.entity.SMSRequest;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Random;
 
 /**
  * @author tairanliu
