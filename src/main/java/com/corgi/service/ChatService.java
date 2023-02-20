@@ -43,7 +43,7 @@ public class ChatService {
         body.put("temperature", 0.5);
         body.put("top_p", 1);
         body.put("frequency_penalty", 0);
-        body.put("pressure_penalty", 0);
+        body.put("presence_penalty", 0);
         body.put("max_tokens", 2048);
         return body;
     }
