@@ -52,7 +52,7 @@ public class ChatService {
         body.put("frequency_penalty", 0.0);
         body.put("presence_penalty", 0.0);
         body.put("best_of", 1);
-        body.put("max_tokens", 2048);
+        body.put("max_tokens", 50);
         return body;
     }
 
