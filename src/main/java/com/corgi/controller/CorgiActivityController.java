@@ -446,7 +446,7 @@ public class CorgiActivityController extends BaseController {
         }
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityComment.getActivityId()));
         if (CollectionUtils.isEmpty(activityList)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论失败，活动不存在");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论失败，该动态已被删除");
         }
         if (!ActivityComment.SWIFT.equals(activityComment.getStatus())) {
             List<ActivityComment> comments = corgiCommentService.getActivityComment(activityList.get(0).getId(), null, null, "");
@@ -516,7 +516,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult like(@RequestBody ActivityLike activityLike) {
         List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityLike.getActivityId()));
         if (CollectionUtils.isEmpty(activityList) || activityList.get(0).getId() == null) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "点赞失败，活动不存在");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "点赞失败，该动态已被删除");
         }
         CorgiActivity activity = activityList.get(0);
         log.info("" + activity + activityLike);
@@ -795,7 +795,7 @@ public class CorgiActivityController extends BaseController {
         corgiUserActivityService.signUp(new UserSignUp(userId, activityId));
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (CollectionUtils.isEmpty(corgiActivities)) {
-            return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+            return new JsonResult(Constants.API_ERROR_CODE, "该动态已被删除");
         }
         UserDetail userDetail = corgiUserService.getUserDetail(userId, null);
         HashMap extra = new HashMap();
@@ -832,7 +832,7 @@ public class CorgiActivityController extends BaseController {
         try {
             List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
             if (CollectionUtils.isEmpty(activityList)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+                return new JsonResult(Constants.API_ERROR_CODE, "该动态已被删除");
             }
             CorgiActivity activity = activityList.get(0);
             if (activity.getStatus().equals(CorgiActivity.DELETED)) {
@@ -911,7 +911,7 @@ public class CorgiActivityController extends BaseController {
             List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
 
             if (CollectionUtils.isEmpty(activityList)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+                return new JsonResult(Constants.API_ERROR_CODE, "该动态已被删除");
             }
             CorgiActivity activity = activityList.get(0);
             if (activity.getStatus().equals(CorgiActivity.DELETED)) {
@@ -967,7 +967,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult getDetail(@RequestParam("activityId") String activityId, @RequestParam("userId") String userId) {
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
         if (CollectionUtils.isEmpty(corgiActivities) || corgiActivities.get(0) == null) {
-            return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+            return new JsonResult(Constants.API_ERROR_CODE, "该动态已被删除");
         }
         if (hasUserId()) {
             userId = getUserId();
@@ -1070,7 +1070,7 @@ public class CorgiActivityController extends BaseController {
             List<CorgiActivity> activityList = corgiActivityService.getActivityByIds(Arrays.asList(activityId));
 
             if (CollectionUtils.isEmpty(activityList)) {
-                return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+                return new JsonResult(Constants.API_ERROR_CODE, "该动态已被删除");
             }
             CorgiActivity activity = activityList.get(0);
             if (activity.getStatus().equals(CorgiActivity.DELETED)) {
