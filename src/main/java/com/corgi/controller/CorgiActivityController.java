@@ -977,7 +977,7 @@ public class CorgiActivityController extends BaseController {
         activities.add(corgiActivities.get(0));
         List<CorgiActivityDetail> details = convertDetail(activities, userId, true);
         if (CollectionUtils.isEmpty(details)) {
-            return new JsonResult(Constants.API_ERROR_CODE, "活动不存在");
+            return new JsonResult(Constants.API_ERROR_CODE, "该动态已被删除");
         }
         CorgiActivityDetail detail = details.get(0);
         Integer blackCount = corgiBlacklistService.isBlacked(detail.getUserId(), userId);
