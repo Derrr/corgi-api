@@ -79,7 +79,6 @@ public class CorgiControllerAdvice {
         logger.error(errorMsg, ex);
         JsonResult jsonResult = new JsonResult("");
         jsonResult.setCode(Constants.SYS_ERROR_CODE);
-        jsonResult.setMessage(ex.getMessage());
         jsonResult.setData(request.getParameterMap());
         return new ResponseEntity(jsonResult, HttpStatus.OK);
     }
