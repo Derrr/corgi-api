@@ -90,11 +90,12 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("get_config")
     public JsonResult getFrontPageConfig() {
-        HashMap<String, Integer> config = new HashMap<>();
+        HashMap<String, Object> config = new HashMap<>();
         config.put("showPay", 1);
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
+        config.put("frontPage", "Mat");
         if ("2.2.7".equals(RequestUtil.getVersion())) {
             log.info("get_config into version:{}  ", config);
             if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
