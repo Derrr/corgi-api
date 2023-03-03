@@ -95,7 +95,7 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        config.put("frontPage", "Hot");
+        //config.put("frontPage", "Mat");
         if ("2.2.7".equals(RequestUtil.getVersion())) {
             log.info("get_config into version:{}  ", config);
             if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
