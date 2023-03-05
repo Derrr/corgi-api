@@ -95,7 +95,16 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
-        //config.put("frontPage", "Mat");
+        try {
+            Integer userId = Integer.valueOf(getUserId());
+            if (userId % 4 == 0) {
+                config.put("frontPage", "Mat");
+            } else if (userId % 4 == 1) {
+                config.put("frontPage", "Hot");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
         if ("2.2.7".equals(RequestUtil.getVersion())) {
             log.info("get_config into version:{}  ", config);
             if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
