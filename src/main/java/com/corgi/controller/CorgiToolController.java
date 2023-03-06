@@ -102,7 +102,7 @@ public class CorgiToolController extends BaseController {
             } else if (userId % 4 == 1) {
                 config.put("frontPage", "Hot");
             } else {
-                config.put("frontPage", "App store");
+                config.put("frontPage", "App Store");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
