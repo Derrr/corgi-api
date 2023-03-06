@@ -101,6 +101,8 @@ public class CorgiToolController extends BaseController {
                 config.put("frontPage", "Mat");
             } else if (userId % 4 == 1) {
                 config.put("frontPage", "Hot");
+            } else {
+                config.put("frontPage", "default");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
