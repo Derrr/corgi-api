@@ -1098,12 +1098,14 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_city_new_user")
-    public JsonResult getCityNewUser(@RequestParam(name = "city",required = false, defaultValue = "") String city) {
+    public JsonResult getCityNewUser(@RequestParam(name = "city", required = false, defaultValue = "") String city) {
         return new JsonResult(corgiUserService.recommendUser(city, getUserId()));
     }
 
     @GetMapping("get_map_user")
-    public JsonResult getMapUser(UserQuery userQuery) {
+    public JsonResult getMapUser(String userQueryJson) {
+        log.info("map:{} ", userQueryJson);
+        UserQuery userQuery = JSONObject.parseObject(userQueryJson, UserQuery.class);
         userQuery.setUserId(getUserId());
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         return new JsonResult(mapUserProfile);

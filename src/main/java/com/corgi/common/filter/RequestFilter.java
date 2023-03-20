@@ -38,7 +38,6 @@ public class RequestFilter implements Filter {
             servletResponse.setContentType("application/json;charset=UTF-8");
             return;
         }
-        log.info(JSONObject.toJSONString(servletRequest.getParameterMap()));
         MDC.put("usrID", "-1");
         long time = System.currentTimeMillis();
         String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
