@@ -1098,7 +1098,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_city_new_user")
-    public JsonResult getCityNewUser(@RequestParam("city") String city) {
+    public JsonResult getCityNewUser(@RequestParam(name = "city",required = false, defaultValue = "") String city) {
         return new JsonResult(corgiUserService.recommendUser(city, getUserId()));
     }
 

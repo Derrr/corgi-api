@@ -6,8 +6,10 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.util.JWTUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.springframework.util.DigestUtils;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 import java.security.cert.Certificate;
@@ -52,12 +54,6 @@ public class CorgiTest {
 
     @Test
     public void testJoin() {
-        System.out.println("aaaa#a".split("#")[1]);
-    }
-
-    @Test
-    public void appStoreResponse() throws CertificateException {
-        String jwt = "eyJleHAiOjE2NjgyNDEzNDUsInVzZXJJZCI6IjEzIiwidmVyc2lvbiI6IjIuMi42IiwiaWF0IjoxNjY4MjM0MTQ1fQ";
-        System.out.println(Base64.getDecoder().decode(jwt));
+        System.out.println(DigestUtils.md5DigestAsHex("022-622-042".getBytes(StandardCharsets.UTF_8)));
     }
 }
