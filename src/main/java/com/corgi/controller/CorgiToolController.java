@@ -97,9 +97,9 @@ public class CorgiToolController extends BaseController {
         config.put("showMap", 1);
         try {
             Integer userId = Integer.valueOf(getUserId());
-            if (userId % 2 == 0) {
+            if (userId % 4 == 0 || userId.equals(1) || userId.equals(593) || userId.equals(7)) {
                 config.put("frontPage", "Mat");
-            } else if (userId % 2 == 1) {
+            } else if (userId % 4 == 1) {
                 config.put("frontPage", "Hot");
             } else {
                 config.put("frontPage", "App Store");
