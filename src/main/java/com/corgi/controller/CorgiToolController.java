@@ -851,6 +851,16 @@ public class CorgiToolController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("behavior_data")
+    public JsonResult behaviorData(CorgiBehaviorReq behaviorReq) {
+        return new JsonResult(corgiStatisticService.getBehaviorData(behaviorReq));
+    }
+
+    @GetMapping("content_data")
+    public JsonResult contentData(CorgiContentReq contentReq) {
+        return new JsonResult(corgiStatisticService.getContentData(contentReq));
+    }
+
     @GetMapping("chat")
     public String test(String text) {
         return chatService.prompt(text);
