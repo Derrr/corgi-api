@@ -853,11 +853,18 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("behavior_data")
     public JsonResult behaviorData(CorgiBehaviorReq behaviorReq) {
+        if(!StringUtils.isEmpty(behaviorReq.getEndTime())
+                && behaviorReq.getEndTime().length() == 10){
+            behaviorReq.setEndTime(behaviorReq.getEndTime()+" 23:59:59");
+        }
         return new JsonResult(corgiStatisticService.getBehaviorData(behaviorReq));
     }
 
     @GetMapping("content_data")
     public JsonResult contentData(CorgiContentReq contentReq) {
+        if(!StringUtils.isEmpty(contentReq.getEndTime()) && contentReq.getEndTime().length() == 10){
+            contentReq.setEndTime(contentReq.getEndTime()+" 23:59:59");
+        }
         return new JsonResult(corgiStatisticService.getContentData(contentReq));
     }
 
