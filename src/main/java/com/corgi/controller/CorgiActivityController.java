@@ -368,9 +368,11 @@ public class CorgiActivityController extends BaseController {
                 if (userPosition.getLng() != null && userPosition.getLng() < 200 && userPosition.getLat() != null && userPosition.getLat() < 200) {
                     activity.setLng(userPosition.getLng());
                     activity.setLat(userPosition.getLat());
+                    activity.setCity(userPosition.getCity());
                 } else if (userPosition.getRealLng() != null && userPosition.getRealLng() < 200 && userPosition.getRealLat() != null && userPosition.getRealLat() < 200) {
                     activity.setLng(userPosition.getRealLng());
                     activity.setLat(userPosition.getRealLat());
+                    activity.setCity(userPosition.getCity());
                 }
             }
         }
