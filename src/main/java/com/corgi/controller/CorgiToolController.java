@@ -107,16 +107,16 @@ public class CorgiToolController extends BaseController {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        if ("2.2.7".equals(RequestUtil.getVersion())) {
+        if ("2.2.8".equals(RequestUtil.getVersion())) {
             log.info("get_config into version:{}  ", config);
-            if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
-                log.info("get_config into channel:{}  ", config);
-                config.put("showPay", 0);
-                config.put("showDiscovery", 0);
-            }
+            //if (CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())) {
+            log.info("get_config into channel:{}  ", config);
+            config.put("showPay", 0);
+            config.put("showPurse", 0);
+            config.put("showDiscovery", 0);
+            //}
             if ("huawei".equals(RequestUtil.getChannel())) {
                 config.put("showMap", 0);
-                config.put("showPurse", 0);
             }
         }
         log.info("get_config:{} version:{} channel:{} ", config, RequestUtil.getVersion(), RequestUtil.getChannel());
