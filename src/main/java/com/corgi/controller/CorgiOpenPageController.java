@@ -94,10 +94,7 @@ public class CorgiOpenPageController extends BaseController {
                 }
             }
         }
-        if("AppStore".equals(RequestUtil.getChannel()) && "2.2.5".compareTo(RequestUtil.getVersion()) <= 0) {
-            corgiOpenPage.setUrlType("12");
-            return new JsonResult(Arrays.asList(corgiOpenPage));
-        }
+
         corgiOpenPage.setStatus(CorgiOpenPage.STATUS_ENABLE);
         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         corgiOpenPage.setStartTime(sdf.format(new Date()));
@@ -127,6 +124,12 @@ public class CorgiOpenPageController extends BaseController {
         result = new ArrayList<>();
         if (!CollectionUtils.isEmpty(openPages)) {
             result.add(openPages.get(new Random().nextInt(openPages.size())));
+        }
+        if (CollectionUtils.isEmpty(result)) {
+            if ("AppStore".equals(RequestUtil.getChannel()) && "2.2.5".compareTo(RequestUtil.getVersion()) <= 0) {
+                corgiOpenPage.setUrlType("12");
+                return new JsonResult(Arrays.asList(corgiOpenPage));
+            }
         }
         return new JsonResult(result);
     }
