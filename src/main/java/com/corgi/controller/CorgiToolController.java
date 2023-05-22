@@ -651,11 +651,11 @@ public class CorgiToolController extends BaseController {
         if (userProfile != null) {
             UserDetail userDetail = new UserDetail();
             userDetail.setAvatarStatus("influencer");
-            userDetail.setUserId(userProfile.getUserId());
+            userDetail.setUserId(userId);
             corgiUserService.updateDetail(userDetail);
             corgiToolService.countUserNumber(userProfile.getNickname());
             mqService.sendInfluencerMessage(PushMessage.builder()
-                    .targetUserId(userProfile.getUserId()).build());
+                    .targetUserId(userId).build());
 
         }
         return new JsonResult();
