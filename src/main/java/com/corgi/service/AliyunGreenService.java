@@ -326,10 +326,10 @@ public class AliyunGreenService {
     }
 
     public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type) {
-        return checkPic(urls, sourceId, type, 5);
+        return checkPic(urls, sourceId, type, "sexy_pic");
     }
 
-    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type, Integer retry) {
+    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type, String bizType) {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
@@ -375,7 +375,7 @@ public class AliyunGreenService {
             tasks.add(task);
         }
         httpBody.put("tasks", tasks);
-        httpBody.put("bizType", "sexy_pic");
+        httpBody.put("bizType", bizType);
 
         imageSyncScanRequest.setHttpContent(org.apache.commons.codec.binary.StringUtils.getBytesUtf8(httpBody.toJSONString()),
                 "UTF-8", FormatType.JSON);

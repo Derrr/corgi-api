@@ -236,6 +236,7 @@ public class CorgiActivityController extends BaseController {
         }
 
         activity.setCheckStatus(AliyunGreenService.PASS);
+        activity.setStrictStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
             UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
             if (userPosition != null) {
@@ -252,9 +253,13 @@ public class CorgiActivityController extends BaseController {
         }
         activity = aliyunGreenService.checkImageActivity(activity);
         if (CorgiActivity.CAT_IMAGE.equals(activity.getCategory())) {
-            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY, "crazy_check");
             if (!checkActivityPic(activityPics)) {
-                activity.setCheckStatus(AliyunGreenService.CHECK);
+                activity.setStrictStatus(AliyunGreenService.CHECK);
+                activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
+                if (!checkActivityPic(activityPics)) {
+                    activity.setCheckStatus(AliyunGreenService.CHECK);
+                }
             }
             activity.setPics(activityPics);
         }
@@ -362,6 +367,7 @@ public class CorgiActivityController extends BaseController {
             }
         }
         activity.setCheckStatus(AliyunGreenService.PASS);
+        activity.setStrictStatus(AliyunGreenService.PASS);
         if (activity.getLat() == 0 && activity.getLng() == 0) {
             UserPosition userPosition = corgiUserService.getUserPosition(getUserId());
             if (userPosition != null) {
@@ -378,9 +384,13 @@ public class CorgiActivityController extends BaseController {
         }
         activity = aliyunGreenService.checkImageActivity(activity);
         if (!CollectionUtils.isEmpty(activity.getPics())) {
-            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.PAYING);
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY, "crazy_check");
             if (!checkActivityPic(activityPics)) {
-                activity.setCheckStatus(AliyunGreenService.CHECK);
+                activity.setStrictStatus(AliyunGreenService.CHECK);
+                activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
+                if (!checkActivityPic(activityPics)) {
+                    activity.setCheckStatus(AliyunGreenService.CHECK);
+                }
             }
             activity.setPics(activityPics);
         }
