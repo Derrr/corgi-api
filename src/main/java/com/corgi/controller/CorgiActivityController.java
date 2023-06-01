@@ -1138,6 +1138,7 @@ public class CorgiActivityController extends BaseController {
         } else {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
+        activity.setStrictStatus(RequestUtil.getChannel());
         List<CorgiActivity> activityList = corgiActivityService.searchActivity(activity, page, pageSize);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
         return new JsonResult(detailList);
@@ -1190,6 +1191,7 @@ public class CorgiActivityController extends BaseController {
             activityList = corgiActivityService.getActivityByIds(activityIds);
         } else if (!StringUtils.isEmpty(activityQuery.getCity())) {
             activityQuery.setUserId("");
+            activityQuery.setVersion(RequestUtil.getChannel());
             activityList = corgiActivityService.getFeedActivity(activityQuery);
         } else {
             activityIds = corgiToolService.getActivityIdsByTopic(activityQuery, activityQuery.getTPage(), activityQuery.getPageSize());
@@ -1625,6 +1627,9 @@ public class CorgiActivityController extends BaseController {
                     || ("fail".equals(activity.getCheckStatus()) || "check".equals(activity.getCheckStatus()))) {
                 continue;
             }
+            if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
+                continue;
+            }
             if (AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                 continue;
             }
@@ -1680,6 +1685,9 @@ public class CorgiActivityController extends BaseController {
                         || CorgiActivity.CAT_TEXT.equals(activity.getCategory())
                         || CorgiActivity.CAT_PAYING.equals(activity.getCategory())) && CollectionUtils.isEmpty(activity.getPics())) {
                     it.remove();
+                    continue;
+                }
+                if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
                     continue;
                 }
                 if (!showNotGood && !userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
