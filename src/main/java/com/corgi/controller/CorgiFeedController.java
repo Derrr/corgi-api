@@ -7,6 +7,7 @@ import com.corgi.activity.api.CorgiActivityFeedService;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.*;
@@ -566,10 +567,15 @@ public class CorgiFeedController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                if (!getUserId().equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     it.remove();
                     continue;
                 }
+                if (!getUserId().equals(activity.getUserId()) && !"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
+                    it.remove();
+                    continue;
+                }
+
                 UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
                 if (userDetail == null) {
                     it.remove();
