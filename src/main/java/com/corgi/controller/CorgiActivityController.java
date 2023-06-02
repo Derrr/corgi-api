@@ -1687,7 +1687,7 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus()) && !userId.equals(activity.getUserId())) {
+                if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus()) && !getUserId().equals(activity.getUserId())) {
                     it.remove();
                     continue;
                 }
