@@ -107,7 +107,7 @@ public class CorgiOpenPageController extends BaseController {
         }
         List<CorgiOpenPage> openPages = corgiOpenPageService.listOpenPage(corgiOpenPage);
         String province = corgiOpenPage.getProvince();
-        if (StringUtils.isEmpty(province)) {
+        if (StringUtils.isEmpty(province) && userPosition != null) {
             province = userPosition.getProvince();
         }
         if (StringUtils.isEmpty(province) && !StringUtils.isEmpty(corgiOpenPage.getCity())) {
