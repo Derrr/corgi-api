@@ -380,7 +380,7 @@ public class CorgiOrderController extends BaseController {
     public JsonResult getMerchandise(@RequestParam("type") String type) {
         CorgiMerchandise query = new CorgiMerchandise();
         query.setType(type);
-        if (!RequestUtil.getChannel().equals("AppStore") && type.equals(CorgiMerchandise.SUBSCRIBE)) {
+        if (!"AppStore".equals(RequestUtil.getChannel()) && type.equals(CorgiMerchandise.SUBSCRIBE)) {
             query.setType(type.concat("-android"));
         }
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
