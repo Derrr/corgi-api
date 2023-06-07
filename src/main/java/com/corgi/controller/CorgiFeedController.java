@@ -571,7 +571,7 @@ public class CorgiFeedController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!getUserId().equals(activity.getUserId()) && !"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
+                if (!getUserId().equals(activity.getUserId()) && !"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
                     it.remove();
                     continue;
                 }

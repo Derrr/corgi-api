@@ -1227,7 +1227,7 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> result = new ArrayList<>();
         if (activities != null) {
             for (CorgiActivity activity : activities) {
-                if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
+                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
                     continue;
                 }
                 if (!AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
@@ -1630,7 +1630,7 @@ public class CorgiActivityController extends BaseController {
                     || ("fail".equals(activity.getCheckStatus()) || "check".equals(activity.getCheckStatus()))) {
                 continue;
             }
-            if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
+            if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
                 continue;
             }
             if (AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
@@ -1690,7 +1690,7 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus()) && !getUserId().equals(activity.getUserId())) {
+                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) && !getUserId().equals(activity.getUserId())) {
                     it.remove();
                     continue;
                 }
