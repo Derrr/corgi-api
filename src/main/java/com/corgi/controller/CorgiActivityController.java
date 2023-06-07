@@ -1227,6 +1227,9 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> result = new ArrayList<>();
         if (activities != null) {
             for (CorgiActivity activity : activities) {
+                if (!"AppStore".equals(RequestUtil.getChannel()) && "check".equals(activity.getStrictStatus())) {
+                    continue;
+                }
                 if (!AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     result.add(activity);
                 }
