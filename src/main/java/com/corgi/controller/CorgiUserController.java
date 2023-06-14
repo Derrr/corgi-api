@@ -29,6 +29,8 @@ import com.corgi.common.util.IPUtil;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
+import com.corgi.entity.tool.Interest;
+import com.corgi.entity.tool.Tag;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
@@ -504,8 +506,8 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(result);
     }
 
-    @GetMapping("/update_extra/{type}")
-    public JsonResult updateXp(@RequestParam("value") String value, @PathVariable("type") String type) {
+    @GetMapping("/update_extra")
+    public JsonResult updateXp(@RequestParam("value") String value, @RequestParam("type") String type) {
         switch (type) {
             case "xp":
                 corgiExtraService.updateXp(getUserId(), value);
@@ -527,14 +529,14 @@ public class CorgiUserController extends BaseController {
     }
 
     @PostMapping("/update_interests")
-    public JsonResult updateInterests(@RequestBody List<String> interests) {
-        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(interests));
+    public JsonResult updateInterests(@RequestBody Interest interest) {
+        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(interest.getInterests()));
         return new JsonResult();
     }
 
     @PostMapping("/update_tags")
-    public JsonResult updateTags(@RequestBody List<String> tags) {
-        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(tags));
+    public JsonResult updateTags(@RequestBody Tag tag) {
+        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(tag.getTags()));
         return new JsonResult();
     }
 
