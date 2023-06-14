@@ -89,8 +89,8 @@ public class CorgiUserController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiMatchService corgiMatchService;
-    @Reference
-    private CorgiExtraService corgiExtraService;
+//    @Reference
+//    private CorgiExtraService corgiExtraService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -499,46 +499,46 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(detail);
     }
 
-    @GetMapping("/get_user_extra")
-    public JsonResult getUserExtra(@RequestParam("userId") String userId) {
-        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
-        UserExtraResult result = new UserExtraResult(userExtra);
-        return new JsonResult(result);
-    }
-
-    @GetMapping("/update_extra")
-    public JsonResult updateXp(@RequestParam("value") String value, @RequestParam("type") String type) {
-        switch (type) {
-            case "xp":
-                corgiExtraService.updateXp(getUserId(), value);
-                break;
-            case "income":
-                corgiExtraService.updateIncome(getUserId(), value);
-                break;
-            case "profession":
-                corgiExtraService.updateProfession(getUserId(), value);
-                break;
-            case "aim":
-                corgiExtraService.updateAim(getUserId(), value);
-                break;
-            case "education":
-                corgiExtraService.updateEducation(getUserId(), value);
-                break;
-        }
-        return new JsonResult();
-    }
-
-    @PostMapping("/update_interests")
-    public JsonResult updateInterests(@RequestBody Interest interest) {
-        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(interest.getInterests()));
-        return new JsonResult();
-    }
-
-    @PostMapping("/update_tags")
-    public JsonResult updateTags(@RequestBody Tag tag) {
-        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(tag.getTags()));
-        return new JsonResult();
-    }
+//    @GetMapping("/get_user_extra")
+//    public JsonResult getUserExtra(@RequestParam("userId") String userId) {
+//        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
+//        UserExtraResult result = new UserExtraResult(userExtra);
+//        return new JsonResult(result);
+//    }
+//
+//    @GetMapping("/update_extra")
+//    public JsonResult updateXp(@RequestParam("value") String value, @RequestParam("type") String type) {
+//        switch (type) {
+//            case "xp":
+//                corgiExtraService.updateXp(getUserId(), value);
+//                break;
+//            case "income":
+//                corgiExtraService.updateIncome(getUserId(), value);
+//                break;
+//            case "profession":
+//                corgiExtraService.updateProfession(getUserId(), value);
+//                break;
+//            case "aim":
+//                corgiExtraService.updateAim(getUserId(), value);
+//                break;
+//            case "education":
+//                corgiExtraService.updateEducation(getUserId(), value);
+//                break;
+//        }
+//        return new JsonResult();
+//    }
+//
+//    @PostMapping("/update_interests")
+//    public JsonResult updateInterests(@RequestBody Interest interest) {
+//        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(interest.getInterests()));
+//        return new JsonResult();
+//    }
+//
+//    @PostMapping("/update_tags")
+//    public JsonResult updateTags(@RequestBody Tag tag) {
+//        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(tag.getTags()));
+//        return new JsonResult();
+//    }
 
     @GetMapping("/get_user_detail")
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
@@ -790,6 +790,9 @@ public class CorgiUserController extends BaseController {
 
         String sign = "SMS_180049529";
         String signName = "可基";
+        if ("huawei".equals(RequestUtil.getChannel())) {
+            signName = "Corgi";
+        }
         //String signName = "Corgi";
         if (telNo.contains("-")) {
             sign = "SMS_188570616";
