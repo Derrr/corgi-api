@@ -118,7 +118,7 @@ public class CorgiLoginController extends BaseController {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
         }
         if (redisTemplate.hasKey("suspended_number_" + userLogin.getTelNo())) {
-            if ("1370000000".equals(userLogin.getTelNo())) {
+            if ("13700000000".equals(userLogin.getTelNo())) {
                 redisTemplate.delete("suspended_number_" + userLogin.getTelNo());
             } else {
                 return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
@@ -131,7 +131,7 @@ public class CorgiLoginController extends BaseController {
         if (StringUtils.isEmpty(userLogin.getUserId())) {
             UserDetail search = new UserDetail();
             search.setTelNo(userLogin.getTelNo());
-            if (!"1370000000".equals(userLogin.getTelNo()) && CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
+            if (!"13700000000".equals(userLogin.getTelNo()) && CollectionUtils.isEmpty(corgiUserService.searchUsers(search, "", 1, 1))) {
                 if (aliyunGreenService.checkAccount(userLogin.getTelNo()) > 65.0) {
                     return new JsonResult(Constants.API_ERROR_CODE, "为了保护平台用户权益，将不允许高风险手机号注册，请更换号码后再注册。");
                 }
