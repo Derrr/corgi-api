@@ -536,7 +536,7 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_tags")
     public JsonResult updateTags(@RequestBody Tag tag) {
-        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(tag.getTags()));
+        corgiExtraService.updateTags(getUserId(), JSONArray.toJSONString(tag.getTags()));
         return new JsonResult();
     }
 
