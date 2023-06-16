@@ -36,6 +36,7 @@ import com.corgi.service.*;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -1164,20 +1165,23 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_user_by_ids")
     public JsonResult getUserByIds(@RequestParam("userIds") String userIds) {
         String[] ids = userIds.split(",");
-        List<UserDetail> profiles = new ArrayList<>();
+        List<UserMatchProfile> profiles = new ArrayList<>();
         Long threshold = System.currentTimeMillis() - 2 * 60000;
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
                 String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
                 userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
-                profiles.add(userDetail);
+                UserMatchProfile userMatchProfile = new UserMatchProfile();
+                BeanUtils.copyProperties(userDetail, userMatchProfile);
+                profiles.add(userMatchProfile);
                 UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
                 if (position != null && position.getUptime() != null && position.getUptime() > threshold) {
-                    userDetail.setOnlineStatus(1);
+                    userMatchProfile.setOnlineStatus(1);
                 } else {
-                    userDetail.setOnlineStatus(0);
+                    userMatchProfile.setOnlineStatus(0);
                 }
+                userMatchProfile.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), ids[i]) + "");
             }
         }
         return new JsonResult(profiles);
