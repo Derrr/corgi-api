@@ -113,6 +113,23 @@ public class CorgiMatchController extends BaseController {
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
+                String freqKey = getUserId() + "_match_times";
+                Long now = System.currentTimeMillis();
+                Long times = redisTemplate.opsForList().size(freqKey);
+                while (times >= 20) {
+                    String lastTime = redisTemplate.opsForList().rightPop(freqKey);
+                    try {
+                        if (now - Long.valueOf(lastTime) < 60000) {
+                            redisTemplate.opsForList().rightPush(freqKey, lastTime);
+                            return new JsonResult(Constants.API_ERROR_CODE, "匹配太频繁啦，请休息一分钟再来哦");
+                        }
+                    } catch (Exception e) {
+
+                    }
+                    times = redisTemplate.opsForList().size(freqKey);
+                }
+                redisTemplate.opsForList().leftPush(freqKey, now + "");
+                redisTemplate.expire(freqKey, 1l, TimeUnit.MINUTES);
                 List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
                 Integer remain = 0;
                 if (!CollectionUtils.isEmpty(remains)) {
@@ -122,7 +139,7 @@ public class CorgiMatchController extends BaseController {
                 }
                 result = remain - matchIds.size();
                 if (result < 0) {
-                    return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
+                    return new JsonResult(Constants.API_ERROR_CODE, "今日匹配已达上限次数，请明日再来哦");
                 }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
                 if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
@@ -168,4 +185,4 @@ public class CorgiMatchController extends BaseController {
         return new JsonResult(result);
     }
 
-        }
+}
