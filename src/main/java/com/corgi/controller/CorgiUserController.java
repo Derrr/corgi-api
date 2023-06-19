@@ -1176,10 +1176,12 @@ public class CorgiUserController extends BaseController {
                 BeanUtils.copyProperties(userDetail, userMatchProfile);
                 profiles.add(userMatchProfile);
                 UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
-                if (position != null && position.getUptime() != null && position.getUptime() > threshold) {
-                    userMatchProfile.setOnlineStatus(1);
-                } else {
-                    userMatchProfile.setOnlineStatus(0);
+                userMatchProfile.setOnlineStatus(0);
+                if (position != null && position.getUptime() != null) {
+                    userMatchProfile.setUptime(position.getUptime());
+                    if (position.getUptime() > threshold) {
+                        userMatchProfile.setOnlineStatus(1);
+                    }
                 }
                 userMatchProfile.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), ids[i]) + "");
             }
