@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.ActivityQuery;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.service.CorgiUtilService;
@@ -157,7 +158,10 @@ public class RecommendController extends BaseController {
                 }
                 activity.setCurrentTime(now);
 
-                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                Long commentCount = null;
+                if ("AppStore".equals(RequestUtil.getChannel())) {
+                    commentCount = corgiCommentService.countActivityComment(activity.getId());
+                }
                 Long likeCount = activity.getLikeCount();
                 if (likeCount == null) {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());

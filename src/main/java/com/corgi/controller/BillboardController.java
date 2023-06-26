@@ -265,7 +265,10 @@ public class BillboardController extends BaseController {
                         activity.setStatus("unpay");
                     }
                 }
-                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                Long commentCount = null;
+                if ("AppStore".equals(RequestUtil.getChannel())) {
+                    commentCount = corgiCommentService.countActivityComment(activity.getId());
+                }
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)

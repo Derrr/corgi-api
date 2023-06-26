@@ -540,7 +540,9 @@ public class CorgiFeedController extends BaseController {
             likeCount = corgiLikeService.countActivityLike(vlog.getActivityId());
         }
         vlogDetail.setLikeCount(likeCount.intValue());
-        vlogDetail.setCommentCount(corgiCommentService.countActivityComment(vlog.getActivityId()).intValue());
+        if ("AppStore".equals(RequestUtil.getChannel())) {
+            vlogDetail.setCommentCount(corgiCommentService.countActivityComment(vlog.getActivityId()).intValue());
+        }
         if (StringUtils.isEmpty(vlog.getVideoId()) && activity != null) {
             vlogDetail.setVideoId(activity.getVideoId());
             if (!StringUtils.isEmpty(activity.getCreateTime())) {
@@ -615,10 +617,13 @@ public class CorgiFeedController extends BaseController {
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
                 }
-                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                Long commentCount = null;
+                if ("AppStore".equals(RequestUtil.getChannel())) {
+                    commentCount = corgiCommentService.countActivityComment(activity.getId());
+                }
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
-                ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
+
                 Long likeCount = activity.getLikeCount();
                 if (likeCount == null) {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());
@@ -630,7 +635,10 @@ public class CorgiFeedController extends BaseController {
                         .initLikeCount(likeCount)
                         .hasLike(hasLike);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
-                detail.setLastComment(activityComment);
+                if ("AppStore".equals(RequestUtil.getChannel())) {
+                    ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
+                    detail.setLastComment(activityComment);
+                }
                 List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(detail.getActivityId());
                 detail.setTopicDetails(topics);
                 if (!CollectionUtils.isEmpty(topics) && topics.get(0) != null && !StringUtils.isEmpty(topics.get(0).getTopicId())) {

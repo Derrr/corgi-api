@@ -63,7 +63,7 @@ public class CorgiUtilService {
     private CorgiBarService corgiBarService;
     @Reference
     private CorgiPicService corgiPicService;
-    public static final List<String> CHANNELS = Arrays.asList("huawei","oppo","qq");
+    public static final List<String> CHANNELS = Arrays.asList("huawei", "oppo", "qq");
 
     private ThreadLocal<String> value = new ThreadLocal<>();
 
@@ -233,16 +233,16 @@ public class CorgiUtilService {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());
                 }
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), userId);
-                //List<ActivityLike> activityLikes = corgiLikeService.getFollowUser(userId, activity.getId());
-                Long commentCount = corgiCommentService.countActivityComment(activity.getId());
 
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
-                //detail.setLikeUsers(activityLikes);
-                detail.setCommentCount(commentCount);
+                if ("AppStore".equals(RequestUtil.getChannel())) {
+                    Long commentCount = corgiCommentService.countActivityComment(activity.getId());
+                    detail.setCommentCount(commentCount);
+                }
 
                 if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory()) && activity.getUserId() != null && !activity.getUserId().startsWith("B")) {
                     UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());
