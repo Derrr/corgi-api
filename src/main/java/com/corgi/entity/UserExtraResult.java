@@ -20,7 +20,13 @@ public class UserExtraResult {
         this.aim = userExtra.getAim();
         this.income = userExtra.getIncome();
         this.education = userExtra.getEducation();
-        this.xp = userExtra.getXp();
+        try {
+            if (!StringUtils.isEmpty(userExtra.getXp())) {
+                this.xp = JSONArray.parseArray(userExtra.getXp(), String.class);
+            }
+        } catch (Exception e) {
+            this.xp = Arrays.asList(userExtra.getInterests().split(","));
+        }
         try {
             if (!StringUtils.isEmpty(userExtra.getInterests())) {
                 this.interests = JSONArray.parseArray(userExtra.getInterests(), String.class);
@@ -41,7 +47,7 @@ public class UserExtraResult {
     private String profession;
     private String income;
     private String education;
-    private String xp;
+    private List<String> xp;
     private String aim;
     private List<String> interests;
     private List<String> tags;

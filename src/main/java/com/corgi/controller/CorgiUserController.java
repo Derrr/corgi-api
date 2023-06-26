@@ -31,6 +31,7 @@ import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Interest;
 import com.corgi.entity.tool.Tag;
+import com.corgi.entity.tool.Xp;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
@@ -510,9 +511,6 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/update_extra")
     public JsonResult updateXp(@RequestParam("value") String value, @RequestParam("type") String type) {
         switch (type) {
-            case "xp":
-                corgiExtraService.updateXp(getUserId(), value);
-                break;
             case "income":
                 corgiExtraService.updateIncome(getUserId(), value);
                 break;
@@ -532,6 +530,12 @@ public class CorgiUserController extends BaseController {
     @PostMapping("/update_interests")
     public JsonResult updateInterests(@RequestBody Interest interest) {
         corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(interest.getInterests()));
+        return new JsonResult();
+    }
+
+    @PostMapping("/update_xp")
+    public JsonResult updateXp(@RequestBody Xp xp) {
+        corgiExtraService.updateXp(getUserId(), JSONArray.toJSONString(xp.getXp()));
         return new JsonResult();
     }
 
