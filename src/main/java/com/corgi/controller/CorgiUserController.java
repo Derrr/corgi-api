@@ -506,7 +506,7 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(result);
     }
 
-    @GetMapping("/update_extra")
+    @PostMapping("/update_extra")
     public JsonResult updateXp(@RequestBody UserExtraUpdate userExtra) {
         String type = userExtra.getType();
         String value = userExtra.getValue();
