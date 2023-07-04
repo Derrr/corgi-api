@@ -83,7 +83,7 @@ public class CorgiMatchController extends BaseController {
         extra.put("greeting", matcher.getGreeting());
         if ("1".equals(matcher.getType())) {
             String freqKey = getUserId() + "_match_times";
-            String checkResult = this.checkFreq(freqKey, 20);
+            String checkResult = this.checkFreq(freqKey, 3);
             if (!StringUtils.isEmpty(checkResult)) {
                 return new JsonResult(Constants.API_ERROR_CODE, checkResult);
             }
