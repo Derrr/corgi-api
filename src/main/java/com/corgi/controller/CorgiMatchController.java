@@ -60,6 +60,11 @@ public class CorgiMatchController extends BaseController {
         if (hasUserId()) {
             userQuery.setUserId(getUserId());
         }
+        String freqKey = getUserId() + "_get_match_times";
+        String checkResult = this.checkFreq(freqKey, 20);
+        if (!StringUtils.isEmpty(checkResult)) {
+            return new JsonResult(Constants.API_ERROR_CODE, checkResult);
+        }
         String key = "matching-" + userQuery.getUserId();
         try {
             if (corgiUtilService.lock(key)) {
@@ -82,12 +87,6 @@ public class CorgiMatchController extends BaseController {
         extra.put("type", PushMessage.QUICK_MATCH_ACCEPT_TYPE);
         extra.put("greeting", matcher.getGreeting());
         if ("1".equals(matcher.getType())) {
-            String freqKey = getUserId() + "_match_times";
-            String checkResult = this.checkFreq(freqKey, 3);
-            if (!StringUtils.isEmpty(checkResult)) {
-                return new JsonResult(Constants.API_ERROR_CODE, checkResult);
-            }
-
             String key = "last_accept_" + getUserId();
             List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
             if (lastAcceptList == null) {
@@ -120,7 +119,7 @@ public class CorgiMatchController extends BaseController {
         try {
             if (corgiUtilService.lock(key)) {
                 String freqKey = getUserId() + "_match_times";
-                String checkResult = this.checkFreq(freqKey, 20);
+                String checkResult = this.checkFreq(freqKey, 3);
                 if (!StringUtils.isEmpty(checkResult)) {
                     return new JsonResult(Constants.API_ERROR_CODE, checkResult);
                 }
