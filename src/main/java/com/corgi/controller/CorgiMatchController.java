@@ -82,6 +82,12 @@ public class CorgiMatchController extends BaseController {
         extra.put("type", PushMessage.QUICK_MATCH_ACCEPT_TYPE);
         extra.put("greeting", matcher.getGreeting());
         if ("1".equals(matcher.getType())) {
+            String freqKey = getUserId() + "_match_times";
+            String checkResult = this.checkFreq(freqKey, 20);
+            if (!StringUtils.isEmpty(checkResult)) {
+                return new JsonResult(Constants.API_ERROR_CODE, checkResult);
+            }
+
             String key = "last_accept_" + getUserId();
             List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
             if (lastAcceptList == null) {
@@ -114,22 +120,10 @@ public class CorgiMatchController extends BaseController {
         try {
             if (corgiUtilService.lock(key)) {
                 String freqKey = getUserId() + "_match_times";
-                Long now = System.currentTimeMillis();
-                Long times = redisTemplate.opsForList().size(freqKey);
-                while (times >= 20) {
-                    String lastTime = redisTemplate.opsForList().rightPop(freqKey);
-                    try {
-                        if (now - Long.valueOf(lastTime) < 60000) {
-                            redisTemplate.opsForList().rightPush(freqKey, lastTime);
-                            return new JsonResult(Constants.API_ERROR_CODE, "匹配太频繁啦，请休息一分钟再来哦");
-                        }
-                    } catch (Exception e) {
-
-                    }
-                    times = redisTemplate.opsForList().size(freqKey);
+                String checkResult = this.checkFreq(freqKey, 20);
+                if (!StringUtils.isEmpty(checkResult)) {
+                    return new JsonResult(Constants.API_ERROR_CODE, checkResult);
                 }
-                redisTemplate.opsForList().leftPush(freqKey, now + "");
-                redisTemplate.expire(freqKey, 1l, TimeUnit.MINUTES);
                 List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
                 Integer remain = 0;
                 if (!CollectionUtils.isEmpty(remains)) {
@@ -185,4 +179,21 @@ public class CorgiMatchController extends BaseController {
         return new JsonResult(result);
     }
 
+    private String checkFreq(String freqKey, Integer threshold) {
+        Long now = System.currentTimeMillis();
+        Long times = redisTemplate.opsForList().size(freqKey);
+        while (times >= threshold) {
+            String lastTime = redisTemplate.opsForList().rightPop(freqKey);
+            try {
+                if (now - Long.valueOf(lastTime) < 60000) {
+                    redisTemplate.opsForList().rightPush(freqKey, lastTime);
+                    return "匹配太频繁啦，请休息一分钟再来哦";
+                }
+            } catch (Exception e) {
+
+            }
+            times = redisTemplate.opsForList().size(freqKey);
+        }
+        return null;
+    }
 }
