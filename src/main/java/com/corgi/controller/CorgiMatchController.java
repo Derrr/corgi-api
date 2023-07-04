@@ -193,6 +193,8 @@ public class CorgiMatchController extends BaseController {
             }
             times = redisTemplate.opsForList().size(freqKey);
         }
+        redisTemplate.opsForList().leftPush(freqKey, now + "");
+        redisTemplate.expire(freqKey, 2l, TimeUnit.MINUTES);
         return null;
     }
 }
