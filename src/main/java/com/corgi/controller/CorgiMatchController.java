@@ -1,7 +1,6 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
