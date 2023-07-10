@@ -63,7 +63,7 @@ public class CorgiMatchController extends BaseController {
         String freqKey = getUserId() + "_get_match_times";
         String checkResult = this.checkFreq(freqKey, 20);
         if (!StringUtils.isEmpty(checkResult)) {
-            return new JsonResult(Constants.API_ERROR_CODE, checkResult);
+            return new JsonResult(Constants.MATCH_TIMES_ERROR_CODE, checkResult);
         }
         String key = "matching-" + userQuery.getUserId();
         try {
@@ -121,7 +121,7 @@ public class CorgiMatchController extends BaseController {
                 String freqKey = getUserId() + "_match_times";
                 String checkResult = this.checkFreq(freqKey, 3);
                 if (!StringUtils.isEmpty(checkResult)) {
-                    return new JsonResult(Constants.API_ERROR_CODE, checkResult);
+                    return new JsonResult(Constants.MATCH_TIMES_ERROR_CODE, checkResult);
                 }
                 List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
                 Integer remain = 0;
@@ -132,7 +132,7 @@ public class CorgiMatchController extends BaseController {
                 }
                 result = remain - matchIds.size();
                 if (result < 0) {
-                    return new JsonResult(Constants.API_ERROR_CODE, "今日匹配已达上限次数，请明日再来哦");
+                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配已达上限次数，请明日再来哦");
                 }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
                 if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
