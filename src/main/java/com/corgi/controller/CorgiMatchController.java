@@ -17,7 +17,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -122,6 +124,10 @@ public class CorgiMatchController extends BaseController {
                 if (!StringUtils.isEmpty(checkResult)) {
                     return new JsonResult(Constants.MATCH_TIMES_ERROR_CODE, checkResult);
                 }
+                String checkDayResult = this.checkDayFreq(freqKey,5);
+                if (!StringUtils.isEmpty(checkResult)) {
+                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
+                }
                 List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
                 Integer remain = 0;
                 if (!CollectionUtils.isEmpty(remains)) {
@@ -131,7 +137,7 @@ public class CorgiMatchController extends BaseController {
                 }
                 result = remain - matchIds.size();
                 if (result < 0) {
-                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配已达上限次数，请明日再来哦");
+                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配总数已达上限次数，请明日再来哦");
                 }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
                 if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
@@ -175,6 +181,21 @@ public class CorgiMatchController extends BaseController {
             corgiUtilService.unlock(key);
         }
         return new JsonResult(result);
+    }
+
+    private String checkDayFreq(String freqKey, Integer threshold) {
+        String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String dayFreqKey = freqKey.concat("_").concat(suffix);
+        boolean hasKey = redisTemplate.hasKey(dayFreqKey);
+        Long times = redisTemplate.opsForList().size(dayFreqKey);
+        while (times >= threshold) {
+            return "今日匹配点击已达100次上线次数，请明日再来哦";
+        }
+        redisTemplate.opsForList().leftPush(freqKey, System.currentTimeMillis() + "");
+        if (!hasKey) {
+            redisTemplate.expire(freqKey, 1l, TimeUnit.DAYS);
+        }
+        return null;
     }
 
     private String checkFreq(String freqKey, Integer threshold) {
