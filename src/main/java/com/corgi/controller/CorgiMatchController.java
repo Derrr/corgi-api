@@ -64,7 +64,7 @@ public class CorgiMatchController extends BaseController {
         String freqKey = getUserId() + "_get_match_times";
         String checkResult = this.checkFreq(freqKey, 20);
         if (!StringUtils.isEmpty(checkResult)) {
-            return new JsonResult(Constants.MATCH_TIMES_ERROR_CODE, checkResult);
+            return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
         }
         String key = "matching-" + userQuery.getUserId();
         try {
@@ -115,18 +115,18 @@ public class CorgiMatchController extends BaseController {
         }
 
         String key = "count_matching-" + getUserId();
-        Integer result = 600;
+        Integer result = 60;
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
                 String freqKey = getUserId() + "_match_times";
                 String checkResult = this.checkFreq(freqKey, 3);
                 if (!StringUtils.isEmpty(checkResult)) {
-                    return new JsonResult(Constants.MATCH_TIMES_ERROR_CODE, checkResult);
+                    return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
                 }
                 String checkDayResult = this.checkDayFreq(freqKey, 5);
                 if (!StringUtils.isEmpty(checkResult)) {
-                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
+                    return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
                 }
 //                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
 //                Integer remain = 0;
