@@ -1,6 +1,7 @@
 package com.corgi.entity;
 
 import com.alibaba.fastjson.JSONArray;
+import com.corgi.user.entity.UserExtra;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
