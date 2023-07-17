@@ -115,16 +115,23 @@ public class CorgiMatchController extends BaseController {
         }
 
         String key = "count_matching-" + getUserId();
-        Integer result = 60;
+        Integer result = 100;
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
                 String freqKey = getUserId() + "_match_times";
-                String checkResult = this.checkFreq(freqKey, 3);
+                String checkResult = this.checkFreq(freqKey, 20);
                 if (!StringUtils.isEmpty(checkResult)) {
                     return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
                 }
-                String checkDayResult = this.checkDayFreq(freqKey, 5);
+                String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String dayFreqKey = freqKey.concat("_").concat(suffix);
+                Long times = redisTemplate.opsForList().size(dayFreqKey);
+                result = 100 - times.intValue();
+                if (result < 0) {
+                    result = 0;
+                }
+                String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
                 if (!StringUtils.isEmpty(checkResult)) {
                     return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
                 }
@@ -184,17 +191,15 @@ public class CorgiMatchController extends BaseController {
         return new JsonResult(result);
     }
 
-    private String checkDayFreq(String freqKey, Integer threshold) {
-        String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String dayFreqKey = freqKey.concat("_").concat(suffix);
+    private String checkDayFreq(String dayFreqKey, Integer threshold) {
         boolean hasKey = redisTemplate.hasKey(dayFreqKey);
         Long times = redisTemplate.opsForList().size(dayFreqKey);
         while (times >= threshold) {
             return "今日匹配点击已达100次上线次数，请明日再来哦";
         }
-        redisTemplate.opsForList().leftPush(freqKey, System.currentTimeMillis() + "");
+        redisTemplate.opsForList().leftPush(dayFreqKey, System.currentTimeMillis() + "");
         if (!hasKey) {
-            redisTemplate.expire(freqKey, 1l, TimeUnit.DAYS);
+            redisTemplate.expire(dayFreqKey, 1l, TimeUnit.DAYS);
         }
         return null;
     }
