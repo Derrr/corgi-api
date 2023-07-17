@@ -978,6 +978,8 @@ public class CorgiUserController extends BaseController {
             if (redisTemplate.hasKey(blackKey)) {
                 redisTemplate.opsForList().leftPush(blackKey, blockId);
             }
+            corgiUserFollowService.unfollow(userId, blockId);
+            corgiUserFollowService.unfollow(blockId, userId);
             return new JsonResult("拉黑成功");
         } else {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请不要重复拉黑");
