@@ -1,7 +1,6 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
@@ -18,7 +17,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,11 @@ public class CorgiMatchController extends BaseController {
     public JsonResult addActivity(@RequestBody UserQuery userQuery) {
         if (hasUserId()) {
             userQuery.setUserId(getUserId());
+        }
+        String freqKey = getUserId() + "_get_match_times";
+        String checkResult = this.checkFreq(freqKey, 20);
+        if (!StringUtils.isEmpty(checkResult)) {
+            return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
         }
         String key = "matching-" + userQuery.getUserId();
         try {
@@ -109,58 +115,75 @@ public class CorgiMatchController extends BaseController {
         }
 
         String key = "count_matching-" + getUserId();
-        Integer result = 0;
+        Integer result = 100;
         String matchKey = "last_match_" + getUserId();
         try {
             if (corgiUtilService.lock(key)) {
-                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
-                Integer remain = 0;
-                if (!CollectionUtils.isEmpty(remains)) {
-                    for (UserMatchRemain remain1 : remains) {
-                        remain += remain1.getRemain();
-                    }
+                String freqKey = getUserId() + "_match_times";
+                String checkResult = this.checkFreq(freqKey, 20);
+                if (!StringUtils.isEmpty(checkResult)) {
+                    return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
                 }
-                result = remain - matchIds.size();
+                String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String dayFreqKey = freqKey.concat("_").concat(suffix);
+                Long times = redisTemplate.opsForList().size(dayFreqKey);
+                result = 100 - times.intValue();
                 if (result < 0) {
-                    return new JsonResult(Constants.API_ERROR_CODE, "用户速配次数不足");
+                    result = 0;
                 }
+                String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
+                if (!StringUtils.isEmpty(checkResult)) {
+                    return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
+                }
+//                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
+//                Integer remain = 0;
+//                if (!CollectionUtils.isEmpty(remains)) {
+//                    for (UserMatchRemain remain1 : remains) {
+//                        remain += remain1.getRemain();
+//                    }
+//                }
+//                result = remain - matchIds.size();
+//                if (result < 0) {
+//                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配总数已达上限次数，请明日再来哦");
+//                }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
-                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
+//                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
 
-                    List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
-                    redisTemplate.delete(matchKey);
+                List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
+                redisTemplate.delete(matchKey);
 
 
-                    if (lastMatchList == null) {
-                        lastMatchList = new ArrayList<>();
+                if (lastMatchList == null) {
+                    lastMatchList = new ArrayList<>();
+                }
+//                    int i = 0;
+//                    for (UserMatchRemain remain1 : remains) {
+//                        Integer size = remain1.getRemain();
+//                        for (int j = size; j > 0; j--) {
+//                            if (i >= matchIds.size()) {
+//                                return new JsonResult(result);
+//                            }
+                for (String matchId : matchIds) {
+//                            String matchId = matchIds.get(i);
+                    redisTemplate.opsForList().rightPush(matchKey, matchId);
+                    if (lastMatchList.contains(matchId)) {
+                        continue;
                     }
-                    int i = 0;
-                    for (UserMatchRemain remain1 : remains) {
-                        Integer size = remain1.getRemain();
-                        for (int j = size; j > 0; j--) {
-                            if (i >= matchIds.size()) {
-                                return new JsonResult(result);
-                            }
-                            String matchId = matchIds.get(i);
-                            redisTemplate.opsForList().rightPush(matchKey, matchId);
-                            if (lastMatchList.contains(matchId)) {
-                                continue;
-                            }
-                            corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
-                            mqService.sendMessage(PushMessage.builder()
-                                    .type(PushMessage.DEFAULT)
-                                    .sourceUserId(getUserId())
-                                    .targetUserId(matchId)
-                                    .message("有一个小哥哥想和你匹配，要去聊聊吗？")
-                                    .extra(extra)
-                                    .build());
-                            i++;
-                        }
-                    }
+                    //corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.DEFAULT)
+                            .sourceUserId(getUserId())
+                            .targetUserId(matchId)
+                            .message("有一个小哥哥想和你匹配，要去聊聊吗？")
+                            .extra(extra)
+                            .build());
+//                            i++;
+//                        }
+//                    }
                 }
             }
         } finally {
-            if (redisTemplate.hasKey(key)) {
+            if (redisTemplate.hasKey(matchKey)) {
                 redisTemplate.expire(matchKey, 1L, TimeUnit.HOURS);
             }
             corgiUtilService.unlock(key);
@@ -168,4 +191,36 @@ public class CorgiMatchController extends BaseController {
         return new JsonResult(result);
     }
 
+    private String checkDayFreq(String dayFreqKey, Integer threshold) {
+        boolean hasKey = redisTemplate.hasKey(dayFreqKey);
+        Long times = redisTemplate.opsForList().size(dayFreqKey);
+        while (times >= threshold) {
+            return "今日匹配点击已达100次上线次数，请明日再来哦";
         }
+        redisTemplate.opsForList().leftPush(dayFreqKey, System.currentTimeMillis() + "");
+        if (!hasKey) {
+            redisTemplate.expire(dayFreqKey, 1l, TimeUnit.DAYS);
+        }
+        return null;
+    }
+
+    private String checkFreq(String freqKey, Integer threshold) {
+        Long now = System.currentTimeMillis();
+        Long times = redisTemplate.opsForList().size(freqKey);
+        while (times >= threshold) {
+            String lastTime = redisTemplate.opsForList().rightPop(freqKey);
+            try {
+                if (now - Long.valueOf(lastTime) < 60000) {
+                    redisTemplate.opsForList().rightPush(freqKey, lastTime);
+                    return "匹配太频繁啦，请休息一分钟再来哦";
+                }
+            } catch (Exception e) {
+
+            }
+            times = redisTemplate.opsForList().size(freqKey);
+        }
+        redisTemplate.opsForList().leftPush(freqKey, now + "");
+        redisTemplate.expire(freqKey, 2l, TimeUnit.MINUTES);
+        return null;
+    }
+}

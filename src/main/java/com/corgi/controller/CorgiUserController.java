@@ -29,13 +29,13 @@ import com.corgi.common.util.IPUtil;
 import com.corgi.common.util.JWTUtils;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
-import com.corgi.entity.tool.Interest;
-import com.corgi.entity.tool.Tag;
+import com.corgi.entity.tool.UserExtraUpdate;
 import com.corgi.exception.PermissionException;
 import com.corgi.service.*;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -89,8 +89,8 @@ public class CorgiUserController extends BaseController {
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiMatchService corgiMatchService;
-//    @Reference
-//    private CorgiExtraService corgiExtraService;
+    @Reference
+    private CorgiExtraService corgiExtraService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -499,46 +499,44 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(detail);
     }
 
-//    @GetMapping("/get_user_extra")
-//    public JsonResult getUserExtra(@RequestParam("userId") String userId) {
-//        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
-//        UserExtraResult result = new UserExtraResult(userExtra);
-//        return new JsonResult(result);
-//    }
-//
-//    @GetMapping("/update_extra")
-//    public JsonResult updateXp(@RequestParam("value") String value, @RequestParam("type") String type) {
-//        switch (type) {
-//            case "xp":
-//                corgiExtraService.updateXp(getUserId(), value);
-//                break;
-//            case "income":
-//                corgiExtraService.updateIncome(getUserId(), value);
-//                break;
-//            case "profession":
-//                corgiExtraService.updateProfession(getUserId(), value);
-//                break;
-//            case "aim":
-//                corgiExtraService.updateAim(getUserId(), value);
-//                break;
-//            case "education":
-//                corgiExtraService.updateEducation(getUserId(), value);
-//                break;
-//        }
-//        return new JsonResult();
-//    }
-//
-//    @PostMapping("/update_interests")
-//    public JsonResult updateInterests(@RequestBody Interest interest) {
-//        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(interest.getInterests()));
-//        return new JsonResult();
-//    }
-//
-//    @PostMapping("/update_tags")
-//    public JsonResult updateTags(@RequestBody Tag tag) {
-//        corgiExtraService.updateInterests(getUserId(), JSONArray.toJSONString(tag.getTags()));
-//        return new JsonResult();
-//    }
+    @GetMapping("/get_user_extra")
+    public JsonResult getUserExtra(@RequestParam("userId") String userId) {
+        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
+        UserExtraResult result = new UserExtraResult(userExtra);
+        return new JsonResult(result);
+    }
+
+    @PostMapping("/update_extra")
+    public JsonResult updateXp(@RequestBody UserExtraUpdate userExtra) {
+        String type = userExtra.getType();
+        String value = userExtra.getValue();
+        switch (type) {
+            case "income":
+                corgiExtraService.updateIncome(getUserId(), value);
+                break;
+            case "profession":
+                corgiExtraService.updateProfession(getUserId(), value);
+                break;
+            case "aim":
+                corgiExtraService.updateAim(getUserId(), value);
+                break;
+            case "education":
+                corgiExtraService.updateEducation(getUserId(), value);
+                break;
+            case "tags":
+                corgiExtraService.updateTags(getUserId(), value);
+                break;
+            case "interests":
+                corgiExtraService.updateInterests(getUserId(), value);
+                break;
+            case "xp":
+                corgiExtraService.updateXp(getUserId(), value);
+                break;
+
+        }
+        return new JsonResult();
+    }
+
 
     @GetMapping("/get_user_detail")
     public JsonResult getUserDetail(@RequestParam("userId") String userId, @RequestParam(name = "loginUserId", required = false) String loginUserId) {
@@ -980,6 +978,8 @@ public class CorgiUserController extends BaseController {
             if (redisTemplate.hasKey(blackKey)) {
                 redisTemplate.opsForList().leftPush(blackKey, blockId);
             }
+            corgiUserFollowService.unfollow(userId, blockId);
+            corgiUserFollowService.unfollow(blockId, userId);
             return new JsonResult("拉黑成功");
         } else {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请不要重复拉黑");
@@ -1164,20 +1164,25 @@ public class CorgiUserController extends BaseController {
     @GetMapping("get_user_by_ids")
     public JsonResult getUserByIds(@RequestParam("userIds") String userIds) {
         String[] ids = userIds.split(",");
-        List<UserDetail> profiles = new ArrayList<>();
+        List<UserMatchProfile> profiles = new ArrayList<>();
         Long threshold = System.currentTimeMillis() - 2 * 60000;
         for (int i = 0; i < ids.length; i++) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
             if (userDetail != null) {
                 String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
                 userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
-                profiles.add(userDetail);
+                UserMatchProfile userMatchProfile = new UserMatchProfile();
+                BeanUtils.copyProperties(userDetail, userMatchProfile);
+                profiles.add(userMatchProfile);
                 UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
-                if (position != null && position.getUptime() != null && position.getUptime() > threshold) {
-                    userDetail.setOnlineStatus(1);
-                } else {
-                    userDetail.setOnlineStatus(0);
+                userMatchProfile.setOnlineStatus(0);
+                if (position != null && position.getUptime() != null) {
+                    userMatchProfile.setUptime(position.getUptime());
+                    if (position.getUptime() > threshold) {
+                        userMatchProfile.setOnlineStatus(1);
+                    }
                 }
+                userMatchProfile.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), ids[i]) + "");
             }
         }
         return new JsonResult(profiles);
