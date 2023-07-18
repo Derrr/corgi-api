@@ -1,5 +1,6 @@
 package com.corgi.controller;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -613,6 +614,9 @@ public class CorgiFeedController extends BaseController {
                 }
                 if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
+                    if (StringUtils.isEmpty(picUrl)) {
+                        continue;
+                    }
                     PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                     height = picInfo.getHeight();
                     width = picInfo.getWidth();
