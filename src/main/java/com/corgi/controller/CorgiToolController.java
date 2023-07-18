@@ -96,14 +96,14 @@ public class CorgiToolController extends BaseController {
         config.put("showPurse", 1);
         config.put("showMap", 1);
         try {
-            Integer userId = Integer.valueOf(getUserId());
-            if (userId % 4 == 0 || userId.equals(1) || userId.equals(593) || userId.equals(7)) {
+//            Integer userId = Integer.valueOf(getUserId());
+//            if (userId % 4 == 0 || userId.equals(1) || userId.equals(593) || userId.equals(7)) {
                 config.put("frontPage", "Mat");
-            } else if (userId % 4 == 1) {
-                config.put("frontPage", "Hot");
-            } else {
-                config.put("frontPage", "App Store");
-            }
+//            } else if (userId % 4 == 1) {
+//                config.put("frontPage", "Hot");
+//            } else {
+//                config.put("frontPage", "App Store");
+//            }
         } catch (Exception e) {
             log.info(e.getMessage(), e);
         }
