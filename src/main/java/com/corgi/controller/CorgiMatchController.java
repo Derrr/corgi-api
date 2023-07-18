@@ -126,14 +126,14 @@ public class CorgiMatchController extends BaseController {
                 }
                 String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
                 String dayFreqKey = freqKey.concat("_").concat(suffix);
+                String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
+                if (!StringUtils.isEmpty(checkResult)) {
+                    return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
+                }
                 Long times = redisTemplate.opsForList().size(dayFreqKey);
                 result = 100 - times.intValue();
                 if (result < 0) {
                     result = 0;
-                }
-                String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
-                if (!StringUtils.isEmpty(checkResult)) {
-                    return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
                 }
 //                List<UserMatchRemain> remains = corgiUserMatchService.countUserRemain(getUserId());
 //                Integer remain = 0;
