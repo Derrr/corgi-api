@@ -1170,37 +1170,38 @@ public class CorgiUserController extends BaseController {
         String[] ids = userIds.split(",");
         List<UserMatchProfile> profiles = new ArrayList<>();
         Long threshold = System.currentTimeMillis() - 2 * 60000;
-        Long start = System.currentTimeMillis();
-        for (int i = 0; i < ids.length; i++) {
-            UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
-            Long tmp = System.currentTimeMillis();
-            log.info("detail:{} ", tmp - start);
-            start = tmp;
-            if (userDetail != null) {
-                String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
-                tmp = System.currentTimeMillis();
-                log.info("vip:{} ", tmp - start);
-                start = tmp;
-                userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
+        if (ids.length < 5) {
+            for (int i = 0; i < ids.length; i++) {
+                UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
+                if (userDetail != null) {
+                    String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
+                    userDetail.setVip(!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate));
+                    UserMatchProfile userMatchProfile = new UserMatchProfile();
+                    BeanUtils.copyProperties(userDetail, userMatchProfile);
+                    profiles.add(userMatchProfile);
+                    userMatchProfile.setOnlineStatus(0);
+                    if (userDetail.getTime() != null) {
+                        userMatchProfile.setUptime(userDetail.getTime());
+                        if (userDetail.getTime() > threshold) {
+                            userMatchProfile.setOnlineStatus(1);
+                        }
+                    }
+                    userMatchProfile.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), ids[i]) + "");
+                }
+            }
+        } else {
+            List<UserDetail> userDetailList = corgiUserService.getUserDetailBasics(String.join("','", ids));
+            for (UserDetail userDetail : userDetailList) {
                 UserMatchProfile userMatchProfile = new UserMatchProfile();
                 BeanUtils.copyProperties(userDetail, userMatchProfile);
                 profiles.add(userMatchProfile);
-                UserPosition position = corgiUserService.getUserPosition(userDetail.getUserId());
-                tmp = System.currentTimeMillis();
-                log.info("position:{} ", tmp - start);
-                start = tmp;
                 userMatchProfile.setOnlineStatus(0);
-                if (position != null && position.getUptime() != null) {
-                    userMatchProfile.setUptime(position.getUptime());
-                    if (position.getUptime() > threshold) {
+                if (userDetail.getTime() != null) {
+                    userMatchProfile.setUptime(userDetail.getTime());
+                    if (userDetail.getTime() > threshold) {
                         userMatchProfile.setOnlineStatus(1);
                     }
                 }
-                userMatchProfile.setIsFollowed(corgiUserFollowService.isFollowed(getUserId(), ids[i]) + "");
-                tmp = System.currentTimeMillis();
-                log.info("follow:{} ", tmp - start);
-                start = tmp;
-
             }
         }
         return new JsonResult(profiles);
