@@ -178,13 +178,16 @@ public class CorgiFeedController extends BaseController {
     }
 
     @GetMapping("get_feeds_by_activity")
-    public JsonResult getFeeds(@RequestParam("activityId") String activityId,
+    public JsonResult getFeeds(@RequestParam(value = "activityId", required = false) String activityId,
                                @RequestParam(name = "category", required = false) String category,
                                @RequestParam("page") Integer page,
                                @RequestParam("pageSize") Integer size) {
         String userId = "1";
         if (hasUserId()) {
             userId = getUserId();
+        }
+        if (StringUtils.isEmpty(activityId)) {
+            return new JsonResult();
         }
         if (corgiUtilService.isNewUser(userId)) {
             return new JsonResult();
