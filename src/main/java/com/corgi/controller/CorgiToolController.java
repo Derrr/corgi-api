@@ -105,7 +105,7 @@ public class CorgiToolController extends BaseController {
                 config.put("frontPage", "App Store");
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.info(e.getMessage(), e);
         }
         if ("2.2.8".equals(RequestUtil.getVersion())) {
             log.info("get_config into version:{}  ", config);
@@ -853,17 +853,17 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("behavior_data")
     public JsonResult behaviorData(CorgiBehaviorReq behaviorReq) {
-        if(!StringUtils.isEmpty(behaviorReq.getEndTime())
-                && behaviorReq.getEndTime().length() == 10){
-            behaviorReq.setEndTime(behaviorReq.getEndTime()+" 23:59:59");
+        if (!StringUtils.isEmpty(behaviorReq.getEndTime())
+                && behaviorReq.getEndTime().length() == 10) {
+            behaviorReq.setEndTime(behaviorReq.getEndTime() + " 23:59:59");
         }
         return new JsonResult(corgiStatisticService.getBehaviorData(behaviorReq));
     }
 
     @GetMapping("content_data")
     public JsonResult contentData(CorgiContentReq contentReq) {
-        if(!StringUtils.isEmpty(contentReq.getEndTime()) && contentReq.getEndTime().length() == 10){
-            contentReq.setEndTime(contentReq.getEndTime()+" 23:59:59");
+        if (!StringUtils.isEmpty(contentReq.getEndTime()) && contentReq.getEndTime().length() == 10) {
+            contentReq.setEndTime(contentReq.getEndTime() + " 23:59:59");
         }
         return new JsonResult(corgiStatisticService.getContentData(contentReq));
     }
