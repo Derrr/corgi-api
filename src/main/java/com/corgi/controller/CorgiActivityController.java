@@ -614,9 +614,12 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_comments")
-    public JsonResult getComment(@RequestParam("activityId") String activityId,
+    public JsonResult getComment(@RequestParam(value = "activityId", required = false) String activityId,
                                  @RequestParam(required = false, name = "lastId") Integer id,
                                  @RequestParam(required = false, name = "size") Integer size) {
+        if (StringUtils.isEmpty(activityId)) {
+            return new JsonResult<>(new ArrayList<>());
+        }
         if ("AppStore".equals(RequestUtil.getChannel())) {
             List<ActivityComment> hotComments = corgiCommentService.getHotComment(activityId, getUserId());
             List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, id, size, getUserId());
