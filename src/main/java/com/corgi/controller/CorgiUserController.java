@@ -833,6 +833,10 @@ public class CorgiUserController extends BaseController {
         if (userId.equals(targetUserId)) {
             return new JsonResult();
         }
+        String blackKey = "black_cache_";
+        if (redisTemplate.hasKey(blackKey.concat(getUserId() + "-" + targetUserId)) || redisTemplate.hasKey(blackKey.concat(targetUserId + "-" + getUserId()))) {
+            return new JsonResult();
+        }
         int follow = corgiUserFollowService.isFollowed(userId, targetUserId);
         if (follow != 1 && follow != 3) {
             corgiUserFollowService.follow(userId, targetUserId);
@@ -976,9 +980,11 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userId = getUserId();
         }
+        String blackKey = "black_cache_" + getUserId();
+        redisTemplate.opsForValue().set(blackKey.concat("-" + blockId), System.currentTimeMillis() + "", 1l, TimeUnit.DAYS);
         String result = corgiBlacklistService.addBlacklist(userId, blockId);
         if (CorgiConstants.SUCCESS.equals(result)) {
-            String blackKey = "black_cache_" + getUserId();
+
             if (redisTemplate.hasKey(blackKey)) {
                 redisTemplate.opsForList().leftPush(blackKey, blockId);
             }
