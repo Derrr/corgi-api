@@ -689,17 +689,17 @@ public class CorgiUserController extends BaseController {
         } else {
             corgiUserService.updateUserPosition(userPosition);
         }
-        if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 5L, TimeUnit.MINUTES)) {
+        String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
+        if (redisTemplate.opsForValue().setIfAbsent("update_user_" + userPosition.getUserId(), "1", 1L, TimeUnit.HOURS)) {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userPosition.getUserId());
             if (userDetail != null) {
                 userDetail.setTime(System.currentTimeMillis());
                 if (!"influencer".equals(userDetail.getAvatarStatus())) {
-                    userDetail.setAvatarStatus(corgiUserService.getUserVipExpire(userDetail.getUserId()));
+                    userDetail.setAvatarStatus(expireDate);
                 }
                 corgiMatchService.updateUser(userDetail);
             }
         }
-        String expireDate = corgiUserService.getUserVipExpire(userPosition.getUserId());
         CorgiUserVipDetail detail = new CorgiUserVipDetail();
         if (StringUtils.isNotEmpty(expireDate) && !"-".equals(expireDate)) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -1161,11 +1161,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_map_user")
-    //public JsonResult getMapUser(@RequestParam Map userQueryMap) {
     public JsonResult getMapUser(UserQuery userQuery) {
-//        String userQueryJson = JSONObject.toJSONString(userQueryMap);
         log.info("map:{} ", JSONObject.toJSONString(userQuery));
-//        UserQuery userQuery = JSONObject.parseObject(userQueryJson, UserQuery.class);
         userQuery.setUserId(getUserId());
         MapUserProfile mapUserProfile = corgiUserService.getMapUser(userQuery);
         return new JsonResult(mapUserProfile);
