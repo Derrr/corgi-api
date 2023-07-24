@@ -55,7 +55,7 @@ public class WXPay {
      * @throws Exception
      */
     public Map<String, String> fillRequestData(Map<String, String> reqData) throws Exception {
-        if (StringUtils.isEmpty(reqData.get("secretKey"))) {
+        if (!StringUtils.isEmpty(reqData.get("secretKey"))) {
             reqData.put("appid", config.getAppID());
             reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
         } else {
