@@ -142,7 +142,8 @@ public class CorgiPayService {
         Map<String, String> body = new HashMap<>();
         body.put("body", merchandise.getTitle());
         body.put("out_trade_no", order.getTradeNo());
-        body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
+        //body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
+        body.put("notify_url", "http://139.224.63.240:7888/order/wx_callback");
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
         body.put("trade_type", "APP");
         if ("com.duke.corgi.mi".equals(order.getPackageName())) {
