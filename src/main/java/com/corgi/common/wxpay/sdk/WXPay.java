@@ -70,10 +70,9 @@ public class WXPay {
             reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
         } else {
             String secretKey = reqData.get("secretKey");
-            reqData.remove("secretKey");
+            //reqData.remove("secretKey");
             reqData.put("sign", WXPayUtil.generateSignature(reqData, secretKey, this.signType));
         }
-        System.out.println("reqData:" + reqData);
         return reqData;
     }
 
