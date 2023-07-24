@@ -71,7 +71,7 @@ public class WXPay {
         } else {
             String secretKey = reqData.get("secretKey");
             reqData.remove("secretKey");
-            reqData.put("sign", WXPayUtil.generateSignature(reqData, reqData.get("secretKey"), this.signType));
+            reqData.put("sign", WXPayUtil.generateSignature(reqData, secretKey, this.signType));
         }
 
         return reqData;
