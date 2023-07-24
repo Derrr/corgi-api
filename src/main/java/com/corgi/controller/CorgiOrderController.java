@@ -83,6 +83,7 @@ public class CorgiOrderController extends BaseController {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             order.setPayTime(sdf.format(new Date()));
         }
+        order.setPackageName(RequestUtil.getPackageName());
         corgiOrderService.updateOrder(order);
         return new JsonResult();
     }
@@ -836,6 +837,7 @@ public class CorgiOrderController extends BaseController {
                 .tradeNo(tradeNo)
                 .sellerId(sellerId)
                 .payAmount(merchandise.getPrice())
+                .packageName(RequestUtil.getPackageName())
                 .build();
         result.put("orderString", "");
         if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {
