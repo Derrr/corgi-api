@@ -10,6 +10,7 @@ import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.request.AlipayTradeRefundApplyRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.alipay.api.response.AlipayTradeCloseResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
@@ -125,6 +126,10 @@ public class CorgiPayService {
     public Map<String, String> wxCloseOrder(CorgiOrder order) throws Exception {
         Map<String, String> orderQuery = new HashMap<>();
         orderQuery.put("out_trade_no", order.getTradeNo());
+        if ("com.duke.corgi.mi".equals(order.getPackageName())) {
+            orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
+            orderQuery.put("appid", "wx0040995027e19688");
+        }
         Map<String, String> result = wxPay.closeOrder(orderQuery);
         order.setResult("订单关闭");
         order.setStatus(CorgiOrder.STATUS.CLOSE);
@@ -140,6 +145,10 @@ public class CorgiPayService {
         body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
         body.put("trade_type", "APP");
+        if ("com.duke.corgi.mi".equals(order.getPackageName())) {
+            body.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
+            body.put("appid", "wx0040995027e19688");
+        }
         try {
             Map<String, String> response = wxPay.unifiedOrder(body);
             Map<String, String> result = new HashMap<>();
@@ -149,7 +158,11 @@ public class CorgiPayService {
             result.put("noncestr", response.get("nonce_str"));
             result.put("prepayid", response.get("prepay_id"));
             result.put("package", "Sign=WXPay");
-            result.put("sign", WXPayUtil.generateSignature(result, CorgiWXPayConfig.config.getKey()));
+            if ("com.duke.corgi.mi".equals(order.getPackageName())) {
+                result.put("sign", WXPayUtil.generateSignature(result, "89368b1bb82fa6940a455255bf9a1089"));
+            } else {
+                result.put("sign", WXPayUtil.generateSignature(result, CorgiWXPayConfig.config.getKey()));
+            }
             return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -179,25 +192,6 @@ public class CorgiPayService {
             log.info("request：{} ", param.toJSONString());
             HttpEntity<String> formEntity = new HttpEntity(param.toJSONString(), headers);
             String resultStr = restTemplate.postForObject(url, formEntity, String.class);
-//            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
-//            connection.setRequestMethod("POST");
-//            connection.setDoOutput(true);
-//            connection.setAllowUserInteraction(false);
-//            PrintStream ps = new PrintStream(connection.getOutputStream());
-//            if (!StringUtils.isEmpty(password)) {
-//                ps.print("{\"receipt-data\": \"" + receipt + "\",\"password\": \"" + password + "\"}");
-//            } else {
-//                ps.print("{\"receipt-data\": \"" + receipt + "\"}");
-//            }
-//            ps.close();
-//            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//            String str;
-//            StringBuffer sb = new StringBuffer();
-//            while ((str = br.readLine()) != null) {
-//                sb.append(str);
-//            }
-//            br.close();
-//            String resultStr = sb.toString();
             JSONObject result = JSONObject.parseObject(resultStr);
             if (result != null && result.getInteger("status") == 21007) {   //递归，以防漏单
                 return verifyApplePay("https://sandbox.itunes.apple.com/verifyReceipt", receipt, password);
@@ -252,6 +246,10 @@ public class CorgiPayService {
         Map<String, String> orderQuery = new HashMap<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         orderQuery.put("out_trade_no", order.getTradeNo());
+        if ("com.duke.corgi.mi".equals(order.getPackageName())) {
+            orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
+            orderQuery.put("appid", "wx0040995027e19688");
+        }
         try {
             Map<String, String> result = wxPay.orderQuery(orderQuery);
             order.setResult(JSON.toJSONString(result));
@@ -273,6 +271,10 @@ public class CorgiPayService {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.MINUTE, -5);
                 if (order.getCtime().compareTo(sdf.format(calendar.getTime())) < 0) {
+                    if ("com.duke.corgi.mi".equals(order.getPackageName())) {
+                        orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
+                        orderQuery.put("appid", "wx0040995027e19688");
+                    }
                     wxPay.closeOrder(orderQuery);
                 }
             }

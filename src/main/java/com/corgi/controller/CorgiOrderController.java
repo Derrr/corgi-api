@@ -83,32 +83,33 @@ public class CorgiOrderController extends BaseController {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             order.setPayTime(sdf.format(new Date()));
         }
+        order.setPackageName(RequestUtil.getPackageName());
         corgiOrderService.updateOrder(order);
         return new JsonResult();
     }
 
-    @GetMapping("refund")
-    public JsonResult refund(@RequestParam("tradeNo") String tradeNo) {
-        if (hasUserId()) {
-            return new JsonResult();
-        }
-        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
-        try {
-            if (!CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
-                return new JsonResult(Constants.API_ERROR_CODE, "无法退单");
-            }
-            if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
-                corgiPayService.wxRefundOrder(order);
-            }
-
-            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayType())) {
-
-            }
-        } catch (Exception e) {
-            order.setResult(e.getMessage());
-        }
-        return new JsonResult();
-    }
+//    @GetMapping("refund")
+//    public JsonResult refund(@RequestParam("tradeNo") String tradeNo) {
+//        if (hasUserId()) {
+//            return new JsonResult();
+//        }
+//        CorgiOrder order = corgiOrderService.getOrderByTradeNo(tradeNo);
+//        try {
+//            if (!CorgiOrder.STATUS.SUCCESS.equals(order.getStatus())) {
+//                return new JsonResult(Constants.API_ERROR_CODE, "无法退单");
+//            }
+//            if (CorgiOrder.PAY_TYPE.WX.equals(order.getPayType())) {
+//                corgiPayService.wxRefundOrder(order);
+//            }
+//
+//            if (CorgiOrder.PAY_TYPE.ALIPAY.equals(order.getPayType())) {
+//
+//            }
+//        } catch (Exception e) {
+//            order.setResult(e.getMessage());
+//        }
+//        return new JsonResult();
+//    }
 
     @PostMapping("withdraw")
     public JsonResult withdraw(@RequestBody CorgiOrder order) {
@@ -836,6 +837,7 @@ public class CorgiOrderController extends BaseController {
                 .tradeNo(tradeNo)
                 .sellerId(sellerId)
                 .payAmount(merchandise.getPrice())
+                .packageName(RequestUtil.getPackageName())
                 .build();
         result.put("orderString", "");
         if (CorgiOrder.PAY_TYPE.ALIPAY.equals(payType)) {

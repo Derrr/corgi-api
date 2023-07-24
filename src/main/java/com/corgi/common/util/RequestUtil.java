@@ -38,6 +38,14 @@ public class RequestUtil {
         return getRequest().getHeader("version");
     }
 
+    public static String getPackageName() {
+        String packageName = getRequest().getHeader("package");
+        if (StringUtils.isEmpty(packageName)) {
+            return "";
+        }
+        return packageName;
+    }
+
     public static String getChannel() {
         return getRequest().getHeader("channel");
     }
