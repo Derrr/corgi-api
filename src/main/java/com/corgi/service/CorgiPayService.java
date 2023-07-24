@@ -127,7 +127,6 @@ public class CorgiPayService {
         Map<String, String> orderQuery = new HashMap<>();
         orderQuery.put("out_trade_no", order.getTradeNo());
         if ("com.duke.corgi.mi".equals(order.getPackageName())) {
-            orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
             orderQuery.put("appid", "wx0040995027e19688");
         }
         Map<String, String> result = wxPay.closeOrder(orderQuery);
@@ -147,7 +146,6 @@ public class CorgiPayService {
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
         body.put("trade_type", "APP");
         if ("com.duke.corgi.mi".equals(order.getPackageName())) {
-            body.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
             body.put("appid", "wx0040995027e19688");
         }
         try {
@@ -249,7 +247,6 @@ public class CorgiPayService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
         orderQuery.put("out_trade_no", order.getTradeNo());
         if ("com.duke.corgi.mi".equals(order.getPackageName())) {
-            orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
             orderQuery.put("appid", "wx0040995027e19688");
         }
         try {
@@ -274,7 +271,6 @@ public class CorgiPayService {
                 calendar.add(Calendar.MINUTE, -5);
                 if (order.getCtime().compareTo(sdf.format(calendar.getTime())) < 0) {
                     if ("com.duke.corgi.mi".equals(order.getPackageName())) {
-                        orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
                         orderQuery.put("appid", "wx0040995027e19688");
                     }
                     wxPay.closeOrder(orderQuery);
