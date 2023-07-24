@@ -39,7 +39,7 @@ public class RequestUtil {
     }
 
     public static String getPackageName() {
-        String packageName = getRequest().getHeader("package");
+        String packageName = getRequest().getHeader("packageName");
         if (StringUtils.isEmpty(packageName)) {
             return "";
         }
