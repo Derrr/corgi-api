@@ -129,6 +129,7 @@ public class WXPay {
         String reqBody = WXPayUtil.mapToXml(reqData);
 
         String resp = this.wxPayRequest.requestWithoutCert(urlSuffix, msgUUID, reqBody, connectTimeoutMs, readTimeoutMs, autoReport);
+        System.out.println("resp:" + resp);
         return resp;
     }
 
