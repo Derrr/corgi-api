@@ -250,7 +250,6 @@ public class CorgiPayService {
             orderQuery.put("secretKey", "89368b1bb82fa6940a455255bf9a1089");
             orderQuery.put("appid", "wx0040995027e19688");
         }
-
         try {
             Map<String, String> result = wxPay.orderQuery(orderQuery);
             order.setResult(JSON.toJSONString(result));
