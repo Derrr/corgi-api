@@ -651,8 +651,7 @@ public class CorgiOrderController extends BaseController {
         CorgiOrder oldOrder = corgiOrderService.getOrderByTradeNo(order.getTradeNo());
         order.setMerchId(oldOrder.getMerchId());
         try {
-            if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())
-                    && !WXPayUtil.isSignatureValid(params, "89368b1bb82fa6940a455255bf9a1089")) {
+            if (!WXPayUtil.isSignatureValid(params, CorgiWXPayConfig.config.getKey())) {
                 order.setStatus(CorgiOrder.STATUS.CREATED);
                 throw new PermissionException("微信回调签名认证失败");
             } else if (WXPayConstants.FAIL.equals(params.get("return_code"))) {

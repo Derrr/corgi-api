@@ -158,11 +158,7 @@ public class CorgiPayService {
             result.put("noncestr", response.get("nonce_str"));
             result.put("prepayid", response.get("prepay_id"));
             result.put("package", "Sign=WXPay");
-            if ("com.duke.corgi.mi".equals(order.getPackageName())) {
-                result.put("sign", WXPayUtil.generateSignature(result, "89368b1bb82fa6940a455255bf9a1089"));
-            } else {
-                result.put("sign", WXPayUtil.generateSignature(result, CorgiWXPayConfig.config.getKey()));
-            }
+            result.put("sign", WXPayUtil.generateSignature(result, CorgiWXPayConfig.config.getKey()));
             return result;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
