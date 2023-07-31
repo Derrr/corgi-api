@@ -500,7 +500,10 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/get_user_extra")
-    public JsonResult getUserExtra(@RequestParam("userId") String userId) {
+    public JsonResult getUserExtra(@RequestParam(value = "userId",required = false) String userId) {
+        if(StringUtils.isEmpty(userId)){
+            return new JsonResult(new UserExtraResult());
+        }
         UserExtra userExtra = corgiExtraService.getUserExtra(userId);
         UserExtraResult result = new UserExtraResult(userExtra);
         return new JsonResult(result);
