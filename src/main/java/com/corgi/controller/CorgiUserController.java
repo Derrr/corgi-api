@@ -500,8 +500,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/get_user_extra")
-    public JsonResult getUserExtra(@RequestParam(value = "userId",required = false) String userId) {
-        if(StringUtils.isEmpty(userId)){
+    public JsonResult getUserExtra(@RequestParam(value = "userId", required = false) String userId) {
+        if (StringUtils.isEmpty(userId)) {
             return new JsonResult(new UserExtraResult());
         }
         UserExtra userExtra = corgiExtraService.getUserExtra(userId);
@@ -583,10 +583,11 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_user_data")
     public JsonResult getUserData(@RequestParam("userId") String userId) {
-        Integer follow = corgiUserFollowService.countFollow(userId);
+        Integer followCount = corgiUserFollowService.countFollow(userId);
+        UserPosition position = corgiUserService.getUserPosition(userId);
         Integer fans = corgiUserFollowService.countFollowed(userId);
         Integer getLike = corgiLikeService.countUserLikeByDate(userId, null);
-        return new JsonResult(new UserData(userId, follow, fans, getLike));
+        return new JsonResult(new UserData(userId, followCount, fans, getLike, (position.getOnlineTime() / 6) / 10.0));
     }
 
     @GetMapping("/visit")

@@ -8,15 +8,17 @@ import lombok.Data;
  */
 @Data
 public class UserData {
-    public UserData(String userId, Integer followCount, Integer fanCount, Integer getLikedCount) {
+    public UserData(String userId, Integer followCount, Integer fanCount, Integer getLikedCount, Double onlineCount) {
         this.userId = userId;
         this.followCount = followCount;
         this.fanCount = fanCount;
         this.getLikedCount = getLikedCount;
+        this.onlineCount = onlineCount;
     }
 
     private String userId;
     private Integer followCount;
     private Integer fanCount;
     private Integer getLikedCount;
+    private Double onlineCount;
 }
