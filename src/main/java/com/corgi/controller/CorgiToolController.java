@@ -98,7 +98,7 @@ public class CorgiToolController extends BaseController {
         try {
 //            Integer userId = Integer.valueOf(getUserId());
 //            if (userId % 4 == 0 || userId.equals(1) || userId.equals(593) || userId.equals(7)) {
-                config.put("frontPage", "Mat");
+            config.put("frontPage", "Mat");
 //            } else if (userId % 4 == 1) {
 //                config.put("frontPage", "Hot");
 //            } else {
@@ -479,6 +479,9 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("suspend_user")
     public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours") Long hours) {
+        if (hours == 0) {
+            redisTemplate.delete("suspended_number_13242556964");
+        }
         UserLogin userLogin = corgiUserService.getUserLogin(userId);
         redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
         redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
