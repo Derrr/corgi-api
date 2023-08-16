@@ -479,12 +479,14 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("suspend_user")
     public JsonResult suspendedUser(@RequestParam("userId") String userId, @RequestParam("hours") Long hours) {
-        if (hours == 0) {
-            redisTemplate.delete("suspended_number_13242556964");
-        }
         UserLogin userLogin = corgiUserService.getUserLogin(userId);
-        redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
-        redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
+        if (hours == 0) {
+            redisTemplate.delete("suspended_number_" + userLogin.getTelNo());
+            redisTemplate.delete("suspended_user_" + userLogin.getUserId());
+        } else {
+            redisTemplate.opsForValue().setIfAbsent("suspended_number_" + userLogin.getTelNo(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
+            redisTemplate.opsForValue().setIfAbsent("suspended_user_" + userLogin.getUserId(), System.currentTimeMillis() + "", hours, TimeUnit.HOURS);
+        }
         return new JsonResult();
     }
 
