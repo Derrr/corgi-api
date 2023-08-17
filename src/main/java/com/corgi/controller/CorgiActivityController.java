@@ -1159,6 +1159,24 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
+    @GetMapping("get_hot_pay_activity")
+    public JsonResult getHotPayActivity(@RequestParam("page") Integer page,
+                                     @RequestParam("pageSize") Integer pageSize) {
+        CorgiUserGoods query = new CorgiUserGoods();
+        query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+        query.setStart((page - 1) * pageSize);
+        query.setSize(pageSize);
+        List<CorgiUserGoods> goods = corgiOrderService.getHotGoods(query);
+        if (CollectionUtils.isEmpty(goods)) {
+            return new JsonResult(new ArrayList<>());
+        }
+        return new JsonResult(convertDetail(
+                corgiActivityService.getActivityByIds(goods.stream()
+                        .map(CorgiUserGoods::getGoodsId).collect(Collectors.toList())),
+                getUserId()));
+    }
+
+
     @GetMapping("get_pay_activity")
     public JsonResult getPayActivity(@RequestParam("page") Integer page,
                                      @RequestParam("pageSize") Integer pageSize) {
@@ -1168,7 +1186,6 @@ public class CorgiActivityController extends BaseController {
         query.setStart((page - 1) * pageSize);
         query.setSize(pageSize);
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
-        log.info("goods:{} ", goods);
         if (CollectionUtils.isEmpty(goods)) {
             return new JsonResult(new ArrayList<>());
         }
