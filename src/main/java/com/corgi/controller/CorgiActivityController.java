@@ -1159,7 +1159,7 @@ public class CorgiActivityController extends BaseController {
         return new JsonResult(detailList);
     }
 
-    @GetMapping("get_hot_pay_activity")
+    @GetMapping("query_hot_pay_activity")
     public JsonResult getHotPayActivity(@RequestParam("page") Integer page,
                                      @RequestParam("pageSize") Integer pageSize) {
         CorgiUserGoods query = new CorgiUserGoods();
