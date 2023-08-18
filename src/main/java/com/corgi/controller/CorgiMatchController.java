@@ -88,28 +88,28 @@ public class CorgiMatchController extends BaseController {
         extra.put("type", PushMessage.QUICK_MATCH_ACCEPT_TYPE);
         extra.put("greeting", matcher.getGreeting());
         if ("1".equals(matcher.getType())) {
-            String key = "last_accept_" + getUserId();
-            List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
-            if (lastAcceptList == null) {
-                lastAcceptList = new ArrayList<>();
-            }
-            if (!CollectionUtils.isEmpty(matchIds)) {
-                for (String matchId : matchIds) {
-                    if (!lastAcceptList.contains(matchId)) {
-                        redisTemplate.opsForValue().set("acceptMatching_" + getUserId() + "-" + matchId, "1", 14l, TimeUnit.DAYS);
-                        corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
-                        mqService.sendMessage(PushMessage.builder()
-                                .type(PushMessage.DEFAULT)
-                                .sourceUserId(getUserId())
-                                .targetUserId(matchId)
-                                .message("匹配成功，快去聊聊吧")
-                                .extra(extra)
-                                .build());
-                    }
+//            String key = "last_accept_" + getUserId();
+//            List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
+//            if (lastAcceptList == null) {
+//                lastAcceptList = new ArrayList<>();
+//            }
+            for (String matchId : matchIds) {
+//                    if (!lastAcceptList.contains(matchId)) {
+                if (redisTemplate.opsForValue().setIfAbsent("acceptMatching_" + getUserId() + "-" + matchId, "1", 20l, TimeUnit.HOURS)) {
+                    corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
+                    mqService.sendMessage(PushMessage.builder()
+                            .type(PushMessage.DEFAULT)
+                            .sourceUserId(getUserId())
+                            .targetUserId(matchId)
+                            .message("匹配成功，快去聊聊吧")
+                            .extra(extra)
+                            .build());
                 }
-                redisTemplate.delete(key);
-                redisTemplate.opsForList().rightPushAll(key, matchIds);
-                redisTemplate.expire(key, 20l, TimeUnit.HOURS);
+//            }
+//        }
+//                redisTemplate.delete(key);
+//                redisTemplate.opsForList().rightPushAll(key, matchIds);
+//                redisTemplate.expire(key, 20l, TimeUnit.HOURS);
             }
             return new JsonResult();
         }
@@ -149,13 +149,13 @@ public class CorgiMatchController extends BaseController {
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
 //                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
 
-                List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
-                redisTemplate.delete(matchKey);
+//                List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
+//                redisTemplate.delete(matchKey);
 
 
-                if (lastMatchList == null) {
-                    lastMatchList = new ArrayList<>();
-                }
+//                if (lastMatchList == null) {
+//                    lastMatchList = new ArrayList<>();
+//                }
 //                    int i = 0;
 //                    for (UserMatchRemain remain1 : remains) {
 //                        Integer size = remain1.getRemain();
@@ -164,23 +164,24 @@ public class CorgiMatchController extends BaseController {
 //                                return new JsonResult(result);
 //                            }
                 for (String matchId : matchIds) {
-//                            String matchId = matchIds.get(i);
-                    redisTemplate.opsForList().rightPush(matchKey, matchId);
-                    if (lastMatchList.contains(matchId)) {
-                        continue;
-                    }
+//                    redisTemplate.opsForList().rightPush(matchKey, matchId);
+//                    if (lastMatchList.contains(matchId)) {
+//                        continue;
+//                    }
                     //corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
-                    mqService.sendMessage(PushMessage.builder()
-                            .type(PushMessage.DEFAULT)
-                            .sourceUserId(getUserId())
-                            .targetUserId(matchId)
-                            .message("有一个小哥哥想和你匹配，要去聊聊吗？")
-                            .extra(extra)
-                            .build());
+                    if (redisTemplate.opsForValue().setIfAbsent(matchKey + "-" + matchId, System.currentTimeMillis() + "", 10l, TimeUnit.HOURS)) {
+                        mqService.sendMessage(PushMessage.builder()
+                                .type(PushMessage.DEFAULT)
+                                .sourceUserId(getUserId())
+                                .targetUserId(matchId)
+                                .message("有一个小哥哥想和你匹配，要去聊聊吗？")
+                                .extra(extra)
+                                .build());
+                    }
 //                            i++;
 //                        }
-//                    }
                 }
+//                }
             }
         } finally {
             if (redisTemplate.hasKey(matchKey)) {
@@ -188,7 +189,10 @@ public class CorgiMatchController extends BaseController {
             }
             corgiUtilService.unlock(key);
         }
-        return new JsonResult(result);
+        return new
+
+                JsonResult(result);
+
     }
 
     private String checkDayFreq(String dayFreqKey, Integer threshold) {
