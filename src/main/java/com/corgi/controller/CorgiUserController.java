@@ -985,12 +985,16 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         String blackKey = "black_cache_" + getUserId();
+        String beBlackKey = "black_cache_" + blockId;
         redisTemplate.opsForValue().set(blackKey.concat("-" + blockId), System.currentTimeMillis() + "", 1l, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(beBlackKey.concat("-" + getUserId()), System.currentTimeMillis() + "", 1l, TimeUnit.DAYS);
         String result = corgiBlacklistService.addBlacklist(userId, blockId);
         if (CorgiConstants.SUCCESS.equals(result)) {
-
             if (redisTemplate.hasKey(blackKey)) {
                 redisTemplate.opsForList().leftPush(blackKey, blockId);
+            }
+            if (redisTemplate.hasKey(beBlackKey)) {
+                redisTemplate.opsForList().leftPush(beBlackKey, getUserId());
             }
             corgiUserFollowService.unfollow(userId, blockId);
             corgiUserFollowService.unfollow(blockId, userId);
