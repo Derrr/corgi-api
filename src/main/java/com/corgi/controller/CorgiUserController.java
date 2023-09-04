@@ -513,7 +513,7 @@ public class CorgiUserController extends BaseController {
     public JsonResult hideExtra(@RequestBody UserExtraUpdate userExtra) {
         String type = userExtra.getType();
         String mode = userExtra.getMode();
-        if (Arrays.asList("income", "profession", "aim", "education", "tags", "interests").contains(mode)) {
+        if (Arrays.asList("income", "profession", "aim", "education", "tags", "interests").contains(type)) {
             String hideValue = "1";
             if ("hide".equals(mode)) {
                 hideValue = "0";
