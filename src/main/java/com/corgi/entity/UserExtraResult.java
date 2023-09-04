@@ -29,6 +29,13 @@ public class UserExtraResult {
         if (!StringUtils.isEmpty(userExtra.getTags())) {
             this.tags = Arrays.asList(userExtra.getTags().split(","));
         }
+        this.hideProfession = userExtra.getHideProfession();
+        this.hideIncome = userExtra.getHideIncome();
+        this.hideEducation = userExtra.getHideEducation();
+        this.hideXp = userExtra.getHideXp();
+        this.hideAim = userExtra.getHideAim();
+        this.hideInterests = userExtra.getHideInterests();
+        this.hideTags = userExtra.getHideTags();
     }
 
     private String profession;
@@ -38,4 +45,11 @@ public class UserExtraResult {
     private String aim;
     private List<String> interests;
     private List<String> tags;
+    private String hideProfession;
+    private String hideIncome;
+    private String hideEducation;
+    private String hideXp;
+    private String hideAim;
+    private String hideInterests;
+    private String hideTags;
 }
