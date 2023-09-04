@@ -509,8 +509,22 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(result);
     }
 
+    @PostMapping("/hide_extra")
+    public JsonResult hideExtra(@RequestBody UserExtraUpdate userExtra) {
+        String type = userExtra.getType();
+        String mode = userExtra.getMode();
+        if (Arrays.asList("income", "profession", "aim", "education", "tags", "interests").contains(mode)) {
+            String hideValue = "1";
+            if ("hide".equals(mode)) {
+                hideValue = "0";
+            }
+            corgiExtraService.updateHide(type, getUserId(), hideValue);
+        }
+        return new JsonResult();
+    }
+
     @PostMapping("/update_extra")
-    public JsonResult updateXp(@RequestBody UserExtraUpdate userExtra) {
+    public JsonResult updateExtra(@RequestBody UserExtraUpdate userExtra) {
         String type = userExtra.getType();
         String value = userExtra.getValue();
         switch (type) {
@@ -797,13 +811,14 @@ public class CorgiUserController extends BaseController {
         String sign = "SMS_180049529";
         String signName = "可基";
         if ("huawei".equals(RequestUtil.getChannel())) {
-            signName = "Corgi";
-        }
-        //String signName = "Corgi";
-        if (telNo.contains("-")) {
             sign = "SMS_188570616";
             signName = "Corgi";
         }
+        //String signName = "Corgi";
+//        if (telNo.contains("-")) {
+//            sign = "SMS_188570616";
+//            signName = "Corgi";
+//        }
         log.info("to {} sending code:{}", telNo, code);
         CommonRequest request = new CommonRequest();
         request.setMethod(MethodType.POST);
