@@ -514,9 +514,9 @@ public class CorgiUserController extends BaseController {
         String type = userExtra.getType();
         String mode = userExtra.getMode();
         if (Arrays.asList("income", "profession", "aim", "education", "tags", "interests").contains(type)) {
-            String hideValue = "1";
+            String hideValue = "0";
             if ("hide".equals(mode)) {
-                hideValue = "0";
+                hideValue = "1";
             }
             corgiExtraService.updateHide(type, getUserId(), hideValue);
         }
