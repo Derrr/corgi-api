@@ -9,4 +9,5 @@ public class Matcher {
     private List<String> matchIds;
     private String type;
     private String greeting;
+    private List<String> filterSource;
 }
