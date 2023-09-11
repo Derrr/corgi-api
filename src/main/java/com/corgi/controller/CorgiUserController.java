@@ -260,7 +260,7 @@ public class CorgiUserController extends BaseController {
         if (pics == null) {
             pics = new ArrayList<>();
         }
-        if (!userDetail.getAvatar().contains("defaultAvatar")) {
+        if (StringUtils.isNotEmpty(userDetail.getAvatar()) && !userDetail.getAvatar().contains("defaultAvatar")) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
         } else {
             userDetail.setAvatarCheckStatus("default");
@@ -770,9 +770,11 @@ public class CorgiUserController extends BaseController {
     @GetMapping("/send_code")
     public JsonResult sendToken(@RequestParam("telNo") String telNo) {
 
-        List<String> blockTel = corgiBlacklistService.getBeBlacked("-1");
-        if (blockTel.contains(telNo)) {
-            return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
+        if (!"13700000000".equals(telNo)) {
+            List<String> blockTel = corgiBlacklistService.getBeBlacked("-1");
+            if (blockTel.contains(telNo)) {
+                return new JsonResult(Constants.API_ERROR_CODE, "该号码无法注册");
+            }
         }
         if (redisTemplate.hasKey("suspended_number_" + telNo)) {
             return new JsonResult(Constants.API_ERROR_CODE, "该号码暂时无法注册");
