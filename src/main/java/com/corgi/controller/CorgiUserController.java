@@ -260,7 +260,7 @@ public class CorgiUserController extends BaseController {
         if (pics == null) {
             pics = new ArrayList<>();
         }
-        if (StringUtils.isNotEmpty(userDetail.getAvatar()) && !userDetail.getAvatar().contains("defaultAvatar")) {
+        if (!userDetail.getAvatar().contains("defaultAvatar")) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
         } else {
             userDetail.setAvatarCheckStatus("default");
