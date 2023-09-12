@@ -260,7 +260,9 @@ public class CorgiUserController extends BaseController {
         if (pics == null) {
             pics = new ArrayList<>();
         }
-        if (!userDetail.getAvatar().contains("defaultAvatar")) {
+        if (!userDetail.getAvatar().contains("defaultAvatar") && UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
+            userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
+        }else if (!userDetail.getAvatar().contains("defaultAvatar")) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
         } else {
             userDetail.setAvatarCheckStatus("default");
@@ -1254,12 +1256,17 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_verify_token")
-    public JsonResult getVerifyToken() throws PermissionException {
+    public JsonResult getVerifyToken(@RequestParam(required = false, name = "avatar") String avatar) throws PermissionException {
         String userId = getUserId();
         if (!hasUserId()) {
             userId = "1";
         }
-        UserDetail detail = corgiUserService.getUserDetailBasic(userId);
+        UserDetail detail = new UserDetail();
+        if (StringUtils.isNotEmpty(avatar)) {
+            detail.setAvatar(avatar);
+        } else {
+            detail = corgiUserService.getUserDetailBasic(userId);
+        }
         if (detail != null) {
             return new JsonResult(aliyunGreenService.getDescribeVerifyToken(detail));
         } else {
