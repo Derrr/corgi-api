@@ -130,8 +130,15 @@ public class CorgiFeedController extends BaseController {
 
     @GetMapping("get_paying_activity")
     public JsonResult getPayingActivity(@RequestParam(required = false, defaultValue = "1") Integer page, @RequestParam(required = false, defaultValue = "30") Integer pageSize) {
+        String timeKey = "get_paying_activity_" + getUserId();
+        String ctime = redisTemplate.opsForValue().get(timeKey);
+        if (page == 1) {
+            ctime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            redisTemplate.opsForValue().set(timeKey, ctime, 12l, TimeUnit.HOURS);
+        }
         CorgiVlog query = new CorgiVlog();
         query.setVideoId(CorgiActivity.CAT_PAYING);
+        query.setCtime(ctime);
         List<CorgiVlog> vlogs = corgiVlogService.listHotVlog(query, page, pageSize);
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(vlogs.stream().map(v -> v.getActivityId()).collect(Collectors.toList()));
         return new JsonResult(convertDetail(corgiActivities, getUserId()));

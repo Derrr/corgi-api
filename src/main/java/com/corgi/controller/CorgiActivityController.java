@@ -1161,11 +1161,18 @@ public class CorgiActivityController extends BaseController {
 
     @GetMapping("query_hot_pay_activity")
     public JsonResult getHotPayActivity(@RequestParam("page") Integer page,
-                                     @RequestParam("pageSize") Integer pageSize) {
+                                        @RequestParam("pageSize") Integer pageSize) {
+        String timeKey = "query_hot_activity_" + getUserId();
+        String ctime = redisTemplate.opsForValue().get(timeKey);
+        if (page == 1) {
+            ctime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            redisTemplate.opsForValue().set(timeKey, ctime, 12l, TimeUnit.HOURS);
+        }
         CorgiUserGoods query = new CorgiUserGoods();
         query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
         query.setStart((page - 1) * pageSize);
         query.setSize(pageSize);
+        query.setCtime(ctime);
         List<CorgiUserGoods> goods = corgiOrderService.getHotGoods(query);
         if (CollectionUtils.isEmpty(goods)) {
             return new JsonResult(new ArrayList<>());
