@@ -262,7 +262,7 @@ public class CorgiUserController extends BaseController {
         }
         if (!userDetail.getAvatar().contains("defaultAvatar") && UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
-        }else if (!userDetail.getAvatar().contains("defaultAvatar")) {
+        } else if (!userDetail.getAvatar().contains("defaultAvatar")) {
             userDetail = aliyunGreenService.checkAvatar(userDetail);
         } else {
             userDetail.setAvatarCheckStatus("default");
