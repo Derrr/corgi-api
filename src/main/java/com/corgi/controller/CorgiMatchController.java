@@ -8,7 +8,7 @@ import com.corgi.entity.Matcher;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.UserMatchRemain;
+import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,20 @@ public class CorgiMatchController extends BaseController {
         String key = "matching-" + userQuery.getUserId();
         try {
             if (corgiUtilService.lock(key)) {
-                return new JsonResult(corgiUserMatchService.getUserMatchItem(userQuery));
+                List<UserMatchItem> items = corgiUserMatchService.getUserMatchItem(userQuery);
+                UserMatchItem item = items.get(0);
+                item.setUserId("7");
+                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/7/1633768977484");
+                item.setNickname("石头");
+                item = items.get(1);
+                item.setUserId("593");
+                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/593/1677251480547");
+                item.setNickname("HHW哈哈");
+                item = items.get(2);
+                item.setUserId("899399");
+                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/899399/1694592492759");
+                item.setNickname("哈哈哈");
+                return new JsonResult(items);
             }
         } finally {
             corgiUtilService.unlock(key);
@@ -150,7 +163,7 @@ public class CorgiMatchController extends BaseController {
 //                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配总数已达上限次数，请明日再来哦");
 //                }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
-                if(!CollectionUtils.isEmpty(matcher.getFilterSource())){
+                if (!CollectionUtils.isEmpty(matcher.getFilterSource())) {
                     extra.put("filterSource", matcher.getFilterSource());
                 }
 //                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
