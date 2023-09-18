@@ -163,9 +163,7 @@ public class CorgiMatchController extends BaseController {
 //                    return new JsonResult(Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配总数已达上限次数，请明日再来哦");
 //                }
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
-                if (!CollectionUtils.isEmpty(matcher.getFilterSource())) {
-                    extra.put("filterSource", matcher.getFilterSource());
-                }
+                extra.put("filterSource", matcher.getFilterSource());
 //                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
 
 //                List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
