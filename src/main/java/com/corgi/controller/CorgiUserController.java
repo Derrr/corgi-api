@@ -814,10 +814,10 @@ public class CorgiUserController extends BaseController {
 
         String sign = "SMS_180049529";
         String signName = "可基";
-        if ("huawei".equals(RequestUtil.getChannel())) {
-            sign = "SMS_188570616";
-            signName = "Corgi";
-        }
+//        if ("huawei".equals(RequestUtil.getChannel())) {
+//            sign = "SMS_188570616";
+//            signName = "Corgi";
+//        }
         //String signName = "Corgi";
 //        if (telNo.contains("-")) {
 //            sign = "SMS_188570616";
