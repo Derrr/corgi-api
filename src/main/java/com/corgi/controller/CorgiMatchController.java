@@ -13,7 +13,6 @@ import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 public class CorgiMatchController extends BaseController {
     @Reference
     private CorgiUserMatchService corgiUserMatchService;
-    @Reference
-    private CorgiUserFollowService corgiUserFollowService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -111,7 +108,6 @@ public class CorgiMatchController extends BaseController {
 //            }
             for (String matchId : matchIds) {
 //                    if (!lastAcceptList.contains(matchId)) {
-                corgiUserFollowService.follow(getUserId(), matchId);
                 if (redisTemplate.opsForValue().setIfAbsent("acceptMatching_" + getUserId() + "-" + matchId, "1", 20l, TimeUnit.HOURS)) {
                     corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
                     mqService.sendMessage(PushMessage.builder()
@@ -186,7 +182,6 @@ public class CorgiMatchController extends BaseController {
 //                        continue;
 //                    }
                     //corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
-                    corgiUserFollowService.follow(getUserId(), matchId);
                     if (redisTemplate.opsForValue().setIfAbsent(matchKey + "-" + matchId, System.currentTimeMillis() + "", 10l, TimeUnit.HOURS)) {
                         mqService.sendMessage(PushMessage.builder()
                                 .type(PushMessage.DEFAULT)
