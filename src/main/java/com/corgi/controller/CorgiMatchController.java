@@ -61,9 +61,12 @@ public class CorgiMatchController extends BaseController {
             userQuery.setUserId(getUserId());
         }
         String freqKey = getUserId() + "_get_match_times";
-        String checkResult = this.checkFreq(freqKey, 20);
-        if (!StringUtils.isEmpty(checkResult)) {
-            return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
+        String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String dayFreqKey = freqKey.concat("_").concat(suffix);
+        Integer checkDayResult = this.checkDayFreq(dayFreqKey, 100);
+//        String checkResult = this.checkFreq(freqKey, 20);
+        if (checkDayResult < 1) {
+            return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配点击已达10次上限次数，请明日再来哦");
         }
         String key = "matching-" + userQuery.getUserId();
         try {
@@ -81,12 +84,12 @@ public class CorgiMatchController extends BaseController {
                 item.setUserId("899399");
                 item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/899399/1694592492759");
                 item.setNickname("哈哈哈");
-                return new JsonResult(items);
+                return new JsonResult(items, checkDayResult + "");
             }
         } finally {
             corgiUtilService.unlock(key);
         }
-        return new JsonResult();
+        return new JsonResult(null, checkDayResult + "");
     }
 
     @PostMapping("desire")
@@ -133,16 +136,16 @@ public class CorgiMatchController extends BaseController {
         try {
             if (corgiUtilService.lock(key)) {
                 String freqKey = getUserId() + "_match_times";
-                String checkResult = this.checkFreq(freqKey, 20);
-                if (!StringUtils.isEmpty(checkResult)) {
-                    return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
-                }
+                //String checkResult = this.checkFreq(freqKey, 20);
+//                if (!StringUtils.isEmpty(checkResult)) {
+//                    return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
+//                }
                 String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
                 String dayFreqKey = freqKey.concat("_").concat(suffix);
-                String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
-                if (!StringUtils.isEmpty(checkResult)) {
-                    return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
-                }
+                //String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
+//                if (!StringUtils.isEmpty(checkResult)) {
+//                    return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, checkDayResult);
+//                }
                 Long times = redisTemplate.opsForList().size(dayFreqKey);
                 result = 100 - times.intValue();
                 if (result < 0) {
@@ -208,17 +211,17 @@ public class CorgiMatchController extends BaseController {
 
     }
 
-    private String checkDayFreq(String dayFreqKey, Integer threshold) {
+    private Integer checkDayFreq(String dayFreqKey, Integer threshold) {
         boolean hasKey = redisTemplate.hasKey(dayFreqKey);
         Long times = redisTemplate.opsForList().size(dayFreqKey);
         while (times >= threshold) {
-            return "今日匹配点击已达100次上线次数，请明日再来哦";
+            return 0;
         }
         redisTemplate.opsForList().leftPush(dayFreqKey, System.currentTimeMillis() + "");
         if (!hasKey) {
             redisTemplate.expire(dayFreqKey, 1l, TimeUnit.DAYS);
         }
-        return null;
+        return 9 - times.intValue();
     }
 
     private String checkFreq(String freqKey, Integer threshold) {
