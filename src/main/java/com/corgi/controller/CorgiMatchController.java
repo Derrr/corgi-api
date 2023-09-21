@@ -8,6 +8,7 @@ import com.corgi.entity.Matcher;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
+import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserMatchItem;
 import com.corgi.user.entity.UserQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 public class CorgiMatchController extends BaseController {
     @Reference
     private CorgiUserMatchService corgiUserMatchService;
+    @Reference
+    private CorgiUserService corgiUserService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -63,10 +66,14 @@ public class CorgiMatchController extends BaseController {
         String freqKey = getUserId() + "_get_match_times";
         String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String dayFreqKey = freqKey.concat("_").concat(suffix);
-        Integer checkDayResult = this.checkDayFreq(dayFreqKey, 100);
-//        String checkResult = this.checkFreq(freqKey, 20);
+        String expireDate = corgiUserService.getUserVipExpire(getUserId());
+        Integer threshold = 10;
+        if (!StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+            threshold = 100;
+        }
+        Integer checkDayResult = this.checkDayFreq(dayFreqKey, threshold);
         if (checkDayResult < 1) {
-            return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配点击已达10次上限次数，请明日再来哦");
+            return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配点击已达" + threshold + "次上限次数，请明日再来哦");
         }
         String key = "matching-" + userQuery.getUserId();
         try {
