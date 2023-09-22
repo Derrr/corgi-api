@@ -228,7 +228,7 @@ public class CorgiMatchController extends BaseController {
         if (!hasKey) {
             redisTemplate.expire(dayFreqKey, 1l, TimeUnit.DAYS);
         }
-        return 9 - times.intValue();
+        return threshold - times.intValue() -1;
     }
 
     private String checkFreq(String freqKey, Integer threshold) {
