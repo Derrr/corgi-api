@@ -79,18 +79,18 @@ public class CorgiMatchController extends BaseController {
         try {
             if (corgiUtilService.lock(key)) {
                 List<UserMatchItem> items = corgiUserMatchService.getUserMatchItem(userQuery);
-                UserMatchItem item = items.get(0);
-                item.setUserId("7");
-                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/7/1633768977484");
-                item.setNickname("石头");
-                item = items.get(1);
-                item.setUserId("593");
-                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/593/1677251480547");
-                item.setNickname("HHW哈哈");
-                item = items.get(2);
-                item.setUserId("899399");
-                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/899399/1694592492759");
-                item.setNickname("哈哈哈");
+//                UserMatchItem item = items.get(0);
+//                item.setUserId("7");
+//                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/7/1633768977484");
+//                item.setNickname("石头");
+//                item = items.get(1);
+//                item.setUserId("593");
+//                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/593/1677251480547");
+//                item.setNickname("HHW哈哈");
+//                item = items.get(2);
+//                item.setUserId("899399");
+//                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/899399/1694592492759");
+//                item.setNickname("哈哈哈");
                 return new JsonResult(items, checkDayResult + "");
             }
         } finally {
