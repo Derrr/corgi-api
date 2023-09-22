@@ -75,6 +75,10 @@ public class CorgiMatchController extends BaseController {
         if (checkDayResult < 1) {
             return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, "今日匹配点击已达" + threshold + "次上限次数，请明日再来哦");
         }
+        checkDayResult -= 1;
+        if (checkDayResult < 0) {
+            checkDayResult = 0;
+        }
         String key = "matching-" + userQuery.getUserId();
         try {
             if (corgiUtilService.lock(key)) {
@@ -228,7 +232,7 @@ public class CorgiMatchController extends BaseController {
         if (!hasKey) {
             redisTemplate.expire(dayFreqKey, 1l, TimeUnit.DAYS);
         }
-        return threshold - times.intValue() -1;
+        return threshold - times.intValue();
     }
 
     private String checkFreq(String freqKey, Integer threshold) {
