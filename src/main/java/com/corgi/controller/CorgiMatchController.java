@@ -79,10 +79,10 @@ public class CorgiMatchController extends BaseController {
         try {
             if (corgiUtilService.lock(key)) {
                 List<UserMatchItem> items = corgiUserMatchService.getUserMatchItem(userQuery);
-//                UserMatchItem item = items.get(0);
-//                item.setUserId("7");
-//                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/7/1633768977484");
-//                item.setNickname("石头");
+                UserMatchItem item = items.get(0);
+                item.setUserId("7");
+                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/7/1633768977484");
+                item.setNickname("石头");
 //                item = items.get(1);
 //                item.setUserId("593");
 //                item.setAvatar("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/593/1677251480547");
