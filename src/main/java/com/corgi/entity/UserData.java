@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 public class UserData {
-    public UserData(String userId, Integer followCount, Integer fanCount, Integer getLikedCount, Double onlineCount) {
+    public UserData(String userId, Integer followCount, Integer fanCount, Integer getLikedCount, String onlineCount) {
         this.userId = userId;
         this.followCount = followCount;
         this.fanCount = fanCount;
@@ -20,5 +20,5 @@ public class UserData {
     private Integer followCount;
     private Integer fanCount;
     private Integer getLikedCount;
-    private Double onlineCount;
+    private String onlineCount;
 }

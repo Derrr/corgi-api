@@ -46,6 +46,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -603,7 +604,8 @@ public class CorgiUserController extends BaseController {
         UserPosition position = corgiUserService.getUserPosition(userId);
         Integer fans = corgiUserFollowService.countFollowed(userId);
         Integer getLike = corgiLikeService.countUserLikeByDate(userId, null);
-        return new JsonResult(new UserData(userId, followCount, fans, getLike, (position.getOnlineTime() / 6) / 10.0));
+        DecimalFormat format = new DecimalFormat("#.#h");
+        return new JsonResult(new UserData(userId, followCount, fans, getLike, format.format((position.getOnlineTime() / 6) / 10.0)));
     }
 
     @GetMapping("/visit")
