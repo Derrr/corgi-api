@@ -70,6 +70,11 @@ public class CorgiMatchController extends BaseController {
         Integer threshold = 10;
         if (!StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
             threshold = 100;
+        } else {
+            UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+            if ("influencer".equals(detail.getAvatarStatus())) {
+                threshold = 100;
+            }
         }
         Integer checkDayResult = this.checkDayFreq(dayFreqKey, threshold);
         if (checkDayResult < 1) {
