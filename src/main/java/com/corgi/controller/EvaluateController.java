@@ -292,6 +292,7 @@ public class EvaluateController extends BaseController {
             //如果tag是数字，认为他传错了，应该是id
             Integer id = Integer.parseInt(userEvaluation.getTag());
             userEvaluation.setUserId("");
+            userEvaluation.setEvaluatorId(null);
             userEvaluation.setId(id);
         } catch (Exception e) {
 
