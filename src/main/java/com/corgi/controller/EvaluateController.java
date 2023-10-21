@@ -288,6 +288,12 @@ public class EvaluateController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "删除tag请联系管理员");
         }
         userEvaluation.setEvaluatorId("");
+        try {
+            Integer id = Integer.parseInt(userEvaluation.getTag());
+            userEvaluation.setId(id);
+        } catch (Exception e) {
+
+        }
         corgiEvaluationService.deleteEvaluation(userEvaluation);
         return new JsonResult();
     }
