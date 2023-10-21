@@ -290,6 +290,7 @@ public class EvaluateController extends BaseController {
         userEvaluation.setEvaluatorId("");
         try {
             Integer id = Integer.parseInt(userEvaluation.getTag());
+            userEvaluation.setUserId("");
             userEvaluation.setId(id);
         } catch (Exception e) {
 
