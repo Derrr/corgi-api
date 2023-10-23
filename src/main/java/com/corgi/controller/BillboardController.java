@@ -230,6 +230,8 @@ public class BillboardController extends BaseController {
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                     if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+                    } else {
+                        activity.setCoverUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/default-avatar/corgi-front.png");
                     }
                     activity.setRefActivityPic(activity.getCoverUrl());
                     List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
