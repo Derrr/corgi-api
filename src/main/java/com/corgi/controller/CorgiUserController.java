@@ -341,10 +341,6 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
         System.out.println(aliyunGreenService.checkText(nickname));
-//        int count = corgiUserService.countUserNickname(nickname);
-//        if (count > 0) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
-//        }
         return new JsonResult();
     }
 

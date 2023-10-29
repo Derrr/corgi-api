@@ -72,6 +72,10 @@ public class AliyunGreenService {
     public static String FAIL = "fail";
     public static String NOT_GOOD = "not_good";
     public static List<String> CHECK_LIST = Arrays.asList("check", "not_good", "fail");
+    public static List<String> BLOCK_WORD_LIST = Arrays.asList("飞机", "初一", "初二", "初三",
+            "高一", "高二", "高三", "初中", "高中", "小学", "骚", "sao", "奴", "贱", "革命", "起义", "嫖", "娼",
+            "无毛", "按摩", "有偿", "付费", "技师", "捆绑", "调教", "学生党", "求C", "约p", "约P", "可飞", "乳头",
+            "精液", "色情", "内裤", "原味", "无套");
 
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
@@ -519,6 +523,12 @@ public class AliyunGreenService {
         if (StringUtils.isEmpty(text)) {
             return textResult;
         }
+        for (String word : BLOCK_WORD_LIST) {
+            if (text.contains(word)) {
+                textResult.setPass(false);
+                text.replaceAll(word, "**");
+            }
+        }
         TextScanRequest textScanRequest = new TextScanRequest();
         textScanRequest.setAcceptFormat(FormatType.JSON);
         textScanRequest.setHttpContentType(FormatType.JSON);
@@ -610,14 +620,7 @@ public class AliyunGreenService {
     public CorgiActivity checkActivity(CorgiActivity activity) {
         String title = activity.getTitle();
         String content = activity.getContent();
-        String type = activity.getActivityType();
         boolean sendMail = false;
-        if (!StringUtils.isEmpty(type) && !checkText(type).isPass()) {
-            activity.setActivityType("待审核");
-            activity.setCheckActivityType(type);
-            activity.setCheckStatus(CHECK);
-            sendMail = true;
-        }
         if (!StringUtils.isEmpty(title) && !checkText(title).isPass()) {
             activity.setTitle(TEXT_FORBIDDEN);
             activity.setCheckTitle(title);
