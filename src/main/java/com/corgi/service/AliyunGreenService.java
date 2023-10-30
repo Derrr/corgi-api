@@ -626,14 +626,14 @@ public class AliyunGreenService {
         CheckTextResult titleResult = checkText(title);
         if (!StringUtils.isEmpty(title) && !titleResult.isPass()) {
             activity.setTitle(titleResult.getContent());
-            //activity.setCheckTitle(title);
+            activity.setCheckTitle(title);
             //activity.setCheckStatus(CHECK);
             //sendMail = true;
         }
         CheckTextResult contentResult = checkText(content);
         if (!StringUtils.isEmpty(content) && !contentResult.isPass()) {
             activity.setContent(contentResult.getContent());
-            //activity.setCheckContent(content);
+            activity.setCheckContent(content);
             //activity.setCheckStatus(CHECK);
             //sendMail = true;
         }
