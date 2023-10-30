@@ -205,9 +205,10 @@ public class AliyunGreenService {
 
     public UserDetail checkDesc(UserDetail userDetail) {
         String desc = userDetail.getDesc();
-        if (!this.checkText(desc).isPass()) {
+        CheckTextResult textResult = this.checkText(desc);
+        if (!textResult.isPass()) {
             //userDetail.setCheckDesc(desc);
-            userDetail.setDesc(desc);
+            userDetail.setDesc(textResult.getContent());
             //userDetail.setCheckStatus(CHECK);
             //mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
@@ -527,6 +528,7 @@ public class AliyunGreenService {
             if (text.contains(word)) {
                 textResult.setPass(false);
                 text.replaceAll(word, "**");
+                textResult.setContent(text);
             }
         }
         TextScanRequest textScanRequest = new TextScanRequest();
@@ -621,14 +623,16 @@ public class AliyunGreenService {
         String title = activity.getTitle();
         String content = activity.getContent();
         //boolean sendMail = false;
-        if (!StringUtils.isEmpty(title) && !checkText(title).isPass()) {
-            activity.setTitle(title);
+        CheckTextResult titleResult = checkText(title);
+        if (!StringUtils.isEmpty(title) && !titleResult.isPass()) {
+            activity.setTitle(titleResult.getContent());
             //activity.setCheckTitle(title);
             //activity.setCheckStatus(CHECK);
             //sendMail = true;
         }
-        if (!StringUtils.isEmpty(content) && !checkText(content).isPass()) {
-            activity.setContent(content);
+        CheckTextResult contentResult = checkText(content);
+        if (!StringUtils.isEmpty(content) && !contentResult.isPass()) {
+            activity.setContent(contentResult.getContent());
             //activity.setCheckContent(content);
             //activity.setCheckStatus(CHECK);
             //sendMail = true;

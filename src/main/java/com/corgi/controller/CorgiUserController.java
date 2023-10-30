@@ -378,15 +378,16 @@ public class CorgiUserController extends BaseController {
         }
 
         String result;
-        if (aliyunGreenService.checkText(userDetail.getNickname()).isPass()) {
+        CheckTextResult checkTextResult = aliyunGreenService.checkText(userDetail.getNickname());
+        if (checkTextResult.isPass()) {
             result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
             userDetail.setCheckStatus(AliyunGreenService.PASS);
             corgiUserService.updateDetail(userDetail);
         } else {
-            result = corgiUserService.updateUserNickname(userDetail.getUserId(), AliyunGreenService.TEXT_FORBIDDEN, userDetail.getNickname());
+            result = corgiUserService.updateUserNickname(userDetail.getUserId(), checkTextResult.getContent(), userDetail.getNickname());
             userDetail.setCheckStatus(AliyunGreenService.CHECK);
             corgiUserService.updateDetail(userDetail);
-            mailService.sendCheckMessage("用户：", userDetail.getUserId());
+            //mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         if (!CorgiConstants.SUCCESS.equals(result)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
