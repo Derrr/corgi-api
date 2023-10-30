@@ -600,10 +600,9 @@ public class CorgiFeedController extends BaseController {
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                     if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
+                    } else {
+                        activity.setCoverUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/corgi/WechatIMG4084.jpg");
                     }
-//                    else {
-//                        activity.setCoverUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/corgi/WechatIMG4084.jpg");
-//                    }
                     activity.setRefActivityPic(activity.getCoverUrl());
                     if (!activity.getUserId().equals(getUserId()) && (!hasUserId() || CollectionUtils.isEmpty(corgiOrderService.getUserGoods(CorgiUserGoods.builder()
                             .userId(getUserId())
