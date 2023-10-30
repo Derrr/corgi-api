@@ -206,10 +206,10 @@ public class AliyunGreenService {
     public UserDetail checkDesc(UserDetail userDetail) {
         String desc = userDetail.getDesc();
         if (!this.checkText(desc).isPass()) {
-            userDetail.setCheckDesc(desc);
-            userDetail.setDesc(AliyunGreenService.TEXT_FORBIDDEN);
-            userDetail.setCheckStatus(CHECK);
-            mailService.sendCheckMessage("用户：", userDetail.getUserId());
+            //userDetail.setCheckDesc(desc);
+            userDetail.setDesc(desc);
+            //userDetail.setCheckStatus(CHECK);
+            //mailService.sendCheckMessage("用户：", userDetail.getUserId());
         }
         return userDetail;
     }
@@ -620,22 +620,22 @@ public class AliyunGreenService {
     public CorgiActivity checkActivity(CorgiActivity activity) {
         String title = activity.getTitle();
         String content = activity.getContent();
-        boolean sendMail = false;
+        //boolean sendMail = false;
         if (!StringUtils.isEmpty(title) && !checkText(title).isPass()) {
-            activity.setTitle(TEXT_FORBIDDEN);
-            activity.setCheckTitle(title);
-            activity.setCheckStatus(CHECK);
-            sendMail = true;
+            activity.setTitle(title);
+            //activity.setCheckTitle(title);
+            //activity.setCheckStatus(CHECK);
+            //sendMail = true;
         }
         if (!StringUtils.isEmpty(content) && !checkText(content).isPass()) {
-            activity.setContent(TEXT_FORBIDDEN);
-            activity.setCheckContent(content);
-            activity.setCheckStatus(CHECK);
-            sendMail = true;
+            activity.setContent(content);
+            //activity.setCheckContent(content);
+            //activity.setCheckStatus(CHECK);
+            //sendMail = true;
         }
-        if (sendMail) {
-            mailService.sendCheckMessage("活动：", activity.getId());
-        }
+//        if (sendMail) {
+//            mailService.sendCheckMessage("活动：", activity.getId());
+//        }
         return activity;
     }
 
