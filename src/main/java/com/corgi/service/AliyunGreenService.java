@@ -75,7 +75,7 @@ public class AliyunGreenService {
     public static List<String> BLOCK_WORD_LIST = Arrays.asList("飞机杯", "打飞机", "初一", "初二", "初三",
             "高一", "高二", "高三", "初中", "高中", "小学生","sao0","sao的", "骚的", "奴", "贱", "革命", "起义", "嫖", "娼",
             "无毛", "按摩", "有偿", "技师", "捆绑", "调教", "学生党", "求C", "约p", "约P", "可飞", "乳头",
-            "精液", "色情", "内裤", "原味", "无套");
+            "精液", "色情", "原味", "无套");
 
     @Value("${aliyun.accessKeyId}")
     private String accessKeyId;
