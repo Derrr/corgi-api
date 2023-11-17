@@ -1198,7 +1198,7 @@ public class CorgiUserController extends BaseController {
         String[] ids = userIds.split(",");
         List<UserMatchProfile> profiles = new ArrayList<>();
         Long threshold = System.currentTimeMillis() - 2 * 60000;
-        if (ids.length < 50) {
+        if (ids.length < 30) {
             for (int i = 0; i < ids.length; i++) {
                 UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
                 if (userDetail != null) {
