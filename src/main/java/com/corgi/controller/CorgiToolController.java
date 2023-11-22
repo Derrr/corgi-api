@@ -17,7 +17,10 @@ import com.corgi.service.AliyunGreenService;
 import com.corgi.service.ChatService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.service.MQService;
+
+
 import com.corgi.user.api.*;
+import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,6 +56,8 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiAreaService corgiAreaService;
     @Reference
+    private CorgiSoundService corgiSoundService;
+    @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
@@ -61,8 +66,6 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiBillboardService corgiBillboardService;
     @Reference
-    private CorgiSoundService corgiSoundService;
-    @Reference
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiVlogService corgiVlogService;
@@ -70,6 +73,8 @@ public class CorgiToolController extends BaseController {
     private CorgiMatchService corgiMatchService;
     @Reference
     private CorgiFeedService corgiFeedService;
+    @Reference
+    private com.corgi.order.api.CorgiOrderService corgiOrderService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -876,6 +881,6 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("chat")
     public String test(String text) {
-        return chatService.prompt(text);
+        return corgiOrderService.completeChatMessage();
     }
 }
