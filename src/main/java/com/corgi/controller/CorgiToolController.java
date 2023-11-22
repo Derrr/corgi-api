@@ -73,8 +73,8 @@ public class CorgiToolController extends BaseController {
     private CorgiMatchService corgiMatchService;
     @Reference
     private CorgiFeedService corgiFeedService;
-    @Reference
-    private com.corgi.order.api.CorgiOrderService corgiOrderService;
+//    @Reference
+//    private com.corgi.order.api.CorgiOrderService corgiOrderService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -878,9 +878,9 @@ public class CorgiToolController extends BaseController {
         }
         return new JsonResult(corgiStatisticService.getContentData(contentReq));
     }
-
-    @GetMapping("chat")
-    public String test(String text) {
-        return corgiOrderService.completeChatMessage();
-    }
+//
+//    @GetMapping("chat")
+//    public String test(String text) {
+//        return corgiOrderService.completeChatMessage();
+//    }
 }
