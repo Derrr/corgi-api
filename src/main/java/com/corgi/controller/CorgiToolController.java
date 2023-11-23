@@ -74,8 +74,8 @@ public class CorgiToolController extends BaseController {
     private CorgiMatchService corgiMatchService;
     @Reference
     private CorgiFeedService corgiFeedService;
-    @Reference
-    private CorgiGPTService corgiGPTService;
+//    @Reference
+//    private CorgiGPTService corgiGPTService;
     @Reference
     private CorgiExtraService corgiExtraService;
     @Autowired
