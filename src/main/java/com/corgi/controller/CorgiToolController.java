@@ -13,6 +13,7 @@ import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
+import com.corgi.order.api.CorgiGPTService;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.ChatService;
 import com.corgi.service.CorgiUtilService;
@@ -74,7 +75,7 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiFeedService corgiFeedService;
     @Reference
-    private com.corgi.order.api.CorgiOrderService corgiOrderService;
+    private CorgiGPTService corgiGPTService;
     @Reference
     private CorgiExtraService corgiExtraService;
     @Autowired
@@ -926,6 +927,6 @@ public class CorgiToolController extends BaseController {
             }
         }
 
-        return corgiOrderService.completeChatMessage(sb.toString(), text);
+        return corgiGPTService.completeChatMessage(sb.toString(), text);
     }
 }
