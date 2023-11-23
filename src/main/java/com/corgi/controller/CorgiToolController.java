@@ -75,6 +75,8 @@ public class CorgiToolController extends BaseController {
     private CorgiFeedService corgiFeedService;
     @Reference
     private com.corgi.order.api.CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiExtraService corgiExtraService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -880,7 +882,50 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("chat")
-    public String test(String text) {
-        return corgiOrderService.completeChatMessage();
+    public String test(String text, String userId) {
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        StringBuilder sb = new StringBuilder();
+        sb.append("姓名：").append(userDetail.getNickname()).append("\n");
+        sb.append("生日：").append(userDetail.getBirthday()).append("\n");
+        sb.append("星座：").append(userDetail.getCon()).append("\n");
+        if (userDetail.getHeight() > 0) {
+            sb.append("身高：").append(userDetail.getHeight()).append("\n");
+        }
+        if (userDetail.getWeight() > 0) {
+            sb.append("体重：").append(userDetail.getWeight()).append("\n");
+        }
+        if (!StringUtils.isEmpty(userDetail.getDesc())) {
+            sb.append("个人简介：").append(userDetail.getDesc());
+            if (!StringUtils.isEmpty(userDetail.getRelation()) && !"无".equals(userDetail.getRelation())) {
+                sb.append(" ").append(userDetail.getRelation());
+            }
+            sb.append("\n\n");
+        }
+        if (!StringUtils.isEmpty(userDetail.getRole())) {
+            sb.append("角色：").append(userDetail.getRole()).append("\n");
+        }
+        if (!StringUtils.isEmpty(userDetail.getGroup())) {
+            sb.append("身材：").append(userDetail.getGroup()).append("\n");
+        }
+        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
+        if (userExtra != null) {
+            if (!StringUtils.isEmpty(userExtra.getIncome())) {
+                sb.append("收入水平：").append(userExtra.getInterests()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getProfession())) {
+                sb.append("职业：").append(userExtra.getProfession()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getAim())) {
+                sb.append("交友目标：").append(userExtra.getAim()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getInterests())) {
+                sb.append("兴趣爱好：").append(userExtra.getInterests()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getTags())) {
+                sb.append("个人标签：").append(userExtra.getTags()).append("\n");
+            }
+        }
+
+        return corgiOrderService.completeChatMessage(sb.toString(), text);
     }
 }
