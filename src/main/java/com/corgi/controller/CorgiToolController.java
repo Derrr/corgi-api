@@ -927,6 +927,6 @@ public class CorgiToolController extends BaseController {
             }
         }
 
-        return corgiGPTService.completeChatMessage(sb.toString(), text);
+        return "";//corgiGPTService.completeChatMessage(sb.toString(), text);
     }
 }
