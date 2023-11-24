@@ -26,8 +26,8 @@ public class UserJob {
     @Autowired
     private EasemobService easemobService;
 
-    //@Async
-    //@Scheduled(fixedRate = 24 * 3600 * 1000)
+    @Async
+    @Scheduled(fixedRate = 24 * 3600 * 1000)
     public void dayRefresh() {
         List<UserProfile> profileList;
         int page = 1;
@@ -38,6 +38,7 @@ public class UserJob {
             page++;
             for (UserProfile userProfile : profileList) {
                 UserDetail userDetail = new UserDetail();
+                userDetail.setUserId(userProfile.getUserId());
                 userDetail.setNickname(userProfile.getNickname());
                 userDetail.setAvatar(userProfile.getAvatar());
                 userDetail.setAvatarCheckStatus(userProfile.getAvatarCheckStatus());
