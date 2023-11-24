@@ -61,7 +61,7 @@ public class EasemobService {
         if (!"check".equals(detail.getAvatarCheckStatus())) {
             user.put("avatarurl", detail.getAvatar());
         }
-        user.put("ext", System.currentTimeMillis());
+        user.put("ext", System.currentTimeMillis() + "");
         String token = redisTemplate.opsForValue().get(TOKEN_KEY);
         if (StringUtils.isEmpty(token)) {
             token = this.getToken();
