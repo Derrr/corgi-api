@@ -31,7 +31,7 @@ public class EasemobService {
     private static final String HOST = "https://a1.easemob.com/";
 
     private static final String USER_URL = "/users";
-    private static final String METAUSER_URL = "/metadata/users";
+    private static final String METAUSER_URL = "/metadata/user";
     private static final String TOKEN_URL = "/token";
 
     private static final String TOKEN_KEY = "Easemob-token";
