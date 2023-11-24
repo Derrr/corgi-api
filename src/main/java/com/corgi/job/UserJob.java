@@ -26,8 +26,8 @@ public class UserJob {
     @Autowired
     private EasemobService easemobService;
 
-    @Async
-    @Scheduled(fixedRate = 24 * 3600 * 1000)
+    //@Async
+    //@Scheduled(fixedRate = 24 * 3600 * 1000)
     public void dayRefresh() {
         List<UserProfile> profileList;
         int page = 1;
