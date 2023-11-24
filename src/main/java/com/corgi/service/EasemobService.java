@@ -67,14 +67,12 @@ public class EasemobService {
             token = this.getToken();
         }
         String finalToken = token;
-        executorService.execute(() -> {
-            String url = HOST + orgName + "/" + appName + METAUSER_URL + "/corgi" + detail.getUserId();
-            HashMap<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/x-www-form-urlencoded");
-            headers.put("Authorization", "Bearer " + finalToken);
-            String result = corgiUtilService.putJson(url, user, headers);
-            log.info("注册结果：" + result);
-        });
+        String url = HOST + orgName + "/" + appName + METAUSER_URL + "/corgi" + detail.getUserId();
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        headers.put("Authorization", "Bearer " + finalToken);
+        String result = corgiUtilService.putJson(url, user, headers);
+        log.info("刷新结果：" + result);
     }
 
     public void deleteUser(String userId) {
