@@ -1,5 +1,6 @@
 package com.corgi.service;
 
+import cn.hutool.http.body.FormUrlEncodedBody;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.entity.CorgiActivity;
@@ -14,13 +15,19 @@ import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.bouncycastle.jcajce.provider.digest.MD5;
@@ -134,19 +141,100 @@ public class CorgiUtilService {
         return false;
     }
 
-    public String postJson(String url, HashMap message) {
+
+    public String deleteJson(String url, HashMap<String, String> headers) {
+        String result = null;
+        CloseableHttpClient httpClient = getCloseableHttpClient();
+        HttpDelete httpDelete = new HttpDelete(url);
+        for (String key : headers.keySet()) {
+            httpDelete.setHeader(key, headers.get(key));
+        }
+        CloseableHttpResponse response = null;
+        try {
+            response = httpClient.execute(httpDelete);
+            if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                result = EntityUtils.toString(response.getEntity(), Charset.defaultCharset());
+                response.getEntity().getContent().close();
+            } else if (response != null) {
+                log.error("请求" + url + "获取失败, 状态异常：" + response.getStatusLine().getStatusCode());
+                result = EntityUtils.toString(response.getEntity(), Charset.defaultCharset());
+            }
+        } catch (IOException e) {
+            log.error("请求地址出错," + url + "错误信息:", e);
+            httpDelete.abort();
+        } catch (IllegalArgumentException e) {
+            log.error("返回参数错误", e);
+            httpDelete.abort();
+        } finally {
+            if (response != null) {
+                try {
+                    EntityUtils.consume(response.getEntity());
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public String putJson(String url, HashMap<String, String> message, HashMap<String, String> headers) {
+
+        String result = null;
+        CloseableHttpClient httpClient = getCloseableHttpClient();
+        HttpPut httpPut = new HttpPut(url);
+        CloseableHttpResponse response = null;
+        try {
+            for (String key : headers.keySet()) {
+                httpPut.setHeader(key, headers.get(key));
+            }
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            for (String key : message.keySet()) {
+                BasicNameValuePair nameValuePair = new BasicNameValuePair(key, message.get(key));
+                nameValuePairs.add(nameValuePair);
+            }
+            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
+            httpPut.setEntity(urlEncodedFormEntity);
+            response = httpClient.execute(httpPut);
+            if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                result = EntityUtils.toString(response.getEntity(), Charset.defaultCharset());
+                response.getEntity().getContent().close();
+            } else if (response != null) {
+                log.error("请求" + url + "获取失败, 状态异常：" + response.getStatusLine().getStatusCode());
+                result = EntityUtils.toString(response.getEntity(), Charset.defaultCharset());
+            }
+
+        } catch (IOException e) {
+            log.error("请求地址出错," + url + "错误信息:", e);
+            httpPut.abort();
+        } catch (IllegalArgumentException e) {
+            log.error("返回参数错误", e);
+            httpPut.abort();
+        } finally {
+            if (response != null) {
+                try {
+                    EntityUtils.consume(response.getEntity());
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public String postJson(String url, HashMap message, HashMap<String, String> headers) {
 
         String result = null;
         CloseableHttpClient httpClient = getCloseableHttpClient();
         HttpPost httpPost = new HttpPost(url);
         CloseableHttpResponse response = null;
         try {
-
-            httpPost.setHeader("Accept", "application/json;charset=UTF-8");
-            httpPost.setHeader("Content-Type", "application/json");
-
+            for (String key : headers.keySet()) {
+                httpPost.setHeader(key, headers.get(key));
+            }
             StringEntity stringEntity = new StringEntity(JSONObject.toJSONString(message));
-            stringEntity.setContentType("application/json;charset=UTF-8");
+            stringEntity.setContentType(headers.get("Content-Type"));
 
             httpPost.setEntity(stringEntity);
             response = httpClient.execute(httpPost);
