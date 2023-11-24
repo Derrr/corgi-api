@@ -38,7 +38,9 @@ public class UserJob {
             page++;
             for (UserProfile userProfile : profileList) {
                 UserDetail userDetail = new UserDetail();
-                BeanUtils.copyProperties(userProfile, userDetail);
+                userDetail.setNickname(userProfile.getNickname());
+                userDetail.setAvatar(userProfile.getAvatar());
+                userDetail.setAvatarCheckStatus(userProfile.getAvatarCheckStatus());
                 easemobService.refreshUser(userDetail);
             }
         } while (!CollectionUtils.isEmpty(profileList));
