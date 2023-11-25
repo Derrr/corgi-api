@@ -100,6 +100,7 @@ public class CorgiBarController extends BaseController {
         CorgiActivity corgiActivity = new CorgiActivity();
         corgiActivity.setCategory(CorgiActivity.CAT_BUSINESS);
         corgiActivity.setUserId(barId);
+        corgiActivity.setStatus(CorgiActivity.NOT_DELETED);
         if (!StringUtils.isEmpty(status)) {
             corgiActivity.setStatus(status);
         }
