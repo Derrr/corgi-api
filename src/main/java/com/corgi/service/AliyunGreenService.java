@@ -527,7 +527,7 @@ public class AliyunGreenService {
         for (String word : BLOCK_WORD_LIST) {
             if (text.contains(word)) {
                 textResult.setPass(false);
-                text.replaceAll(word, "**");
+                text = text.replaceAll(word, "**");
                 textResult.setContent(text);
             }
         }
@@ -603,18 +603,15 @@ public class AliyunGreenService {
     public CorgiActivity checkImageActivity(CorgiActivity activity) {
         String title = activity.getTitle();
         String content = activity.getContent();
-        CheckTextResult result = checkText(title);
-        if (!StringUtils.isEmpty(title) && !result.isPass()) {
-            boolean noFilterContent = StringUtils.isEmpty(result.getContent());
-            activity.setTitle(noFilterContent ? content.replaceAll(".", "*") : result.getContent());
+        CheckTextResult titleResult = checkText(title);
+        if (!StringUtils.isEmpty(title) && !titleResult.isPass()) {
+            activity.setTitle(titleResult.getContent());
             activity.setCheckTitle(title);
-            activity.setCheckStatus(CHECK);
         }
-        if (!StringUtils.isEmpty(content) && !result.isPass()) {
-            boolean noFilterContent = StringUtils.isEmpty(result.getContent());
-            activity.setContent(noFilterContent ? content.replaceAll(".", "*") : result.getContent());
+        CheckTextResult contentResult = checkText(content);
+        if (!StringUtils.isEmpty(content) && !contentResult.isPass()) {
+            activity.setContent(contentResult.getContent());
             activity.setCheckContent(content);
-            activity.setCheckStatus(CHECK);
         }
         return activity;
     }
