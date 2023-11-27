@@ -1368,10 +1368,30 @@ public class CorgiActivityController extends BaseController {
         query.setLoginUserId(getUserId());
         if (!getUserId().equals(query.getUserId()) && corgiUtilService.isNewUser(getUserId())) {
             return new JsonResult(new ArrayList());
-//            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
-//            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
         } else {
-            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), !CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
+            List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
+            if (query.getPage() == null || query.getPage() == 1) {
+                CorgiUserGoods goods = new CorgiUserGoods();
+                goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+                goods.setSize(3);
+                goods.setTraderId(getUserId());
+                List<CorgiUserGoods> userGoods = corgiOrderService.getHotGoods(goods);
+                if (!CollectionUtils.isEmpty(userGoods)) {
+                    List<String> activityIds = userGoods.stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
+                    List<CorgiActivity> goodsActivity = corgiActivityService.getActivityByIds(activityIds);
+                    if (!CollectionUtils.isEmpty(goodsActivity)) {
+                        Iterator<CorgiActivity> it = activities.iterator();
+                        while (it.hasNext()) {
+                            CorgiActivity activity = it.next();
+                            if (activityIds.contains(activity.getId())) {
+                                it.remove();
+                            }
+                        }
+                        activities.addAll(0, goodsActivity);
+                    }
+                }
+            }
+            return new JsonResult(convertDetail(activities, getUserId(), !CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
         }
     }
 
@@ -1802,14 +1822,12 @@ public class CorgiActivityController extends BaseController {
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
-                List<UserProfile> signUpUsers = new ArrayList<>();
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
-                        .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
                 detail.setBuyers(buyers);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
