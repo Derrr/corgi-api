@@ -1174,7 +1174,6 @@ public class CorgiActivityController extends BaseController {
             redisTemplate.opsForValue().set(timeKey + "_end", endtime, 24l, TimeUnit.HOURS);
         }
         CorgiUserGoods query = new CorgiUserGoods();
-        query.setUserId(getUserId());
         query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
         query.setStart((page - 1) * pageSize);
         query.setSize(pageSize);
