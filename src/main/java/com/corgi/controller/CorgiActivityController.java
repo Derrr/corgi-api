@@ -1164,15 +1164,22 @@ public class CorgiActivityController extends BaseController {
                                         @RequestParam("pageSize") Integer pageSize) {
         String timeKey = "query_hot_activity_" + getUserId();
         String ctime = redisTemplate.opsForValue().get(timeKey);
+        String endtime = redisTemplate.opsForValue().get(timeKey + "_end");
         if (page == 1) {
-            ctime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-            redisTemplate.opsForValue().set(timeKey, ctime, 12l, TimeUnit.HOURS);
+            Calendar calendar = Calendar.getInstance();
+            ctime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
+            calendar.add(Calendar.DATE, -7);
+            endtime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
+            redisTemplate.opsForValue().set(timeKey, ctime, 24l, TimeUnit.HOURS);
+            redisTemplate.opsForValue().set(timeKey + "_end", endtime, 24l, TimeUnit.HOURS);
         }
         CorgiUserGoods query = new CorgiUserGoods();
+        query.setUserId(getUserId());
         query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
         query.setStart((page - 1) * pageSize);
         query.setSize(pageSize);
         query.setCtime(ctime);
+        query.setUptime(endtime);
         List<CorgiUserGoods> goods = corgiOrderService.getHotGoods(query);
         if (CollectionUtils.isEmpty(goods)) {
             return new JsonResult(new ArrayList<>());
@@ -1182,7 +1189,6 @@ public class CorgiActivityController extends BaseController {
                         .map(CorgiUserGoods::getGoodsId).collect(Collectors.toList())),
                 getUserId()));
     }
-
 
     @GetMapping("get_pay_activity")
     public JsonResult getPayActivity(@RequestParam("page") Integer page,

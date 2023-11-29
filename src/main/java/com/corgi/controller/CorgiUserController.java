@@ -339,7 +339,9 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(nickname)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
-        System.out.println(aliyunGreenService.checkText(nickname));
+        if (!aliyunGreenService.checkText(nickname).isPass()) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字短，请更换昵称");
+        }
         return new JsonResult();
     }
 

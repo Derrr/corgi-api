@@ -84,14 +84,6 @@ public class CorgiHotVlogController extends BaseController {
         return new JsonResult();
     }
 
-    @GetMapping("test_add")
-    public JsonResult addHot(@RequestParam("activityId") String activityId) {
-        CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
-        mqService.sendMessage(buildCreatorMessage(activityId));
-        mqService.sendMessage(buildFollowerMessage(activityId, activity.getCategory()));
-        return new JsonResult();
-    }
-
     @PostMapping("add")
     public JsonResult addHot(@RequestBody CorgiVlogHot corgiVlogHot) {
         corgiVlogHot.setViewCount(null);
@@ -102,11 +94,7 @@ public class CorgiHotVlogController extends BaseController {
         corgiVlogHot.setType(CorgiVlogHot.TYPE.MANUAL);
         corgiVlogService.addHotVlog(corgiVlogHot);
         corgiActivityService.updateByColumn(corgiVlogHot.getActivityId(), "checkStatus", "good");
-        CorgiActivity activity = corgiActivityFeedService.getActivityById(corgiVlogHot.getActivityId());
         mqService.sendMessage(buildCreatorMessage(corgiVlogHot.getActivityId()));
-        if (CorgiActivity.CAT_PAYING.equals(activity.getCategory()) && redisTemplate.opsForValue().setIfAbsent("hot_add-" + activity.getUserId() + "-" + getUserId(), System.currentTimeMillis() + "", 7L, TimeUnit.DAYS)) {
-            mqService.sendMessage(buildFollowerMessage(corgiVlogHot.getActivityId(), activity.getCategory()));
-        }
         return new JsonResult();
     }
 
@@ -150,37 +138,5 @@ public class CorgiHotVlogController extends BaseController {
         return pushMessage;
     }
 
-    private PushMessage buildFollowerMessage(String activityId, String category) {
-        CorgiActivity activity = corgiActivityFeedService.getActivityById(activityId);
-        PushMessage pushMessage = new PushMessage();
-        pushMessage.setType(PushMessage.ACTIVITY);
-        pushMessage.setSourceUserId("corgihelper");
-        pushMessage.setMessage("热门动态提醒");
-        pushMessage.setTargetUserId(activity.getUserId());
-        UserDetail detail = corgiUserService.getUserDetailBasic(activity.getUserId());
-        HashMap<String, Object> extra = new HashMap<>();
-        extra.put("type", "907");
-        extra.put("urlType", "2");
-        extra.put("url", activityId);
-        extra.put("alertTitle", "热门动态提醒");
-        if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process")) {
-            if (StringUtils.isEmpty(activity.getVideoId())) {
-                extra.put("picUrl", activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
-            } else {
-                extra.put("picUrl", activity.getCoverUrl());
-            }
-        }
-        if (!CorgiActivity.CAT_PAYING.equals(category)) {
-            List<ActivityPic> pics = corgiPicService.getActivityPic(activityId);
-            if (CollectionUtils.isNotEmpty(pics)) {
-                extra.put("picUrl", pics.get(0).getPicUrl());
-            }
-            extra.put("desc", "你关注的好友 " + detail.getNickname() + " 发布的动态正在被围观快去看看吧！");
-        } else {
-            extra.put("desc", "你关注的好友 " + detail.getNickname() + " 发布的付费动态正在被围观快去看看吧！");
-            extra.put("showPayReadMask", true);
-        }
-        pushMessage.setExtra(extra);
-        return pushMessage;
-    }
+
 }
