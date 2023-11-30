@@ -1377,7 +1377,8 @@ public class CorgiActivityController extends BaseController {
             String key = "user_pay_activity-" + query.getUserId();
             List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
             List<String> activityIds = redisTemplate.opsForList().range(key, 0, -1);
-            if ((query.getPage() == null || query.getPage() == 1)) {
+            if ((query.getPage() == null || query.getPage() == 1)
+                    && StringUtils.isEmpty(query.getActivityId()) && !CorgiActivity.CAT_PAYING.equals(query.getCategory())) {
                 CorgiUserGoods goods = new CorgiUserGoods();
                 goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
                 goods.setSize(3);
@@ -1400,7 +1401,7 @@ public class CorgiActivityController extends BaseController {
                         activities.addAll(0, goodsActivity);
                     }
                 }
-            } else if (!CollectionUtils.isEmpty(activityIds)) {
+            } else if (!CollectionUtils.isEmpty(activityIds) && !CorgiActivity.CAT_PAYING.equals(query.getCategory())) {
                 Iterator<CorgiActivity> it = activities.iterator();
                 while (it.hasNext()) {
                     CorgiActivity activity = it.next();
