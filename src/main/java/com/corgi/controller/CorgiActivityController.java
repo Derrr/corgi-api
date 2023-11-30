@@ -1374,15 +1374,20 @@ public class CorgiActivityController extends BaseController {
         if (!getUserId().equals(query.getUserId()) && corgiUtilService.isNewUser(getUserId())) {
             return new JsonResult(new ArrayList());
         } else {
+            String key = "user_pay_activity-" + query.getUserId();
             List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
-            if (query.getPage() == null || query.getPage() == 1) {
+            List<String> activityIds = redisTemplate.opsForList().range(key, 0, -1);
+            if ((query.getPage() == null || query.getPage() == 1)) {
                 CorgiUserGoods goods = new CorgiUserGoods();
                 goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
                 goods.setSize(3);
-                goods.setTraderId(getUserId());
+                goods.setTraderId(query.getUserId());
                 List<CorgiUserGoods> userGoods = corgiOrderService.getHotGoods(goods);
                 if (!CollectionUtils.isEmpty(userGoods)) {
-                    List<String> activityIds = userGoods.stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
+                    activityIds = userGoods.stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
+                    redisTemplate.delete(key);
+                    redisTemplate.opsForList().leftPushAll(key, activityIds);
+                    redisTemplate.expire(key, 1l, TimeUnit.DAYS);
                     List<CorgiActivity> goodsActivity = corgiActivityService.getActivityByIds(activityIds);
                     if (!CollectionUtils.isEmpty(goodsActivity)) {
                         Iterator<CorgiActivity> it = activities.iterator();
@@ -1393,6 +1398,14 @@ public class CorgiActivityController extends BaseController {
                             }
                         }
                         activities.addAll(0, goodsActivity);
+                    }
+                }
+            } else if (!CollectionUtils.isEmpty(activityIds)) {
+                Iterator<CorgiActivity> it = activities.iterator();
+                while (it.hasNext()) {
+                    CorgiActivity activity = it.next();
+                    if (activityIds.contains(activity.getId())) {
+                        it.remove();
                     }
                 }
             }
