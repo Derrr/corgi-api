@@ -470,10 +470,12 @@ public class CorgiActivityController extends BaseController {
             }
         }
         CheckTextResult textResult = aliyunGreenService.checkText(activityComment.getContent(), "ad_check");
+
         if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !textResult.isPass()) {
             boolean noFilterContent = StringUtils.isEmpty(textResult.getContent());
             this.checkComment(getUserId());
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : textResult.getContent());
+            mqService.sendAdminMessage(getUserId(), "经系统检测发现您的评论【" + textResult.getOriginContent() + "】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
         Integer blackCount = corgiBlacklistService.isBlacked(activityList.get(0).getUserId(), getUserId());
         if (blackCount == 1) {
