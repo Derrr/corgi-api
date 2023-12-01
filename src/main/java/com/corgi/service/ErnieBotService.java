@@ -2,10 +2,14 @@ package com.corgi.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+@Slf4j
+@Service
 public class ErnieBotService {
 
     public static final String API_KEY = "Bt64y1zy1VUVsRxrrUSypEKB";
