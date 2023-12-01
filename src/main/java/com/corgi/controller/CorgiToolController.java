@@ -14,10 +14,7 @@ import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
 import com.corgi.order.api.CorgiGPTService;
-import com.corgi.service.AliyunGreenService;
-import com.corgi.service.ChatService;
-import com.corgi.service.CorgiUtilService;
-import com.corgi.service.MQService;
+import com.corgi.service.*;
 
 
 import com.corgi.user.api.*;
@@ -75,7 +72,7 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiFeedService corgiFeedService;
     @Reference
-    private CorgiGPTService corgiGPTService;
+    private ErnieBotService ernieBotService;
     @Reference
     private CorgiExtraService corgiExtraService;
     @Autowired
@@ -927,6 +924,6 @@ public class CorgiToolController extends BaseController {
             }
         }
 
-        return corgiGPTService.completeChatMessage(sb.toString(), text);
+        return ernieBotService.getMessage("1",sb.toString(), text);
     }
 }
