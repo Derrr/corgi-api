@@ -884,6 +884,15 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("chat")
     public String test(String text, String userId) {
+        return ernieBotService.getMessage("1", getUserMessage(userId), text);
+    }
+
+    @GetMapping("yinyuan")
+    public String yinyuantest(String userId) {
+        return ernieBotService.getMessage("1", getUserMessage(userId), "以下是我的信息：\n" + getUserMessage("7") + "\n请问我和你适合谈恋爱吗，我应该如何追求你？");
+    }
+
+    private String getUserMessage(String userId) {
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
         StringBuilder sb = new StringBuilder();
         sb.append("姓名：").append(userDetail.getNickname()).append("\n");
@@ -926,7 +935,6 @@ public class CorgiToolController extends BaseController {
                 sb.append("个人标签：").append(userExtra.getTags()).append("\n");
             }
         }
-
-        return ernieBotService.getMessage("1", sb.toString(), text);
+        return sb.toString();
     }
 }
