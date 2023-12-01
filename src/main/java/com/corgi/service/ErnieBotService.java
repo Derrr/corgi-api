@@ -46,7 +46,7 @@ public class ErnieBotService {
         Response response = null;
         try {
             response = HTTP_CLIENT.newCall(request).execute();
-            return response.body().string();
+            return JSONObject.parseObject(response.body().string()).getString("result");
         } catch (IOException e) {
             e.printStackTrace();
             if (response != null && response.body() != null) {
