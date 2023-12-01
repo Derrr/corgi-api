@@ -72,7 +72,7 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiFeedService corgiFeedService;
     @Reference
-    private ErnieBotService ernieBotService;
+    private CorgiGPTService corgiGPTService;
     @Reference
     private CorgiExtraService corgiExtraService;
     @Autowired
@@ -85,6 +85,9 @@ public class CorgiToolController extends BaseController {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private ChatService chatService;
+    @Autowired
+    private ErnieBotService ernieBotService;
+
     @Autowired
     private MQService mqService;
 
@@ -924,6 +927,6 @@ public class CorgiToolController extends BaseController {
             }
         }
 
-        return ernieBotService.getMessage("1",sb.toString(), text);
+        return ernieBotService.getMessage("1", sb.toString(), text);
     }
 }
