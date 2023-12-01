@@ -7,6 +7,7 @@ import okhttp3.*;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -15,7 +16,11 @@ public class ErnieBotService {
     public static final String API_KEY = "Bt64y1zy1VUVsRxrrUSypEKB";
     public static final String SECRET_KEY = "19N8q14nSTVSENiSSwoF66CLzov5cf0z";
 
-    static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().build();
+    static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder()
+            .callTimeout(120, TimeUnit.SECONDS)
+            .pingInterval(5, TimeUnit.SECONDS)
+            .readTimeout(600, TimeUnit.SECONDS)
+            .build();
 
     public String getMessage(String userId, String system, String message) {
         JSONObject messagebody = new JSONObject();
