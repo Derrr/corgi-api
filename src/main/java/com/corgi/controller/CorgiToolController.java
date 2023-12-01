@@ -889,7 +889,7 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("yinyuan")
     public String yinyuantest(String userId) {
-        return ernieBotService.getMessage("1", getUserMessage(userId), "以下是我的信息：\n" + getUserMessage("7") + "\n请问我和你适合谈恋爱吗？具体有哪些地方是合拍的？哪些地方不合拍？基于你和我的兴趣爱好，我应该如何追求你？");
+        return ernieBotService.getMessage("1", getUserMessage(userId), "以下是我的信息：\n" + getUserMessage("7") + "\n请问我和你适合谈恋爱吗？如果你给我们两个打分，我们的合拍指数是多少？具体有哪些地方是合拍的？哪些地方不合拍？基于你和我的兴趣爱好，我应该如何追求你？");
     }
 
     private String getUserMessage(String userId) {
