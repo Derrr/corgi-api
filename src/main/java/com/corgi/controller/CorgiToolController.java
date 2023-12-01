@@ -920,7 +920,7 @@ public class CorgiToolController extends BaseController {
         UserExtra userExtra = corgiExtraService.getUserExtra(userId);
         if (userExtra != null) {
             if (!StringUtils.isEmpty(userExtra.getIncome())) {
-                sb.append("收入水平：").append(userExtra.getInterests()).append("\n");
+                sb.append("收入水平：").append(userExtra.getIncome()).append("\n");
             }
             if (!StringUtils.isEmpty(userExtra.getProfession())) {
                 sb.append("职业：").append(userExtra.getProfession()).append("\n");
