@@ -570,6 +570,9 @@ public class CorgiUserController extends BaseController {
                 log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
+            if (!userId.equals(loginUserId)) {
+                userDetail.setCheckNickname(null);
+            }
             if (userDetail.getRole() == null) {
                 userDetail.setRole("");
             }
@@ -849,7 +852,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("follow")
-    public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+    public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String
+            targetUserId) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -876,7 +880,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("unfollow")
-    public JsonResult unfollow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+    public JsonResult unfollow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String
+            targetUserId) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -885,7 +890,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("is_followed")
-    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam(name = "targetUserId", required = false) String targetUserId) {
+    public JsonResult isFollowed(@RequestParam("userId") String
+                                         userId, @RequestParam(name = "targetUserId", required = false) String targetUserId) {
         if (StringUtils.isEmpty(targetUserId)) {
             return new JsonResult(0);
         }
@@ -903,7 +909,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_share_user")
-    public JsonResult getShareUser(@RequestParam("userId") String userId, @RequestParam(required = false, name = "name") String name,
+    public JsonResult getShareUser(@RequestParam("userId") String
+                                           userId, @RequestParam(required = false, name = "name") String name,
                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getShareUserByPage(userId, name, page, pageSize);
         if (StringUtils.isNotEmpty(name)) {
@@ -937,7 +944,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("read_follow")
-    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followedUserId") String followedUserId) {
+    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followedUserId") String
+            followedUserId) {
         corgiUserFollowService.readFollowUser(followedUserId, userId);
         return new JsonResult();
     }
@@ -968,7 +976,8 @@ public class CorgiUserController extends BaseController {
 
 
     @GetMapping("update_user_tag")
-    public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam(required = false, name = "tags") List<String> tags) {
+    public JsonResult updateUserTag(@RequestParam("userId") String
+                                            userId, @RequestParam(required = false, name = "tags") List<String> tags) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -977,7 +986,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("update_user_interest")
-    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam(required = false, name = "interests") List<String> interests) {
+    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String
+            category, @RequestParam(required = false, name = "interests") List<String> interests) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -1086,7 +1096,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/call_user_city")
-    public JsonResult callCity(@RequestParam("city") String city, @RequestParam(required = false, name = "userId") String userId) {
+    public JsonResult callCity(@RequestParam("city") String
+                                       city, @RequestParam(required = false, name = "userId") String userId) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -1256,7 +1267,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_verify_token")
-    public JsonResult getVerifyToken(@RequestParam(required = false, name = "avatar") String avatar) throws PermissionException {
+    public JsonResult getVerifyToken(@RequestParam(required = false, name = "avatar") String avatar) throws
+            PermissionException {
         String userId = getUserId();
         if (!hasUserId()) {
             userId = "1";
