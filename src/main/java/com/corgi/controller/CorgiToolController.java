@@ -414,8 +414,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_nickname")
-    public JsonResult agreeNickname(@RequestParam("userId") String
-                                            userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
+    public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
         if (!StringUtils.isEmpty(nickname)) {
             String result = corgiUserService.updateUserNickname(userId, nickname, "");
             if (!CorgiConstants.SUCCESS.equals(result)) {
@@ -442,6 +441,11 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("agree_user")
     public JsonResult agreeUser(@RequestParam("userId") String userId) {
+        UserDetail oldDetail = corgiUserService.getUserDetailBasic(userId);
+        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
+            corgiUserService.updateUserNickname(userId, oldDetail.getCheckNickname(), "");
+        }
+
         UserDetail detail = new UserDetail();
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
