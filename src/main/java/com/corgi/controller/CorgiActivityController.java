@@ -1380,7 +1380,9 @@ public class CorgiActivityController extends BaseController {
             List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
             List<String> activityIds = redisTemplate.opsForList().range(key, 0, -1);
             if ((query.getPage() == null || query.getPage() == 1)
-                    && StringUtils.isEmpty(query.getActivityId()) && !CorgiActivity.CAT_PAYING.equals(query.getCategory())) {
+                    && StringUtils.isEmpty(query.getActivityId())
+                    && !CorgiActivity.CAT_PAYING.equals(query.getCategory())
+                    && !getUserId().equals(query.getUserId())) {
                 CorgiUserGoods goods = new CorgiUserGoods();
                 goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
                 goods.setSize(3);
