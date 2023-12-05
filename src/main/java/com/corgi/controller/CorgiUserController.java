@@ -374,26 +374,30 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(userDetail.getNickname())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
-        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getNickname())) {
+        UserDetail oldDetail = corgiUserService.getUserDetailBasic(userDetail.getUserId());
+        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
         }
 
-        String result;
-        CheckTextResult checkTextResult = aliyunGreenService.checkText(userDetail.getNickname());
-        if (checkTextResult.isPass()) {
-            result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
-            userDetail.setCheckStatus(AliyunGreenService.PASS);
-            corgiUserService.updateDetail(userDetail);
-        } else {
-            result = corgiUserService.updateUserNickname(userDetail.getUserId(), checkTextResult.getContent(), userDetail.getNickname());
-            userDetail.setCheckStatus(AliyunGreenService.CHECK);
-            corgiUserService.updateDetail(userDetail);
-            //mailService.sendCheckMessage("用户：", userDetail.getUserId());
-        }
-        if (!CorgiConstants.SUCCESS.equals(result)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
-        }
-        return getJsonResult(result);
+//        String result = "";
+//        CheckTextResult checkTextResult = aliyunGreenService.checkText(userDetail.getNickname());
+//        if (checkTextResult.isPass()) {
+//            result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
+//            userDetail.setCheckStatus(AliyunGreenService.PASS);
+//            corgiUserService.updateDetail(userDetail);
+//        } else {
+//            result = corgiUserService.updateUserNickname(userDetail.getUserId(), checkTextResult.getContent(), userDetail.getNickname());
+
+        userDetail.setCheckNickname(userDetail.getNickname());
+        userDetail.setNickname(oldDetail.getNickname());
+        userDetail.setCheckStatus(AliyunGreenService.CHECK);
+        corgiUserService.updateDetail(userDetail);
+        //mailService.sendCheckMessage("用户：", userDetail.getUserId());
+//        }
+//        if (!CorgiConstants.SUCCESS.equals(result)) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
+//        }
+        return getJsonResult("");
     }
 
     @PostMapping("/update_prefer_group")
