@@ -1376,44 +1376,44 @@ public class CorgiActivityController extends BaseController {
         if (!getUserId().equals(query.getUserId()) && corgiUtilService.isNewUser(getUserId())) {
             return new JsonResult(new ArrayList());
         } else {
-            String key = "user_pay_activity-" + query.getUserId();
+//            String key = "user_pay_activity-" + query.getUserId();
             List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
-            List<String> activityIds = redisTemplate.opsForList().range(key, 0, -1);
-            if ((query.getPage() == null || query.getPage() == 1)
-                    && StringUtils.isEmpty(query.getActivityId())
-                    && !CorgiActivity.CAT_PAYING.equals(query.getCategory())
-                    && !getUserId().equals(query.getUserId())) {
-                CorgiUserGoods goods = new CorgiUserGoods();
-                goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
-                goods.setSize(3);
-                goods.setTraderId(query.getUserId());
-                List<CorgiUserGoods> userGoods = corgiOrderService.getHotGoods(goods);
-                if (!CollectionUtils.isEmpty(userGoods)) {
-                    activityIds = userGoods.stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
-                    redisTemplate.delete(key);
-                    redisTemplate.opsForList().leftPushAll(key, activityIds);
-                    redisTemplate.expire(key, 1l, TimeUnit.DAYS);
-                    List<CorgiActivity> goodsActivity = corgiActivityService.getActivityByIds(activityIds);
-                    if (!CollectionUtils.isEmpty(goodsActivity)) {
-                        Iterator<CorgiActivity> it = activities.iterator();
-                        while (it.hasNext()) {
-                            CorgiActivity activity = it.next();
-                            if (activityIds.contains(activity.getId())) {
-                                it.remove();
-                            }
-                        }
-                        activities.addAll(0, goodsActivity);
-                    }
-                }
-            } else if (!CollectionUtils.isEmpty(activityIds) && !CorgiActivity.CAT_PAYING.equals(query.getCategory())) {
-                Iterator<CorgiActivity> it = activities.iterator();
-                while (it.hasNext()) {
-                    CorgiActivity activity = it.next();
-                    if (activityIds.contains(activity.getId())) {
-                        it.remove();
-                    }
-                }
-            }
+//            List<String> activityIds = redisTemplate.opsForList().range(key, 0, -1);
+//            if ((query.getPage() == null || query.getPage() == 1)
+//                    && StringUtils.isEmpty(query.getActivityId())
+//                    && !CorgiActivity.CAT_PAYING.equals(query.getCategory())
+//                    && !getUserId().equals(query.getUserId())) {
+//                CorgiUserGoods goods = new CorgiUserGoods();
+//                goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+//                goods.setSize(3);
+//                goods.setTraderId(query.getUserId());
+//                List<CorgiUserGoods> userGoods = corgiOrderService.getHotGoods(goods);
+//                if (!CollectionUtils.isEmpty(userGoods)) {
+//                    activityIds = userGoods.stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
+//                    redisTemplate.delete(key);
+//                    redisTemplate.opsForList().leftPushAll(key, activityIds);
+//                    redisTemplate.expire(key, 1l, TimeUnit.DAYS);
+//                    List<CorgiActivity> goodsActivity = corgiActivityService.getActivityByIds(activityIds);
+//                    if (!CollectionUtils.isEmpty(goodsActivity)) {
+//                        Iterator<CorgiActivity> it = activities.iterator();
+//                        while (it.hasNext()) {
+//                            CorgiActivity activity = it.next();
+//                            if (activityIds.contains(activity.getId())) {
+//                                it.remove();
+//                            }
+//                        }
+//                        activities.addAll(0, goodsActivity);
+//                    }
+//                }
+//            } else if (!CollectionUtils.isEmpty(activityIds) && !CorgiActivity.CAT_PAYING.equals(query.getCategory())) {
+//                Iterator<CorgiActivity> it = activities.iterator();
+//                while (it.hasNext()) {
+//                    CorgiActivity activity = it.next();
+//                    if (activityIds.contains(activity.getId())) {
+//                        it.remove();
+//                    }
+//                }
+//            }
             return new JsonResult(convertDetail(activities, getUserId(), !CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
         }
     }
