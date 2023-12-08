@@ -22,6 +22,7 @@ import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.CharacterUtils;
@@ -335,12 +336,20 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/check_nickname")
-    public JsonResult checkNickname(@RequestParam("nickname") String nickname) {
+    public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
         if (StringUtils.isEmpty(nickname)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            String expireDate = corgiUserService.getUserVipExpire(getUserId());
+            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
+            } else {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
+            }
+        }
         if (!aliyunGreenService.checkText(nickname).isPass()) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字短，请更换昵称");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字段，请更换昵称");
         }
         return new JsonResult();
     }
@@ -376,27 +385,20 @@ public class CorgiUserController extends BaseController {
         }
         UserDetail oldDetail = corgiUserService.getUserDetailBasic(userDetail.getUserId());
         if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
         }
-
-//        String result = "";
-//        CheckTextResult checkTextResult = aliyunGreenService.checkText(userDetail.getNickname());
-//        if (checkTextResult.isPass()) {
-//            result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
-//            userDetail.setCheckStatus(AliyunGreenService.PASS);
-//            corgiUserService.updateDetail(userDetail);
-//        } else {
-//            result = corgiUserService.updateUserNickname(userDetail.getUserId(), checkTextResult.getContent(), userDetail.getNickname());
 
         userDetail.setCheckNickname(userDetail.getNickname());
         userDetail.setNickname(oldDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
-        //mailService.sendCheckMessage("用户：", userDetail.getUserId());
-//        }
-//        if (!CorgiConstants.SUCCESS.equals(result)) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
-//        }
+
+        String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
+        if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+            redisTemplate.opsForValue().set(CacheConstants.NICKNAME_UPDATE + userDetail.getUserId(), System.currentTimeMillis() + "", 7l, TimeUnit.DAYS);
+        } else {
+            redisTemplate.opsForValue().set(CacheConstants.NICKNAME_UPDATE + userDetail.getUserId(), System.currentTimeMillis() + "", 30l, TimeUnit.DAYS);
+        }
         return getJsonResult("");
     }
 

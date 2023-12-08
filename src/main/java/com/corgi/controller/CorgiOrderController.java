@@ -14,6 +14,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.util.RequestUtil;
@@ -300,6 +301,7 @@ public class CorgiOrderController extends BaseController {
                     return result;
                 }
             }
+            String preExpireTime = corgiUserService.getUserVipExpire(getUserId());
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 BarReservation update = new BarReservation();
@@ -307,6 +309,12 @@ public class CorgiOrderController extends BaseController {
                 update.setTradeNo(result.get("orderNo") + "");
                 update.setMerchId(merchId);
                 corgiReserveService.updateReservation(update);
+            }
+            String afterExpireTime = corgiUserService.getUserVipExpire(getUserId());
+            //购买vip更新昵称更改时间
+            if (!StringUtils.isEmpty(afterExpireTime) && !"-".equals(afterExpireTime)
+                    && (StringUtils.isEmpty(preExpireTime) || "-".equals(preExpireTime))) {
+                redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + getUserId());
             }
             return new JsonResult(result);
         } finally {

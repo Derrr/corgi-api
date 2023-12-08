@@ -7,6 +7,7 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.RequestUtil;
@@ -416,6 +417,10 @@ public class CorgiToolController extends BaseController {
     @GetMapping("agree_nickname")
     public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
         if (!StringUtils.isEmpty(nickname)) {
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+            if (nickname.equals(userDetail.getNickname())) {
+                redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + userId);
+            }
             String result = corgiUserService.updateUserNickname(userId, nickname, "");
             if (!CorgiConstants.SUCCESS.equals(result)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
