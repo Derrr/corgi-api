@@ -343,7 +343,7 @@ public class CorgiUserController extends BaseController {
         if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
             String expireDate = corgiUserService.getUserVipExpire(getUserId());
             if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
-                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
+                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
             } else {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
             }
