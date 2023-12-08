@@ -337,9 +337,6 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/check_nickname")
     public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
-        if (StringUtils.isEmpty(nickname)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
-        }
         if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
             String expireDate = corgiUserService.getUserVipExpire(getUserId());
             if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
