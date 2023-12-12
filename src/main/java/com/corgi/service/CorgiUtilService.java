@@ -125,19 +125,19 @@ public class CorgiUtilService {
     }
 
     public boolean isNewUser(String userId) {
-        String channel = RequestUtil.getChannel();
-        if (CHANNELS.contains(channel) && ("2.2.3".equals(RequestUtil.getVersion()) || StringUtils.isEmpty(RequestUtil.getVersion()))) {
-            UserLogin userLogin = corgiUserService.getUserLogin(userId);
-            if ("13700000000".equals(userLogin.getTelNo())) {
-                return true;
-            }
-            if (userLogin != null && userLogin.getCtime() != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.HOUR, -24);
-                return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
-            }
-        }
+//        String channel = RequestUtil.getChannel();
+//        if (CHANNELS.contains(channel) && ("2.2.3".equals(RequestUtil.getVersion()) || StringUtils.isEmpty(RequestUtil.getVersion()))) {
+//            UserLogin userLogin = corgiUserService.getUserLogin(userId);
+//            if ("13700000000".equals(userLogin.getTelNo())) {
+//                return true;
+//            }
+//            if (userLogin != null && userLogin.getCtime() != null) {
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                Calendar calendar = Calendar.getInstance();
+//                calendar.add(Calendar.HOUR, -24);
+//                return userLogin.getCtime().compareTo(sdf.format(calendar.getTime())) > 0;
+//            }
+//        }
         return false;
     }
 
