@@ -316,12 +316,12 @@ public class CorgiUserController extends BaseController {
             userDetail.setUserId(getUserId());
         }
         String key = "update_user-" + getUserId();
-        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
-        }
-        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
-        }
+//        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
+//        }
+//        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+//        }
         if (userDetail.getAvatar() != null && userDetail.getAvatar().contains(UserDetail.VERIFIED)) {
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
         }
@@ -388,7 +388,7 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
         }
 
-            userDetail.setCheckNickname(userDetail.getNickname());
+        userDetail.setCheckNickname(userDetail.getNickname());
         userDetail.setNickname(oldDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
