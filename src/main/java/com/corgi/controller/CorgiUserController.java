@@ -399,7 +399,7 @@ public class CorgiUserController extends BaseController {
         } else {
             redisTemplate.opsForValue().set(CacheConstants.NICKNAME_UPDATE + userDetail.getUserId(), System.currentTimeMillis() + "", 30l, TimeUnit.DAYS);
         }
-        return getJsonResult("");
+        return new JsonResult();
     }
 
     @PostMapping("/update_prefer_group")
