@@ -210,6 +210,7 @@ public class AliyunGreenService {
         CheckTextResult textResult = this.checkText(desc);
         if (!textResult.isPass()) {
             userDetail.setDesc(textResult.getContent());
+            mqService.sendAdminMessage(userDetail.getUserId(),"经系统检测发现您的个人介绍【"+textResult.getOriginContent()+"】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
         return userDetail;
     }
