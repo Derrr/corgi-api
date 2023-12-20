@@ -387,8 +387,7 @@ public class CorgiUserController extends BaseController {
         if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
         }
-
-        userDetail.setCheckNickname(userDetail.getNickname());
+        corgiUserService.updateUserNickname(userDetail.getUserId(), oldDetail.getNickname(), userDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
         mqService.sendAdminMessage(userDetail.getUserId(),"您的昵称修改正在审核中，我们将在24小时内完成审核，请耐心等待。");
