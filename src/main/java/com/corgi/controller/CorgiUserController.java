@@ -389,7 +389,6 @@ public class CorgiUserController extends BaseController {
         }
 
         userDetail.setCheckNickname(userDetail.getNickname());
-        userDetail.setNickname(oldDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
         mqService.sendAdminMessage(userDetail.getUserId(),"您的昵称修改正在审核中，我们将在24小时内完成审核，请耐心等待。");
