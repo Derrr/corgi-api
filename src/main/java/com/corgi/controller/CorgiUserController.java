@@ -337,14 +337,14 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/check_nickname")
     public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
-//        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
-//            String expireDate = corgiUserService.getUserVipExpire(getUserId());
-//            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
-//                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
-//            } else {
-//                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
-//            }
-//        }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            String expireDate = corgiUserService.getUserVipExpire(getUserId());
+            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
+            } else {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
+            }
+        }
         if (!aliyunGreenService.checkText(nickname).isPass()) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字段，请更换昵称");
         }
@@ -384,9 +384,9 @@ public class CorgiUserController extends BaseController {
         if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
         }
-//        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
-//        }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
+        }
         corgiUserService.updateUserNickname(userDetail.getUserId(), oldDetail.getNickname(), userDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
