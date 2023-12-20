@@ -390,7 +390,7 @@ public class CorgiUserController extends BaseController {
         corgiUserService.updateUserNickname(userDetail.getUserId(), oldDetail.getNickname(), userDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
-        mqService.sendAdminMessage(userDetail.getUserId(),"您的昵称修改正在审核中，我们将在24小时内完成审核，请耐心等待。");
+        mqService.sendAdminMessage(userDetail.getUserId(), "您的昵称修改正在审核中，我们将在24小时内完成审核，请耐心等待。");
         String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
         if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
             redisTemplate.opsForValue().set(CacheConstants.NICKNAME_UPDATE + userDetail.getUserId(), System.currentTimeMillis() + "", 7l, TimeUnit.DAYS);
@@ -1226,7 +1226,7 @@ public class CorgiUserController extends BaseController {
                     profiles.add(userMatchProfile);
                     userMatchProfile.setOnlineStatus(0);
                     if (userDetail.getTime() != null) {
-                        userMatchProfile.setUptime(userDetail.getTime());
+                        userMatchProfile.setUptime(userDetail.getTime() + "");
                         if (userDetail.getTime() > threshold) {
                             userMatchProfile.setOnlineStatus(1);
                         }
@@ -1242,7 +1242,7 @@ public class CorgiUserController extends BaseController {
                 profiles.add(userMatchProfile);
                 userMatchProfile.setOnlineStatus(0);
                 if (userDetail.getTime() != null) {
-                    userMatchProfile.setUptime(userDetail.getTime());
+                    userMatchProfile.setUptime(userDetail.getTime() + "");
                     if (userDetail.getTime() > threshold) {
                         userMatchProfile.setOnlineStatus(1);
                     }
