@@ -152,7 +152,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("query_activity")
-    public JsonResult queryActivity(CorgiActivity activity, @RequestParam(name = "sort", required = false) String sort, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult queryActivity(CorgiActivity activity, @RequestParam(name = "sort", required = false) String sort, @RequestParam(name = "topic", required = false) String topic, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
@@ -160,15 +160,15 @@ public class CorgiToolController extends BaseController {
             ActivityQuery activityQuery = new ActivityQuery();
             activityQuery.setPageSize(pageSize);
             activityQuery.setPage(page);
-            if (!CollectionUtils.isEmpty(activity.getTopics())) {
-                String topic = activity.getTopics().get(0);
-                activityQuery.setTopic(topic);
-            }
+            activityQuery.setTopic(topic);
             if ("likeAsc".equals(sort)) {
                 activityQuery.setSort(sort);
             }
             List<String> activityIds = corgiUserActivityService.queryHotActivity(activityQuery);
             return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
+        }
+        if (!StringUtils.isEmpty(topic)) {
+            activity.setTopics(Arrays.asList(topic));
         }
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
         return new JsonResult(activityList);
