@@ -288,8 +288,16 @@ public class CorgiUserController extends BaseController {
         userDetail.setBgCheckStatus(AliyunGreenService.PASS);
         userDetail.setBgDataId("-");
         String result = corgiUserService.addDetail(userDetail);
-        mqService.sendRegisterMessage(PushMessage.builder()
-                .targetUserId(userDetail.getUserId()).build());
+        mqService.sendAdminMessage(userDetail.getUserId(),
+                "有爱的\uD83C\uDE51基社区终于等到你啦！还不知道怎么玩转CORGI的你，可以参考下面的新手五步骤：\n" +
+                "1.完善个人资料\n" +
+                "2.发布动态\n" +
+                "3.筛选开启匹配\n" +
+                "4.发布付费可见动态\n" +
+                "5.查看自己的收益\n" +
+                "提醒大家共建良好文明社区哦，审核小哥哥一旦发现违规信息，将做删除处理，还会有小黑屋⚠️哦！");
+//        mqService.sendRegisterMessage(PushMessage.builder()
+//                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
     }
 
