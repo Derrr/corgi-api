@@ -470,10 +470,12 @@ public class CorgiActivityController extends BaseController {
             }
         }
         CheckTextResult textResult = aliyunGreenService.checkText(activityComment.getContent(), "ad_check");
+
         if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !textResult.isPass()) {
             boolean noFilterContent = StringUtils.isEmpty(textResult.getContent());
             this.checkComment(getUserId());
             activityComment.setContent(noFilterContent ? activityComment.getContent().replaceAll(".", "*") : textResult.getContent());
+            mqService.sendAdminMessage(getUserId(), "经系统检测发现您的评论【" + textResult.getOriginContent() + "】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
         Integer blackCount = corgiBlacklistService.isBlacked(activityList.get(0).getUserId(), getUserId());
         if (blackCount == 1) {
@@ -1164,15 +1166,21 @@ public class CorgiActivityController extends BaseController {
                                         @RequestParam("pageSize") Integer pageSize) {
         String timeKey = "query_hot_activity_" + getUserId();
         String ctime = redisTemplate.opsForValue().get(timeKey);
+        String endtime = redisTemplate.opsForValue().get(timeKey + "_end");
         if (page == 1) {
-            ctime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-            redisTemplate.opsForValue().set(timeKey, ctime, 12l, TimeUnit.HOURS);
+            Calendar calendar = Calendar.getInstance();
+            ctime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
+            calendar.add(Calendar.DATE, -7);
+            endtime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
+            redisTemplate.opsForValue().set(timeKey, ctime, 24l, TimeUnit.HOURS);
+            redisTemplate.opsForValue().set(timeKey + "_end", endtime, 24l, TimeUnit.HOURS);
         }
         CorgiUserGoods query = new CorgiUserGoods();
         query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
         query.setStart((page - 1) * pageSize);
         query.setSize(pageSize);
         query.setCtime(ctime);
+        query.setUptime(endtime);
         List<CorgiUserGoods> goods = corgiOrderService.getHotGoods(query);
         if (CollectionUtils.isEmpty(goods)) {
             return new JsonResult(new ArrayList<>());
@@ -1182,7 +1190,6 @@ public class CorgiActivityController extends BaseController {
                         .map(CorgiUserGoods::getGoodsId).collect(Collectors.toList())),
                 getUserId()));
     }
-
 
     @GetMapping("get_pay_activity")
     public JsonResult getPayActivity(@RequestParam("page") Integer page,
@@ -1266,9 +1273,9 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> result = new ArrayList<>();
         if (activities != null) {
             for (CorgiActivity activity : activities) {
-                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
-                    continue;
-                }
+//                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
+//                    continue;
+//                }
                 if (!AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     result.add(activity);
                 }
@@ -1368,10 +1375,46 @@ public class CorgiActivityController extends BaseController {
         query.setLoginUserId(getUserId());
         if (!getUserId().equals(query.getUserId()) && corgiUtilService.isNewUser(getUserId())) {
             return new JsonResult(new ArrayList());
-//            List<String> activityIds = corgiFeedService.getPopularFeed(getUserId(), query.getPageSize());
-//            return new JsonResult(convertDetail(corgiActivityService.getActivityByIds(activityIds), getUserId(), false));
         } else {
-            return new JsonResult(convertDetail(corgiActivityService.getFeedActivity(query), getUserId(), !CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
+//            String key = "user_pay_activity-" + query.getUserId();
+            List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
+//            List<String> activityIds = redisTemplate.opsForList().range(key, 0, -1);
+//            if ((query.getPage() == null || query.getPage() == 1)
+//                    && StringUtils.isEmpty(query.getActivityId())
+//                    && !CorgiActivity.CAT_PAYING.equals(query.getCategory())
+//                    && !getUserId().equals(query.getUserId())) {
+//                CorgiUserGoods goods = new CorgiUserGoods();
+//                goods.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+//                goods.setSize(3);
+//                goods.setTraderId(query.getUserId());
+//                List<CorgiUserGoods> userGoods = corgiOrderService.getHotGoods(goods);
+//                if (!CollectionUtils.isEmpty(userGoods)) {
+//                    activityIds = userGoods.stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
+//                    redisTemplate.delete(key);
+//                    redisTemplate.opsForList().leftPushAll(key, activityIds);
+//                    redisTemplate.expire(key, 1l, TimeUnit.DAYS);
+//                    List<CorgiActivity> goodsActivity = corgiActivityService.getActivityByIds(activityIds);
+//                    if (!CollectionUtils.isEmpty(goodsActivity)) {
+//                        Iterator<CorgiActivity> it = activities.iterator();
+//                        while (it.hasNext()) {
+//                            CorgiActivity activity = it.next();
+//                            if (activityIds.contains(activity.getId())) {
+//                                it.remove();
+//                            }
+//                        }
+//                        activities.addAll(0, goodsActivity);
+//                    }
+//                }
+//            } else if (!CollectionUtils.isEmpty(activityIds) && !CorgiActivity.CAT_PAYING.equals(query.getCategory())) {
+//                Iterator<CorgiActivity> it = activities.iterator();
+//                while (it.hasNext()) {
+//                    CorgiActivity activity = it.next();
+//                    if (activityIds.contains(activity.getId())) {
+//                        it.remove();
+//                    }
+//                }
+//            }
+            return new JsonResult(convertDetail(activities, getUserId(), !CorgiUtilService.CHANNELS.contains(RequestUtil.getChannel())));
         }
     }
 
@@ -1669,9 +1712,9 @@ public class CorgiActivityController extends BaseController {
                     || ("fail".equals(activity.getCheckStatus()) || "check".equals(activity.getCheckStatus()))) {
                 continue;
             }
-            if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
-                continue;
-            }
+//            if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
+//                continue;
+//            }
             if (AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                 continue;
             }
@@ -1729,10 +1772,10 @@ public class CorgiActivityController extends BaseController {
                     it.remove();
                     continue;
                 }
-                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) && !getUserId().equals(activity.getUserId())) {
-                    it.remove();
-                    continue;
-                }
+//                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory())) && !getUserId().equals(activity.getUserId())) {
+//                    it.remove();
+//                    continue;
+//                }
                 if (!showNotGood && !userId.equals(activity.getUserId()) && AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     it.remove();
                     continue;
@@ -1802,14 +1845,12 @@ public class CorgiActivityController extends BaseController {
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
-                List<UserProfile> signUpUsers = new ArrayList<>();
                 Integer shareCount = corgiShareService.countShare(activity.getId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)
                         .initSize(height, width)
                         .initCommentCount(commentCount)
                         .initLikeCount(likeCount)
                         .initLikeUsers(users)
-                        .initSignUpUsers(signUpUsers)
                         .hasLike(hasLike);
                 detail.setBuyers(buyers);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));

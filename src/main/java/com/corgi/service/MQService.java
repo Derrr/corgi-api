@@ -21,6 +21,20 @@ public class MQService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    public void sendAdminMessage(String targetUserId, String message) {
+        PushMessage pushMessage = PushMessage.builder()
+                .type(PushMessage.DEFAULT)
+                .sourceUserId("corgihelper")
+                .targetUserId(targetUserId)
+                .message(message)
+                .build();
+        try {
+            rabbitTemplate.convertAndSend(CorgiQueueName.PUSH_MESSAGE_QUEUE, pushMessage);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
     public void sendMessage(PushMessage pushMessage) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.PUSH_MESSAGE_QUEUE, pushMessage);
@@ -29,7 +43,7 @@ public class MQService {
         }
     }
 
-    public void sendSilentMessage(PushMessage pushMessage){
+    public void sendSilentMessage(PushMessage pushMessage) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.SILENT_PUSH_QUEUE, pushMessage);
         } catch (Exception e) {
@@ -85,7 +99,7 @@ public class MQService {
         }
     }
 
-    public void sendDate(PushMessage pushMessage){
+    public void sendDate(PushMessage pushMessage) {
         try {
             rabbitTemplate.convertAndSend(CorgiQueueName.USER_DATE_QUEUE, pushMessage);
         } catch (Exception e) {

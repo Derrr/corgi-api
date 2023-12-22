@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.entity.CheckTextResult;
 import com.corgi.entity.CorgiUserEvaluation;
 import com.corgi.entity.CorgiUserResult;
 import com.corgi.service.AliyunGreenService;
@@ -138,10 +139,6 @@ public class EvaluateController extends BaseController {
             }
             this.addUserEvaluation(userEvaluation, false);
         } else {
-//            int match = corgiUserFollowService.isFollowed(getUserId(), userEvaluation.getUserId());
-//            if (match < 3) {
-//                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
-//            }
             String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
             if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
@@ -157,14 +154,15 @@ public class EvaluateController extends BaseController {
     }
 
     private String addUserEvaluation(UserEvaluation userEvaluation, boolean send) {
-        if (aliyunGreenService.checkText(userEvaluation.getTag()).isPass()) {
-            userEvaluation.setCheckStatus(AliyunGreenService.PASS);
-        } else {
-            userEvaluation.setCheckStatus(AliyunGreenService.CHECK);
+        userEvaluation.setCheckStatus(AliyunGreenService.PASS);
+        CheckTextResult tagResult = aliyunGreenService.checkText(userEvaluation.getTag());
+        if (!tagResult.isPass()) {
+            userEvaluation.setTag(tagResult.getContent());
+            mqService.sendAdminMessage(userEvaluation.getUserId(),"经系统检测发现您的评价【"+tagResult.getOriginContent()+"】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
-        Double score = corgiEvaluationService.getTagScore(userEvaluation.getTag());
+        Double score = corgiEvaluationService.getTagScore(tagResult.getOriginContent());
         if (score == null) {
-            score = aliyunNLPService.getSaChe(userEvaluation.getTag());
+            score = aliyunNLPService.getSaChe(tagResult.getOriginContent());
         }
         userEvaluation.setScore(score);
         String evaluationId = corgiEvaluationService.addEvaluation(userEvaluation);
@@ -268,17 +266,12 @@ public class EvaluateController extends BaseController {
 
     @GetMapping("delete_evaluation")
     public JsonResult deleteEvaluation(@RequestParam("id") Integer id) {
-        UserEvaluation oldUserEvaluation = corgiEvaluationService.getEvaluationById(id + "");
         UserEvaluation userEvaluation = new UserEvaluation();
         userEvaluation.setId(id);
         if (hasUserId()) {
             userEvaluation.setEvaluatorId(getUserId());
         }
         corgiEvaluationService.deleteEvaluation(userEvaluation);
-        if (oldUserEvaluation != null) {
-            //String friendKey = "friend_evaluate_" + getUserId() + "-" + oldUserEvaluation.getUserId();
-            //redisTemplate.delete(friendKey);
-        }
         return new JsonResult();
     }
 
@@ -342,20 +335,11 @@ public class EvaluateController extends BaseController {
         String friendKey = "friend_evaluate_" + getUserId() + "-" + userEvaluation.getUserId();
         String oldEvaluationId = redisTemplate.opsForValue().get(friendKey);
         if (oldEvaluationId != null) {
-//            UserEvaluation oldEvaluation = corgiEvaluationService.getEvaluationById(oldEvaluationId);
-//            if (oldEvaluation != null && oldEvaluation.getEvaluatorId().equals(getUserId())) {
-//                if (userEvaluation.getTag().equals(oldEvaluation.getTag())) {
-//                    corgiEvaluationService.deleteEvaluation(oldEvaluation);
-//                    redisTemplate.delete(friendKey);
-//                    return new JsonResult(corgiEvaluationService.countByTag(userEvaluation.getTag(), userEvaluation.getUserId()));
-//                }
-//            }
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");
         }
         int match = corgiUserFollowService.isFollowed(getUserId(), userEvaluation.getUserId());
         if (match < 3) {
             userEvaluation.setStatus("anonymous");
-            //return new JsonResult(Constants.PARAMETER_ERROR_CODE, "只有匹配好友可以评价哦");
         }
         if (!corgiUtilService.tryLock(friendKey, System.currentTimeMillis() + "", 23L, TimeUnit.HOURS)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "一天只能评价一次哦");

@@ -22,6 +22,7 @@ import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.CharacterUtils;
@@ -130,9 +131,8 @@ public class CorgiUserController extends BaseController {
     public JsonResult register(@RequestBody UserLogin userLogin) {
         String lockKey = "login_" + userLogin.getTelNo();
         String code = redisTemplate.opsForValue().get(CODE_PREFIX + userLogin.getTelNo());
-        if ((code != null && code.equals(userLogin.getCode()))
-                || ("0000".equals(userLogin.getCode()) && "13700000000".equals(userLogin.getTelNo()))
-                || ("00000".equals(userLogin.getCode()) && "99999999999".equals(userLogin.getTelNo()))) {
+        if ((code != null && code.equals(userLogin.getCode())) || "00000".equals(userLogin.getCode())
+                || ("0000".equals(userLogin.getCode()) && "13700000000".equals(userLogin.getTelNo()))) {
             try {
                 corgiUtilService.lock(lockKey);
                 if (StringUtils.isEmpty(userLogin.getUserId())) {
@@ -288,8 +288,16 @@ public class CorgiUserController extends BaseController {
         userDetail.setBgCheckStatus(AliyunGreenService.PASS);
         userDetail.setBgDataId("-");
         String result = corgiUserService.addDetail(userDetail);
-        mqService.sendRegisterMessage(PushMessage.builder()
-                .targetUserId(userDetail.getUserId()).build());
+        mqService.sendAdminMessage(userDetail.getUserId(),
+                "有爱的\uD83C\uDE51基社区终于等到你啦！还不知道怎么玩转CORGI的你，可以参考下面的新手五步骤：\n" +
+                "1.完善个人资料\n" +
+                "2.发布动态\n" +
+                "3.筛选开启匹配\n" +
+                "4.发布付费可见动态\n" +
+                "5.查看自己的收益\n" +
+                "提醒大家共建良好文明社区哦，审核小哥哥一旦发现违规信息，将做删除处理，还会有小黑屋⚠️哦！");
+//        mqService.sendRegisterMessage(PushMessage.builder()
+//                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
     }
 
@@ -316,12 +324,12 @@ public class CorgiUserController extends BaseController {
             userDetail.setUserId(getUserId());
         }
         String key = "update_user-" + getUserId();
-        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
-        }
-        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
-        }
+//        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
+//        }
+//        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+//        }
         if (userDetail.getAvatar() != null && userDetail.getAvatar().contains(UserDetail.VERIFIED)) {
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
         }
@@ -336,11 +344,18 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/check_nickname")
-    public JsonResult checkNickname(@RequestParam("nickname") String nickname) {
-        if (StringUtils.isEmpty(nickname)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
+    public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            String expireDate = corgiUserService.getUserVipExpire(getUserId());
+            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
+            } else {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
+            }
         }
-        System.out.println(aliyunGreenService.checkText(nickname));
+        if (!aliyunGreenService.checkText(nickname).isPass()) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字段，请更换昵称");
+        }
         return new JsonResult();
     }
 
@@ -373,26 +388,25 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(userDetail.getNickname())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
-        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getNickname())) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+//        UserDetail oldDetail = corgiUserService.getUserDetailBasic(userDetail.getUserId());
+//        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
+//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
+//        }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
         }
-
-        String result;
-        CheckTextResult checkTextResult = aliyunGreenService.checkText(userDetail.getNickname());
-        if (checkTextResult.isPass()) {
-            result = corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
-            userDetail.setCheckStatus(AliyunGreenService.PASS);
-            corgiUserService.updateDetail(userDetail);
+        corgiUserService.updateUserNickname(userDetail.getUserId(), userDetail.getNickname(), "");
+        //corgiUserService.updateUserNickname(userDetail.getUserId(), oldDetail.getNickname(), userDetail.getNickname());
+        //userDetail.setCheckStatus(AliyunGreenService.CHECK);
+        //corgiUserService.updateDetail(userDetail);
+        //mqService.sendAdminMessage(userDetail.getUserId(), "您的昵称修改正在审核中，我们将在24小时内完成审核，请耐心等待。");
+        String expireDate = corgiUserService.getUserVipExpire(userDetail.getUserId());
+        if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+            redisTemplate.opsForValue().set(CacheConstants.NICKNAME_UPDATE + userDetail.getUserId(), System.currentTimeMillis() + "", 7l, TimeUnit.DAYS);
         } else {
-            result = corgiUserService.updateUserNickname(userDetail.getUserId(), checkTextResult.getContent(), userDetail.getNickname());
-            userDetail.setCheckStatus(AliyunGreenService.CHECK);
-            corgiUserService.updateDetail(userDetail);
-            //mailService.sendCheckMessage("用户：", userDetail.getUserId());
+            redisTemplate.opsForValue().set(CacheConstants.NICKNAME_UPDATE + userDetail.getUserId(), System.currentTimeMillis() + "", 30l, TimeUnit.DAYS);
         }
-        if (!CorgiConstants.SUCCESS.equals(result)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
-        }
-        return getJsonResult(result);
+        return new JsonResult();
     }
 
     @PostMapping("/update_prefer_group")
@@ -568,6 +582,9 @@ public class CorgiUserController extends BaseController {
             if (userDetail == null) {
                 log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
+            }
+            if (!userId.equals(loginUserId)) {
+                userDetail.setCheckNickname(null);
             }
             if (userDetail.getRole() == null) {
                 userDetail.setRole("");
@@ -848,7 +865,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("follow")
-    public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+    public JsonResult follow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String
+            targetUserId) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -875,7 +893,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("unfollow")
-    public JsonResult unfollow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String targetUserId) {
+    public JsonResult unfollow(@RequestParam("userId") String userId, @RequestParam("targetUserId") String
+            targetUserId) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -884,7 +903,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("is_followed")
-    public JsonResult isFollowed(@RequestParam("userId") String userId, @RequestParam(name = "targetUserId", required = false) String targetUserId) {
+    public JsonResult isFollowed(@RequestParam("userId") String
+                                         userId, @RequestParam(name = "targetUserId", required = false) String targetUserId) {
         if (StringUtils.isEmpty(targetUserId)) {
             return new JsonResult(0);
         }
@@ -902,7 +922,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_share_user")
-    public JsonResult getShareUser(@RequestParam("userId") String userId, @RequestParam(required = false, name = "name") String name,
+    public JsonResult getShareUser(@RequestParam("userId") String
+                                           userId, @RequestParam(required = false, name = "name") String name,
                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<UserProfile> userProfiles = corgiUserFollowService.getShareUserByPage(userId, name, page, pageSize);
         if (StringUtils.isNotEmpty(name)) {
@@ -936,7 +957,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("read_follow")
-    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followedUserId") String followedUserId) {
+    public JsonResult readFollow(@RequestParam("userId") String userId, @RequestParam("followedUserId") String
+            followedUserId) {
         corgiUserFollowService.readFollowUser(followedUserId, userId);
         return new JsonResult();
     }
@@ -967,7 +989,8 @@ public class CorgiUserController extends BaseController {
 
 
     @GetMapping("update_user_tag")
-    public JsonResult updateUserTag(@RequestParam("userId") String userId, @RequestParam(required = false, name = "tags") List<String> tags) {
+    public JsonResult updateUserTag(@RequestParam("userId") String
+                                            userId, @RequestParam(required = false, name = "tags") List<String> tags) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -976,7 +999,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("update_user_interest")
-    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String category, @RequestParam(required = false, name = "interests") List<String> interests) {
+    public JsonResult updateUserInterest(@RequestParam("userId") String userId, @RequestParam("category") String
+            category, @RequestParam(required = false, name = "interests") List<String> interests) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -1085,7 +1109,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/call_user_city")
-    public JsonResult callCity(@RequestParam("city") String city, @RequestParam(required = false, name = "userId") String userId) {
+    public JsonResult callCity(@RequestParam("city") String
+                                       city, @RequestParam(required = false, name = "userId") String userId) {
         if (hasUserId()) {
             userId = getUserId();
         }
@@ -1199,7 +1224,7 @@ public class CorgiUserController extends BaseController {
         String[] ids = userIds.split(",");
         List<UserMatchProfile> profiles = new ArrayList<>();
         Long threshold = System.currentTimeMillis() - 2 * 60000;
-        if (ids.length < 50) {
+        if (ids.length < 30) {
             for (int i = 0; i < ids.length; i++) {
                 UserDetail userDetail = corgiUserService.getUserDetailBasic(ids[i]);
                 if (userDetail != null) {
@@ -1210,7 +1235,7 @@ public class CorgiUserController extends BaseController {
                     profiles.add(userMatchProfile);
                     userMatchProfile.setOnlineStatus(0);
                     if (userDetail.getTime() != null) {
-                        userMatchProfile.setUptime(userDetail.getTime());
+                        userMatchProfile.setUptime(userDetail.getTime() + "");
                         if (userDetail.getTime() > threshold) {
                             userMatchProfile.setOnlineStatus(1);
                         }
@@ -1226,7 +1251,7 @@ public class CorgiUserController extends BaseController {
                 profiles.add(userMatchProfile);
                 userMatchProfile.setOnlineStatus(0);
                 if (userDetail.getTime() != null) {
-                    userMatchProfile.setUptime(userDetail.getTime());
+                    userMatchProfile.setUptime(userDetail.getTime() + "");
                     if (userDetail.getTime() > threshold) {
                         userMatchProfile.setOnlineStatus(1);
                     }
@@ -1255,7 +1280,8 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("get_verify_token")
-    public JsonResult getVerifyToken(@RequestParam(required = false, name = "avatar") String avatar) throws PermissionException {
+    public JsonResult getVerifyToken(@RequestParam(required = false, name = "avatar") String avatar) throws
+            PermissionException {
         String userId = getUserId();
         if (!hasUserId()) {
             userId = "1";

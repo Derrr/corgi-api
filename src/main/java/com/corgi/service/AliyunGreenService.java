@@ -54,7 +54,6 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -73,7 +72,7 @@ public class AliyunGreenService {
     public static String NOT_GOOD = "not_good";
     public static List<String> CHECK_LIST = Arrays.asList("check", "not_good", "fail");
     public static List<String> BLOCK_WORD_LIST = Arrays.asList("飞机杯", "打飞机", "初一", "初二", "初三",
-            "高一", "高二", "高三", "初中", "高中", "小学生","sao0","sao的", "骚的", "奴", "贱", "革命", "起义", "嫖", "娼",
+            "高一", "高二", "高三", "初中", "高中", "小学生", "sao0", "sao的", "骚的", "奴", "贱", "革命", "起义", "嫖", "娼",
             "无毛", "按摩", "有偿", "技师", "捆绑", "调教", "学生党", "求C", "约p", "约P", "可飞", "乳头",
             "精液", "色情", "原味", "无套");
 
@@ -99,6 +98,9 @@ public class AliyunGreenService {
     private MailService mailService;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private MQService mqService;
+
 
     @PostConstruct
     void init() {
@@ -207,10 +209,8 @@ public class AliyunGreenService {
         String desc = userDetail.getDesc();
         CheckTextResult textResult = this.checkText(desc);
         if (!textResult.isPass()) {
-            //userDetail.setCheckDesc(desc);
             userDetail.setDesc(textResult.getContent());
-            //userDetail.setCheckStatus(CHECK);
-            //mailService.sendCheckMessage("用户：", userDetail.getUserId());
+            mqService.sendAdminMessage(userDetail.getUserId(),"经系统检测发现您的个人介绍【"+textResult.getOriginContent()+"】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
         return userDetail;
     }
@@ -524,6 +524,7 @@ public class AliyunGreenService {
         if (StringUtils.isEmpty(text)) {
             return textResult;
         }
+        textResult.setOriginContent(text);
         for (String word : BLOCK_WORD_LIST) {
             if (text.contains(word)) {
                 textResult.setPass(false);
@@ -604,14 +605,20 @@ public class AliyunGreenService {
         String title = activity.getTitle();
         String content = activity.getContent();
         CheckTextResult titleResult = checkText(title);
+        String forbiddenText = "";
         if (!StringUtils.isEmpty(title) && !titleResult.isPass()) {
             activity.setTitle(titleResult.getContent());
             activity.setCheckTitle(title);
+            forbiddenText += titleResult.getOriginContent();
         }
         CheckTextResult contentResult = checkText(content);
         if (!StringUtils.isEmpty(content) && !contentResult.isPass()) {
             activity.setContent(contentResult.getContent());
             activity.setCheckContent(content);
+            forbiddenText += contentResult.getOriginContent();
+        }
+        if (!StringUtils.isEmpty(forbiddenText)) {
+            mqService.sendAdminMessage(activity.getUserId(), "经系统检测发现您的动态文案【" + forbiddenText + "】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
         return activity;
     }

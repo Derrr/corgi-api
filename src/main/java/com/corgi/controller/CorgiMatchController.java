@@ -67,13 +67,13 @@ public class CorgiMatchController extends BaseController {
         String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String dayFreqKey = freqKey.concat("_").concat(suffix);
         String expireDate = corgiUserService.getUserVipExpire(getUserId());
-        Integer threshold = 10;
+        Integer threshold = 50;
         if (!StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
-            threshold = 100;
+            threshold = 200;
         } else {
             UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
             if ("influencer".equals(detail.getAvatarStatus())) {
-                threshold = 100;
+                threshold = 200;
             }
         }
         Integer checkDayResult = this.checkDayFreq(dayFreqKey, threshold);

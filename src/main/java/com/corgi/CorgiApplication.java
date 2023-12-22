@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 import javax.servlet.Filter;
@@ -17,6 +18,7 @@ import javax.servlet.Filter;
 
 @SpringBootApplication
 @EnableDubboConfiguration
+@EnableScheduling
 public class CorgiApplication {
 
     public static void main(String[] args) {

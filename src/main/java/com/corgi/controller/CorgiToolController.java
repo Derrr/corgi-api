@@ -7,17 +7,19 @@ import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.CorgiConstants;
 import com.corgi.common.CorgiQueueName;
 import com.corgi.common.JsonResult;
+import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
-import com.corgi.service.AliyunGreenService;
-import com.corgi.service.ChatService;
-import com.corgi.service.CorgiUtilService;
-import com.corgi.service.MQService;
+import com.corgi.order.api.CorgiGPTService;
+import com.corgi.service.*;
+
+
 import com.corgi.user.api.*;
+import com.corgi.user.api.CorgiPicService;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,6 +55,8 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiAreaService corgiAreaService;
     @Reference
+    private CorgiSoundService corgiSoundService;
+    @Reference
     private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
@@ -61,8 +65,6 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiBillboardService corgiBillboardService;
     @Reference
-    private CorgiSoundService corgiSoundService;
-    @Reference
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiVlogService corgiVlogService;
@@ -70,6 +72,10 @@ public class CorgiToolController extends BaseController {
     private CorgiMatchService corgiMatchService;
     @Reference
     private CorgiFeedService corgiFeedService;
+    @Reference
+    private CorgiGPTService corgiGPTService;
+    @Reference
+    private CorgiExtraService corgiExtraService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -80,6 +86,9 @@ public class CorgiToolController extends BaseController {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private ChatService chatService;
+    @Autowired
+    private ErnieBotService ernieBotService;
+
     @Autowired
     private MQService mqService;
 
@@ -143,9 +152,23 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("query_activity")
-    public JsonResult queryActivity(CorgiActivity activity, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult queryActivity(CorgiActivity activity, @RequestParam(name = "sort", required = false) String sort, @RequestParam(name = "topic", required = false) String topic, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
+        }
+        if (!StringUtils.isEmpty(sort)) {
+            ActivityQuery activityQuery = new ActivityQuery();
+            activityQuery.setPageSize(pageSize);
+            activityQuery.setPage(page);
+            activityQuery.setTopic(topic);
+            if ("likeAsc".equals(sort)) {
+                activityQuery.setSort(sort);
+            }
+            List<String> activityIds = corgiUserActivityService.queryHotActivity(activityQuery);
+            return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
+        }
+        if (!StringUtils.isEmpty(topic)) {
+            activity.setTopics(Arrays.asList(topic));
         }
         List<CorgiActivity> activityList = corgiActivityService.searchCorgiActivity(activity, page, pageSize);
         return new JsonResult(activityList);
@@ -406,9 +429,12 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("agree_nickname")
-    public JsonResult agreeNickname(@RequestParam("userId") String
-                                            userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
+    public JsonResult agreeNickname(@RequestParam("userId") String userId, @RequestParam(required = false, name = "nickname", defaultValue = "") String nickname) {
         if (!StringUtils.isEmpty(nickname)) {
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+            if (nickname.equals(userDetail.getNickname())) {
+                redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + userId);
+            }
             String result = corgiUserService.updateUserNickname(userId, nickname, "");
             if (!CorgiConstants.SUCCESS.equals(result)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, result);
@@ -434,6 +460,11 @@ public class CorgiToolController extends BaseController {
 
     @GetMapping("agree_user")
     public JsonResult agreeUser(@RequestParam("userId") String userId) {
+        UserDetail oldDetail = corgiUserService.getUserDetailBasic(userId);
+        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
+            corgiUserService.updateUserNickname(userId, oldDetail.getCheckNickname(), "");
+        }
+
         UserDetail detail = new UserDetail();
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
@@ -875,7 +906,58 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("chat")
-    public String test(String text) {
-        return chatService.prompt(text);
+    public String test(String text, String userId) {
+        return ernieBotService.getMessage("1", getUserMessage(userId), text);
+    }
+
+    @GetMapping("yinyuan")
+    public String yinyuantest(String userId) {
+        return ernieBotService.getMessage("1", getUserMessage(userId), "以下是我的信息：\n" + getUserMessage("7") + "\n请问我和你适合谈恋爱吗？如果你给我们两个打分，我们的合拍指数是多少？具体有哪些地方是合拍的？哪些地方不合拍？基于你和我的兴趣爱好，我应该如何追求你？");
+    }
+
+    private String getUserMessage(String userId) {
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        StringBuilder sb = new StringBuilder();
+        sb.append("姓名：").append(userDetail.getNickname()).append("\n");
+        sb.append("生日：").append(userDetail.getBirthday()).append("\n");
+        sb.append("星座：").append(userDetail.getCon()).append("\n");
+        if (userDetail.getHeight() > 0) {
+            sb.append("身高：").append(userDetail.getHeight()).append("\n");
+        }
+        if (userDetail.getWeight() > 0) {
+            sb.append("体重：").append(userDetail.getWeight()).append("\n");
+        }
+        if (!StringUtils.isEmpty(userDetail.getDesc())) {
+            sb.append("个人简介：").append(userDetail.getDesc());
+            if (!StringUtils.isEmpty(userDetail.getRelation()) && !"无".equals(userDetail.getRelation())) {
+                sb.append(" ").append(userDetail.getRelation());
+            }
+            sb.append("\n\n");
+        }
+        if (!StringUtils.isEmpty(userDetail.getRole())) {
+            sb.append("角色：").append(userDetail.getRole()).append("\n");
+        }
+        if (!StringUtils.isEmpty(userDetail.getGroup())) {
+            sb.append("身材：").append(userDetail.getGroup()).append("\n");
+        }
+        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
+        if (userExtra != null) {
+            if (!StringUtils.isEmpty(userExtra.getIncome())) {
+                sb.append("收入水平：").append(userExtra.getIncome()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getProfession())) {
+                sb.append("职业：").append(userExtra.getProfession()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getAim())) {
+                sb.append("交友目标：").append(userExtra.getAim()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getInterests())) {
+                sb.append("兴趣爱好：").append(userExtra.getInterests()).append("\n");
+            }
+            if (!StringUtils.isEmpty(userExtra.getTags())) {
+                sb.append("个人标签：").append(userExtra.getTags()).append("\n");
+            }
+        }
+        return sb.toString();
     }
 }

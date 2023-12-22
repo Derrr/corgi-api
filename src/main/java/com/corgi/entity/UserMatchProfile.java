@@ -6,5 +6,4 @@ import lombok.Data;
 @Data
 public class UserMatchProfile extends UserDetail {
     private String isFollowed;
-    private Long uptime;
 }

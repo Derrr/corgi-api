@@ -13,4 +13,6 @@ public class Constants {
     public static final int JWT_PERMISSION_ERROR_CODE = 403;
     public static final int SYS_ERROR_CODE = 500;
     public static final int SERVER_ERROR_CODE = 600;
+
+    public static final int VIP_REQUIRED_ERROR_CODE = 800;
 }

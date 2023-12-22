@@ -6,4 +6,5 @@ import lombok.Data;
 public class CheckTextResult {
     boolean pass = true;
     String content = "";
+    String originContent = "";
 }
