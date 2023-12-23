@@ -14,7 +14,6 @@ import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
 import com.corgi.entity.tool.Topic;
-import com.corgi.order.api.CorgiGPTService;
 import com.corgi.service.*;
 
 
@@ -72,8 +71,6 @@ public class CorgiToolController extends BaseController {
     private CorgiMatchService corgiMatchService;
     @Reference
     private CorgiFeedService corgiFeedService;
-    @Reference
-    private CorgiGPTService corgiGPTService;
     @Reference
     private CorgiExtraService corgiExtraService;
     @Autowired
