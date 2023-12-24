@@ -153,7 +153,7 @@ public class CorgiToolController extends BaseController {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
-        if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(activity.getStartTime()) && !StringUtils.isEmpty(activity.getEndTime())) {
+        if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(activity.getStartTime())) {
             ActivityQuery activityQuery = new ActivityQuery();
             activityQuery.setPageSize(pageSize);
             activityQuery.setPage(page);
