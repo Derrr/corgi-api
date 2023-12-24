@@ -161,6 +161,7 @@ public class CorgiToolController extends BaseController {
             if ("likeAsc".equals(sort)) {
                 activityQuery.setSort(sort);
             }
+            activityQuery.setStartTime("2023-01-01");
             List<String> activityIds = corgiUserActivityService.queryHotActivity(activityQuery);
             return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
         }
