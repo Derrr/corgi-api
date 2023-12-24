@@ -153,7 +153,7 @@ public class CorgiToolController extends BaseController {
         if (StringUtils.isEmpty(activity.getStatus())) {
             activity.setStatus(CorgiActivity.NOT_DELETED);
         }
-        if (!StringUtils.isEmpty(sort)) {
+        if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(activity.getStartTime()) && !StringUtils.isEmpty(activity.getEndTime())) {
             ActivityQuery activityQuery = new ActivityQuery();
             activityQuery.setPageSize(pageSize);
             activityQuery.setPage(page);
@@ -161,7 +161,6 @@ public class CorgiToolController extends BaseController {
             if ("likeAsc".equals(sort)) {
                 activityQuery.setSort(sort);
             }
-            activityQuery.setStartTime("2023-01-01");
             List<String> activityIds = corgiUserActivityService.queryHotActivity(activityQuery);
             return new JsonResult(corgiActivityService.getActivityByIds(activityIds));
         }
@@ -433,7 +432,7 @@ public class CorgiToolController extends BaseController {
             if (nickname.equals(userDetail.getNickname())) {
                 redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + userId);
                 mqService.sendAdminMessage(userId, "根据系统检测以及网络平台相关规定，您提交的昵称修改，存在违规词，未能通过审核。");
-            }else{
+            } else {
                 mqService.sendAdminMessage(userId, "您提交的昵称修改已通过审核。");
             }
             String result = corgiUserService.updateUserNickname(userId, nickname, "");
