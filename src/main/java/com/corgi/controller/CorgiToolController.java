@@ -434,6 +434,9 @@ public class CorgiToolController extends BaseController {
             UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
             if (nickname.equals(userDetail.getNickname())) {
                 redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + userId);
+                mqService.sendAdminMessage(userId, "根据系统检测以及网络平台相关规定，您提交的昵称修改，存在违规词，未能通过审核。");
+            }else{
+                mqService.sendAdminMessage(userId, "您提交的昵称修改已通过审核。");
             }
             String result = corgiUserService.updateUserNickname(userId, nickname, "");
             if (!CorgiConstants.SUCCESS.equals(result)) {
