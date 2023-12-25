@@ -290,12 +290,12 @@ public class CorgiUserController extends BaseController {
         String result = corgiUserService.addDetail(userDetail);
         mqService.sendAdminMessage(userDetail.getUserId(),
                 "有爱的\uD83C\uDE51基社区终于等到你啦！还不知道怎么玩转CORGI的你，可以参考下面的新手五步骤：\n" +
-                "1.完善个人资料\n" +
-                "2.发布动态\n" +
-                "3.筛选开启匹配\n" +
-                "4.发布付费可见动态\n" +
-                "5.查看自己的收益\n" +
-                "提醒大家共建良好文明社区哦，审核小哥哥一旦发现违规信息，将做删除处理，还会有小黑屋⚠️哦！");
+                        "1.完善个人资料\n" +
+                        "2.发布动态\n" +
+                        "3.筛选开启匹配\n" +
+                        "4.发布付费可见动态\n" +
+                        "5.查看自己的收益\n" +
+                        "提醒大家共建良好文明社区哦，审核小哥哥一旦发现违规信息，将做删除处理，还会有小黑屋⚠️哦！");
 //        mqService.sendRegisterMessage(PushMessage.builder()
 //                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
@@ -345,14 +345,14 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/check_nickname")
     public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
-        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
-            String expireDate = corgiUserService.getUserVipExpire(getUserId());
-            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
-                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
-            } else {
-                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
-            }
-        }
+//        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+////            String expireDate = corgiUserService.getUserVipExpire(getUserId());
+////            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+        ////                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
+////            } else {
+        ////                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
+////            }
+////        }
         if (!aliyunGreenService.checkText(nickname).isPass()) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字段，请更换昵称");
         }
