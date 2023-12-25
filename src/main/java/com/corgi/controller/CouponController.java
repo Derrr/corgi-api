@@ -29,31 +29,29 @@ public class CouponController extends BaseController {
 
     @PostMapping("add_coupon")
     public JsonResult addCoupon(@RequestBody CorgiCoupon coupon) {
-        coupon.setBarId(getUserId());
         corgiCouponService.addCoupon(coupon);
         return new JsonResult();
     }
 
     @PostMapping("update_coupon")
     public JsonResult updateCoupon(@RequestBody CorgiCoupon coupon) {
-        if (hasUserId()) {
-            coupon.setBarId(getUserId());
-        }
         corgiCouponService.updateCoupon(coupon);
         return new JsonResult();
     }
 
     @GetMapping("get_coupon")
-    public JsonResult getCoupon(@RequestParam(required = false, name = "status") String status, @RequestParam(required = false,name = "barId")String barId) {
-        if(StringUtils.isEmpty(barId)){
-            barId = getUserId();
-        }
-        return new JsonResult(corgiCouponService.getCoupon(barId, status));
+    public JsonResult getCoupon(@RequestParam(required = false, name = "barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        return new JsonResult(corgiCouponService.getCoupon(barId, page, pageSize));
+    }
+
+    @GetMapping("count_coupon")
+    public JsonResult getCoupon(@RequestParam(required = false, name = "barId") String barId) {
+        return new JsonResult(corgiCouponService.countCoupon(barId));
     }
 
     @GetMapping("delete_coupon")
     public JsonResult deleteCoupon(@RequestParam("id") Integer id) {
-        corgiCouponService.deleteCoupon(id, getUserId());
+        corgiCouponService.deleteCoupon(id, "1");
         return new JsonResult();
     }
 
@@ -74,11 +72,6 @@ public class CouponController extends BaseController {
             return new JsonResult();
         }
         corgiCouponService.deleteActivityCoupon(activityId);
-        if (barActivityDetail.getCoupons() != null) {
-            for (CorgiCoupon corgiCoupon : barActivityDetail.getCoupons()) {
-                corgiCouponService.addActivityCoupon(activityId, corgiCoupon.getId());
-            }
-        }
         return new JsonResult();
     }
 }
