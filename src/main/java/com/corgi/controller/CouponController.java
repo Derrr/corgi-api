@@ -5,7 +5,9 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.BarActivityDetail;
+import com.corgi.user.api.CorgiBarService;
 import com.corgi.user.api.CorgiCouponService;
+import com.corgi.user.entity.BarProfile;
 import com.corgi.user.entity.CorgiCoupon;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -25,6 +27,8 @@ public class CouponController extends BaseController {
     @Reference
     private CorgiCouponService corgiCouponService;
     @Reference
+    private CorgiBarService corgiBarService;
+    @Reference
     private CorgiActivityService corgiActivityService;
 
     @PostMapping("add_coupon")
@@ -41,11 +45,13 @@ public class CouponController extends BaseController {
 
     @GetMapping("get_coupon")
     public JsonResult getCoupon(@RequestParam(required = false, name = "barId") String barId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        barId = this.searchBar(barId);
         return new JsonResult(corgiCouponService.getCoupon(barId, page, pageSize));
     }
 
     @GetMapping("count_coupon")
     public JsonResult getCoupon(@RequestParam(required = false, name = "barId") String barId) {
+        barId = this.searchBar(barId);
         return new JsonResult(corgiCouponService.countCoupon(barId));
     }
 
@@ -73,5 +79,17 @@ public class CouponController extends BaseController {
         }
         corgiCouponService.deleteActivityCoupon(activityId);
         return new JsonResult();
+    }
+
+    private String searchBar(String barId) {
+        if (!StringUtils.isEmpty(barId)) {
+            BarProfile query = new BarProfile();
+            query.setBarName(barId);
+            List<BarProfile> barProfiles = corgiBarService.searchBar(query);
+            if (!CollectionUtils.isEmpty(barProfiles)) {
+                return barProfiles.get(0).getBarId();
+            }
+        }
+        return barId;
     }
 }
