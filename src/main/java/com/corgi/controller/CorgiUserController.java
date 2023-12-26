@@ -324,12 +324,12 @@ public class CorgiUserController extends BaseController {
             userDetail.setUserId(getUserId());
         }
         String key = "update_user-" + getUserId();
-//        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
-//        }
-//        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
-//        }
+        if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
+        }
+        if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
+        }
         if (userDetail.getAvatar() != null && userDetail.getAvatar().contains(UserDetail.VERIFIED)) {
             userDetail.setAvatarCheckStatus(UserDetail.VERIFIED);
         }
@@ -345,14 +345,14 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/check_nickname")
     public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
-//        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
-////            String expireDate = corgiUserService.getUserVipExpire(getUserId());
-////            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
-        ////                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
-////            } else {
-        ////                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
-////            }
-////        }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            String expireDate = corgiUserService.getUserVipExpire(getUserId());
+            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
+            } else {
+                return new JsonResult(Constants.VIP_REQUIRED_ERROR_CODE, "普通用户一个月内仅支持修改一次昵称，开通VIP立即享受一次修改昵称机会，之后每七天可修改一次昵称。");
+            }
+        }
         if (!aliyunGreenService.checkText(nickname).isPass()) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称包含敏感字段，请更换昵称");
         }
