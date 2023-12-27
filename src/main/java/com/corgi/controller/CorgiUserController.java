@@ -250,13 +250,6 @@ public class CorgiUserController extends BaseController {
         if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
         }
-//        if (StringUtils.isEmpty(userDetail.getBirthday())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请填写你的生日");
-//        }
-//        int count = corgiUserService.countUserNickname(userDetail.getNickname());
-//        if (count > 0) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称被抢啦！换一个试试？");
-//        }
         List<UserPic> pics = (List<UserPic>) aliyunGreenService.checkPic(userDetail.getUserPics(), userDetail.getUserId(), CheckPic.USER);
         if (pics == null) {
             pics = new ArrayList<>();
@@ -296,8 +289,8 @@ public class CorgiUserController extends BaseController {
                         "4.发布付费可见动态\n" +
                         "5.查看自己的收益\n" +
                         "提醒大家共建良好文明社区哦，审核小哥哥一旦发现违规信息，将做删除处理，还会有小黑屋⚠️哦！");
-//        mqService.sendRegisterMessage(PushMessage.builder()
-//                .targetUserId(userDetail.getUserId()).build());
+        mqService.sendRegisterMessage(PushMessage.builder()
+                .targetUserId(userDetail.getUserId()).build());
         return getJsonResult(result);
     }
 
