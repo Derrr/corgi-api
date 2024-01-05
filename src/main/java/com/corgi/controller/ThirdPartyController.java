@@ -194,22 +194,13 @@ public class ThirdPartyController extends BaseController {
                     it.remove();
                     continue;
                 }
+                activity.setCoverUrl(activity.getPics().get(0).getPicUrl());
                 if (AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
                     it.remove();
                     continue;
                 }
                 activity.setCurrentTime(now);
-                Long height = activity.getHeight();
-                Long width = activity.getWidth();
-
-                if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
-                    String picUrl = activity.getPics().get(0).getPicUrl();
-                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                    height = picInfo.getHeight();
-                    width = picInfo.getWidth();
-                }
-                com.corgi.entity.CorgiActivityDetail detail = new com.corgi.entity.CorgiActivityDetail(activity)
-                        .initSize(height, width);
+                com.corgi.entity.CorgiActivityDetail detail = new com.corgi.entity.CorgiActivityDetail(activity);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detailList.add(detail);
                 if (detailList.size() > 5) {
