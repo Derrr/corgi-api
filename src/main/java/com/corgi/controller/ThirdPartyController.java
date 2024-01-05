@@ -6,15 +6,14 @@ import com.corgi.activity.entity.ActivityPic;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.common.constant.Constants;
+import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.*;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.AsyncTaskService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
-import com.corgi.user.entity.ActivityBillboard;
-import com.corgi.user.entity.UserDetail;
-import com.corgi.user.entity.UserLogin;
+import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -164,6 +163,61 @@ public class ThirdPartyController extends BaseController {
         }
         log.info(aliyunGreenService.checkText(nickname) + "");
         return new JsonResult();
+    }
+
+    @GetMapping("get_user_activity")
+    public JsonResult getMyRunningActivity(@RequestParam("userId") String userId) {
+        ActivityQuery query = new ActivityQuery();
+        query.setUserId(userId);
+        query.setLoginUserId("");
+        query.setPage(1);
+        query.setPageSize(10);
+        query.setCategory(CorgiActivity.CAT_IMAGE);
+        List<CorgiActivity> activities = corgiActivityService.getFeedActivity(query);
+        return new JsonResult(convertDetail(activities));
+    }
+
+    private List<CorgiActivityDetail> convertDetail(List<CorgiActivity> activityList) {
+        List<com.corgi.entity.CorgiActivityDetail> detailList = new ArrayList<>();
+        String now = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
+        if (!CollectionUtils.isEmpty(activityList)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Long nowTime = System.currentTimeMillis();
+            Iterator<CorgiActivity> it = activityList.iterator();
+            while (it.hasNext()) {
+                CorgiActivity activity = it.next();
+                if (activity == null || activity.getUserId() == null || (("fail".equals(activity.getCheckStatus()) || "check".equals(activity.getCheckStatus())))) {
+                    it.remove();
+                    continue;
+                }
+                if (!CorgiActivity.CAT_IMAGE.equals(activity.getCategory()) || CollectionUtils.isEmpty(activity.getPics())) {
+                    it.remove();
+                    continue;
+                }
+                if (AliyunGreenService.NOT_GOOD.equals(activity.getCheckStatus())) {
+                    it.remove();
+                    continue;
+                }
+                activity.setCurrentTime(now);
+                Long height = activity.getHeight();
+                Long width = activity.getWidth();
+
+                if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
+                    String picUrl = activity.getPics().get(0).getPicUrl();
+                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                    height = picInfo.getHeight();
+                    width = picInfo.getWidth();
+                }
+                com.corgi.entity.CorgiActivityDetail detail = new com.corgi.entity.CorgiActivityDetail(activity)
+                        .initSize(height, width);
+                detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
+                detailList.add(detail);
+                if (detailList.size() > 5) {
+                    break;
+                }
+            }
+        }
+        return detailList;
     }
 
     private ActivityPic convertPic(ActivityPic pic) {
