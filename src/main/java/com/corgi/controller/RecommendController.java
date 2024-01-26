@@ -159,9 +159,9 @@ public class RecommendController extends BaseController {
                 activity.setCurrentTime(now);
 
                 Long commentCount = null;
-                if ("AppStore".equals(RequestUtil.getChannel())) {
+                //if ("AppStore".equals(RequestUtil.getChannel())) {
                     commentCount = corgiCommentService.countActivityComment(activity.getId());
-                }
+                //}
                 Long likeCount = activity.getLikeCount();
                 if (likeCount == null) {
                     likeCount = corgiLikeService.countActivityLike(activity.getId());

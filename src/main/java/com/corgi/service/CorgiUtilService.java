@@ -327,10 +327,10 @@ public class CorgiUtilService {
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 detail.setHasLike(hasLike);
                 detail.setLikeCount(likeCount);
-                if ("AppStore".equals(RequestUtil.getChannel())) {
+                //if ("AppStore".equals(RequestUtil.getChannel())) {
                     Long commentCount = corgiCommentService.countActivityComment(activity.getId());
                     detail.setCommentCount(commentCount);
-                }
+                //}
 
                 if (!CorgiActivity.CAT_BUSINESS.equals(activity.getCategory()) && activity.getUserId() != null && !activity.getUserId().startsWith("B")) {
                     UserDetail userDetail = corgiUserService.getUserDetailBasic(activity.getUserId());

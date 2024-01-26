@@ -213,9 +213,9 @@ public class BillboardController extends BaseController {
                 if ("fail".equals(activity.getCheckStatus()) || (!(CorgiActivity.CAT_VIDEO.equals(activity.getCategory()) || CorgiActivity.CAT_TEXT.equals(activity.getCategory())) && CollectionUtils.isEmpty(activity.getPics()))) {
                     continue;
                 }
-                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
-                    continue;
-                }
+//                if (!"AppStore".equals(RequestUtil.getChannel()) && ("check".equals(activity.getStrictStatus()) || CorgiActivity.CAT_VIDEO.equals(activity.getCategory()))) {
+//                    continue;
+//                }
                 activity.setCurrentTime(now);
                 Long height = activity.getHeight();
                 Long width = activity.getWidth();
@@ -266,9 +266,9 @@ public class BillboardController extends BaseController {
                     }
                 }
                 Long commentCount = null;
-                if ("AppStore".equals(RequestUtil.getChannel())) {
+                //if ("AppStore".equals(RequestUtil.getChannel())) {
                     commentCount = corgiCommentService.countActivityComment(activity.getId());
-                }
+                //}
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
                 CorgiActivityDetail detail = new CorgiActivityDetail(activity)

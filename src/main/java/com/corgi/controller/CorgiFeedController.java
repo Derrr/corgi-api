@@ -551,9 +551,9 @@ public class CorgiFeedController extends BaseController {
             likeCount = corgiLikeService.countActivityLike(vlog.getActivityId());
         }
         vlogDetail.setLikeCount(likeCount.intValue());
-        if ("AppStore".equals(RequestUtil.getChannel())) {
+        //if ("AppStore".equals(RequestUtil.getChannel())) {
             vlogDetail.setCommentCount(corgiCommentService.countActivityComment(vlog.getActivityId()).intValue());
-        }
+        //}
         if (StringUtils.isEmpty(vlog.getVideoId()) && activity != null) {
             vlogDetail.setVideoId(activity.getVideoId());
             if (!StringUtils.isEmpty(activity.getCreateTime())) {
@@ -634,9 +634,9 @@ public class CorgiFeedController extends BaseController {
                     width = picInfo.getWidth();
                 }
                 Long commentCount = null;
-                if ("AppStore".equals(RequestUtil.getChannel())) {
+                //if ("AppStore".equals(RequestUtil.getChannel())) {
                     commentCount = corgiCommentService.countActivityComment(activity.getId());
-                }
+                //}
                 List<ActivityLike> users = corgiLikeService.getActivityLike(activity.getId(), 1, 3);
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());
 
@@ -651,10 +651,10 @@ public class CorgiFeedController extends BaseController {
                         .initLikeCount(likeCount)
                         .hasLike(hasLike);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
-                if ("AppStore".equals(RequestUtil.getChannel())) {
+                //if ("AppStore".equals(RequestUtil.getChannel())) {
                     ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
                     detail.setLastComment(activityComment);
-                }
+                //}
                 List<CorgiTopic> topics = corgiToolService.getActivityTopicDetails(detail.getActivityId());
                 detail.setTopicDetails(topics);
                 if (!CollectionUtils.isEmpty(topics) && topics.get(0) != null && !StringUtils.isEmpty(topics.get(0).getTopicId())) {
