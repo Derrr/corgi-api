@@ -20,12 +20,15 @@ public class UserExtraResult {
         this.aim = userExtra.getAim();
         this.income = userExtra.getIncome();
         this.education = userExtra.getEducation();
+        this.xp = new ArrayList<>();
         if (!StringUtils.isEmpty(userExtra.getXp())) {
             this.xp = Arrays.asList(userExtra.getXp().split(","));
         }
+        this.interests = new ArrayList<>();
         if (!StringUtils.isEmpty(userExtra.getInterests())) {
             this.interests = Arrays.asList(userExtra.getInterests().split(","));
         }
+        this.tags = new ArrayList<>();
         if (!StringUtils.isEmpty(userExtra.getTags())) {
             this.tags = Arrays.asList(userExtra.getTags().split(","));
         }
