@@ -1464,6 +1464,9 @@ public class CorgiActivityController extends BaseController {
         List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics, getUserId(), CheckPic.ACTIVITY);
         String status = AliyunGreenService.PASS;
         for (ActivityPic pic : activityPicList) {
+            if (pic == null || StringUtils.isEmpty(pic.getPicUrl())) {
+                continue;
+            }
             String result = corgiPicService.addActivityPic(pic);
             pic.setPicId(result);
             if (AliyunGreenService.CHECK.equals(pic.getStatus())) {
@@ -1832,7 +1835,7 @@ public class CorgiActivityController extends BaseController {
                 if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
                     if (StringUtils.isEmpty(picUrl)) {
-                        log.info("wrong pic info..." + activity.getId());
+                        continue;
                     } else {
                         PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
                         height = picInfo.getHeight();
