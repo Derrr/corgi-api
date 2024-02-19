@@ -611,7 +611,11 @@ public class CorgiUserController extends BaseController {
         Integer fans = corgiUserFollowService.countFollowed(userId);
         Integer getLike = corgiLikeService.countUserLikeByDate(userId, null);
         DecimalFormat format = new DecimalFormat("#.#h");
-        return new JsonResult(new UserData(userId, followCount, fans, getLike, format.format((position.getOnlineTime() / 6) / 10.0)));
+        String onlineTime = "0.0";
+        if (position != null && position.getOnlineTime() != null) {
+            onlineTime = format.format((position.getOnlineTime() / 6) / 10.0);
+        }
+        return new JsonResult(new UserData(userId, followCount, fans, getLike, onlineTime));
     }
 
     @GetMapping("/visit")
@@ -746,7 +750,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
-        if(userQuery.getLat() == null || userQuery.getLat() > 200 || userQuery.getLng() == null || userQuery.getLng() > 200){
+        if (userQuery.getLat() == null || userQuery.getLat() > 200 || userQuery.getLng() == null || userQuery.getLng() > 200) {
             return new JsonResult(new ArrayList<>());
         }
         userQuery.setGroup(changeGroupList(userQuery.getGroup()));
