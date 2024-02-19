@@ -1463,12 +1463,24 @@ public class CorgiActivityController extends BaseController {
         String activityId = activityPics.get(0).getActivityId();
         List<ActivityPic> activityPicList = (List<ActivityPic>) aliyunGreenService.checkPic(activityPics, getUserId(), CheckPic.ACTIVITY);
         String status = AliyunGreenService.PASS;
+        int picCount = 0;
         for (ActivityPic pic : activityPicList) {
+            if (pic == null || StringUtils.isEmpty(pic.getPicUrl())) {
+                continue;
+            }
             String result = corgiPicService.addActivityPic(pic);
             pic.setPicId(result);
             if (AliyunGreenService.CHECK.equals(pic.getStatus())) {
                 status = pic.getStatus();
             }
+            picCount++;
+        }
+        if (picCount == 0) {
+            CorgiActivity updateActivity = new CorgiActivity();
+            updateActivity.setId(activityId);
+            updateActivity.setCheckStatus("fail");
+            corgiActivityService.updateCorgiActivityStatus(updateActivity);
+            return new JsonResult(400, "图片添加失败");
         }
         if (AliyunGreenService.CHECK.equals(status)) {
             CorgiActivity updateActivity = new CorgiActivity();
@@ -1784,8 +1796,6 @@ public class CorgiActivityController extends BaseController {
                 if (CorgiActivity.CAT_PAYING.equals(activity.getCategory())) {
                     if (activity.getCoverUrl() != null && !activity.getCoverUrl().contains("?x-oss-process") && StringUtils.isEmpty(activity.getVideoId())) {
                         activity.setCoverUrl(activity.getCoverUrl() + "?x-oss-process=style/fuzzyCover");
-                    } else {
-                        activity.setCoverUrl("https://corgi-pic.oss-cn-beijing.aliyuncs.com/corgi/WechatIMG4084.jpg");
                     }
                     activity.setRefActivityPic(activity.getCoverUrl());
                     List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
@@ -1833,9 +1843,13 @@ public class CorgiActivityController extends BaseController {
 
                 if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
-                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                    height = picInfo.getHeight();
-                    width = picInfo.getWidth();
+                    if (StringUtils.isEmpty(picUrl)) {
+                        continue;
+                    } else {
+                        PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                        height = picInfo.getHeight();
+                        width = picInfo.getWidth();
+                    }
                 }
                 Long commentCount = null;
                 //if ("AppStore".equals(RequestUtil.getChannel())) {
