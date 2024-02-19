@@ -746,6 +746,9 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_nearby_user")
     public JsonResult getNearbyUser(UserQuery userQuery) {
+        if(userQuery.getLat() == null || userQuery.getLat() > 200 || userQuery.getLng() == null || userQuery.getLng() > 200){
+            return new JsonResult(new ArrayList<>());
+        }
         userQuery.setGroup(changeGroupList(userQuery.getGroup()));
         List<UserProfile> userProfiles = corgiUserService.getNearByUser(userQuery);
         CorgiActivity corgiActivity = new CorgiActivity();
