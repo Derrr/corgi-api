@@ -1831,9 +1831,13 @@ public class CorgiActivityController extends BaseController {
 
                 if (!CollectionUtils.isEmpty(activity.getPics()) && (height == null || width == null)) {
                     String picUrl = activity.getPics().get(0).getPicUrl();
-                    PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
-                    height = picInfo.getHeight();
-                    width = picInfo.getWidth();
+                    if (StringUtils.isEmpty(picUrl)) {
+                        log.info("wrong pic info..." + activity.getId());
+                    } else {
+                        PicInfo picInfo = aliyunGreenService.getAliyunPicInfo(picUrl);
+                        height = picInfo.getHeight();
+                        width = picInfo.getWidth();
+                    }
                 }
                 Long commentCount = null;
                 if ("AppStore".equals(RequestUtil.getChannel())) {
