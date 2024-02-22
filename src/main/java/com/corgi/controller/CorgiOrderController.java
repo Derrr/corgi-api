@@ -274,7 +274,8 @@ public class CorgiOrderController extends BaseController {
                     .build();
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
             if (CollectionUtils.isNotEmpty(postOrders)) {
-                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品");
+                Long minute = getCancelMinutes(postOrders);
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品，请" + minute + "后再尝试购买");
             }
 
             String marketId = StringUtils.isEmpty(goodsId) ? "-" : goodsId;
@@ -917,6 +918,27 @@ public class CorgiOrderController extends BaseController {
         }
 
         return retMap;
+    }
+
+    private long getCancelMinutes(List<CorgiOrder> orders) {
+        String ctime = "";
+        for (CorgiOrder order : orders) {
+            if (ctime.compareTo(order.getCtime()) < 0) {
+                ctime = order.getCtime();
+            }
+        }
+        Long now = System.currentTimeMillis();
+        Long time;
+        try {
+            time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(ctime).getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 5l;
+        }
+        if (now - time > 5 * 60000) {
+            return 1;
+        }
+        return 5 - (now - time) / 60000 + 1;
     }
 
     List<CorgiUserOrder> buildOrder(List<CorgiOrder> orders, String userId) {
