@@ -275,7 +275,7 @@ public class CorgiOrderController extends BaseController {
             List<CorgiOrder> postOrders = corgiOrderService.getOrderByPage(orderQuery, 1, 10);
             if (CollectionUtils.isNotEmpty(postOrders)) {
                 Long minute = getCancelMinutes(postOrders);
-                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品，请" + minute + "后再尝试购买");
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "还有待付款的商品，请 " + minute + "分钟 后再尝试购买");
             }
 
             String marketId = StringUtils.isEmpty(goodsId) ? "-" : goodsId;
