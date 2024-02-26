@@ -93,6 +93,8 @@ public class CorgiUserController extends BaseController {
     private CorgiMatchService corgiMatchService;
     @Reference
     private CorgiExtraService corgiExtraService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -575,11 +577,18 @@ public class CorgiUserController extends BaseController {
                 log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
+            if("block".equals(userDetail.getCheckStatus()) || "blocked".equals(userDetail.getCheckStatus())){
+                new JsonResult(userDetail);
+            }
             if (!userId.equals(loginUserId)) {
                 userDetail.setCheckNickname(null);
             }
             if (userDetail.getRole() == null) {
                 userDetail.setRole("");
+            }
+            String locationExpire = corgiOrderService.getUserLocationExpireDate(loginUserId);
+            if(StringUtils.isNotEmpty(locationExpire)){
+                userDetail.setCheckStatus("locationVip");
             }
             userDetail.setMatch(0.0);
             if (getUserId().equals(userId)) {
@@ -759,18 +768,8 @@ public class CorgiUserController extends BaseController {
         corgiActivity.setStatus(CorgiActivity.CREATED);
         try {
             for (UserProfile userProfile : userProfiles) {
-//                String key = "activity_count_" + userProfile.getUserId();
-//                String count = redisTemplate.opsForValue().get(key);
-//                if (StringUtils.isEmpty(count) || !StringUtils.isNumeric(count)) {
-//                    corgiActivity.setUserId(userProfile.getUserId());
-//                    long finalCount = corgiActivityService.countCorgiActivity(corgiActivity);
-//                    userProfile.setActivityCount((int) finalCount);
-//                    redisTemplate.opsForValue().set(key, finalCount + "", 1, TimeUnit.HOURS);
-//                } else {
-//                    userProfile.setActivityCount(Integer.parseInt(count));
-//                }
                 userProfile.setActivityCount(0);
-//                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
+                userProfile.setSounds(corgiSoundService.getCorgiSound(userProfile.getUserId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
