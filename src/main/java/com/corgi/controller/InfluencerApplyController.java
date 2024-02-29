@@ -6,12 +6,10 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.ActivityBillboardDetail;
-import com.corgi.user.api.CorgiBillboardService;
-import com.corgi.user.api.CorgiInfluencerApplyService;
-import com.corgi.user.api.CorgiPicService;
-import com.corgi.user.api.CorgiUserActivityService;
+import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityBillboard;
 import com.corgi.user.entity.InfluencerApply;
+import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -30,34 +28,50 @@ import java.util.*;
 public class InfluencerApplyController extends BaseController {
     @Reference
     private CorgiInfluencerApplyService corgiInfluencerApplyService;
+    @Reference
+    private CorgiUserService corgiUserService;
 
     @PostMapping("apply")
-    public JsonResult apply(@RequestBody JSONObject content) {
-        InfluencerApply apply = new InfluencerApply();
-        apply.setDetail(content.toJSONString());
+    public JsonResult apply(@RequestBody InfluencerApply apply) {
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
+        apply.setUserId(userDetail.getUserId());
+        apply.setAvatar(userDetail.getAvatar());
+        apply.setNickname(userDetail.getNicknameDataId());
         corgiInfluencerApplyService.addApply(apply);
         return new JsonResult();
     }
 
-    @GetMapping("get_applies")
-    public JsonResult getApplies(@RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-        List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(page, size);
-        List<JSONObject> result = new ArrayList<>();
+    @GetMapping("get_status")
+    public JsonResult getStatus() {
+        InfluencerApply query = new InfluencerApply();
+        query.setUserId(getUserId());
+        List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(query, 1, 1);
         if (!CollectionUtils.isEmpty(applies)) {
-            for (InfluencerApply apply : applies) {
-                log.info("apply:{} ", apply);
-                if (StringUtils.isEmpty(apply.getDetail())) {
-                    continue;
-                }
-                try {
-                    result.add(JSONObject.parseObject(apply.getDetail()));
-                } catch (Exception e) {
-                    log.error("apply:{} ", apply.getDetail());
-                }
+            if("审核中".equals(applies.get(0).getStatus())){
+                return new JsonResult(300,"审核中");
+            }
+            if("通过".equals(applies.get(0).getStatus())){
+                return new JsonResult(400,"已通过");
             }
         }
+        return new JsonResult();
+    }
+
+    @GetMapping("get_applies")
+    public JsonResult getApplies(@RequestParam("status") String status, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+        InfluencerApply query = new InfluencerApply();
+        query.setStatus(status);
+        List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(query, page, size);
+        Integer count = corgiInfluencerApplyService.countApplies(query);
+        HashMap<String, Object> result = new HashMap<>();
+        result.put("applies", applies);
+        result.put("count", count);
         return new JsonResult(result);
     }
 
-
+    @GetMapping("update_apply")
+    public JsonResult updateApply(@RequestBody InfluencerApply apply) {
+        corgiInfluencerApplyService.updateApply(apply);
+        return new JsonResult();
+    }
 }

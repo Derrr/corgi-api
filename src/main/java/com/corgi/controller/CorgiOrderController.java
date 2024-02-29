@@ -207,25 +207,37 @@ public class CorgiOrderController extends BaseController {
         try {
             PaidBillboard paidBillboard = new PaidBillboard();
             paidBillboard.setDate(date);
-            paidBillboard.setActivityId(goodsId);
             List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
             if (CollectionUtils.isNotEmpty(billboards)) {
                 for (PaidBillboard billboard : billboards) {
-                    if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
-                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
+                    if (PaidBillboard.CREATED.equals(billboard.getStatus())) {
+                        continue;
                     }
-                    if (!PaidBillboard.CREATED.equals(billboard.getStatus()) && goodsId.equals(billboard.getActivityId())) {
+                    if (goodsId.equals(billboard.getActivityId())) {
                         return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
+                    }
+                    if (!PaidBillboard.FAIL.equals(billboard.getStatus())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
                     }
                 }
             }
+            if (MerchandiseEnum.BILLBOARD_YEAR.getCode().equals(merchId) && !this.checkYearBillboard()) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不满足免费上榜规则");
+            }
             paidBillboard.setUserId(activity.getUserId());
+            paidBillboard.setActivityId(goodsId);
             paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
-            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
-            HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
-            paidBillboard.setTradeNo(result.get("orderNo") + "");
-            corgiBillboardService.updatePaiBillboard(paidBillboard);
-            return new JsonResult(result);
+            if (MerchandiseEnum.BILLBOARD_YEAR.getCode().equals(merchId)) {
+                paidBillboard.setStatus(PaidBillboard.FREE);
+                corgiBillboardService.updatePaiBillboard(paidBillboard);
+                return new JsonResult();
+            } else {
+                CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
+                HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+                paidBillboard.setTradeNo(result.get("orderNo") + "");
+                corgiBillboardService.updatePaiBillboard(paidBillboard);
+                return new JsonResult(result);
+            }
         } finally {
             corgiUtilService.unlock(key);
         }
@@ -380,8 +392,18 @@ public class CorgiOrderController extends BaseController {
 
     @GetMapping("get_merchandises_by_date")
     public JsonResult getMerchandiseByDate(@RequestParam("date") String date) {
+        PaidBillboard billboardQuery = new PaidBillboard();
+        billboardQuery.setStatus(PaidBillboard.PAID);
+        billboardQuery.setUserId(getUserId());
+        List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(billboardQuery, 1, 1);
+        if(CollectionUtils.isNotEmpty(billboards)){
+            return new JsonResult(Constants.BILLBOARD_STATUS, "审核中");
+        }
         CorgiMerchandise query = new CorgiMerchandise();
         query.setType("billboard");
+        if (this.checkYearBillboard()) {
+            query.setType("billboardyear");
+        }
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
         return new JsonResult(merchandises);
     }
@@ -393,7 +415,6 @@ public class CorgiOrderController extends BaseController {
         if (!"AppStore".equals(RequestUtil.getChannel()) && type.equals(CorgiMerchandise.SUBSCRIBE)) {
             query.setType(type.concat("-android"));
         }
-        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
         if (type.startsWith(CorgiMerchandise.SUBSCRIBE)) {
             CorgiUserGoods orderQuery = CorgiUserGoods.builder()
                     .userId(getUserId())
@@ -403,11 +424,13 @@ public class CorgiOrderController extends BaseController {
                     .build();
             List<CorgiUserGoods> orders = corgiOrderService.getUserGoods(orderQuery);
             if (CollectionUtils.isNotEmpty(orders)) {
-                merchandises = merchandises.stream().filter(m -> !"首购".equals(m.getDisReason())).collect(Collectors.toList());
+                query.setDisReason("续费");
             } else {
-                merchandises = merchandises.stream().filter(m -> "首购".equals(m.getDisReason())).collect(Collectors.toList());
+                query.setDisReason("首购");
             }
         }
+        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
+
         return new JsonResult(merchandises);
     }
 
@@ -891,6 +914,29 @@ public class CorgiOrderController extends BaseController {
             log.error(e.getMessage(), e);
         }
         return order;
+    }
+
+    private boolean checkYearBillboard() {
+        String vipExpire = corgiUserService.getUserVipExpire(getUserId());
+        if (StringUtils.isNotEmpty(vipExpire) && !"-".equals(vipExpire)) {
+            List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                    .userId(getUserId())
+                    .goodsType(CorgiMerchandise.SUBSCRIBE)
+                    .build());
+            if (CollectionUtils.isNotEmpty(goods) && Arrays.asList("AS01", "AS05", "S01", "S05").contains(goods.get(0).getMerchId())) {
+                CorgiUserGoods yearGoods = goods.get(0);
+                PaidBillboard paidBillboard = new PaidBillboard();
+                paidBillboard.setStatus("pass");
+                paidBillboard.setCtime(yearGoods.getCtime());
+                List<PaidBillboard> passBillboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 10);
+                if (CollectionUtils.isEmpty(passBillboards)) {
+                    paidBillboard.setStatus("fail");
+                    List<PaidBillboard> failBillboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 10);
+                    return CollectionUtils.isEmpty(failBillboards) || failBillboards.size() < 3;
+                }
+            }
+        }
+        return false;
     }
 
     // 将request中的参数转换成Map
