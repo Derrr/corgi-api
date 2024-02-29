@@ -6,12 +6,14 @@ import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
 import com.corgi.entity.ActivityBillboardDetail;
+import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.ActivityBillboard;
 import com.corgi.user.entity.InfluencerApply;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserProfile;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,8 @@ public class InfluencerApplyController extends BaseController {
     private CorgiInfluencerApplyService corgiInfluencerApplyService;
     @Reference
     private CorgiUserService corgiUserService;
+    @Autowired
+    private MQService mqService;
 
     @PostMapping("apply")
     public JsonResult apply(@RequestBody InfluencerApply apply) {
@@ -47,11 +51,11 @@ public class InfluencerApplyController extends BaseController {
         query.setUserId(getUserId());
         List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(query, 1, 1);
         if (!CollectionUtils.isEmpty(applies)) {
-            if("审核中".equals(applies.get(0).getStatus())){
-                return new JsonResult(300,"审核中");
+            if ("审核中".equals(applies.get(0).getStatus())) {
+                return new JsonResult(300, "审核中");
             }
-            if("通过".equals(applies.get(0).getStatus())){
-                return new JsonResult(400,"已通过");
+            if ("通过".equals(applies.get(0).getStatus())) {
+                return new JsonResult(400, "已通过");
             }
         }
         return new JsonResult();
@@ -69,9 +73,17 @@ public class InfluencerApplyController extends BaseController {
         return new JsonResult(result);
     }
 
-    @GetMapping("update_apply")
+    @PostMapping("update_apply")
     public JsonResult updateApply(@RequestBody InfluencerApply apply) {
         corgiInfluencerApplyService.updateApply(apply);
+        if (StringUtils.isEmpty(apply.getWechat())) {
+            if ("通过".equals(apply.getStatus())) {
+                mqService.sendAdminMessage(apply.getUserId(),"您申请的天菜创始人已通过审核，24小时内运营小伙伴将会拉您入群，请留意微信消息");
+            }
+            if ("不通过".equals(apply.getStatus())) {
+                mqService.sendAdminMessage(apply.getUserId(),"很抱歉，您的天菜创始人申请未通过审核");
+            }
+        }
         return new JsonResult();
     }
 }
