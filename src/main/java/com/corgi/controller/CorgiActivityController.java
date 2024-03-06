@@ -775,12 +775,7 @@ public class CorgiActivityController extends BaseController {
         }
         if (CorgiActivity.CAT_ACTIVITY.equals(activity.getCategory())) {
             List<ActivityPic> activitypics = corgiPicService.getActivityPic(activity.getId());
-//            List<UserProfile> recommendUser = corgiUserService.recommendUser(activity.getCity(), activity.getUserId());
-//            if (CollectionUtils.isEmpty(recommendUser)) {
-//                recommendUser = corgiUserFollowService.getMatchUserByPage(activity.getUserId(), "active", 0.0, 0.0, 1, 6);
-//            }
             return new JsonResult(AddActivityResult.getResult(activity)
-//                    .setRecommend(recommendUser)
                     .setActivityPics(activitypics)
                     .setCanCallCity(getCallCityKey(activity.getUserId()) != null)
                     .setHasCallCity(redisTemplate.hasKey(CALL_CITY_PREFIX.concat(activity.getId()))));

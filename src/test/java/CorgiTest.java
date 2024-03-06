@@ -52,6 +52,6 @@ public class CorgiTest {
 
     @Test
     public void testJoin() {
-        System.out.println(DigestUtils.md5DigestAsHex("022-622-042".getBytes(StandardCharsets.UTF_8)));
+        System.out.println("https://corgi-pic.oss-cn-beijing.aliyuncs.com/avatar/946676/1709700344750".replaceAll("corgi-pic\\.oss-cn-beijing\\.aliyuncs\\.com", "image.corgi.org.cn"));
     }
 }
