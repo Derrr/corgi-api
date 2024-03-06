@@ -164,7 +164,6 @@ public class BillboardController extends BaseController {
     @GetMapping("get_paid_billboard")
     public JsonResult getPaidBillboar(PaidBillboard paidBillboard, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         HashMap<String, Object> result = new HashMap<>();
-        log.info("paid:{}", paidBillboard);
         if (!hasUserId()) {
             result.put("activities", corgiBillboardService.queryPaidBillboard(paidBillboard, page, pageSize));
             result.put("total", corgiBillboardService.countPaiBillboard(paidBillboard));
