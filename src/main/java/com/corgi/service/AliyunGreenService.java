@@ -469,7 +469,7 @@ public class AliyunGreenService {
 
     public PicInfo getAliyunPicInfo(String url) {
         String[] urlArr = url.split("\\?x-oss-process");
-        url = urlArr[0];
+        url = urlArr[0].replaceAll("image\\.corgi\\.org\\.cn","corgi-pic.oss-cn-beijing.aliyuncs.com" );
         PicInfo picInfo = new PicInfo();
         String result;
         try {
