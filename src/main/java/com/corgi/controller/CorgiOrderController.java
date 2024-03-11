@@ -307,6 +307,12 @@ public class CorgiOrderController extends BaseController {
                 if (!checkLocation(goodsId, result)) {
                     return result;
                 }
+            } else if (merchandise.getType().equals(CorgiMerchandise.LOCATIONMONTH)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                if (!checkLocation(goodsId, result)) {
+                    return result;
+                }
             } else if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
@@ -340,6 +346,15 @@ public class CorgiOrderController extends BaseController {
         if (position == null || position.getLat() == null || position.getLng() == null
                 || position.getLat() > 200 || position.getLng() > 200 || position.getLat() == 0 || position.getLng() == 0) {
             result.setMessage("定位失败");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkLocationMonth(JsonResult result) {
+        String vipResult = corgiOrderService.getUserLocationExpireDate(getUserId());
+        if (StringUtils.isNotEmpty(vipResult)) {
+            result.setMessage("不能重复购买");
             return false;
         }
         return true;
@@ -396,7 +411,7 @@ public class CorgiOrderController extends BaseController {
         billboardQuery.setStatus(PaidBillboard.PAID);
         billboardQuery.setUserId(getUserId());
         List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(billboardQuery, 1, 1);
-        if(CollectionUtils.isNotEmpty(billboards)){
+        if (CollectionUtils.isNotEmpty(billboards)) {
             return new JsonResult(Constants.BILLBOARD_STATUS, "审核中");
         }
         CorgiMerchandise query = new CorgiMerchandise();
