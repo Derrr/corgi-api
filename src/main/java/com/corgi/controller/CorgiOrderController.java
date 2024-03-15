@@ -14,7 +14,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
-import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.util.RequestUtil;
@@ -66,6 +65,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiBillboardService corgiBillboardService;
     @Reference
     private CorgiReserveService corgiReserveService;
+    @Reference
+    private CorgiUserWechatService corgiUserWechatService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -310,7 +311,7 @@ public class CorgiOrderController extends BaseController {
             } else if (merchandise.getType().equals(CorgiMerchandise.LOCATIONMONTH)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
-                if (!checkLocation(goodsId, result)) {
+                if (!checkLocationMonth(result)) {
                     return result;
                 }
             } else if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
@@ -319,8 +320,17 @@ public class CorgiOrderController extends BaseController {
                 if (!checkReservePay(goodsId, result)) {
                     return result;
                 }
+            } else if (merchandise.getType().equals(CorgiMerchandise.WECHAT)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                sellerId = goodsId;
+                UserWechat userWechat = checkWechatPay(goodsId, result);
+                if (userWechat == null) {
+                    return result;
+                }
+                marketId = userWechat.getId();
             }
-            String preExpireTime = corgiUserService.getUserVipExpire(getUserId());
+
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 BarReservation update = new BarReservation();
@@ -329,12 +339,7 @@ public class CorgiOrderController extends BaseController {
                 update.setMerchId(merchId);
                 corgiReserveService.updateReservation(update);
             }
-            String afterExpireTime = corgiUserService.getUserVipExpire(getUserId());
-            //购买vip更新昵称更改时间
-            if (!StringUtils.isEmpty(afterExpireTime) && !"-".equals(afterExpireTime)
-                    && (StringUtils.isEmpty(preExpireTime) || "-".equals(preExpireTime))) {
-                redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + getUserId());
-            }
+
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
@@ -368,6 +373,7 @@ public class CorgiOrderController extends BaseController {
             return false;
         }
         CorgiUserGoods goodsQuery = new CorgiUserGoods();
+        goodsQuery.setUserId(getUserId());
         goodsQuery.setGoodsId(goodsId);
         goodsQuery.setGoodsType(CorgiUserGoods.GOODS_TYPE.RESERVE);
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(goodsQuery);
@@ -376,6 +382,24 @@ public class CorgiOrderController extends BaseController {
             return false;
         }
         return true;
+    }
+
+    private UserWechat checkWechatPay(String goodsId, JsonResult result) {
+        UserWechat userWechat = corgiUserWechatService.getUserWechat(goodsId);
+        if(userWechat == null){
+            result.setMessage("该用户未开放微信购买");
+            return null;
+        }
+        CorgiUserGoods goodsQuery = new CorgiUserGoods();
+        goodsQuery.setUserId(getUserId());
+        goodsQuery.setGoodsId(goodsId);
+        goodsQuery.setGoodsType(CorgiMerchandise.WECHAT);
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(goodsQuery);
+        if (CollectionUtils.isNotEmpty(goods)) {
+            result.setMessage("该微信已购买");
+            return null;
+        }
+        return userWechat;
     }
 
     private CorgiActivity checkActivityPay(String goodsId, String merchId, JsonResult result) {

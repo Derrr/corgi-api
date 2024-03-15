@@ -53,6 +53,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author tairanliu
@@ -69,6 +71,8 @@ public class CorgiUserController extends BaseController {
     private CorgiPicService corgiPicService;
     @Reference
     private CorgiUserFollowService corgiUserFollowService;
+    @Reference
+    private CorgiUserActivityService corgiUserActivityService;
     @Reference
     private CorgiToolService corgiToolService;
     @Reference
@@ -95,6 +99,8 @@ public class CorgiUserController extends BaseController {
     private CorgiExtraService corgiExtraService;
     @Reference
     private CorgiOrderService corgiOrderService;
+    @Reference
+    private CorgiUserWechatService corgiUserWechatService;
 
     @Autowired
     private AliyunGreenService aliyunGreenService;
@@ -384,12 +390,12 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
         UserDetail oldDetail = corgiUserService.getUserDetailBasic(userDetail.getUserId());
-//        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
-//        }
-//        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
-//        }
+        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
+        }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
+        }
         corgiUserService.updateUserNickname(userDetail.getUserId(), oldDetail.getNickname(), userDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
@@ -517,6 +523,100 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(result);
     }
 
+    @GetMapping("/get_user_wechat")
+    public JsonResult getUserWechat(@RequestParam(value = "userId") String userId) {
+        CorgiUserGoods query = CorgiUserGoods.builder()
+                .userId(getUserId())
+                .goodsId(userId)
+                .goodsType(CorgiMerchandise.WECHAT)
+                .build();
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
+        UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
+        if (!CollectionUtils.isEmpty(goods)) {
+            CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+            wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+            wechat.setPayStatus("pay");
+            return new JsonResult(wechat);
+        }
+        //用户没有开放微信购买
+        if (userWechat == null || "0".equals(userWechat.getStatus())) {
+            CorgiUserWechat wechat = new CorgiUserWechat();
+            wechat.setPayStatus("unrelease");
+            return new JsonResult();
+        }
+        //登录用户未购买微信
+        CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+        wechat.setWechat("");
+        wechat.setWechatShot("");
+        wechat.setReply("");
+        wechat.setPayStatus("unpay");
+        wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+        return new JsonResult(wechat);
+    }
+
+    @GetMapping("/list_wechat_user")
+    public JsonResult listWechatUser(@RequestParam("id") String id, @RequestParam("size") Integer pageSize) {
+        UserWechat query = new UserWechat();
+        query.setId(id);
+        List<UserWechat> userWechats = corgiUserWechatService.queryWechat(query, 0, pageSize);
+        CorgiMerchandise merchQuery = new CorgiMerchandise();
+        merchQuery.setType(CorgiMerchandise.WECHAT);
+        Map<String, CorgiMerchandise> merchandiseMap = corgiOrderService.getMerchandise(merchQuery).stream()
+                .collect(Collectors.toMap(CorgiMerchandise::getId, Function.identity()));
+        CorgiUserGoods goodQuery = new CorgiUserGoods();
+        goodQuery.setUserId(getUserId());
+        goodQuery.setGoodsType(CorgiMerchandise.WECHAT);
+        List<String> paidUserIds = corgiOrderService.getUserGoods(goodQuery).stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
+        List<CorgiUserWechat> results = new ArrayList<>();
+        for (UserWechat userWechat : userWechats) {
+            results.add(this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds));
+        }
+        return new JsonResult(results);
+    }
+
+    @GetMapping("/check_wechat")
+    public JsonResult checkWechat() {
+        HashMap<String, Boolean> result = new HashMap<>();
+        UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+        result.put("avatar", UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()));
+        result.put("follow", corgiUserFollowService.countFollowed(getUserId()) >= 100);
+        result.put("activity", corgiUserActivityService.countUserActivity(getUserId()) >= 3);
+        return new JsonResult(result);
+    }
+
+    @PostMapping("/update_user_wechat")
+    public JsonResult updateUserWechat(@RequestBody UserWechat userWechat) {
+        if (hasUserId()) {
+            userWechat.setUserId(getUserId());
+        }
+        if ("0".equals(userWechat.getStatus())) {
+            corgiUserWechatService.updateUserWechat(userWechat);
+            return new JsonResult();
+        }
+        userWechat.setStatus("1");
+        UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
+        if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
+            userWechat.setAvatar(detail.getAvatar());
+            userWechat.setNickname(detail.getNickname());
+        } else {
+            return new JsonResult(400, "不满足微信解锁条件");
+        }
+        corgiUserWechatService.updateUserWechat(userWechat);
+        CorgiUserWechat result = CorgiUserWechat.getWechat(userWechat);
+        result.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+        return new JsonResult(result);
+    }
+
+    @GetMapping("/list_wechat_paid")
+    public JsonResult listWechatPaid(@RequestParam("page") Integer page, @RequestParam("size") Integer pageSize) {
+        List<UserWechat> userWechats = corgiUserWechatService.listUserPaidWechats(getUserId(), page, pageSize);
+        List<CorgiUserWechat> results = new ArrayList<>();
+        for (UserWechat userWechat : userWechats) {
+            results.add(CorgiUserWechat.getWechat(userWechat));
+        }
+        return new JsonResult(results);
+    }
+
     @PostMapping("/hide_extra")
     public JsonResult hideExtra(@RequestBody UserExtraUpdate userExtra) {
         String type = userExtra.getType();
@@ -577,7 +677,7 @@ public class CorgiUserController extends BaseController {
                 log.info(" user:{} detail code:{} ", userId, Constants.PARAMETER_ERROR_CODE);
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "用户不存在");
             }
-            if("block".equals(userDetail.getCheckStatus()) || "blocked".equals(userDetail.getCheckStatus())){
+            if ("block".equals(userDetail.getCheckStatus()) || "blocked".equals(userDetail.getCheckStatus())) {
                 new JsonResult(userDetail);
             }
             if (!userId.equals(loginUserId)) {
@@ -587,7 +687,7 @@ public class CorgiUserController extends BaseController {
                 userDetail.setRole("");
             }
             String locationExpire = corgiOrderService.getUserLocationExpireDate(loginUserId);
-            if(StringUtils.isNotEmpty(locationExpire)){
+            if (StringUtils.isNotEmpty(locationExpire)) {
                 userDetail.setCheckStatus("locationVip");
             }
             userDetail.setMatch(0.0);
@@ -1345,6 +1445,20 @@ public class CorgiUserController extends BaseController {
         mqService.sendMessage(buildRemindPaying(userId));
         redisTemplate.opsForValue().set("remind_paying-" + userId + "-" + getUserId(), System.currentTimeMillis() + "", 30L, TimeUnit.DAYS);
         return new JsonResult(false);
+    }
+
+    private CorgiUserWechat checkWechatUnpay(UserWechat userWechat, Map<String, CorgiMerchandise> merchandiseMap
+            , List<String> paidUserIds) {
+        CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+        wechat.setMerchandise(merchandiseMap.get(wechat.getMerchandise()));
+        wechat.setPayStatus("pay");
+        if (!paidUserIds.contains(wechat.getUserId())) {
+            wechat.setWechat("");
+            wechat.setWechatShot("");
+            wechat.setReply("");
+            wechat.setPayStatus("unpay");
+        }
+        return wechat;
     }
 
     private PushMessage buildRemindPaying(String userId) {

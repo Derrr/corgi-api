@@ -64,6 +64,8 @@ public class CorgiToolController extends BaseController {
     @Reference
     private CorgiBillboardService corgiBillboardService;
     @Reference
+    private CorgiUserWechatService corgiUserWechatService;
+    @Reference
     private CorgiShareService corgiShareService;
     @Reference
     private CorgiVlogService corgiVlogService;
@@ -146,6 +148,18 @@ public class CorgiToolController extends BaseController {
     public JsonResult countUser(UserDetail userDetail) {
         long count = corgiUserService.countUsers(userDetail);
         return new JsonResult(count);
+    }
+
+    @GetMapping("get_wechat_list")
+    public JsonResult getWechatList(@RequestParam("page")Integer page, @RequestParam("size")Integer size) {
+        if (hasUserId()) {
+            return new JsonResult();
+        }
+        HashMap<String,Object> result = new HashMap<>();
+        UserWechat query = new UserWechat();
+        result.put("wechat",corgiUserWechatService.queryWechat(query,page,size));
+        result.put("total",corgiUserWechatService.countWechat(query));
+        return new JsonResult(result);
     }
 
     @GetMapping("query_activity")
