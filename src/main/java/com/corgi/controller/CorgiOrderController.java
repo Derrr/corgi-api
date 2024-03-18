@@ -125,13 +125,24 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(getUserId())
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
-        query.setSellerId(null);
-        query.setUserId(getUserId());
-        query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-        Double successWithdraw = corgiOrderService.countIncome(query);
-        query.setStatus(CorgiOrder.STATUS.CREATED);
-        Double withdrawing = corgiOrderService.countIncome(query);
-        Double totalWithdraw = withdrawing + successWithdraw;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -7);
+        query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .merchType(CorgiMerchandise.WECHAT)
+                .sellerId(getUserId())
+                .ctime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()))
+                .build();
+        Double lockedIncome = corgiOrderService.countIncome(query);
+        totalIncome -= lockedIncome;
+
+        query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .userId(getUserId())
+                .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
+                .build();
+        Double totalWithdraw = corgiOrderService.countIncome(query);
         Double rate = 0.6;
         if ("influencer".equals(detail.getAvatarStatus())) {
             rate = 0.65;
@@ -386,7 +397,7 @@ public class CorgiOrderController extends BaseController {
 
     private UserWechat checkWechatPay(String goodsId, JsonResult result) {
         UserWechat userWechat = corgiUserWechatService.getUserWechat(goodsId);
-        if(userWechat == null){
+        if (userWechat == null) {
             result.setMessage("该用户未开放微信购买");
             return null;
         }
