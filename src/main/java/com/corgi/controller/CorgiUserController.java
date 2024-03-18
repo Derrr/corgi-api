@@ -579,7 +579,7 @@ public class CorgiUserController extends BaseController {
         HashMap<String, Boolean> result = new HashMap<>();
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         result.put("avatar", UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()));
-        result.put("follow", corgiUserFollowService.countFollowed(getUserId()) >= 100);
+        result.put("fans", corgiUserFollowService.countFollowed(getUserId()) >= 100);
         result.put("activity", corgiUserActivityService.countUserActivity(getUserId()) >= 3);
         return new JsonResult(result);
     }
@@ -598,7 +598,7 @@ public class CorgiUserController extends BaseController {
         if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
             userWechat.setAvatar(detail.getAvatar());
             userWechat.setNickname(detail.getNickname());
-        } else {
+        } else if (hasUserId()) {
             return new JsonResult(400, "不满足微信解锁条件");
         }
         corgiUserWechatService.updateUserWechat(userWechat);
