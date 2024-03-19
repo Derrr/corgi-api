@@ -382,12 +382,12 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称为空");
         }
         UserDetail oldDetail = corgiUserService.getUserDetailBasic(userDetail.getUserId());
-//        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
-//        }
-//        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
-//            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
-//        }
+        if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "昵称审核中，无法更新");
+        }
+        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "近期已更改过昵称，请过段时间再更新");
+        }
         corgiUserService.updateUserNickname(userDetail.getUserId(), oldDetail.getNickname(), userDetail.getNickname());
         userDetail.setCheckStatus(AliyunGreenService.CHECK);
         corgiUserService.updateDetail(userDetail);
