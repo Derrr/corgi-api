@@ -371,10 +371,11 @@ public class CorgiUserController extends BaseController {
     }
 
     @PostMapping("/update_nickname")
-    public JsonResult updateNickname(@RequestBody UserDetail userDetail) {
-        if (hasUserId()) {
-            userDetail.setUserId(getUserId());
+    public JsonResult updateNickname(@RequestBody UserDetail userDetail) throws PermissionException{
+        if (!hasUserId()) {
+            throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
         }
+        userDetail.setUserId(getUserId());
         if (StringUtils.isEmpty(userDetail.getUserId())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "userId为空");
         }
@@ -916,7 +917,7 @@ public class CorgiUserController extends BaseController {
                                     @RequestParam(name = "lat", required = false) Double lat,
                                     @RequestParam(name = "lng", required = false) Double lng,
                                     @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        if("distance".equals(type) && lat == null || lng == null || lat > 200 || lng > 200){
+        if ("distance".equals(type) && lat == null || lng == null || lat > 200 || lng > 200) {
             type = "new";
         }
         List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
@@ -1319,17 +1320,15 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("get_compare_result")
     public JsonResult getCompareResult(@RequestParam("avatar") String avatar) throws PermissionException {
-        String userId = getUserId();
-        if (!hasUserId()) {
-            userId = "1";
-        }
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
-        if (userDetail != null && UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
-            CompareFacesResponse response = aliyunGreenService.compareAvatar(userDetail.getAvatar(), avatar);
-            if (response.getData() != null) {
-                Float score = response.getData().getSimilarityScore();
-                if (score != null && score > 80) {
-                    return new JsonResult("verified");
+        if (hasUserId()) {
+            UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
+            if (userDetail != null && UserDetail.VERIFIED.equals(userDetail.getAvatarCheckStatus())) {
+                CompareFacesResponse response = aliyunGreenService.compareAvatar(userDetail.getAvatar(), avatar);
+                if (response.getData() != null) {
+                    Float score = response.getData().getSimilarityScore();
+                    if (score != null && score > 80) {
+                        return new JsonResult("verified");
+                    }
                 }
             }
         }
