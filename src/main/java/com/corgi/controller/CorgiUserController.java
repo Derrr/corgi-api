@@ -346,7 +346,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/check_nickname")
     public JsonResult checkNickname(@RequestParam(value = "nickname", required = false) String nickname) {
-        if (redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
+        if (hasUserId() && redisTemplate.hasKey(CacheConstants.NICKNAME_UPDATE + getUserId())) {
             String expireDate = corgiUserService.getUserVipExpire(getUserId());
             if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "尊敬的VIP用户，您本周的修改机会已耗尽，请下周再尝试修改～");
