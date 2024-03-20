@@ -60,9 +60,10 @@ public class CorgiMatchController extends BaseController {
 
     @PostMapping("get_matches")
     public JsonResult addActivity(@RequestBody UserQuery userQuery) {
-        if (hasUserId()) {
-            userQuery.setUserId(getUserId());
+        if (!hasUserId()) {
+            return new JsonResult(0, Constants.MATCH_REMAIN_ERROR_CODE, "获取匹配人员失败");
         }
+        userQuery.setUserId(getUserId());
         String freqKey = getUserId() + "_get_match_times";
         String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String dayFreqKey = freqKey.concat("_").concat(suffix);
