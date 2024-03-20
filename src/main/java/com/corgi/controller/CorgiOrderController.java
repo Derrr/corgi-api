@@ -319,7 +319,7 @@ public class CorgiOrderController extends BaseController {
                 if (!checkLocation(goodsId, result)) {
                     return result;
                 }
-            } else if (merchandise.getType().equals(CorgiMerchandise.LOCATIONMONTH)) {
+            } else if (merchandise.getType().equals(CorgiMerchandise.LOCATION_MONTH)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
                 if (!checkLocationMonth(result)) {
