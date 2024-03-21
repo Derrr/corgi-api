@@ -681,7 +681,7 @@ public class CorgiUserController extends BaseController {
                 String jwtUserId = decodedJWT.getClaim("userId").asString();
                 log.info("updating user:{} ", jwtUserId);
                 if (JWTUtils.ADMIN_ID.equals(jwtUserId)) {
-                    result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
+                    return new JsonResult(Constants.PERMISSION_ERROR_CODE, "非当前用户");
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
                     log.error("非当前用户");
                     return new JsonResult(Constants.PERMISSION_ERROR_CODE, "非当前用户");
