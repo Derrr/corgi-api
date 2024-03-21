@@ -283,9 +283,11 @@ public class CorgiBarController extends BaseController {
             userIds.add(attend.getUserId());
             if (detail.getAvatars().size() < 3) {
                 UserDetail userDetail = corgiUserService.getUserDetailBasic(attend.getUserId());
-                if (!StringUtils.isEmpty(userDetail.getAvatar())) {
+                if (userDetail != null && !StringUtils.isEmpty(userDetail.getAvatar())) {
                     detail.getAvatars().add(userDetail.getAvatar());
                 }
+            } else {
+                break;
             }
         }
         detail.setCount(userIds.size());
