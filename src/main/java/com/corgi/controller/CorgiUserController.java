@@ -917,7 +917,7 @@ public class CorgiUserController extends BaseController {
                                     @RequestParam(name = "lat", required = false) Double lat,
                                     @RequestParam(name = "lng", required = false) Double lng,
                                     @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        if ("distance".equals(type) && lat == null || lng == null || lat > 200 || lng > 200) {
+        if ("distance".equals(type) && (lat == null || lng == null || lat > 200 || lng > 200)) {
             type = "new";
         }
         List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
