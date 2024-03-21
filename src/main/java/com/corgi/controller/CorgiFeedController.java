@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("feed")
 public class CorgiFeedController extends BaseController {
-    @Reference
+    @Reference(retries = 1, timeout = 60000)
     private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiActivityFeedService corgiActivityFeedService;
