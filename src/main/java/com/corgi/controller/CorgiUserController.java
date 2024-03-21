@@ -687,9 +687,7 @@ public class CorgiUserController extends BaseController {
                 userDetail.setRole("");
             }
             String locationExpire = corgiOrderService.getUserLocationExpireDate(loginUserId);
-            if (StringUtils.isNotEmpty(locationExpire)
-                    && new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
-                    .compareTo(locationExpire) < 0) {
+            if (StringUtils.isNotEmpty(locationExpire)) {
                 userDetail.setCheckStatus("locationVip");
             }
             userDetail.setMatch(0.0);
