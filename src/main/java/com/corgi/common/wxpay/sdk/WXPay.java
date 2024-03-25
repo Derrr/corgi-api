@@ -1,11 +1,13 @@
 package com.corgi.common.wxpay.sdk;
 
 import com.corgi.common.wxpay.sdk.WXPayConstants.SignType;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class WXPay {
 
     private WXPayConfig config = CorgiWXPayConfig.config;
