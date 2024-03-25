@@ -23,6 +23,7 @@ import com.corgi.user.entity.CorgiMerchandise;
 import com.corgi.user.entity.CorgiOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -53,6 +54,10 @@ public class CorgiPayService {
     private CorgiOrderService corgiOrderService;
     @Autowired
     private RestTemplate restTemplate;
+    @Value("${pay.wx.notify_url}")
+    private String wxNotifyUrl;
+    @Value("${pay.alipay.notify_url}")
+    private String alipayNotifyUrl;
 
     public static final String ALI_URL = "https://openapi.alipay.com/gateway.do";
     /**
@@ -98,8 +103,7 @@ public class CorgiPayService {
         model.setTotalAmount(merchandise.getPrice() + "");
         model.setBody(merchandise.getContent());
         request.setBizModel(model);
-        request.setNotifyUrl("https://api.corgi.org.cn/order/alipay_callback");
-        //request.setNotifyUrl("http://139.224.63.240:7888/order/alipay_callback");
+        request.setNotifyUrl(alipayNotifyUrl);
         try {
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
             return response.getBody();
@@ -141,8 +145,7 @@ public class CorgiPayService {
         Map<String, String> body = new HashMap<>();
         body.put("body", merchandise.getTitle());
         body.put("out_trade_no", order.getTradeNo());
-        //body.put("notify_url", "https://api.corgi.org.cn/order/wx_callback");
-        body.put("notify_url", "http://139.224.63.240:7888/order/wx_callback");
+        body.put("notify_url", wxNotifyUrl);
         body.put("total_fee", (long) (merchandise.getPrice() * 100) + "");
         body.put("trade_type", "APP");
         if ("com.duke.corgi.mi".equals(order.getPackageName())) {

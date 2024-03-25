@@ -1,21 +1,17 @@
 package com.corgi.common.wxpay.sdk;
 
 import com.corgi.common.wxpay.sdk.WXPayConstants.SignType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 public class WXPay {
 
     private WXPayConfig config = CorgiWXPayConfig.config;
     private SignType signType = SignType.MD5;
     private boolean autoReport = false;
     private boolean useSandbox = false;
-    //private String notifyUrl = "https://api.corgi.org.cn/order/wx_callback";
     private String notifyUrl = "http://139.224.63.240:7888/order/wx_callback";
 
     private WXPayRequest wxPayRequest = new WXPayRequest();
@@ -320,7 +316,7 @@ public class WXPay {
         } else {
             url = WXPayConstants.UNIFIEDORDER_URL_SUFFIX;
         }
-        if (this.notifyUrl != null) {
+        if (reqData.get("notify_url") == null) {
             reqData.put("notify_url", this.notifyUrl);
         }
         String respXml = this.requestWithoutCert(url, this.fillRequestData(reqData), connectTimeoutMs, readTimeoutMs);
