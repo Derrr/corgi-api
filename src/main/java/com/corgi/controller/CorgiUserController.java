@@ -375,7 +375,7 @@ public class CorgiUserController extends BaseController {
         if (!hasUserId()) {
             log.info(userDetail.toString());
             log.info("version:{} channel:{} ip:{}", getVersion(), RequestUtil.getChannel(), RequestUtil.getIP());
-            throw new PermissionException(Constants.API_ERROR_CODE, "无权限操作");
+            return new JsonResult();
         }
         userDetail.setUserId(getUserId());
         if (StringUtils.isEmpty(userDetail.getUserId())) {
