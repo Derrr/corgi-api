@@ -1452,7 +1452,7 @@ public class CorgiUserController extends BaseController {
     private CorgiUserWechat checkWechatUnpay(UserWechat userWechat, Map<String, CorgiMerchandise> merchandiseMap
             , List<String> paidUserIds) {
         CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
-        wechat.setMerchandise(merchandiseMap.get(wechat.getMerchandise()));
+        wechat.setMerchandise(merchandiseMap.get(wechat.getMerchId()));
         wechat.setPayStatus("pay");
         if (!paidUserIds.contains(wechat.getUserId())) {
             wechat.setWechat("");
