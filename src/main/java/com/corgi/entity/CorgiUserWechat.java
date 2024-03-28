@@ -34,7 +34,7 @@ public class CorgiUserWechat extends UserWechat {
             this.height = userDetail.getHeight();
         }
         if (userDetail.getWeight() > 0) {
-            this.height = userDetail.getHeight();
+            this.weight = userDetail.getWeight();
         }
         try {
             if (StringUtils.isNotEmpty(userDetail.getBirthday())) {
