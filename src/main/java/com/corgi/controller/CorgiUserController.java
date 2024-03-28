@@ -531,29 +531,28 @@ public class CorgiUserController extends BaseController {
                 .goodsId(userId)
                 .goodsType(CorgiMerchandise.WECHAT)
                 .build();
-        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
         UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
+        //用户没有开放微信购买
+        if (userWechat == null || "0".equals(userWechat.getStatus())) {
+            return new JsonResult();
+        }
+        CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+        wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
+        wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+        if(getUserId().equals(userId)){
+            wechat.setPayStatus("self");
+            return new JsonResult(wechat);
+        }
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
         if (!CollectionUtils.isEmpty(goods)) {
-            CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
-            wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
-            wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
             wechat.setPayStatus("pay");
             return new JsonResult(wechat);
         }
-        //用户没有开放微信购买
-        if (userWechat == null || "0".equals(userWechat.getStatus())) {
-            CorgiUserWechat wechat = new CorgiUserWechat();
-            wechat.setPayStatus("unrelease");
-            return new JsonResult();
-        }
         //登录用户未购买微信
-        CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
         wechat.setWechat("");
         wechat.setWechatShot("");
         wechat.setReply("");
         wechat.setPayStatus("unpay");
-        wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
-        wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
         return new JsonResult(wechat);
     }
 
