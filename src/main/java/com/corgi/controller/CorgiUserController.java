@@ -535,6 +535,7 @@ public class CorgiUserController extends BaseController {
         UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
         if (!CollectionUtils.isEmpty(goods)) {
             CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+            wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
             wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
             wechat.setPayStatus("pay");
             return new JsonResult(wechat);
@@ -551,6 +552,7 @@ public class CorgiUserController extends BaseController {
         wechat.setWechatShot("");
         wechat.setReply("");
         wechat.setPayStatus("unpay");
+        wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
         wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
         return new JsonResult(wechat);
     }
@@ -606,6 +608,7 @@ public class CorgiUserController extends BaseController {
         }
         corgiUserWechatService.updateUserWechat(userWechat);
         CorgiUserWechat result = CorgiUserWechat.getWechat(userWechat);
+        result.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
         result.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
         return new JsonResult(result);
     }
@@ -1454,6 +1457,7 @@ public class CorgiUserController extends BaseController {
     private CorgiUserWechat checkWechatUnpay(UserWechat userWechat, Map<String, CorgiMerchandise> merchandiseMap
             , List<String> paidUserIds) {
         CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+        wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
         wechat.setMerchandise(merchandiseMap.get(wechat.getMerchId()));
         wechat.setPayStatus("pay");
         if (!paidUserIds.contains(wechat.getUserId())) {
