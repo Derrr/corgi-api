@@ -539,8 +539,8 @@ public class CorgiUserController extends BaseController {
         CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
         wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
         wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
-        if(getUserId().equals(userId)){
-            wechat.setPayStatus("self");
+        if (getUserId().equals(userId)) {
+            wechat.setPayStatus("owner");
             return new JsonResult(wechat);
         }
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
@@ -572,7 +572,7 @@ public class CorgiUserController extends BaseController {
         List<CorgiUserWechat> results = new ArrayList<>();
         for (UserWechat userWechat : userWechats) {
             //if (!getUserId().equals(userWechat.getUserId())) {
-                results.add(this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds));
+            results.add(this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds));
             //}
         }
         return new JsonResult(results);
