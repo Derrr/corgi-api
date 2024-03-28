@@ -379,7 +379,7 @@ public class CorgiUserController extends BaseController {
     }
 
     @PostMapping("/update_nickname")
-    public JsonResult updateNickname(@RequestBody UserDetail userDetail) throws PermissionException{
+    public JsonResult updateNickname(@RequestBody UserDetail userDetail) throws PermissionException {
         if (!hasUserId()) {
             return new JsonResult();
         }
@@ -570,7 +570,9 @@ public class CorgiUserController extends BaseController {
         List<String> paidUserIds = corgiOrderService.getUserGoods(goodQuery).stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
         List<CorgiUserWechat> results = new ArrayList<>();
         for (UserWechat userWechat : userWechats) {
-            results.add(this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds));
+            //if (!getUserId().equals(userWechat.getUserId())) {
+                results.add(this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds));
+            //}
         }
         return new JsonResult(results);
     }
