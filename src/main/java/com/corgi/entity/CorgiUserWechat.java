@@ -40,7 +40,7 @@ public class CorgiUserWechat extends UserWechat {
             if (StringUtils.isNotEmpty(userDetail.getBirthday())) {
                 Calendar today = Calendar.getInstance();
                 Calendar birthDay = Calendar.getInstance();
-                birthDay.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(userDetail.getBirthday()));
+                birthDay.setTime(new SimpleDateFormat("yyyy/MM/dd").parse(userDetail.getBirthday()));
                 this.age = today.get(Calendar.YEAR) - birthDay.get(Calendar.YEAR);
                 if (today.get(Calendar.MONTH) < birthDay.get(Calendar.MONTH) ||
                         (today.get(Calendar.MONTH) == birthDay.get(Calendar.MONTH) &&
