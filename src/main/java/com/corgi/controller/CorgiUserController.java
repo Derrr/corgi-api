@@ -380,7 +380,7 @@ public class CorgiUserController extends BaseController {
 
     @PostMapping("/update_nickname")
     public JsonResult updateNickname(@RequestBody UserDetail userDetail) throws PermissionException{
-        if (!hasUserId() ) {
+        if (!hasUserId()) {
             return new JsonResult();
         }
         userDetail.setUserId(getUserId());
