@@ -581,11 +581,13 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/check_wechat")
     public JsonResult checkWechat() {
-        HashMap<String, Boolean> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         result.put("avatar", UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus()));
-        result.put("fans", corgiUserFollowService.countFollowed(getUserId()) >= 100);
-        result.put("activity", corgiUserActivityService.countUserActivity(getUserId()) >= 3);
+        result.put("fans", corgiUserFollowService.countFollowed(getUserId()));
+        result.put("fansThreshold", 100);
+        result.put("activity", corgiUserActivityService.countUserActivity(getUserId()));
+        result.put("activityThreshold", 3);
         return new JsonResult(result);
     }
 
