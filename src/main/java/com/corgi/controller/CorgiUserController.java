@@ -526,11 +526,7 @@ public class CorgiUserController extends BaseController {
 
     @GetMapping("/get_user_wechat")
     public JsonResult getUserWechat(@RequestParam(value = "userId") String userId) {
-        CorgiUserGoods query = CorgiUserGoods.builder()
-                .userId(getUserId())
-                .goodsId(userId)
-                .goodsType(CorgiMerchandise.WECHAT)
-                .build();
+
         UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
         //用户没有开放微信购买
         if (userWechat == null || "0".equals(userWechat.getStatus())) {
@@ -543,6 +539,13 @@ public class CorgiUserController extends BaseController {
             wechat.setPayStatus("owner");
             return new JsonResult(wechat);
         }
+        CorgiUserGoods query = CorgiUserGoods.builder()
+                .userId(getUserId())
+                .goodsId(userId)
+                .goodsType(CorgiMerchandise.WECHAT)
+                .start(0)
+                .size(1)
+                .build();
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
         if (!CollectionUtils.isEmpty(goods)) {
             wechat.setPayStatus("pay");
