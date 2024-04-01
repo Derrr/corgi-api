@@ -552,7 +552,9 @@ public class CorgiUserController extends BaseController {
             return new JsonResult(wechat);
         }
         //登录用户未购买微信
-        wechat.setWechat("");
+        if (StringUtils.isNotEmpty(wechat.getWechat())) {
+            wechat.setWechat(wechat.getWechatShot().substring(0, 3) + "****");
+        }
         wechat.setWechatShot("");
         wechat.setReply("");
         wechat.setPayStatus("unpay");
