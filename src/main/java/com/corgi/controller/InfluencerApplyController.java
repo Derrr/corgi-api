@@ -50,17 +50,20 @@ public class InfluencerApplyController extends BaseController {
         InfluencerApply query = new InfluencerApply();
         query.setUserId(getUserId());
         List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(query, 1, 1);
+        HashMap result = new HashMap();
+        result.put("status", 200);
         if (!CollectionUtils.isEmpty(applies)) {
             if ("applied".equals(applies.get(0).getStatus())) {
-                HashMap result = new HashMap();
                 result.put("wechat", applies.get(0).getWechat());
-                return new JsonResult(result, 300, "审核中");
+                result.put("status", 300);
+                return new JsonResult(result, "审核中");
             }
             if ("pass".equals(applies.get(0).getStatus())) {
-                return new JsonResult(400, "已通过");
+                result.put("status", 400);
+                return new JsonResult(result, "已通过");
             }
         }
-        return new JsonResult();
+        return new JsonResult(result);
     }
 
     @GetMapping("get_applies")
