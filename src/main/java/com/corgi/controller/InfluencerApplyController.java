@@ -52,7 +52,9 @@ public class InfluencerApplyController extends BaseController {
         List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(query, 1, 1);
         if (!CollectionUtils.isEmpty(applies)) {
             if ("applied".equals(applies.get(0).getStatus())) {
-                return new JsonResult(300, "审核中");
+                HashMap result = new HashMap();
+                result.put("wechat", applies.get(0).getWechat());
+                return new JsonResult(result, 300, "审核中");
             }
             if ("pass".equals(applies.get(0).getStatus())) {
                 return new JsonResult(400, "已通过");
@@ -78,10 +80,10 @@ public class InfluencerApplyController extends BaseController {
         corgiInfluencerApplyService.updateApply(apply);
         if (StringUtils.isEmpty(apply.getWechat())) {
             if ("pass".equals(apply.getStatus())) {
-                mqService.sendAdminMessage(apply.getUserId(),"您申请的天菜创始人已通过审核，24小时内运营小伙伴将会拉您入群，请留意微信消息");
+                mqService.sendAdminMessage(apply.getUserId(), "您申请的天菜创始人已通过审核，24小时内运营小伙伴将会拉您入群，请留意微信消息");
             }
             if ("fail".equals(apply.getStatus())) {
-                mqService.sendAdminMessage(apply.getUserId(),"很抱歉，您的天菜创始人申请未通过审核");
+                mqService.sendAdminMessage(apply.getUserId(), "很抱歉，您的天菜创始人申请未通过审核");
             }
         }
         return new JsonResult();
