@@ -604,6 +604,9 @@ public class CorgiUserController extends BaseController {
             corgiUserWechatService.updateUserWechat(userWechat);
             return new JsonResult();
         }
+        if(StringUtils.isEmpty(userWechat.getWechat()) || StringUtils.isEmpty(userWechat.getReply())){
+            return new JsonResult(400, "请填写内容");
+        }
         userWechat.setStatus("1");
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
