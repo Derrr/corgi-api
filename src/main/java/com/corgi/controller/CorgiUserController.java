@@ -601,7 +601,9 @@ public class CorgiUserController extends BaseController {
             userWechat.setUserId(getUserId());
         }
         if ("0".equals(userWechat.getStatus())) {
-            corgiUserWechatService.updateUserWechat(userWechat);
+            UserWechat delete = new UserWechat();
+            delete.setStatus("0");
+            corgiUserWechatService.updateUserWechat(delete);
             return new JsonResult();
         }
         if(StringUtils.isEmpty(userWechat.getWechat()) || StringUtils.isEmpty(userWechat.getReply())){
@@ -609,7 +611,7 @@ public class CorgiUserController extends BaseController {
         }
         userWechat.setStatus("1");
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
-        if (UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
+        if (detail != null && UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
             userWechat.setAvatar(detail.getAvatar());
             userWechat.setNickname(detail.getNickname());
         } else if (hasUserId()) {
@@ -617,7 +619,7 @@ public class CorgiUserController extends BaseController {
         }
         corgiUserWechatService.updateUserWechat(userWechat);
         CorgiUserWechat result = CorgiUserWechat.getWechat(userWechat);
-        result.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
+        result.initUserDetail(detail);
         result.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
         return new JsonResult(result);
     }
