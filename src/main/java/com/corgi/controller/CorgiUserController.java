@@ -602,6 +602,7 @@ public class CorgiUserController extends BaseController {
         }
         if ("0".equals(userWechat.getStatus())) {
             UserWechat delete = new UserWechat();
+            delete.setUserId(userWechat.getUserId());
             delete.setStatus("0");
             corgiUserWechatService.updateUserWechat(delete);
             return new JsonResult();
