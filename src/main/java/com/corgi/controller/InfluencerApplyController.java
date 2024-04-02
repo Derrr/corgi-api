@@ -85,14 +85,14 @@ public class InfluencerApplyController extends BaseController {
             if ("pass".equals(apply.getStatus())) {
                 UserDetail update = new UserDetail();
                 update.setUserId(apply.getUserId());
-                update.setAvatarCheckStatus("influencer");
+                update.setAvatarStatus("influencer");
                 corgiUserService.updateDetail(update);
                 mqService.sendAdminMessage(apply.getUserId(), "您申请的天菜创始人已通过审核，24小时内运营小伙伴将会拉您入群，请留意微信消息");
             }
             if ("fail".equals(apply.getStatus())) {
                 UserDetail update = new UserDetail();
                 update.setUserId(apply.getUserId());
-                update.setAvatarCheckStatus("");
+                update.setAvatarStatus("");
                 corgiUserService.updateDetail(update);
                 mqService.sendAdminMessage(apply.getUserId(), "很抱歉，您的天菜创始人申请未通过审核");
             }

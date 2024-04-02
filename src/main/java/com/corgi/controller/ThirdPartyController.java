@@ -82,6 +82,21 @@ public class ThirdPartyController extends BaseController {
         return new JsonResult(results);
     }
 
+    @GetMapping("get_invited_schedule")
+    public JsonResult getInvitedSchedule(@RequestParam("userId") String userId) {
+        Integer total = corgiOrderService.countInvited(userId, "");
+        Integer count = total % 10;
+        if (total > 120) {
+            count = 10;
+        }
+        HashMap<String, Integer> result = new HashMap<>();
+        result.put("count", count);
+        result.put("threshold", 10);
+        result.put("per", count * 10);
+        return new JsonResult(result);
+    }
+
+
     @GetMapping("recommend_user")
     public JsonResult getRecommendUser(@RequestParam("userId") String userId) {
         List<UserDetail> result = new ArrayList<>();
