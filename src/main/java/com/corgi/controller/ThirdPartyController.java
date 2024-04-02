@@ -14,6 +14,7 @@ import com.corgi.service.AsyncTaskService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
+import com.corgi.user.enums.MerchandiseEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -47,7 +48,9 @@ public class ThirdPartyController extends BaseController {
     @Reference
     private CorgiBillboardService corgiBillboardService;
     @Reference
-    CorgiToolService corgiToolService;
+    private CorgiToolService corgiToolService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -58,6 +61,26 @@ public class ThirdPartyController extends BaseController {
     private AsyncTaskService asyncTaskService;
 
     public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
+
+    @GetMapping("get_invited_bonus")
+    public JsonResult getInvitedBonus(@RequestParam("userId") String userId) {
+        MerchandiseEnum e = MerchandiseEnum.BONUS_SUBSCRIBE;
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                .userId(userId)
+                .merchId(e.getCode())
+                .start(0)
+                .size(20)
+                .build());
+        List<HashMap<String, String>> results = new ArrayList<>();
+        for (CorgiUserGoods g : goods) {
+            HashMap<String, String> result = new HashMap<>();
+            result.put("title", e.getTitle());
+            result.put("desc", e.getDesc());
+            result.put("ctime", g.getCtime());
+            results.add(result);
+        }
+        return new JsonResult(results);
+    }
 
     @GetMapping("recommend_user")
     public JsonResult getRecommendUser(@RequestParam("userId") String userId) {

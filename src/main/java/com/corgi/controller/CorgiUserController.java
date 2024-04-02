@@ -583,6 +583,12 @@ public class CorgiUserController extends BaseController {
         return new JsonResult(results);
     }
 
+    @GetMapping("/invited")
+    public JsonResult invited(@RequestParam("userId") String userId){
+        corgiOrderService.invite(userId, getUserId());
+        return new JsonResult();
+    }
+
     @GetMapping("/check_wechat")
     public JsonResult checkWechat() {
         HashMap<String, Object> result = new HashMap<>();
