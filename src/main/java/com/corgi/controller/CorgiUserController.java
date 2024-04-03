@@ -584,8 +584,17 @@ public class CorgiUserController extends BaseController {
     }
 
     @GetMapping("/invited")
-    public JsonResult invited(@RequestParam("userId") String userId){
-        corgiOrderService.invite(userId, getUserId());
+    public JsonResult invited(@RequestParam("userId") String userId, @RequestParam("wechatId")String wechatId){
+        Boolean result = corgiOrderService.invite(userId, getUserId());
+        WechatInvite bind = new WechatInvite();
+        bind.setUserId(userId);
+        bind.setCorgiId(getUserId());
+        bind.setWechatId(wechatId);
+        bind.setStatus("0");
+        if(result){
+            bind.setStatus("1");
+        }
+        corgiToolService.bindWechat(bind);
         return new JsonResult();
     }
 
