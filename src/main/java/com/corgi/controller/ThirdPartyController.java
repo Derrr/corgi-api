@@ -69,7 +69,7 @@ public class ThirdPartyController extends BaseController {
             return new JsonResult();
         }
         String lockKey = "wechat-invite-" + wechatInvite.getUserId();
-        if (redisTemplate.opsForValue().setIfAbsent(lockKey, wechatInvite.getWechatId(), 500l, TimeUnit.MILLISECONDS)) {
+        if (redisTemplate.opsForValue().setIfAbsent(lockKey, wechatInvite.getWechatId(), 100l, TimeUnit.MILLISECONDS)) {
             corgiToolService.inviteWechat(wechatInvite);
         }
         return new JsonResult();
