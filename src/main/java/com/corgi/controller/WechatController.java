@@ -35,6 +35,7 @@ public class WechatController extends BaseController {
 //        }
 //        corgiToolService.bindWechat(wechatId, profiles.get(0).getUserId());
 //        return new JsonResult(profiles.get(0).getUserId());
+        return new JsonResult();
     }
 
     @GetMapping("getCorgiId")
