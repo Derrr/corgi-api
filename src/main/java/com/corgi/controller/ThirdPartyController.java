@@ -20,13 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -61,6 +59,26 @@ public class ThirdPartyController extends BaseController {
     private AsyncTaskService asyncTaskService;
 
     public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
+
+    @PostMapping("invite_wechat")
+    public JsonResult inviteWechat(@RequestBody WechatInvite wechatInvite) {
+        if (StringUtils.isEmpty(wechatInvite.getUserId())
+                || StringUtils.isEmpty(wechatInvite.getWechatId())
+                || StringUtils.isEmpty(wechatInvite.getWechatName())
+                || StringUtils.isEmpty(wechatInvite.getHeadimgurl())) {
+            return new JsonResult();
+        }
+        String lockKey = "wechat-invite-" + wechatInvite.getUserId();
+        if (redisTemplate.opsForValue().setIfAbsent(lockKey, wechatInvite.getWechatId(), 500l, TimeUnit.MILLISECONDS)) {
+            corgiToolService.inviteWechat(wechatInvite);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("get_wechat_invite")
+    public JsonResult getWechatInvite(@RequestParam("userId") String userId) {
+        return new JsonResult(corgiToolService.getInviteByUserId(userId));
+    }
 
     @GetMapping("get_invited_bonus")
     public JsonResult getInvitedBonus(@RequestParam("userId") String userId) {
