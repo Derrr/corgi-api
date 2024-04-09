@@ -68,9 +68,9 @@ public class InfluencerApplyController extends BaseController {
 
     @GetMapping("get_applies")
     public JsonResult getApplies(@RequestParam("status") String status,
-                                 @RequestParam("userId") String userId,
-                                 @RequestParam("nickname") String nickname,
-                                 @RequestParam("wechat") String wechat,
+                                 @RequestParam(name = "userId",required = false, defaultValue = "") String userId,
+                                 @RequestParam(name = "nickname",required = false, defaultValue = "") String nickname,
+                                 @RequestParam(name = "wechat",required = false, defaultValue = "") String wechat,
                                  @RequestParam("page") Integer page,
                                  @RequestParam("size") Integer size) {
         InfluencerApply query = new InfluencerApply();
