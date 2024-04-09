@@ -67,9 +67,17 @@ public class InfluencerApplyController extends BaseController {
     }
 
     @GetMapping("get_applies")
-    public JsonResult getApplies(@RequestParam("status") String status, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+    public JsonResult getApplies(@RequestParam("status") String status,
+                                 @RequestParam("userId") String userId,
+                                 @RequestParam("nickname") String nickname,
+                                 @RequestParam("wechat") String wechat,
+                                 @RequestParam("page") Integer page,
+                                 @RequestParam("size") Integer size) {
         InfluencerApply query = new InfluencerApply();
         query.setStatus(status);
+        query.setUserId(userId);
+        query.setNickname(nickname);
+        query.setWechat(wechat);
         List<InfluencerApply> applies = corgiInfluencerApplyService.getApplies(query, page, size);
         Integer count = corgiInfluencerApplyService.countApplies(query);
         HashMap<String, Object> result = new HashMap<>();
