@@ -590,7 +590,7 @@ public class CorgiUserController extends BaseController {
         bind.setUserId(userId);
         bind.setCorgiId(getUserId());
         bind.setWechatId(wechatId);
-        bind.setStatus("0");
+        bind.setStatus("2");
         if(result){
             bind.setStatus("1");
         }
