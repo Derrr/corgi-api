@@ -154,8 +154,8 @@ public class CorgiToolController extends BaseController {
     public JsonResult getWechatList(@RequestParam("page")Integer page,
                                     @RequestParam("size")Integer size,
                                     @RequestParam(value = "userId",required = false)String userId,
-                                    @RequestParam(value = "nickname", required = false)Integer nickname,
-                                    @RequestParam(value = "wechat", required = false)Integer wechat) {
+                                    @RequestParam(value = "nickname", required = false)String nickname,
+                                    @RequestParam(value = "wechat", required = false)String wechat) {
         if (hasUserId()) {
             return new JsonResult();
         }
