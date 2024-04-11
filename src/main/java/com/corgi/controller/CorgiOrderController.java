@@ -637,7 +637,7 @@ public class CorgiOrderController extends BaseController {
                     }
                     if (null == inApp) {
                         inApps = result.getJSONArray("latest_receipt_info");
-                        inApp = inApps.getJSONObject(0);
+                        inApp = inApps.getJSONObject(inApps.size() - 1);
                     }
                     if (null == inApp) {
                         order.setStatus(CorgiOrder.STATUS.FAIL);
