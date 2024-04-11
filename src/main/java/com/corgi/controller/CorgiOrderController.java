@@ -609,7 +609,7 @@ public class CorgiOrderController extends BaseController {
         //}
         JSONObject result = corgiPayService.verifyApplePay(receiptData, password);
         order.setResult(result.toJSONString());
-        log.info("result:{}", order.getResult());
+        log.info("orderId:{}, result:{}", transactionId, order.getResult());
         if ("0".equals(result.getString("status"))) {
             order.setStatus(CorgiOrder.STATUS.SUCCESS);
         } else {
