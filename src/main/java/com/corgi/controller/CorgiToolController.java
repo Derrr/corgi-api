@@ -151,12 +151,19 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_wechat_list")
-    public JsonResult getWechatList(@RequestParam("page")Integer page, @RequestParam("size")Integer size) {
+    public JsonResult getWechatList(@RequestParam("page")Integer page,
+                                    @RequestParam("size")Integer size,
+                                    @RequestParam(value = "userId",required = false)String userId,
+                                    @RequestParam(value = "nickname", required = false)Integer nickname,
+                                    @RequestParam(value = "wechat", required = false)Integer wechat) {
         if (hasUserId()) {
             return new JsonResult();
         }
         HashMap<String,Object> result = new HashMap<>();
         UserWechat query = new UserWechat();
+        query.setUserId(userId);
+        query.setNickname(nickname);
+        query.setWechat(wechat);
         result.put("wechat",corgiUserWechatService.queryWechat(query,page,size));
         result.put("total",corgiUserWechatService.countWechat(query));
         return new JsonResult(result);
