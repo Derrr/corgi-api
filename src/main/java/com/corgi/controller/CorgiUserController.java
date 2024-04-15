@@ -615,6 +615,7 @@ public class CorgiUserController extends BaseController {
         if (hasUserId()) {
             userWechat.setUserId(getUserId());
         }
+
         if ("0".equals(userWechat.getStatus())) {
             UserWechat delete = new UserWechat();
             delete.setUserId(userWechat.getUserId());
@@ -625,6 +626,7 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(userWechat.getWechat()) || StringUtils.isEmpty(userWechat.getReply())) {
             return new JsonResult(400, "请填写内容");
         }
+        aliyunGreenService.checkText(userWechat.getReply());
         userWechat.setStatus("1");
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         if (detail != null && UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
@@ -645,7 +647,9 @@ public class CorgiUserController extends BaseController {
         List<UserWechat> userWechats = corgiUserWechatService.listUserPaidWechats(getUserId(), page, pageSize);
         List<CorgiUserWechat> results = new ArrayList<>();
         for (UserWechat userWechat : userWechats) {
-            results.add(CorgiUserWechat.getWechat(userWechat));
+            if (userWechat != null) {
+                results.add(CorgiUserWechat.getWechat(userWechat));
+            }
         }
         return new JsonResult(results);
     }
