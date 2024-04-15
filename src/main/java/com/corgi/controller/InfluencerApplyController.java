@@ -40,7 +40,7 @@ public class InfluencerApplyController extends BaseController {
         UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
         apply.setUserId(userDetail.getUserId());
         apply.setAvatar(userDetail.getAvatar());
-        apply.setNickname(userDetail.getNicknameDataId());
+        apply.setNickname(userDetail.getNickname());
         corgiInfluencerApplyService.addApply(apply);
         return new JsonResult();
     }
