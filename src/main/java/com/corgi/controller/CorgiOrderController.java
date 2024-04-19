@@ -401,6 +401,10 @@ public class CorgiOrderController extends BaseController {
             result.setMessage("该用户未开放微信购买");
             return null;
         }
+        if (getUserId().equals(userWechat.getUserId())) {
+            result.setMessage("不能购买自己的微信");
+            return null;
+        }
         CorgiUserGoods goodsQuery = new CorgiUserGoods();
         goodsQuery.setUserId(getUserId());
         goodsQuery.setGoodsId(goodsId);
