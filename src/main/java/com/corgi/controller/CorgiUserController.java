@@ -326,7 +326,7 @@ public class CorgiUserController extends BaseController {
         }
         String key = "update_user-" + getUserId();
         if (!redisTemplate.opsForValue().setIfAbsent(key, System.currentTimeMillis() + "", 5l, TimeUnit.SECONDS)) {
-            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "更新太频繁");
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "操作太频繁，请稍后再试");
         }
         if (AliyunGreenService.TEXT_FORBIDDEN.equals(userDetail.getDesc())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "审核中，无法更新");
