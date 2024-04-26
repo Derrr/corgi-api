@@ -648,7 +648,10 @@ public class CorgiUserController extends BaseController {
         List<CorgiUserWechat> results = new ArrayList<>();
         for (UserWechat userWechat : userWechats) {
             if (userWechat != null) {
-                results.add(CorgiUserWechat.getWechat(userWechat));
+                CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+                wechat.setPayStatus("pay");
+                wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+                results.add(wechat);
             }
         }
         return new JsonResult(results);
