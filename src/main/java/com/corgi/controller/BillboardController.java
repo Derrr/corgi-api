@@ -267,7 +267,7 @@ public class BillboardController extends BaseController {
                 }
                 Long commentCount = null;
                 //if ("AppStore".equals(RequestUtil.getChannel())) {
-                    commentCount = corgiCommentService.countActivityComment(activity.getId());
+                commentCount = corgiCommentService.countActivityComment(activity.getId());
                 //}
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
                 Integer hasLike = corgiLikeService.countUserLike(activity.getId(), getUserId());

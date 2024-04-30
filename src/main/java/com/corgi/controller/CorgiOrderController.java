@@ -14,7 +14,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.entity.CorgiActivity;
 import com.corgi.common.JsonResult;
-import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.constant.PayConstans;
 import com.corgi.common.util.RequestUtil;
@@ -66,6 +65,8 @@ public class CorgiOrderController extends BaseController {
     private CorgiBillboardService corgiBillboardService;
     @Reference
     private CorgiReserveService corgiReserveService;
+    @Reference
+    private CorgiUserWechatService corgiUserWechatService;
     @Autowired
     private CorgiPayService corgiPayService;
     @Autowired
@@ -124,13 +125,24 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(getUserId())
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
-        query.setSellerId(null);
-        query.setUserId(getUserId());
-        query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-        Double successWithdraw = corgiOrderService.countIncome(query);
-        query.setStatus(CorgiOrder.STATUS.CREATED);
-        Double withdrawing = corgiOrderService.countIncome(query);
-        Double totalWithdraw = withdrawing + successWithdraw;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -7);
+        query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .merchType(CorgiMerchandise.WECHAT)
+                .sellerId(getUserId())
+                .ctime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()))
+                .build();
+        Double lockedIncome = corgiOrderService.countIncome(query);
+        totalIncome -= lockedIncome;
+
+        query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .userId(getUserId())
+                .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
+                .build();
+        Double totalWithdraw = corgiOrderService.countIncome(query);
         Double rate = 0.6;
         if ("influencer".equals(detail.getAvatarStatus())) {
             rate = 0.65;
@@ -207,25 +219,37 @@ public class CorgiOrderController extends BaseController {
         try {
             PaidBillboard paidBillboard = new PaidBillboard();
             paidBillboard.setDate(date);
-            paidBillboard.setActivityId(goodsId);
             List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 100);
             if (CollectionUtils.isNotEmpty(billboards)) {
                 for (PaidBillboard billboard : billboards) {
-                    if (PaidBillboard.PASS.equals(billboard.getStatus()) || PaidBillboard.PAID.equals(billboard.getStatus())) {
-                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
+                    if (PaidBillboard.CREATED.equals(billboard.getStatus())) {
+                        continue;
                     }
-                    if (!PaidBillboard.CREATED.equals(billboard.getStatus()) && goodsId.equals(billboard.getActivityId())) {
+                    if (goodsId.equals(billboard.getActivityId())) {
                         return new JsonResult(Constants.PARAMETER_ERROR_CODE, "动态在该日期已尝试上榜");
+                    }
+                    if (!PaidBillboard.FAIL.equals(billboard.getStatus())) {
+                        return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该日期已存在上榜动态");
                     }
                 }
             }
+            if (MerchandiseEnum.BILLBOARD_YEAR.getCode().equals(merchId) && !this.checkYearBillboard()) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "不满足免费上榜规则");
+            }
             paidBillboard.setUserId(activity.getUserId());
+            paidBillboard.setActivityId(goodsId);
             paidBillboard = corgiBillboardService.createPaidBillboard(paidBillboard);
-            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
-            HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
-            paidBillboard.setTradeNo(result.get("orderNo") + "");
-            corgiBillboardService.updatePaiBillboard(paidBillboard);
-            return new JsonResult(result);
+            if (MerchandiseEnum.BILLBOARD_YEAR.getCode().equals(merchId)) {
+                paidBillboard.setStatus(PaidBillboard.FREE);
+                corgiBillboardService.updatePaiBillboard(paidBillboard);
+                return new JsonResult();
+            } else {
+                CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
+                HashMap<String, Object> result = this.payResult(payType, paidBillboard.getId(), "corgi", merchandise);
+                paidBillboard.setTradeNo(result.get("orderNo") + "");
+                corgiBillboardService.updatePaiBillboard(paidBillboard);
+                return new JsonResult(result);
+            }
         } finally {
             corgiUtilService.unlock(key);
         }
@@ -295,14 +319,29 @@ public class CorgiOrderController extends BaseController {
                 if (!checkLocation(goodsId, result)) {
                     return result;
                 }
+            } else if (merchandise.getType().equals(CorgiMerchandise.LOCATION_MONTH)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                if (!checkLocationMonth(result)) {
+                    return result;
+                }
             } else if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 JsonResult result = new JsonResult();
                 result.setCode(Constants.PARAMETER_ERROR_CODE);
                 if (!checkReservePay(goodsId, result)) {
                     return result;
                 }
+            } else if (merchandise.getType().equals(CorgiMerchandise.WECHAT)) {
+                JsonResult result = new JsonResult();
+                result.setCode(Constants.PARAMETER_ERROR_CODE);
+                sellerId = goodsId;
+                UserWechat userWechat = checkWechatPay(goodsId, result);
+                if (userWechat == null) {
+                    return result;
+                }
+                marketId = userWechat.getId();
             }
-            String preExpireTime = corgiUserService.getUserVipExpire(getUserId());
+
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 BarReservation update = new BarReservation();
@@ -311,12 +350,7 @@ public class CorgiOrderController extends BaseController {
                 update.setMerchId(merchId);
                 corgiReserveService.updateReservation(update);
             }
-            String afterExpireTime = corgiUserService.getUserVipExpire(getUserId());
-            //购买vip更新昵称更改时间
-            if (!StringUtils.isEmpty(afterExpireTime) && !"-".equals(afterExpireTime)
-                    && (StringUtils.isEmpty(preExpireTime) || "-".equals(preExpireTime))) {
-                redisTemplate.delete(CacheConstants.NICKNAME_UPDATE + getUserId());
-            }
+
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
@@ -333,6 +367,15 @@ public class CorgiOrderController extends BaseController {
         return true;
     }
 
+    private boolean checkLocationMonth(JsonResult result) {
+        String vipResult = corgiOrderService.getUserLocationExpireDate(getUserId());
+        if (StringUtils.isNotEmpty(vipResult)) {
+            result.setMessage("不能重复购买");
+            return false;
+        }
+        return true;
+    }
+
     private boolean checkReservePay(String goodsId, JsonResult result) {
         BarReservation query = new BarReservation();
         query.setId(goodsId);
@@ -341,6 +384,7 @@ public class CorgiOrderController extends BaseController {
             return false;
         }
         CorgiUserGoods goodsQuery = new CorgiUserGoods();
+        goodsQuery.setUserId(getUserId());
         goodsQuery.setGoodsId(goodsId);
         goodsQuery.setGoodsType(CorgiUserGoods.GOODS_TYPE.RESERVE);
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(goodsQuery);
@@ -349,6 +393,28 @@ public class CorgiOrderController extends BaseController {
             return false;
         }
         return true;
+    }
+
+    private UserWechat checkWechatPay(String goodsId, JsonResult result) {
+        UserWechat userWechat = corgiUserWechatService.getUserWechat(goodsId);
+        if (userWechat == null) {
+            result.setMessage("该用户未开放微信购买");
+            return null;
+        }
+        if (getUserId().equals(userWechat.getUserId())) {
+            result.setMessage("不能购买自己的微信");
+            return null;
+        }
+        CorgiUserGoods goodsQuery = new CorgiUserGoods();
+        goodsQuery.setUserId(getUserId());
+        goodsQuery.setGoodsId(goodsId);
+        goodsQuery.setGoodsType(CorgiMerchandise.WECHAT);
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(goodsQuery);
+        if (CollectionUtils.isNotEmpty(goods)) {
+            result.setMessage("该微信已购买");
+            return null;
+        }
+        return userWechat;
     }
 
     private CorgiActivity checkActivityPay(String goodsId, String merchId, JsonResult result) {
@@ -382,8 +448,18 @@ public class CorgiOrderController extends BaseController {
 
     @GetMapping("get_merchandises_by_date")
     public JsonResult getMerchandiseByDate(@RequestParam("date") String date) {
+        PaidBillboard billboardQuery = new PaidBillboard();
+        billboardQuery.setStatus(PaidBillboard.PAID);
+        billboardQuery.setUserId(getUserId());
+        List<PaidBillboard> billboards = corgiBillboardService.queryPaidBillboard(billboardQuery, 1, 1);
+        if (CollectionUtils.isNotEmpty(billboards)) {
+            return new JsonResult(Constants.BILLBOARD_STATUS, "审核中");
+        }
         CorgiMerchandise query = new CorgiMerchandise();
         query.setType("billboard");
+        if (this.checkYearBillboard()) {
+            query.setType("billboardyear");
+        }
         List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
         return new JsonResult(merchandises);
     }
@@ -395,7 +471,6 @@ public class CorgiOrderController extends BaseController {
         if (!"AppStore".equals(RequestUtil.getChannel()) && type.equals(CorgiMerchandise.SUBSCRIBE)) {
             query.setType(type.concat("-android"));
         }
-        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
         if (type.startsWith(CorgiMerchandise.SUBSCRIBE)) {
             CorgiUserGoods orderQuery = CorgiUserGoods.builder()
                     .userId(getUserId())
@@ -405,11 +480,13 @@ public class CorgiOrderController extends BaseController {
                     .build();
             List<CorgiUserGoods> orders = corgiOrderService.getUserGoods(orderQuery);
             if (CollectionUtils.isNotEmpty(orders)) {
-                merchandises = merchandises.stream().filter(m -> !"首购".equals(m.getDisReason())).collect(Collectors.toList());
+                query.setDisReason("续费");
             } else {
-                merchandises = merchandises.stream().filter(m -> "首购".equals(m.getDisReason())).collect(Collectors.toList());
+                query.setDisReason("首购");
             }
         }
+        List<CorgiMerchandise> merchandises = corgiOrderService.getMerchandise(query);
+
         return new JsonResult(merchandises);
     }
 
@@ -538,6 +615,7 @@ public class CorgiOrderController extends BaseController {
         //}
         JSONObject result = corgiPayService.verifyApplePay(receiptData, password);
         order.setResult(result.toJSONString());
+        log.info("orderId:{}, result:{}", transactionId, order.getResult());
         if ("0".equals(result.getString("status"))) {
             order.setStatus(CorgiOrder.STATUS.SUCCESS);
         } else {
@@ -565,7 +643,7 @@ public class CorgiOrderController extends BaseController {
                     }
                     if (null == inApp) {
                         inApps = result.getJSONArray("latest_receipt_info");
-                        inApp = inApps.getJSONObject(0);
+                        inApp = inApps.getJSONObject(inApps.size() - 1);
                     }
                     if (null == inApp) {
                         order.setStatus(CorgiOrder.STATUS.FAIL);
@@ -893,6 +971,29 @@ public class CorgiOrderController extends BaseController {
             log.error(e.getMessage(), e);
         }
         return order;
+    }
+
+    private boolean checkYearBillboard() {
+        String vipExpire = corgiUserService.getUserVipExpire(getUserId());
+        if (StringUtils.isNotEmpty(vipExpire) && !"-".equals(vipExpire)) {
+            List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                    .userId(getUserId())
+                    .goodsType(CorgiMerchandise.SUBSCRIBE)
+                    .build());
+            if (CollectionUtils.isNotEmpty(goods) && Arrays.asList("AS01", "AS05", "S01", "S05").contains(goods.get(0).getMerchId())) {
+                CorgiUserGoods yearGoods = goods.get(0);
+                PaidBillboard paidBillboard = new PaidBillboard();
+                paidBillboard.setStatus("pass");
+                paidBillboard.setCtime(yearGoods.getCtime());
+                List<PaidBillboard> passBillboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 10);
+                if (CollectionUtils.isEmpty(passBillboards)) {
+                    paidBillboard.setStatus("fail");
+                    List<PaidBillboard> failBillboards = corgiBillboardService.queryPaidBillboard(paidBillboard, 1, 10);
+                    return CollectionUtils.isEmpty(failBillboards) || failBillboards.size() < 3;
+                }
+            }
+        }
+        return false;
     }
 
     // 将request中的参数转换成Map

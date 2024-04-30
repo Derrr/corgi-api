@@ -14,18 +14,17 @@ import com.corgi.service.AsyncTaskService;
 import com.corgi.service.CorgiUtilService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
+import com.corgi.user.enums.MerchandiseEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tairanliu
@@ -47,7 +46,9 @@ public class ThirdPartyController extends BaseController {
     @Reference
     private CorgiBillboardService corgiBillboardService;
     @Reference
-    CorgiToolService corgiToolService;
+    private CorgiToolService corgiToolService;
+    @Reference
+    private CorgiOrderService corgiOrderService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -58,6 +59,61 @@ public class ThirdPartyController extends BaseController {
     private AsyncTaskService asyncTaskService;
 
     public static final String URL = "https://corgi-pic.oss-cn-beijing.aliyuncs.com/share/character/%s.png?x-oss-process=style/zip";
+
+    @PostMapping("invite_wechat")
+    public JsonResult inviteWechat(@RequestBody WechatInvite wechatInvite) {
+        if (StringUtils.isEmpty(wechatInvite.getUserId())
+                || StringUtils.isEmpty(wechatInvite.getWechatId())
+                || StringUtils.isEmpty(wechatInvite.getWechatName())
+                || StringUtils.isEmpty(wechatInvite.getHeadimgurl())) {
+            return new JsonResult();
+        }
+        String lockKey = "wechat-invite-" + wechatInvite.getUserId();
+        if (redisTemplate.opsForValue().setIfAbsent(lockKey, wechatInvite.getWechatId(), 100l, TimeUnit.MILLISECONDS)) {
+            corgiToolService.inviteWechat(wechatInvite);
+        }
+        return new JsonResult();
+    }
+
+    @GetMapping("get_wechat_invite")
+    public JsonResult getWechatInvite(@RequestParam("userId") String userId) {
+        return new JsonResult(corgiToolService.getInviteByUserId(userId));
+    }
+
+    @GetMapping("get_invited_bonus")
+    public JsonResult getInvitedBonus(@RequestParam("userId") String userId) {
+        MerchandiseEnum e = MerchandiseEnum.BONUS_SUBSCRIBE;
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(CorgiUserGoods.builder()
+                .userId(userId)
+                .merchId(e.getCode())
+                .start(0)
+                .size(20)
+                .build());
+        List<HashMap<String, String>> results = new ArrayList<>();
+        for (CorgiUserGoods g : goods) {
+            HashMap<String, String> result = new HashMap<>();
+            result.put("title", e.getTitle());
+            result.put("desc", e.getDesc());
+            result.put("ctime", g.getCtime());
+            results.add(result);
+        }
+        return new JsonResult(results);
+    }
+
+    @GetMapping("get_invited_schedule")
+    public JsonResult getInvitedSchedule(@RequestParam("userId") String userId) {
+        Integer total = corgiOrderService.countInvited(userId, "");
+        Integer count = total % 10;
+        if (total > 120) {
+            count = 10;
+        }
+        HashMap<String, Integer> result = new HashMap<>();
+        result.put("count", count);
+        result.put("threshold", 10);
+        result.put("per", count * 10);
+        return new JsonResult(result);
+    }
+
 
     @GetMapping("recommend_user")
     public JsonResult getRecommendUser(@RequestParam("userId") String userId) {

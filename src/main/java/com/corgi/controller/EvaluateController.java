@@ -132,6 +132,9 @@ public class EvaluateController extends BaseController {
             }
         }
         userEvaluation.setType(UserEvaluation.TYPE_FRIEND);
+        if (StringUtils.isEmpty(userEvaluation.getTag())) {
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请填写评价内容");
+        }
         if (getUserId().equals(userEvaluation.getUserId())) {
             Integer count = corgiEvaluationService.countByUser(getUserId(), getUserId());
             if (count > 2) {
@@ -158,7 +161,7 @@ public class EvaluateController extends BaseController {
         CheckTextResult tagResult = aliyunGreenService.checkText(userEvaluation.getTag());
         if (!tagResult.isPass()) {
             userEvaluation.setTag(tagResult.getContent());
-            mqService.sendAdminMessage(userEvaluation.getUserId(),"经系统检测发现您的评价【"+tagResult.getOriginContent()+"】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
+            mqService.sendAdminMessage(userEvaluation.getUserId(), "经系统检测发现您的评价【" + tagResult.getOriginContent() + "】涉嫌违规，已被系统自动屏蔽，请自觉维护社群健康发展。");
         }
         Double score = corgiEvaluationService.getTagScore(tagResult.getOriginContent());
         if (score == null) {

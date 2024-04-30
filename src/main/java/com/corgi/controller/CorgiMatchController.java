@@ -141,10 +141,10 @@ public class CorgiMatchController extends BaseController {
         try {
             if (corgiUtilService.lock(key)) {
                 String freqKey = getUserId() + "_match_times";
-                //String checkResult = this.checkFreq(freqKey, 20);
-//                if (!StringUtils.isEmpty(checkResult)) {
-//                    return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
-//                }
+                String checkResult = this.checkFreq(freqKey, 20);
+                if (!StringUtils.isEmpty(checkResult)) {
+                    return new JsonResult(0, Constants.MATCH_TIMES_ERROR_CODE, checkResult);
+                }
                 String suffix = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
                 String dayFreqKey = freqKey.concat("_").concat(suffix);
                 //String checkDayResult = this.checkDayFreq(dayFreqKey, 100);
@@ -170,13 +170,13 @@ public class CorgiMatchController extends BaseController {
                 extra.put("type", PushMessage.QUICK_MATCH_TYPE);
 //                if (!CollectionUtils.isEmpty(remains) && !CollectionUtils.isEmpty(matchIds)) {
 
-//                List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
-//                redisTemplate.delete(matchKey);
+                List<String> lastMatchList = redisTemplate.opsForList().range(matchKey, 0, -1);
+                redisTemplate.delete(matchKey);
 
 
-//                if (lastMatchList == null) {
-//                    lastMatchList = new ArrayList<>();
-//                }
+                if (lastMatchList == null) {
+                    lastMatchList = new ArrayList<>();
+                }
 //                    int i = 0;
 //                    for (UserMatchRemain remain1 : remains) {
 //                        Integer size = remain1.getRemain();
@@ -185,11 +185,11 @@ public class CorgiMatchController extends BaseController {
 //                                return new JsonResult(result);
 //                            }
                 for (String matchId : matchIds) {
-//                    redisTemplate.opsForList().rightPush(matchKey, matchId);
-//                    if (lastMatchList.contains(matchId)) {
-//                        continue;
-//                    }
-                    //corgiUserMatchService.addUserMatch(getUserId(), matchId, remain1.getTradeNo());
+                    redisTemplate.opsForList().rightPush(matchKey, matchId);
+                    if (lastMatchList.contains(matchId)) {
+                        continue;
+                    }
+                    corgiUserMatchService.addUserMatch(getUserId(), matchId, "");
                     if (redisTemplate.opsForValue().setIfAbsent(matchKey + "-" + matchId, System.currentTimeMillis() + "", 10l, TimeUnit.HOURS)) {
                         mqService.sendMessage(PushMessage.builder()
                                 .type(PushMessage.DEFAULT)
