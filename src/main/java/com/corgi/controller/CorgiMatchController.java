@@ -109,28 +109,27 @@ public class CorgiMatchController extends BaseController {
         extra.put("greeting", matcher.getGreeting());
         extra.put("filterSource", matcher.getFilterSource());
         if ("1".equals(matcher.getType())) {
-//            String key = "last_accept_" + getUserId();
-//            List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
-//            if (lastAcceptList == null) {
-//                lastAcceptList = new ArrayList<>();
-//            }
+            String key = "last_accept_" + getUserId();
+            List<String> lastAcceptList = redisTemplate.opsForList().range(key, 0, -1);
+            if (lastAcceptList == null) {
+                lastAcceptList = new ArrayList<>();
+            }
             for (String matchId : matchIds) {
-//                    if (!lastAcceptList.contains(matchId)) {
-                if (redisTemplate.opsForValue().setIfAbsent("acceptMatching_" + getUserId() + "-" + matchId, "1", 20l, TimeUnit.HOURS)) {
-                    corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
-                    mqService.sendMessage(PushMessage.builder()
-                            .type(PushMessage.DEFAULT)
-                            .sourceUserId(getUserId())
-                            .targetUserId(matchId)
-                            .message("匹配成功，快去聊聊吧")
-                            .extra(extra)
-                            .build());
+                if (!lastAcceptList.contains(matchId)) {
+                    if (redisTemplate.opsForValue().setIfAbsent("acceptMatching_" + getUserId() + "-" + matchId, "1", 20l, TimeUnit.HOURS)) {
+                        corgiUserMatchService.addUserMatch(getUserId(), matchId, "1");
+                        mqService.sendMessage(PushMessage.builder()
+                                .type(PushMessage.DEFAULT)
+                                .sourceUserId(getUserId())
+                                .targetUserId(matchId)
+                                .message("匹配成功，快去聊聊吧")
+                                .extra(extra)
+                                .build());
+                    }
                 }
-//            }
-//        }
-//                redisTemplate.delete(key);
-//                redisTemplate.opsForList().rightPushAll(key, matchIds);
-//                redisTemplate.expire(key, 20l, TimeUnit.HOURS);
+                redisTemplate.delete(key);
+                redisTemplate.opsForList().rightPushAll(key, matchIds);
+                redisTemplate.expire(key, 20l, TimeUnit.HOURS);
             }
             return new JsonResult();
         }
