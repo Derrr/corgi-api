@@ -1085,6 +1085,15 @@ public class CorgiUserController extends BaseController {
                                    @RequestParam(name = "lat", required = false) Double lat,
                                    @RequestParam(name = "lng", required = false) Double lng,
                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (lat > 200 || lng > 200) {
+            UserPosition p = corgiUserService.getUserPosition(getUserId());
+            if (p.getRealLat() < 200 && p.getRealLng() < 200) {
+                lat = p.getRealLat();
+                lng = p.getRealLng();
+            } else {
+                return new JsonResult(new ArrayList<>());
+            }
+        }
         List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, type, lat, lng, page, pageSize);
         return new JsonResult(userProfiles);
     }
