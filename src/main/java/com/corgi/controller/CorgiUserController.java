@@ -656,6 +656,7 @@ public class CorgiUserController extends BaseController {
                 CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
                 wechat.setPayStatus("pay");
                 wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+                wechat.setId(userWechat.getSort());
                 results.add(wechat);
             }
         }
