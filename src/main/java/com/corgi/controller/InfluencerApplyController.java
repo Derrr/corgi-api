@@ -80,7 +80,7 @@ public class InfluencerApplyController extends BaseController {
     }
 
     @GetMapping("get_applies")
-    public JsonResult getApplies(@RequestParam(value = "status", required = false, defaultValue = "1") String status,
+    public JsonResult getApplies(@RequestParam(value = "status", required = false, defaultValue = "") String status,
                                  @RequestParam(name = "userId",required = false, defaultValue = "") String userId,
                                  @RequestParam(name = "nickname",required = false, defaultValue = "") String nickname,
                                  @RequestParam(name = "wechat",required = false, defaultValue = "") String wechat,
