@@ -579,7 +579,7 @@ public class CorgiUserController extends BaseController {
             if (!getUserId().equals(userWechat.getUserId())) {
                 CorgiUserWechat wechat = this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds);
                 UserDetail wechatDetail = corgiUserService.getUserDetailBasic(userWechat.getUserId());
-                if (wechatDetail == null) {
+                if (wechatDetail != null) {
                     wechat.initUserDetail(wechatDetail);
                     results.add(wechat);
                 }
