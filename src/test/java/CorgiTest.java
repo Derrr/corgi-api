@@ -1,24 +1,8 @@
 
-import com.alibaba.fastjson.JSONObject;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.corgi.common.util.JWTUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.pqc.math.linearalgebra.Matrix;
 import org.junit.Test;
-import org.springframework.util.DigestUtils;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.PublicKey;
-
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.interfaces.ECPublicKey;
-
-import java.util.Base64;
-import java.util.Optional;
 
 public class CorgiTest {
     @Test
@@ -45,9 +29,32 @@ public class CorgiTest {
 
     @Test
     public void test() {
-        String objStr = "{\"content\":[{\"columnIds\":[\"1qaz\",\"2wsx\"],\"data\":[{\"1qaz\":{\"isBold\":false,\"type\":\"text\",\"value\":\"This review process is effective in terms of helping me evaluate my team members and develop talents\",\"width\":770},\"2wsx\":{\"dataRange\":{\"maximum\":5,\"minimum\":1},\"isBold\":false,\"type\":\"input_num\",\"value\":\"\",\"width\":100}},{\"1qaz\":{\"isBold\":false,\"type\":\"text\",\"value\":\"The review process allows me to give objective assessment of each employee’s capabilities and potential\",\"width\":770},\"2wsx\":{\"dataRange\":{\"maximum\":5,\"minimum\":1},\"is_bold\":false,\"type\":\"input_num\",\"value\":\"\",\"width\":100}},{\"1qaz\":{\"isBold\":false,\"type\":\"text\",\"value\":\"I conduct productive conversations with team members and review contributes to my team management effort\",\"width\":770},\"2wsx\":{\"dataRange\":{\"maximum\":5,\"minimum\":1},\"isBold\":false,\"type\":\"input_num\",\"value\":\"\",\"width\":100}},{\"1qaz\":{\"isBold\":false,\"type\":\"text\",\"value\":\"The review process is clear and efficient\",\"width\":770},\"2wsx\":{\"dataRange\":{\"maximum\":5,\"minimum\":1},\"isBold\":false,\"type\":\"input_num\",\"value\":\"\",\"width\":100}}],\"display\":{\"1qaz\":{\"type\":\"text\",\"value\":\"\",\"width\":660,\"widthMob\":0,\"dataRange\":null,\"isBold\":false},\"2wsx\":{\"type\":\"input_num\",\"value\":\"\",\"width\":240,\"widthMob\":0,\"dataRange\":{\"maximum\":5,\"minimum\":1},\"isBold\":false}},\"groupId\":\"\",\"groupName\":\"\",\"header\":{\"1qaz\":{\"name\":\"Item\",\"type\":\"text\",\"width\":780},\"2wsx\":{\"name\":\"Rating\",\"type\":\"text\",\"width\":150}},\"isNeedAdd\":0,\"maximum\":0,\"minimum\":0,\"questionId\":\"table12\"}],\"dataRange\":\"\",\"guidance\":\"\",\"icon\":\"\",\"id\":997,\"instructions\":\"<p>We highly appreciate your participation in the Mid-year Appraisal and your effort in talent development. Please provide your feedback to this appraisal in the questions below.</p><br/><p style='color: #666; line-height: 19px;font-weight: normal;margin-top: 3px;'>1 - Strongly disagree<br/>2 - Disagree<br/>3 - Neutral<br/>4 - Agree<br/>5 - Strongly agree</p>\",\"isDisplayGroupName\":1,\"isMust\":1,\"note\":\"\",\"questionId\":\"table1\",\"questionType\":3,\"tips\":\"\",\"title\":\"\",\"showTips\":false}\n";
-        JSONObject obj = JSONObject.parseObject(objStr);
-        System.out.println(obj);
+        int scale = 19;
+        double[][] m = new double[scale][scale];
+        for (int i = 0; i < scale - 1; i++) {
+            m[i][i + 1] = 1.0;
+        }
+        for (int i = 0; i < scale; i++) {
+            m[scale - 1][i] = 1.0 / scale;
+        }
+        double[][] result = this.multiply(m, m, scale);
+        for (int i = 0; i < 100; i++) {
+            System.out.println(result[scale - 1][scale - 1]);
+            result = this.multiply(result, m, scale);
+        }
+        System.out.println(result[scale - 1][scale - 1]);
+    }
+
+    private double[][] multiply(double[][] m1, double[][] m2, int scale) {
+        double[][] result = new double[scale][scale];
+        for (int i = 0; i < scale; i++) {
+            for (int j = 0; j < scale; j++) {
+                for (int l = 0; l < scale; l++) {
+                    result[i][j] += m1[i][l] * m2[l][j];
+                }
+            }
+        }
+        return result;
     }
 
     @Test

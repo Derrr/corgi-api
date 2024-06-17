@@ -126,16 +126,16 @@ public class CorgiOrderController extends BaseController {
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -7);
-        query = CorgiOrder.builder()
-                .status(CorgiOrder.STATUS.SUCCESS)
-                .merchType(CorgiMerchandise.WECHAT)
-                .sellerId(getUserId())
-                .ctime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()))
-                .build();
-        Double lockedIncome = corgiOrderService.countIncome(query);
-        totalIncome -= lockedIncome;
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.DATE, -7);
+//        query = CorgiOrder.builder()
+//                .status(CorgiOrder.STATUS.SUCCESS)
+//                .merchType(CorgiMerchandise.WECHAT)
+//                .sellerId(getUserId())
+//                .ctime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()))
+//                .build();
+//        Double lockedIncome = corgiOrderService.countIncome(query);
+//        totalIncome -= lockedIncome;
 
         query = CorgiOrder.builder()
                 .status(CorgiOrder.STATUS.SUCCESS)

@@ -577,7 +577,12 @@ public class CorgiUserController extends BaseController {
         List<CorgiUserWechat> results = new ArrayList<>();
         for (UserWechat userWechat : userWechats) {
             if (!getUserId().equals(userWechat.getUserId())) {
-                results.add(this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds));
+                CorgiUserWechat wechat = this.checkWechatUnpay(userWechat, merchandiseMap, paidUserIds);
+                UserDetail wechatDetail = corgiUserService.getUserDetailBasic(userWechat.getUserId());
+                if (wechatDetail != null) {
+                    wechat.initUserDetail(wechatDetail);
+                    results.add(wechat);
+                }
             }
         }
         return new JsonResult(results);
@@ -651,6 +656,7 @@ public class CorgiUserController extends BaseController {
                 CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
                 wechat.setPayStatus("pay");
                 wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+                wechat.setId(userWechat.getSort());
                 results.add(wechat);
             }
         }
@@ -1491,7 +1497,6 @@ public class CorgiUserController extends BaseController {
     private CorgiUserWechat checkWechatUnpay(UserWechat userWechat, Map<String, CorgiMerchandise> merchandiseMap
             , List<String> paidUserIds) {
         CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
-        wechat.initUserDetail(corgiUserService.getUserDetailBasic(userWechat.getUserId()));
         wechat.setMerchandise(merchandiseMap.get(wechat.getMerchId()));
         wechat.setPayStatus("pay");
         if (!paidUserIds.contains(wechat.getUserId())) {

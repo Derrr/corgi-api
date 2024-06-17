@@ -45,6 +45,19 @@ public class InfluencerApplyController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("apply")
+    public JsonResult getApply(@RequestParam String wechat) {
+        InfluencerApply apply = new InfluencerApply();
+        apply.setWechat(wechat);
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
+        apply.setUserId(userDetail.getUserId());
+        apply.setAvatar(userDetail.getAvatar());
+        apply.setNickname(userDetail.getNickname());
+        corgiInfluencerApplyService.addApply(apply);
+        return new JsonResult();
+    }
+
+
     @GetMapping("get_status")
     public JsonResult getStatus() {
         InfluencerApply query = new InfluencerApply();
@@ -67,7 +80,7 @@ public class InfluencerApplyController extends BaseController {
     }
 
     @GetMapping("get_applies")
-    public JsonResult getApplies(@RequestParam("status") String status,
+    public JsonResult getApplies(@RequestParam(value = "status", required = false, defaultValue = "") String status,
                                  @RequestParam(name = "userId",required = false, defaultValue = "") String userId,
                                  @RequestParam(name = "nickname",required = false, defaultValue = "") String nickname,
                                  @RequestParam(name = "wechat",required = false, defaultValue = "") String wechat,
