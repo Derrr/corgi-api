@@ -75,6 +75,8 @@ public class CorgiActivityController extends BaseController {
     private CorgiOrderService corgiOrderService;
     @Reference
     private CorgiBlacklistService corgiBlacklistService;
+    @Reference
+    private CorgiCouponActivityService corgiCouponActivityService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
     @Autowired
@@ -1154,6 +1156,21 @@ public class CorgiActivityController extends BaseController {
         List<CorgiActivity> activityList = corgiActivityService.searchActivity(activity, page, pageSize);
         List<CorgiActivityDetail> detailList = convertDetail(activityList, getUserId());
         return new JsonResult(detailList);
+    }
+
+    @GetMapping("count_coupon")
+    public JsonResult getCoupon() {
+        CouponActivity query = new CouponActivity();
+        query.setUserId(getUserId());
+        return new JsonResult(corgiCouponActivityService.countCoupon(query));
+    }
+
+    @GetMapping("get_coupon")
+    public JsonResult getCoupon(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        CouponActivity query = new CouponActivity();
+        query.setUserId(getUserId());
+        corgiCouponActivityService.expireCouponActivity(query);
+        return new JsonResult(corgiCouponActivityService.getCouponList(query, page, pageSize));
     }
 
     @GetMapping("query_hot_pay_activity")

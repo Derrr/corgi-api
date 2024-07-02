@@ -523,6 +523,45 @@ public class CorgiUserController extends BaseController {
         UserExtraResult result = new UserExtraResult(userExtra);
         return new JsonResult(result);
     }
+    @GetMapping("/feed_user_wechat")
+    public JsonResult feedUserWechat() {
+        String key = "feed_user_wechat_".concat(getUserId());
+        String userId = redisTemplate.opsForList().rightPop(key);
+        if(StringUtils.isEmpty(userId) || getUserId().equals(userId)){
+            return new JsonResult();
+        }
+        UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
+        //用户没有开放微信购买
+        if (userWechat == null || "0".equals(userWechat.getStatus())) {
+            return new JsonResult();
+        }
+        UserDetail wechatUserDetail = corgiUserService.getUserDetailBasic(userWechat.getUserId());
+        if(wechatUserDetail == null){
+            return new JsonResult();
+        }
+        CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
+        wechat.initUserDetail(wechatUserDetail);
+        wechat.setMerchandise(corgiOrderService.getMerchandiseById(userWechat.getMerchId(), getUserId()));
+        CorgiUserGoods query = CorgiUserGoods.builder()
+                .userId(getUserId())
+                .goodsId(userId)
+                .goodsType(CorgiMerchandise.WECHAT)
+                .start(0)
+                .size(1)
+                .build();
+        List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
+        if (!CollectionUtils.isEmpty(goods)) {
+            return new JsonResult();
+        }
+        //登录用户未购买微信
+        if (StringUtils.isNotEmpty(wechat.getWechat())) {
+            wechat.setWechat(wechat.getWechatShot().substring(0, 3) + "****");
+        }
+        wechat.setWechatShot("");
+        wechat.setReply("");
+        wechat.setPayStatus("unpay");
+        return new JsonResult(wechat);
+    }
 
     @GetMapping("/get_user_wechat")
     public JsonResult getUserWechat(@RequestParam(value = "userId") String userId) {
@@ -979,10 +1018,10 @@ public class CorgiUserController extends BaseController {
 //            signName = "Corgi";
 //        }
         //String signName = "Corgi";
-//        if (telNo.contains("-")) {
-//            sign = "SMS_188570616";
-//            signName = "Corgi";
-//        }
+        if (telNo.contains("-")) {
+            sign = "SMS_188570616";
+            signName = "Corgi";
+        }
         log.info("to {} sending code:{}", telNo, code);
         CommonRequest request = new CommonRequest();
         request.setMethod(MethodType.POST);
@@ -1022,6 +1061,14 @@ public class CorgiUserController extends BaseController {
             return new JsonResult();
         }
         int follow = corgiUserFollowService.isFollowed(userId, targetUserId);
+        UserWechat wechat = corgiUserWechatService.getUserWechat(targetUserId);
+        //用户没有开放微信购买
+        if (wechat != null && !"0".equals(wechat.getStatus()) &&
+                redisTemplate.opsForValue().setIfAbsent("get_user_wechat_".concat(userId).concat("-").concat(targetUserId), "1", 7, TimeUnit.DAYS)) {
+            String key = "feed_user_wechat_".concat(userId);
+            redisTemplate.opsForList().leftPush(key, targetUserId);
+            redisTemplate.expire(key, 30l, TimeUnit.DAYS);
+        }
         if (follow != 1 && follow != 3) {
             corgiUserFollowService.follow(userId, targetUserId);
             HashMap extra = new HashMap();

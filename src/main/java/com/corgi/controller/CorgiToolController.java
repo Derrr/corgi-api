@@ -75,6 +75,8 @@ public class CorgiToolController extends BaseController {
     private CorgiFeedService corgiFeedService;
     @Reference
     private CorgiExtraService corgiExtraService;
+    @Reference
+    private CorgiCouponActivityService corgiCouponActivityService;
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -167,6 +169,18 @@ public class CorgiToolController extends BaseController {
         result.put("wechat",corgiUserWechatService.queryWechat(query,page,size));
         result.put("total",corgiUserWechatService.countWechat(query));
         return new JsonResult(result);
+    }
+
+    @GetMapping("add_coupon_activity")
+    public JsonResult addCouponActivity(@RequestParam("userId")String userId, @RequestParam("value")Double value, @RequestParam("expireDate")Integer date){
+        CouponActivity addCouponActivity = new CouponActivity();
+        addCouponActivity.setUserId(userId);
+        addCouponActivity.setValue(value);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, date);
+        addCouponActivity.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+        corgiCouponActivityService.addCouponActivity(addCouponActivity);
+        return new JsonResult();
     }
 
     @GetMapping("query_activity")
