@@ -1159,18 +1159,18 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("count_coupon")
-    public JsonResult getCoupon() {
+    public JsonResult countCoupon() {
         CouponActivity query = new CouponActivity();
         query.setUserId(getUserId());
         return new JsonResult(corgiCouponActivityService.countCoupon(query));
     }
 
     @GetMapping("get_coupon")
-    public JsonResult getCoupon(@RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+    public JsonResult getCoupon() {
         CouponActivity query = new CouponActivity();
         query.setUserId(getUserId());
         corgiCouponActivityService.expireCouponActivity(query);
-        return new JsonResult(corgiCouponActivityService.getCouponList(query, page, pageSize));
+        return new JsonResult(corgiCouponActivityService.getCouponList(query, 1, 200));
     }
 
     @GetMapping("query_hot_pay_activity")
