@@ -251,49 +251,50 @@ public class CorgiOrderController extends BaseController {
             if (merchandise == null) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品不存在");
             }
-            if (merchandise.getType().equals(CorgiMerchandise.ACTIVITY)) {
-                CouponActivity query = new CouponActivity();
-                query.setUserId(getUserId());
-                corgiCouponActivityService.expireCouponActivity(query);
-                CouponActivity coupon = corgiCouponActivityService.getCouponActivity(couponId);
-                if (coupon == null) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "优惠券不存在");
-                }
-                if (!"2".equals(coupon.getStatus())) {
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "优惠券已失效");
-                }
-                if(coupon.getValue() > 0 && coupon.getValue() < merchandise.getPrice()){
-                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "优惠券金额不足");
-                }
-                JsonResult result = new JsonResult();
-                result.setCode(Constants.PARAMETER_ERROR_CODE);
-                CorgiActivity activity = this.checkActivityPay(activityId, merchId, result);
-                if (activity == null) {
-                    return result;
-                }
-                coupon.setUsedActivity(activityId);
-                coupon.setStatus("1");
-                corgiCouponActivityService.updateCouponActivity(coupon);
-
-                String marketId = activity.getMarketId();
-                String sellerId = activity.getUserId();
-                String tradeNo = UuidUtil.getTradeNo(getUserId());
-                CorgiOrder order = CorgiOrder.builder()
-                        .userId(getUserId())
-                        .payType(CorgiOrder.PAY_TYPE.COUPON)
-                        .marketId(marketId)
-                        .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
-                        .merchId(merchandise.getId())
-                        .tradeNo(tradeNo)
-                        .sellerId(sellerId)
-                        .payAmount(merchandise.getPrice())
-                        .packageName(RequestUtil.getPackageName())
-                        .orderId(coupon.getId()+"")
-                        .status(CorgiOrder.STATUS.SUCCESS)
-                        .build();
-                corgiOrderService.addOrder(order);
-                corgiOrderService.buyWithCoupon(order);
+            if (!merchandise.getType().equals(CorgiMerchandise.ACTIVITY)) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品类型不正确");
             }
+            CouponActivity query = new CouponActivity();
+            query.setUserId(getUserId());
+            corgiCouponActivityService.expireCouponActivity(query);
+            CouponActivity coupon = corgiCouponActivityService.getCouponActivity(couponId);
+            if (coupon == null) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "优惠券不存在");
+            }
+            if (!"2".equals(coupon.getStatus())) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "优惠券已失效");
+            }
+            if (coupon.getValue() > 0 && coupon.getValue() < merchandise.getPrice()) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "优惠券金额不足");
+            }
+            JsonResult result = new JsonResult();
+            result.setCode(Constants.PARAMETER_ERROR_CODE);
+            CorgiActivity activity = this.checkActivityPay(activityId, merchId, result);
+            if (activity == null) {
+                return result;
+            }
+            coupon.setUsedActivity(activityId);
+            coupon.setStatus("1");
+            corgiCouponActivityService.updateCouponActivity(coupon);
+
+            String marketId = activity.getMarketId();
+            String sellerId = activity.getUserId();
+            String tradeNo = UuidUtil.getTradeNo(getUserId());
+            CorgiOrder order = CorgiOrder.builder()
+                    .userId(getUserId())
+                    .payType(CorgiOrder.PAY_TYPE.COUPON)
+                    .marketId(marketId)
+                    .desc(MerchandiseEnum.getByCode(merchandise.getId()).getDesc())
+                    .merchId(merchandise.getId())
+                    .tradeNo(tradeNo)
+                    .sellerId(sellerId)
+                    .payAmount(merchandise.getPrice())
+                    .packageName(RequestUtil.getPackageName())
+                    .orderId(coupon.getId() + "")
+                    .status(CorgiOrder.STATUS.SUCCESS)
+                    .build();
+            corgiOrderService.addOrder(order);
+            corgiOrderService.buyWithCoupon(order);
         } finally {
             corgiUtilService.unlock(key);
         }
