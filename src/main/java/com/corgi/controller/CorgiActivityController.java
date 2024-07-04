@@ -1162,6 +1162,7 @@ public class CorgiActivityController extends BaseController {
     public JsonResult countCoupon() {
         CouponActivity query = new CouponActivity();
         query.setUserId(getUserId());
+        query.setStatus("2");
         return new JsonResult(corgiCouponActivityService.countCoupon(query));
     }
 

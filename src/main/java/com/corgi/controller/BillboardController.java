@@ -8,12 +8,14 @@ import com.corgi.common.util.RequestUtil;
 import com.corgi.common.util.TimeUtil;
 import com.corgi.entity.ActivityBillboardDetail;
 import com.corgi.entity.CorgiActivityDetail;
+import com.corgi.entity.IncomeBillboardUser;
 import com.corgi.entity.PicInfo;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +56,8 @@ public class BillboardController extends BaseController {
     private CorgiBlacklistService corgiBlacklistService;
     @Autowired
     private AliyunGreenService aliyunGreenService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @GetMapping("get_by_date")
     public JsonResult getByDate(@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
@@ -178,6 +184,126 @@ public class BillboardController extends BaseController {
             corgiBillboardService.updatePaiBillboard(paidBillboard);
         }
         return new JsonResult();
+    }
+
+    @GetMapping("get_pay_billboard")
+    public JsonResult getPayillboard() {
+        Calendar calendar = this.getMonday();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String monday = sdf.format(calendar.getTime());
+        String key = "pay_billboard_" + monday;
+        List<String> billboardList;
+        List<IncomeBillboardUser> users = new ArrayList<>();
+        if (redisTemplate.hasKey(key) && redisTemplate.opsForList().size(key) > 0) {
+            billboardList = redisTemplate.opsForList().range(key, 0, 10);
+            for (String billboard : billboardList) {
+                IncomeBillboardUser user = this.getIncomeUser(billboard);
+                if (user == null) {
+                    continue;
+                }
+                users.add(user);
+            }
+        } else {
+            calendar.add(Calendar.DATE, -7);
+            String lastMonday = sdf.format(calendar.getTime());
+            billboardList = corgiBillboardService.getTopPayUsers(lastMonday, monday);
+            for (String billboard : billboardList) {
+                IncomeBillboardUser user = this.getIncomeUser(billboard);
+                if (user == null) {
+                    continue;
+                }
+                users.add(user);
+                redisTemplate.opsForList().rightPush(key, billboard);
+                if (users.size() >= 10) {
+                    break;
+                }
+            }
+            if (redisTemplate.hasKey(key)) {
+                redisTemplate.expire(key, 7, TimeUnit.DAYS);
+            }
+        }
+        return new JsonResult(users);
+    }
+
+    @GetMapping("get_income_billboard")
+    public JsonResult getIncomeBillboard() {
+        Calendar calendar = this.getMonday();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String monday = sdf.format(calendar.getTime());
+        String key = "income_billboard_" + monday;
+        List<String> billboardList;
+        List<IncomeBillboardUser> users = new ArrayList<>();
+        if (redisTemplate.hasKey(key) && redisTemplate.opsForList().size(key) > 0) {
+            billboardList = redisTemplate.opsForList().range(key, 0, 10);
+            for (String billboard : billboardList) {
+                IncomeBillboardUser user = this.getIncomeUser(billboard);
+                if (user == null) {
+                    continue;
+                }
+                users.add(user);
+            }
+        } else {
+            calendar.add(Calendar.DATE, -7);
+            String lastMonday = sdf.format(calendar.getTime());
+            billboardList = corgiBillboardService.getTopIncomeUsers(lastMonday, monday);
+            for (String billboard : billboardList) {
+                IncomeBillboardUser user = this.getIncomeUser(billboard);
+                if (user == null) {
+                    continue;
+                }
+                users.add(user);
+                redisTemplate.opsForList().rightPush(key, billboard);
+                if (users.size() >= 10) {
+                    break;
+                }
+            }
+            if (redisTemplate.hasKey(key)) {
+                redisTemplate.expire(key, 7, TimeUnit.DAYS);
+            }
+        }
+        return new JsonResult(users);
+    }
+
+    private IncomeBillboardUser getIncomeUser(String billboard) {
+        try {
+            String[] arr = billboard.split("-");
+            UserDetail detail = corgiUserService.getUserDetailBasic(arr[0]);
+            if (detail == null) {
+                return null;
+            }
+            IncomeBillboardUser billboardUser = new IncomeBillboardUser();
+            billboardUser.setAvatar(detail.getAvatar());
+            billboardUser.setHeight(detail.getHeight());
+            billboardUser.setWeight(detail.getWeight());
+
+            Calendar current = Calendar.getInstance();
+            Calendar birthdate = Calendar.getInstance();
+            birthdate.setTime(new SimpleDateFormat("yyyy/MM/dd").parse(detail.getBirthday()));
+            billboardUser.setAge(current.get(Calendar.YEAR) - birthdate.get(Calendar.YEAR));
+            if (current.get(Calendar.DAY_OF_YEAR) < birthdate.get(Calendar.DAY_OF_YEAR)) {
+                billboardUser.setAge(billboardUser.getAge() - 1);
+            }
+            if (arr.length > 1) {
+                try {
+                    billboardUser.setPrice(Double.valueOf(arr[1]));
+                } catch (Exception e) {
+                    billboardUser.setPrice(0.0);
+                }
+            }
+            return billboardUser;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private Calendar getMonday() {
+        Calendar calendar = Calendar.getInstance();
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        if (dayOfWeek != Calendar.MONDAY) {
+            calendar.add(Calendar.DAY_OF_WEEK, Calendar.MONDAY - dayOfWeek);
+        }
+        return calendar;
     }
 
     private List<ActivityBillboardDetail> buildActivityBillboard(List<ActivityBillboard> billboards) {
