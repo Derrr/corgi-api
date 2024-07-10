@@ -523,11 +523,12 @@ public class CorgiUserController extends BaseController {
         UserExtraResult result = new UserExtraResult(userExtra);
         return new JsonResult(result);
     }
+
     @GetMapping("/feed_user_wechat")
     public JsonResult feedUserWechat() {
         String key = "feed_user_wechat_".concat(getUserId());
         String userId = redisTemplate.opsForList().rightPop(key);
-        if(StringUtils.isEmpty(userId) || getUserId().equals(userId)){
+        if (StringUtils.isEmpty(userId) || getUserId().equals(userId)) {
             return new JsonResult();
         }
         UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
@@ -536,7 +537,7 @@ public class CorgiUserController extends BaseController {
             return new JsonResult();
         }
         UserDetail wechatUserDetail = corgiUserService.getUserDetailBasic(userWechat.getUserId());
-        if(wechatUserDetail == null){
+        if (wechatUserDetail == null) {
             return new JsonResult();
         }
         CorgiUserWechat wechat = CorgiUserWechat.getWechat(userWechat);
@@ -674,7 +675,9 @@ public class CorgiUserController extends BaseController {
         userWechat.setStatus("1");
         UserDetail detail = corgiUserService.getUserDetailBasic(getUserId());
         if (detail != null && UserDetail.VERIFIED.equals(detail.getAvatarCheckStatus())) {
-            userWechat.setAvatar(detail.getAvatar());
+            if (StringUtils.isEmpty(userWechat.getAvatar())) {
+                userWechat.setAvatar(detail.getAvatar());
+            }
             userWechat.setNickname(detail.getNickname());
         } else if (hasUserId()) {
             return new JsonResult(400, "不满足微信解锁条件");
