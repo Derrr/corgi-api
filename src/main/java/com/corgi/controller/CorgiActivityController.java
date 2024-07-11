@@ -1167,10 +1167,11 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("get_coupon")
-    public JsonResult getCoupon() {
+    public JsonResult getCoupon(@RequestParam("status")String status) {
         CouponActivity query = new CouponActivity();
         query.setUserId(getUserId());
         corgiCouponActivityService.expireCouponActivity(query);
+        query.setStatus(status);
         return new JsonResult(corgiCouponActivityService.getCouponList(query, 1, 200));
     }
 
