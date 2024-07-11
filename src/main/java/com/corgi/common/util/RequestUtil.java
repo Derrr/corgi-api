@@ -46,6 +46,10 @@ public class RequestUtil {
         return packageName;
     }
 
+    public static String getIP() {
+        return IPUtil.getIpAddr(getRequest());
+    }
+
     public static String getChannel() {
         return getRequest().getHeader("channel");
     }

@@ -482,6 +482,8 @@ public class CorgiOrderController extends BaseController {
         query.setUserId(getUserId());
         query.setGoodsId(goodsId);
         query.setGoodsType(CorgiUserGoods.GOODS_TYPE.ACTIVITY);
+        query.setStart(0);
+        query.setSize(1);
         List<CorgiUserGoods> goods = corgiOrderService.getUserGoods(query);
         if (CollectionUtils.isNotEmpty(goods)) {
             result.setMessage("该动态已付费");

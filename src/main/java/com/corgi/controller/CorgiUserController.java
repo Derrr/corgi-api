@@ -169,7 +169,7 @@ public class CorgiUserController extends BaseController {
                     }
                     userLogin.setUserId(getUserId());
                     corgiUserService.updateUserLogin(userLogin);
-                    return new JsonResult("更新手机号成功");
+                    return new JsonResult(0,"更新手机号成功");
                 }
             } finally {
                 corgiUtilService.unlock(lockKey);
@@ -877,7 +877,7 @@ public class CorgiUserController extends BaseController {
                 String jwtUserId = decodedJWT.getClaim("userId").asString();
                 log.info("updating user:{} ", jwtUserId);
                 if (JWTUtils.ADMIN_ID.equals(jwtUserId)) {
-                    result.put("jwt", JWTUtils.createJWT(userPosition.getUserId(), userPosition.getVersion()));
+                    return new JsonResult(Constants.PERMISSION_ERROR_CODE, "非当前用户");
                 } else if (!userPosition.getUserId().equals(jwtUserId)) {
                     log.error("非当前用户");
                     return new JsonResult(Constants.PERMISSION_ERROR_CODE, "非当前用户");
@@ -1111,7 +1111,7 @@ public class CorgiUserController extends BaseController {
                                     @RequestParam(name = "lat", required = false) Double lat,
                                     @RequestParam(name = "lng", required = false) Double lng,
                                     @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
-        if ("distance".equals(type) && lat == null || lng == null || lat > 200 || lng > 200) {
+        if ("distance".equals(type) && (lat == null || lng == null || lat > 200 || lng > 200)) {
             type = "new";
         }
         List<UserProfile> userProfiles = corgiUserFollowService.getFollowUserByPage(userId, type, lat, lng, page, pageSize);
@@ -1135,6 +1135,15 @@ public class CorgiUserController extends BaseController {
                                    @RequestParam(name = "lat", required = false) Double lat,
                                    @RequestParam(name = "lng", required = false) Double lng,
                                    @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
+        if (lat > 200 || lng > 200) {
+            UserPosition p = corgiUserService.getUserPosition(getUserId());
+            if (p.getRealLat() < 200 && p.getRealLng() < 200) {
+                lat = p.getRealLat();
+                lng = p.getRealLng();
+            } else {
+                return new JsonResult(new ArrayList<>());
+            }
+        }
         List<UserProfile> userProfiles = corgiUserFollowService.getMatchUserByPage(userId, type, lat, lng, page, pageSize);
         return new JsonResult(userProfiles);
     }
