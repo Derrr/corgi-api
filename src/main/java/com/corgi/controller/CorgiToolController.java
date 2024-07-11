@@ -153,26 +153,26 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("get_wechat_list")
-    public JsonResult getWechatList(@RequestParam("page")Integer page,
-                                    @RequestParam("size")Integer size,
-                                    @RequestParam(value = "userId",required = false)String userId,
-                                    @RequestParam(value = "nickname", required = false)String nickname,
-                                    @RequestParam(value = "wechat", required = false)String wechat) {
+    public JsonResult getWechatList(@RequestParam("page") Integer page,
+                                    @RequestParam("size") Integer size,
+                                    @RequestParam(value = "userId", required = false) String userId,
+                                    @RequestParam(value = "nickname", required = false) String nickname,
+                                    @RequestParam(value = "wechat", required = false) String wechat) {
         if (hasUserId()) {
             return new JsonResult();
         }
-        HashMap<String,Object> result = new HashMap<>();
+        HashMap<String, Object> result = new HashMap<>();
         UserWechat query = new UserWechat();
         query.setUserId(userId);
         query.setNickname(nickname);
         query.setWechat(wechat);
-        result.put("wechat",corgiUserWechatService.queryWechat(query,page,size));
-        result.put("total",corgiUserWechatService.countWechat(query));
+        result.put("wechat", corgiUserWechatService.queryWechat(query, page, size));
+        result.put("total", corgiUserWechatService.countWechat(query));
         return new JsonResult(result);
     }
 
     @GetMapping("add_coupon_activity")
-    public JsonResult addCouponActivity(@RequestParam("userId")String userId, @RequestParam("value")Double value, @RequestParam("expireDate")Integer date){
+    public JsonResult addCouponActivity(@RequestParam("userId") String userId, @RequestParam("value") Double value, @RequestParam("expireDate") Integer date) {
         CouponActivity addCouponActivity = new CouponActivity();
         addCouponActivity.setUserId(userId);
         addCouponActivity.setValue(value);
@@ -501,11 +501,19 @@ public class CorgiToolController extends BaseController {
         if (!StringUtils.isEmpty(oldDetail.getCheckNickname())) {
             corgiUserService.updateUserNickname(userId, oldDetail.getCheckNickname(), "");
         }
-
         UserDetail detail = new UserDetail();
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
         corgiUserService.updateDetail(detail);
+        if ("1".equals(userId) || "593".equals(userId)) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, 1);
+            CouponActivity coupon = new CouponActivity();
+            coupon.setUserId(userId);
+            coupon.setValue(5.0);
+            coupon.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+            corgiCouponActivityService.addCouponActivity(coupon);
+        }
         return new JsonResult();
     }
 
