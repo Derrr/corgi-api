@@ -179,6 +179,7 @@ public class CorgiToolController extends BaseController {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, date);
         addCouponActivity.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+        addCouponActivity.setTitle("APP Store五星好评奖励");
         corgiCouponActivityService.addCouponActivity(addCouponActivity);
         return new JsonResult();
     }
@@ -509,9 +510,11 @@ public class CorgiToolController extends BaseController {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, 1);
             CouponActivity coupon = new CouponActivity();
+            coupon.setTitle("APP Store五星好评奖励");
             coupon.setUserId(userId);
-            coupon.setValue(5.0);
             coupon.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+
+            coupon.setValue(5.0);
             corgiCouponActivityService.addCouponActivity(coupon);
             coupon.setValue(0.0);
             corgiCouponActivityService.addCouponActivity(coupon);
