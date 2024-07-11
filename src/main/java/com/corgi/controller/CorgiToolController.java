@@ -505,13 +505,15 @@ public class CorgiToolController extends BaseController {
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
         corgiUserService.updateDetail(detail);
-        if ("1".equals(userId) || "593".equals(userId)) {
+        if (Arrays.asList("1","593","977560").contains(userId)) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, 1);
             CouponActivity coupon = new CouponActivity();
             coupon.setUserId(userId);
             coupon.setValue(5.0);
             coupon.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
+            corgiCouponActivityService.addCouponActivity(coupon);
+            coupon.setValue(0.0);
             corgiCouponActivityService.addCouponActivity(coupon);
         }
         return new JsonResult();
