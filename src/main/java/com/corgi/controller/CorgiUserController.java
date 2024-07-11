@@ -169,7 +169,7 @@ public class CorgiUserController extends BaseController {
                     }
                     userLogin.setUserId(getUserId());
                     corgiUserService.updateUserLogin(userLogin);
-                    return new JsonResult("更新手机号成功");
+                    return new JsonResult(0,"更新手机号成功");
                 }
             } finally {
                 corgiUtilService.unlock(lockKey);
