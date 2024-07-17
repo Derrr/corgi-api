@@ -12,6 +12,7 @@ import org.springframework.beans.BeanUtils;
 public class IncomeBillboardUser {
     private String userId;
     private String avatar;
+    private String nickname;
     private Integer age;
     private Integer height;
     private Integer weight;

@@ -275,6 +275,7 @@ public class BillboardController extends BaseController {
             billboardUser.setAvatar(detail.getAvatar());
             billboardUser.setHeight(detail.getHeight());
             billboardUser.setWeight(detail.getWeight());
+            billboardUser.setNickname(detail.getNickname());
 
             Calendar current = Calendar.getInstance();
             Calendar birthdate = Calendar.getInstance();
