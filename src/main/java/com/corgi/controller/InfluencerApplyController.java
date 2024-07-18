@@ -101,23 +101,20 @@ public class InfluencerApplyController extends BaseController {
 
     @PostMapping("update_apply")
     public JsonResult updateApply(@RequestBody InfluencerApply apply) {
-        log.info("apply:{}", apply);
         corgiInfluencerApplyService.updateApply(apply);
-        if (StringUtils.isEmpty(apply.getWechat())) {
-            if ("pass".equals(apply.getStatus())) {
-                UserDetail update = new UserDetail();
-                update.setUserId(apply.getUserId());
-                update.setAvatarStatus("influencer");
-                corgiUserService.updateDetail(update);
-                mqService.sendAdminMessage(apply.getUserId(), "您申请的天菜创始人已通过审核，24小时内运营小伙伴将会拉您入群，请留意微信消息");
-            }
-            if ("fail".equals(apply.getStatus())) {
-                UserDetail update = new UserDetail();
-                update.setUserId(apply.getUserId());
-                update.setAvatarStatus("");
-                corgiUserService.updateDetail(update);
-                mqService.sendAdminMessage(apply.getUserId(), "很抱歉，您的天菜创始人申请未通过审核");
-            }
+        if ("pass".equals(apply.getStatus())) {
+            UserDetail update = new UserDetail();
+            update.setUserId(apply.getUserId());
+            update.setAvatarStatus("influencer");
+            corgiUserService.updateDetail(update);
+            mqService.sendAdminMessage(apply.getUserId(), "您申请的天菜创始人已通过审核，24小时内运营小伙伴将会拉您入群，请留意微信消息");
+        }
+        if ("fail".equals(apply.getStatus())) {
+            UserDetail update = new UserDetail();
+            update.setUserId(apply.getUserId());
+            update.setAvatarStatus("");
+            corgiUserService.updateDetail(update);
+            mqService.sendAdminMessage(apply.getUserId(), "很抱歉，您的天菜创始人申请未通过审核");
         }
         return new JsonResult();
     }
