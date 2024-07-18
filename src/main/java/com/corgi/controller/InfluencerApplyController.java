@@ -81,9 +81,9 @@ public class InfluencerApplyController extends BaseController {
 
     @GetMapping("get_applies")
     public JsonResult getApplies(@RequestParam(value = "status", required = false, defaultValue = "") String status,
-                                 @RequestParam(name = "userId",required = false, defaultValue = "") String userId,
-                                 @RequestParam(name = "nickname",required = false, defaultValue = "") String nickname,
-                                 @RequestParam(name = "wechat",required = false, defaultValue = "") String wechat,
+                                 @RequestParam(name = "userId", required = false, defaultValue = "") String userId,
+                                 @RequestParam(name = "nickname", required = false, defaultValue = "") String nickname,
+                                 @RequestParam(name = "wechat", required = false, defaultValue = "") String wechat,
                                  @RequestParam("page") Integer page,
                                  @RequestParam("size") Integer size) {
         InfluencerApply query = new InfluencerApply();
@@ -101,6 +101,7 @@ public class InfluencerApplyController extends BaseController {
 
     @PostMapping("update_apply")
     public JsonResult updateApply(@RequestBody InfluencerApply apply) {
+        log.info("apply:{}", apply);
         corgiInfluencerApplyService.updateApply(apply);
         if (StringUtils.isEmpty(apply.getWechat())) {
             if ("pass".equals(apply.getStatus())) {
