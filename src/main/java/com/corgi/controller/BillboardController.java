@@ -272,6 +272,7 @@ public class BillboardController extends BaseController {
                 return null;
             }
             IncomeBillboardUser billboardUser = new IncomeBillboardUser();
+            billboardUser.setUserId(detail.getUserId());
             billboardUser.setAvatar(detail.getAvatar());
             billboardUser.setHeight(detail.getHeight());
             billboardUser.setWeight(detail.getWeight());
