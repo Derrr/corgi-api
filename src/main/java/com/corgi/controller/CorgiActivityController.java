@@ -625,10 +625,10 @@ public class CorgiActivityController extends BaseController {
             return new JsonResult<>(new ArrayList<>());
         }
         //if ("AppStore".equals(RequestUtil.getChannel())) {
-            List<ActivityComment> hotComments = corgiCommentService.getHotComment(activityId, getUserId());
-            List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, id, size, getUserId());
-            activityComments.addAll(0, hotComments);
-            return new JsonResult(activityComments);
+        List<ActivityComment> hotComments = corgiCommentService.getHotComment(activityId, getUserId());
+        List<ActivityComment> activityComments = corgiCommentService.getActivityComment(activityId, id, size, getUserId());
+        activityComments.addAll(0, hotComments);
+        return new JsonResult(activityComments);
 //        } else {
 //            return new JsonResult(corgiCommentService.getUserActivityComment(activityId, getUserId()));
 //        }
@@ -637,8 +637,8 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("get_hot_comments")
     public JsonResult getHotComment(@RequestParam("activityId") String activityId) {
         //if ("AppStore".equals(RequestUtil.getChannel())) {
-            List<ActivityComment> activityComments = corgiCommentService.getHotComment(activityId, getUserId());
-            return new JsonResult(activityComments);
+        List<ActivityComment> activityComments = corgiCommentService.getHotComment(activityId, getUserId());
+        return new JsonResult(activityComments);
 //        } else {
 //            return new JsonResult(new ArrayList<>());
 //        }
@@ -657,8 +657,8 @@ public class CorgiActivityController extends BaseController {
     @GetMapping("count_comment")
     public JsonResult countComment(@RequestParam("activityId") String activityId) {
         //if ("AppStore".equals(RequestUtil.getChannel())) {
-            Long count = corgiCommentService.countActivityComment(activityId);
-            return new JsonResult(count);
+        Long count = corgiCommentService.countActivityComment(activityId);
+        return new JsonResult(count);
 //        } else {
 //            return new JsonResult();
 //        }
@@ -1159,16 +1159,17 @@ public class CorgiActivityController extends BaseController {
     }
 
     @GetMapping("count_coupon")
-    public JsonResult countCoupon() {
+    public JsonResult countCoupon(@RequestParam(name = "price", defaultValue = "0", required = false) Double price) {
         CouponActivity query = new CouponActivity();
         query.setUserId(getUserId());
         corgiCouponActivityService.expireCouponActivity(query);
         query.setStatus("2");
+        query.setValue(price);
         return new JsonResult(corgiCouponActivityService.countCoupon(query));
     }
 
     @GetMapping("get_coupon")
-    public JsonResult getCoupon(@RequestParam("status")String status) {
+    public JsonResult getCoupon(@RequestParam("status") String status) {
         CouponActivity query = new CouponActivity();
         query.setUserId(getUserId());
         corgiCouponActivityService.expireCouponActivity(query);
@@ -1868,7 +1869,7 @@ public class CorgiActivityController extends BaseController {
                 }
                 Long commentCount = null;
                 //if ("AppStore".equals(RequestUtil.getChannel())) {
-                    commentCount = corgiCommentService.countActivityComment(activity.getId());
+                commentCount = corgiCommentService.countActivityComment(activity.getId());
                 //}
                 Integer swiftCommentCount = corgiCommentService.countActivityCommentByStatus(activity.getId(), getUserId(), ActivityComment.SWIFT);
                 Long likeCount = corgiLikeService.countActivityLike(activity.getId());
@@ -1884,8 +1885,8 @@ public class CorgiActivityController extends BaseController {
                 detail.setBuyers(buyers);
                 detail.setTimeShow(TimeUtil.buildTimeText(detail.getCreateTime(), nowTime, sdf));
                 //if ("AppStore".equals(RequestUtil.getChannel())) {
-                    ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
-                    detail.setLastComment(activityComment);
+                ActivityComment activityComment = corgiCommentService.getLastComment(activity.getId(), getUserId());
+                detail.setLastComment(activityComment);
                 //}
                 detail.setShareCount(shareCount);
                 detail.setHasSwiftComment(swiftCommentCount);
