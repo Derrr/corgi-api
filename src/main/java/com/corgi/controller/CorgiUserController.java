@@ -621,6 +621,7 @@ public class CorgiUserController extends BaseController {
                 UserDetail wechatDetail = corgiUserService.getUserDetailBasic(userWechat.getUserId());
                 if (wechatDetail != null) {
                     wechat.initUserDetail(wechatDetail);
+                    wechat.setId(userWechat.getSort());
                     results.add(wechat);
                 }
             }
