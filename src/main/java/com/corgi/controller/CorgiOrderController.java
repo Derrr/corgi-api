@@ -104,7 +104,9 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(getUserId())
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
-
+        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+        Double balancePay = corgiOrderService.countIncome(query);
+        totalIncome -= balancePay;
 //        Calendar calendar = Calendar.getInstance();
 //        calendar.add(Calendar.DATE, -7);
 //        query = CorgiOrder.builder()
@@ -193,6 +195,13 @@ public class CorgiOrderController extends BaseController {
         }
         if (!CorgiActivity.CAT_IMAGE.contains(activity.getCategory())) {
             return new JsonResult(Constants.PARAMETER_ERROR_CODE, "该动态类型不能上榜");
+        }
+        if (CorgiOrder.PAY_TYPE.BALANCE.equals(payType)) {
+            Double balance = this.getBalance(getUserId());
+            CorgiMerchandise merchandise = corgiOrderService.getMerchandiseById(merchId, getUserId());
+            if (merchandise.getPrice() > balance) {
+                return new JsonResult(Constants.PARAMETER_ERROR_CODE, "余额不足");
+            }
         }
         corgiUtilService.lock(key);
         try {
@@ -301,6 +310,12 @@ public class CorgiOrderController extends BaseController {
         return new JsonResult();
     }
 
+    @GetMapping("get_balance")
+    public JsonResult getBalance() {
+        Double balance = this.getBalance(getUserId());
+        return new JsonResult(balance);
+    }
+
     @GetMapping("pay")
     public JsonResult pay(@RequestParam("merchId") String merchId,
                           @RequestParam(required = false, name = "goodsId") String goodsId,
@@ -335,6 +350,12 @@ public class CorgiOrderController extends BaseController {
             }
             if (merchandise.getStatus() == null || "0".equals(merchandise.getStatus())) {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "商品已失效");
+            }
+            if (CorgiOrder.PAY_TYPE.BALANCE.equals(payType)) {
+                Double balance = this.getBalance(getUserId());
+                if (merchandise.getPrice() > balance) {
+                    return new JsonResult(Constants.PARAMETER_ERROR_CODE, "余额不足");
+                }
             }
 
             CorgiOrder orderQuery = CorgiOrder.builder()
@@ -387,7 +408,6 @@ public class CorgiOrderController extends BaseController {
                 }
                 marketId = userWechat.getId();
             }
-
             HashMap<String, Object> result = this.payResult(payType, marketId, sellerId, merchandise);
             if (merchandise.getType().equals(CorgiMerchandise.RESERVE)) {
                 BarReservation update = new BarReservation();
@@ -396,11 +416,37 @@ public class CorgiOrderController extends BaseController {
                 update.setMerchId(merchId);
                 corgiReserveService.updateReservation(update);
             }
-
             return new JsonResult(result);
         } finally {
             corgiUtilService.unlock(key);
         }
+    }
+
+    private Double getBalance(String userId) {
+        CorgiOrder query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .sellerId(userId)
+                .build();
+        Double totalIncome = corgiOrderService.countIncome(query);
+        if (totalIncome <= 0) {
+            return 0.0;
+        }
+        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+        Double balancePay = corgiOrderService.countIncome(query);
+        query = CorgiOrder.builder()
+                .status(CorgiOrder.STATUS.SUCCESS)
+                .userId(getUserId())
+                .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
+                .build();
+        Double totalWithdraw = corgiOrderService.countIncome(query);
+        Double rate = 0.6;
+        if (totalWithdraw > 0) {
+            UserDetail detail = corgiUserService.getUserDetailBasic(userId);
+            if ("influencer".equals(detail.getAvatarStatus())) {
+                rate = 0.65;
+            }
+        }
+        return totalIncome - balancePay - totalWithdraw / rate;
     }
 
     private boolean checkLocation(String goodsId, JsonResult result) {
@@ -743,6 +789,8 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(userId)
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
+        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+        Double balancePay = corgiOrderService.countIncome(query);
         query.setSellerId(null);
         query.setUserId(userId);
         query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
@@ -764,7 +812,8 @@ public class CorgiOrderController extends BaseController {
         }
         result.put("totalIncome", totalIncome);
         result.put("totalWithdraw", totalWithdraw);
-        result.put("remainWithdraw", totalIncome * rate - totalWithdraw);
+        result.put("balancePay", balancePay);
+        result.put("remainWithdraw", (totalIncome - balancePay) * rate - totalWithdraw);
         return new JsonResult(result);
     }
 
@@ -981,8 +1030,12 @@ public class CorgiOrderController extends BaseController {
         if (CorgiOrder.PAY_TYPE.WX.equals(payType)) {
             result.put("orderString", corgiPayService.getWXPayOrder(merchandise, order));
         }
-        if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType)) {
+        if (CorgiOrder.PAY_TYPE.IN_APP.equals(payType) || CorgiOrder.PAY_TYPE.BALANCE.equals(payType)) {
             corgiOrderService.addOrder(order);
+        }
+        if (CorgiOrder.PAY_TYPE.BALANCE.equals(payType)) {
+            order.setStatus(CorgiOrder.STATUS.SUCCESS);
+            corgiOrderService.updateOrder(order);
         }
         result.put("orderNo", order.getTradeNo());
         result.put("merchandise", merchandise);
