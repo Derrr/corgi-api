@@ -529,7 +529,8 @@ public class CorgiUserController extends BaseController {
         String key = "feed_user_wechat_".concat(getUserId());
         String userId = redisTemplate.opsForList().rightPop(key);
         if (StringUtils.isEmpty(userId) || getUserId().equals(userId)) {
-            return new JsonResult();
+            //return new JsonResult();
+            userId = "7";
         }
         UserWechat userWechat = corgiUserWechatService.getUserWechat(userId);
         //用户没有开放微信购买
