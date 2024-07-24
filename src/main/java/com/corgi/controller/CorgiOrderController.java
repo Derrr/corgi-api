@@ -793,10 +793,10 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(userId)
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
-        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
-        Double balancePay = corgiOrderService.countIncome(query);
         query.setSellerId(null);
         query.setUserId(userId);
+        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+        Double balancePay = corgiOrderService.countIncome(query);
         query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
         Double successWithdraw = corgiOrderService.countIncome(query);
         query.setStatus(CorgiOrder.STATUS.CREATED);
