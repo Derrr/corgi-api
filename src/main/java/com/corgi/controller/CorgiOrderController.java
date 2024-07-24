@@ -104,9 +104,6 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(getUserId())
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
-        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
-        Double balancePay = corgiOrderService.countIncome(query);
-        totalIncome -= balancePay;
 //        Calendar calendar = Calendar.getInstance();
 //        calendar.add(Calendar.DATE, -7);
 //        query = CorgiOrder.builder()
@@ -124,6 +121,11 @@ public class CorgiOrderController extends BaseController {
                 .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
                 .build();
         Double totalWithdraw = corgiOrderService.countIncome(query);
+
+        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+        Double balancePay = corgiOrderService.countIncome(query);
+        totalIncome -= balancePay;
+
         Double rate = 0.6;
         if ("influencer".equals(detail.getAvatarStatus())) {
             rate = 0.65;
@@ -431,14 +433,16 @@ public class CorgiOrderController extends BaseController {
         if (totalIncome <= 0) {
             return 0.0;
         }
-        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
-        Double balancePay = corgiOrderService.countIncome(query);
         query = CorgiOrder.builder()
                 .status(CorgiOrder.STATUS.SUCCESS)
                 .userId(getUserId())
                 .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
                 .build();
         Double totalWithdraw = corgiOrderService.countIncome(query);
+
+        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+        Double balancePay = corgiOrderService.countIncome(query);
+
         Double rate = 0.6;
         if (totalWithdraw > 0) {
             UserDetail detail = corgiUserService.getUserDetailBasic(userId);
