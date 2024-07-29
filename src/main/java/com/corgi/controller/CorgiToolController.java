@@ -506,7 +506,7 @@ public class CorgiToolController extends BaseController {
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
         corgiUserService.updateDetail(detail);
-        if (Arrays.asList("1","593","977560","858064").contains(userId)) {
+        if (Arrays.asList("1","593","977560","858064","982573").contains(userId)) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, 1);
             CouponActivity coupon = new CouponActivity();
