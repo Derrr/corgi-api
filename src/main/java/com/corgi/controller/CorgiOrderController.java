@@ -468,6 +468,11 @@ public class CorgiOrderController extends BaseController {
             result.setMessage("定位失败");
             return false;
         }
+        String vipResult = corgiOrderService.getUserLocationExpireDate(getUserId());
+        if (StringUtils.isNotEmpty(vipResult)) {
+            result.setMessage("已购买包月定位礼包");
+            return false;
+        }
         return true;
     }
 
