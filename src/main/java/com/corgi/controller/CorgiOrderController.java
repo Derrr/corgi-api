@@ -425,32 +425,40 @@ public class CorgiOrderController extends BaseController {
     }
 
     private Double getBalance(String userId) {
-        CorgiOrder query = CorgiOrder.builder()
-                .status(CorgiOrder.STATUS.SUCCESS)
-                .sellerId(userId)
-                .build();
-        Double totalIncome = corgiOrderService.countIncome(query);
-        if (totalIncome <= 0) {
-            return 0.0;
-        }
-        query = CorgiOrder.builder()
-                .status(CorgiOrder.STATUS.SUCCESS)
-                .userId(getUserId())
-                .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
-                .build();
-        Double totalWithdraw = corgiOrderService.countIncome(query);
-
-        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
-        Double balancePay = corgiOrderService.countIncome(query);
-
-        Double rate = 0.6;
-        if (totalWithdraw > 0) {
-            UserDetail detail = corgiUserService.getUserDetailBasic(userId);
-            if ("influencer".equals(detail.getAvatarStatus())) {
-                rate = 0.65;
+        String key = "withdraw_" + getUserId();
+        corgiUtilService.lock(key);
+        try {
+            CorgiOrder query = CorgiOrder.builder()
+                    .status(CorgiOrder.STATUS.SUCCESS)
+                    .sellerId(userId)
+                    .build();
+            Double totalIncome = corgiOrderService.countIncome(query);
+            if (totalIncome <= 0) {
+                return 0.0;
             }
+            query = CorgiOrder.builder()
+                    .status(CorgiOrder.STATUS.SUCCESS)
+                    .userId(getUserId())
+                    .payType(CorgiOrder.PAY_TYPE.WITHDRAW)
+                    .build();
+            Double totalWithdraw = corgiOrderService.countIncome(query);
+            query.setStatus(CorgiOrder.STATUS.CREATED);
+            Double withdrawing = corgiOrderService.countIncome(query);
+            query.setStatus(CorgiOrder.STATUS.SUCCESS);
+            query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+            Double balancePay = corgiOrderService.countIncome(query);
+
+            Double rate = 0.6;
+            if (totalWithdraw > 0 || withdrawing > 0) {
+                UserDetail detail = corgiUserService.getUserDetailBasic(userId);
+                if ("influencer".equals(detail.getAvatarStatus())) {
+                    rate = 0.65;
+                }
+            }
+            return totalIncome - balancePay - (totalWithdraw + withdrawing) / rate;
+        } finally {
+            corgiUtilService.unlock(key);
         }
-        return totalIncome - balancePay - totalWithdraw / rate;
     }
 
     private boolean checkLocation(String goodsId, JsonResult result) {
