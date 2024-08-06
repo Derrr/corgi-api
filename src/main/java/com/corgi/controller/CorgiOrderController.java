@@ -315,7 +315,7 @@ public class CorgiOrderController extends BaseController {
     @GetMapping("get_balance")
     public JsonResult getBalance() {
         Double balance = this.getBalance(getUserId());
-        return new JsonResult(balance);
+        return new JsonResult(Math.round(balance * 100) / 100.0);
     }
 
     @GetMapping("pay")
