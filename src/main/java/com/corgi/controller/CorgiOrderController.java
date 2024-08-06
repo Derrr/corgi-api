@@ -185,7 +185,7 @@ public class CorgiOrderController extends BaseController {
                                    @RequestParam("payType") String payType) {
         String key = "billboard_pay_" + date;
         if (!redisTemplate.opsForValue().setIfAbsent(key.concat(getUserId()), "1", 2L, TimeUnit.SECONDS)) {
-            return new JsonResult();
+            return new JsonResult(Constants.PARAMETER_ERROR_CODE, "请求太频繁");
         }
         List<CorgiActivity> corgiActivities = corgiActivityService.getActivityByIds(Arrays.asList(goodsId));
         if (CollectionUtils.isEmpty(corgiActivities)) {
