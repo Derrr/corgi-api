@@ -35,7 +35,6 @@ import com.corgi.user.api.CorgiSoundService;
 import com.corgi.user.entity.CorgiSound;
 import com.corgi.user.entity.UserDetail;
 import com.corgi.user.entity.UserPic;
-import com.aliyuncs.facebody.model.v20191230.DetectFaceRequest;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +48,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.aliyun.teaopenapi.models.Config;
+import com.aliyun.green20220302.Client;
+import com.aliyun.green20220302.models.TextModerationPlusRequest;
+import com.aliyun.green20220302.models.TextModerationPlusResponse;
+import com.aliyun.green20220302.models.TextModerationPlusResponseBody;
+import com.aliyun.green20220302.models.ImageModerationRequest;
+import com.aliyun.green20220302.models.ImageModerationResponse;
+import com.aliyun.green20220302.models.ImageModerationResponseBody;
+import com.aliyun.green20220302.models.ImageModerationResponseBody.ImageModerationResponseBodyData;
+import com.aliyun.green20220302.models.ImageModerationResponseBody.ImageModerationResponseBodyDataResult;
+import com.aliyun.teautil.models.RuntimeOptions;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -291,7 +302,7 @@ public class AliyunGreenService {
         data.put("scenes", Arrays.asList("antispam"));
         data.put("tasks", tasks);
 
-        System.out.println(JSON.toJSONString(data, true));
+        log.info(JSON.toJSONString(data, true));
         try {
             asyncScanRequest.setHttpContent(data.toJSONString().getBytes("UTF-8"), "UTF-8", FormatType.JSON);
             HttpResponse httpResponse = managementClient.doAction(asyncScanRequest);
@@ -331,10 +342,97 @@ public class AliyunGreenService {
     }
 
     public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type) {
-        return checkPic(urls, sourceId, type, "sexy_pic");
+        return checkPic(urls, sourceId, type, "baselineCheck_pro");
     }
 
-    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type, String bizType) {
+    public List<? extends CorgiPic> checkPic(List<? extends CorgiPic> urls, String sourceId, String type, String serviceName) {
+        if (CollectionUtils.isEmpty(urls)) {
+            return null;
+        }
+        log.info("pics = " + urls);
+        Config config = new Config();
+        config.setAccessKeyId(accessKeyId);
+        config.setAccessKeySecret(accessKeySecret);
+        // 设置http代理。
+        //config.setHttpProxy("http://10.10.xx.xx:xxxx");
+        // 设置https代理。
+        //config.setHttpsProxy("https://10.10.xx.xx:xxxx");
+        // 接入区域和地址请根据实际情况修改
+        // 接入地址列表：https://help.aliyun.com/document_detail/467828.html?#section-uib-qkw-0c8
+        config.setEndpoint("green-cip-vpc.cn-beijing.aliyuncs.com");
+        try {
+            Client client = new Client(config);
+            // 创建RuntimeObject实例并设置运行参数
+            RuntimeOptions runtime = new RuntimeOptions();
+
+            for (CorgiPic pic : urls) {
+                // 检测参数构造。
+                Map<String, String> serviceParameters = new HashMap<>();
+                //公网可访问的URL。
+                serviceParameters.put("imageUrl", pic.getPicUrl());
+                //待检测数据唯一标识
+                serviceParameters.put("dataId", UUID.randomUUID().toString());
+
+                ImageModerationRequest request = new ImageModerationRequest();
+                // 图片检测service：内容安全控制台图片增强版规则配置的serviceCode，示例：baselineCheck
+                // 支持service请参考：https://help.aliyun.com/document_detail/467826.html?0#p-23b-o19-gff
+                request.setService(serviceName);
+                request.setServiceParameters(JSON.toJSONString(serviceParameters));
+                ImageModerationResponse response = null;
+                try {
+                    response = client.imageModerationWithOptions(request, runtime);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+                if (response != null) {
+                    if (response.getStatusCode() == 200) {
+                        ImageModerationResponseBody body = response.getBody();
+                        log.info("requestId=" + body.getRequestId());
+                        log.info("code=" + body.getCode());
+                        log.info("msg=" + body.getMsg());
+                        if (body.getCode() == 200) {
+                            ImageModerationResponseBodyData data = body.getData();
+                            log.info("dataId=" + data.getDataId());
+                            List<ImageModerationResponseBodyDataResult> results = data.getResult();
+                            String resultStr = "|";
+                            for (ImageModerationResponseBodyDataResult result : results) {
+                                log.info("label=" + result.getLabel());
+                                log.info("confidence=" + result.getConfidence());
+                                resultStr += result.getLabel() + "-" + result.getConfidence() + "|";
+                            }
+                            pic.setResult(resultStr);
+                            if ("none".equals(data.getRiskLevel())) {
+                                pic.setStatus(CorgiPic.NORMAL);
+                                pic.setResult("pass");
+                            } else {
+                                pic.setStatus(CorgiPic.NEED_CHECK);
+                                pic.setResult(resultStr);
+                            }
+                            addCheckPic(pic, sourceId, type);
+                        } else {
+                            pic.setStatus(CorgiPic.NEED_CHECK);
+                            pic.setResult("image moderation not success. code:" + body.getCode());
+                            addCheckPic(pic, sourceId, type);
+                        }
+                    } else {
+                        pic.setStatus(CorgiPic.NEED_CHECK);
+                        pic.setResult("response not success. status:" + response.getStatusCode());
+                        addCheckPic(pic, sourceId, type);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            for (CorgiPic pic : urls) {
+                pic.setStatus(CorgiPic.NEED_CHECK);
+                pic.setResult("service failed. response:" + e.getMessage());
+                addCheckPic(pic, sourceId, type);
+            }
+        }
+        return urls;
+    }
+
+    public List<? extends CorgiPic> checkPicOld(List<? extends CorgiPic> urls, String sourceId, String type, String bizType) {
         if (CollectionUtils.isEmpty(urls)) {
             return null;
         }
@@ -469,7 +567,7 @@ public class AliyunGreenService {
 
     public PicInfo getAliyunPicInfo(String url) {
         String[] urlArr = url.split("\\?x-oss-process");
-        url = urlArr[0].replaceAll("image\\.corgi\\.org\\.cn","corgi-pic.oss-cn-beijing.aliyuncs.com" );
+        url = urlArr[0].replaceAll("image\\.corgi\\.org\\.cn", "corgi-pic.oss-cn-beijing.aliyuncs.com");
         PicInfo picInfo = new PicInfo();
         String result;
         try {
@@ -519,10 +617,95 @@ public class AliyunGreenService {
     }
 
     public CheckTextResult checkText(String text) {
-        return checkText(text, "sexy_pic");
+        return checkText(text, "llm_query_moderation");
     }
 
-    public CheckTextResult checkText(String text, String bussType) {
+    public CheckTextResult checkText(String text, String serviceName) {
+        CheckTextResult textResult = new CheckTextResult();
+        if (StringUtils.isEmpty(text)) {
+            return textResult;
+        }
+        textResult.setOriginContent(text);
+        Config config = new Config();
+        /**
+         * 阿里云账号AccessKey拥有所有API的访问权限，建议您使用RAM用户进行API访问或日常运维。
+         * 常见获取环境变量方式：
+         * 方式一：
+         *     获取RAM用户AccessKey ID：System.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID");
+         *     获取RAM用户AccessKey Secret：System.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
+         * 方式二：
+         *     获取RAM用户AccessKey ID：System.getProperty("ALIBABA_CLOUD_ACCESS_KEY_ID");
+         *     获取RAM用户AccessKey Secret：System.getProperty("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
+         */
+        config.setAccessKeyId(accessKeyId);
+        config.setAccessKeySecret(accessKeySecret);
+        //接入区域和地址请根据实际情况修改
+        config.setRegionId("cn-shanghai");
+        config.setEndpoint("green-cip.cn-shanghai.aliyuncs.com");
+        //连接时超时时间，单位毫秒（ms）。
+        config.setReadTimeout(6000);
+        //读取时超时时间，单位毫秒（ms）。
+        config.setConnectTimeout(3000);
+        //设置http代理。
+        //config.setHttpProxy("http://xx.xx.xx.xx:xxxx");
+        //设置https代理。
+        //config.setHttpsProxy("https://xx.xx.xx.xx:xxxx");
+
+
+        try {
+            Client client = new Client(config);
+
+            JSONObject serviceParameters = new JSONObject();
+            serviceParameters.put("content", text);
+
+            TextModerationPlusRequest textModerationPlusRequest = new TextModerationPlusRequest();
+            // 检测类型
+            textModerationPlusRequest.setService(serviceName);
+            textModerationPlusRequest.setServiceParameters(serviceParameters.toJSONString());
+            TextModerationPlusResponse response = client.textModerationPlus(textModerationPlusRequest);
+            if (response.getStatusCode() == 200) {
+                TextModerationPlusResponseBody result = response.getBody();
+                log.info(JSON.toJSONString(result));
+                Integer code = result.getCode();
+                if (200 == code) {
+                    TextModerationPlusResponseBody.TextModerationPlusResponseBodyData data = result.getData();
+                    if ("high".equals(data.getRiskLevel())) {
+                        textResult.setPass(false);
+                        textResult.setContent("****");
+                    } else if (!CollectionUtils.isEmpty(data.getResult())) {
+                        for (TextModerationPlusResponseBody.TextModerationPlusResponseBodyDataResult responseBodyDataResult : data.getResult()) {
+                            if (!CollectionUtils.isEmpty(responseBodyDataResult.getCustomizedHit())) {
+                                for (TextModerationPlusResponseBody.TextModerationPlusResponseBodyDataResultCustomizedHit customizedHit : responseBodyDataResult.getCustomizedHit()) {
+                                    if (!StringUtils.isEmpty(customizedHit.getKeyWords())) {
+                                        String[] words = customizedHit.getKeyWords().split(",");
+                                        for (int i = 0; i < words.length; i++) {
+                                            text = text.replaceAll(words[i], "**");
+                                        }
+                                    }
+                                }
+                            }
+                            if (!StringUtils.isEmpty(responseBodyDataResult.getRiskWords())) {
+                                String[] words = responseBodyDataResult.getRiskWords().split(",");
+                                for (int i = 0; i < words.length; i++) {
+                                    text = text.replaceAll(words[i], "**");
+                                }
+                            }
+                        }
+                        textResult.setContent(text);
+                    }
+                } else {
+                    log.info("text moderation not success. code:" + code);
+                }
+            } else {
+                log.info("response not success. status:" + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return textResult;
+    }
+
+    public CheckTextResult checkTextOld(String text, String bussType) {
         CheckTextResult textResult = new CheckTextResult();
         if (StringUtils.isEmpty(text)) {
             return textResult;
@@ -557,7 +740,7 @@ public class AliyunGreenService {
         data.put("scenes", Arrays.asList("antispam"));
         data.put("tasks", tasks);
         data.put("bizType", bussType);
-        System.out.println(JSON.toJSONString(data, true));
+        log.info(JSON.toJSONString(data, true));
         // 请务必设置超时时间
         textScanRequest.setConnectTimeout(3000);
         textScanRequest.setReadTimeout(6000);

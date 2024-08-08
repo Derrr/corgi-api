@@ -471,7 +471,7 @@ public class CorgiActivityController extends BaseController {
                 return new JsonResult(Constants.PARAMETER_ERROR_CODE, "评论得过快～ 休息一下去看看其他精彩内容吧。");
             }
         }
-        CheckTextResult textResult = aliyunGreenService.checkText(activityComment.getContent(), "ad_check");
+        CheckTextResult textResult = aliyunGreenService.checkText(activityComment.getContent(), "comment_detection_pro");
 
         if (!ActivityComment.SWIFT.equals(activityComment.getStatus()) && !textResult.isPass()) {
             boolean noFilterContent = StringUtils.isEmpty(textResult.getContent());
