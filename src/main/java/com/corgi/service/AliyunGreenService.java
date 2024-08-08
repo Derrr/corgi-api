@@ -385,6 +385,7 @@ public class AliyunGreenService {
                     log.error(e.getMessage(), e);
                 }
                 if (response != null) {
+                    log.info("response:{} ", JSONObject.toJSON(response));
                     if (response.getStatusCode() == 200) {
                         ImageModerationResponseBody body = response.getBody();
                         log.info("requestId=" + body.getRequestId());
@@ -663,7 +664,7 @@ public class AliyunGreenService {
             textModerationPlusRequest.setService(serviceName);
             textModerationPlusRequest.setServiceParameters(serviceParameters.toJSONString());
             TextModerationPlusResponse response = client.textModerationPlus(textModerationPlusRequest);
-            log.info("response:{}", response);
+            log.info("response:{} ", JSONObject.toJSON(response));
             if (response.getStatusCode() == 200) {
                 TextModerationPlusResponseBody result = response.getBody();
                 log.info(JSON.toJSONString(result));
