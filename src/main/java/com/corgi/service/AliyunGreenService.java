@@ -359,7 +359,7 @@ public class AliyunGreenService {
         //config.setHttpsProxy("https://10.10.xx.xx:xxxx");
         // 接入区域和地址请根据实际情况修改
         // 接入地址列表：https://help.aliyun.com/document_detail/467828.html?#section-uib-qkw-0c8
-        config.setEndpoint("green-cip-vpc.cn-beijing.aliyuncs.com");
+        config.setEndpoint("green-cip-vpc.cn-shanghai.aliyuncs.com");
         try {
             Client client = new Client(config);
             // 创建RuntimeObject实例并设置运行参数
@@ -795,7 +795,7 @@ public class AliyunGreenService {
         if (!StringUtils.isEmpty(title) && !titleResult.isPass()) {
             activity.setTitle(titleResult.getContent());
             activity.setCheckTitle(title);
-            forbiddenText += titleResult.getOriginContent();
+            forbiddenText += titleResult.getOriginContent() + " ";
         }
         CheckTextResult contentResult = checkText(content);
         if (!StringUtils.isEmpty(content) && !contentResult.isPass()) {
