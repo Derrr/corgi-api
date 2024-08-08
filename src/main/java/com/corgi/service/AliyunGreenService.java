@@ -678,6 +678,7 @@ public class AliyunGreenService {
                                     String[] words = customizedHit.getKeyWords().split(",");
                                     for (int i = 0; i < words.length; i++) {
                                         text = text.replaceAll(words[i], "**");
+                                        textResult.setPass(false);
                                     }
                                 }
                             }
@@ -686,6 +687,7 @@ public class AliyunGreenService {
                             String[] words = responseBodyDataResult.getRiskWords().split(",");
                             for (int i = 0; i < words.length; i++) {
                                 text = text.replaceAll(words[i], "**");
+                                textResult.setPass(false);
                             }
                         }
                     }
