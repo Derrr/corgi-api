@@ -641,7 +641,7 @@ public class AliyunGreenService {
         config.setAccessKeySecret(accessKeySecret);
         //接入区域和地址请根据实际情况修改
         config.setRegionId("cn-shanghai");
-        config.setEndpoint("green-cip.cn-shanghai.aliyuncs.com");
+        config.setEndpoint("green-cip-vpc.cn-shanghai.aliyuncs.com");
         //连接时超时时间，单位毫秒（ms）。
         config.setReadTimeout(6000);
         //读取时超时时间，单位毫秒（ms）。
@@ -663,6 +663,7 @@ public class AliyunGreenService {
             textModerationPlusRequest.setService(serviceName);
             textModerationPlusRequest.setServiceParameters(serviceParameters.toJSONString());
             TextModerationPlusResponse response = client.textModerationPlus(textModerationPlusRequest);
+            log.info("response:{}", response);
             if (response.getStatusCode() == 200) {
                 TextModerationPlusResponseBody result = response.getBody();
                 log.info(JSON.toJSONString(result));
