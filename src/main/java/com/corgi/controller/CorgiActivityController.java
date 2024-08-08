@@ -255,7 +255,7 @@ public class CorgiActivityController extends BaseController {
         }
         activity = aliyunGreenService.checkImageActivity(activity);
         if (CorgiActivity.CAT_IMAGE.equals(activity.getCategory())) {
-            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY, "crazy_check");
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
             if (!checkActivityPic(activityPics)) {
                 activity.setStrictStatus(AliyunGreenService.CHECK);
                 activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
@@ -386,7 +386,7 @@ public class CorgiActivityController extends BaseController {
         }
         activity = aliyunGreenService.checkImageActivity(activity);
         if (!CollectionUtils.isEmpty(activity.getPics())) {
-            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY, "crazy_check");
+            List<ActivityPic> activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);
             if (!checkActivityPic(activityPics)) {
                 activity.setStrictStatus(AliyunGreenService.CHECK);
                 activityPics = (List<ActivityPic>) aliyunGreenService.checkPic(activity.getPics(), activity.getUserId(), CheckPic.ACTIVITY);

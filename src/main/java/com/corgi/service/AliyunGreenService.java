@@ -386,40 +386,38 @@ public class AliyunGreenService {
                 }
                 if (response != null) {
                     log.info("response:{} ", JSONObject.toJSON(response));
-                    if (response.getStatusCode() == 200) {
-                        ImageModerationResponseBody body = response.getBody();
-                        log.info("requestId=" + body.getRequestId());
-                        log.info("code=" + body.getCode());
-                        log.info("msg=" + body.getMsg());
-                        if (body.getCode() == 200) {
-                            ImageModerationResponseBodyData data = body.getData();
-                            log.info("dataId=" + data.getDataId());
-                            List<ImageModerationResponseBodyDataResult> results = data.getResult();
-                            String resultStr = "|";
-                            for (ImageModerationResponseBodyDataResult result : results) {
-                                log.info("label=" + result.getLabel());
-                                log.info("confidence=" + result.getConfidence());
-                                resultStr += result.getLabel() + "-" + result.getConfidence() + "|";
-                            }
-                            pic.setResult(resultStr);
-                            if ("none".equals(data.getRiskLevel())) {
-                                pic.setStatus(CorgiPic.NORMAL);
-                                pic.setResult("pass");
-                            } else {
-                                pic.setStatus(CorgiPic.NEED_CHECK);
-                                pic.setResult(resultStr);
-                            }
-                            addCheckPic(pic, sourceId, type);
+                    ImageModerationResponseBody body = response.getBody();
+                    log.info("requestId=" + body.getRequestId());
+                    log.info("code=" + body.getCode());
+                    log.info("msg=" + body.getMsg());
+                    if (body.getCode() == 200) {
+                        ImageModerationResponseBodyData data = body.getData();
+                        log.info("dataId=" + data.getDataId());
+                        List<ImageModerationResponseBodyDataResult> results = data.getResult();
+                        String resultStr = "|";
+                        for (ImageModerationResponseBodyDataResult result : results) {
+                            log.info("label=" + result.getLabel());
+                            log.info("confidence=" + result.getConfidence());
+                            resultStr += result.getLabel() + "-" + result.getConfidence() + "|";
+                        }
+                        pic.setResult(resultStr);
+                        if ("none".equals(data.getRiskLevel())) {
+                            pic.setStatus(CorgiPic.NORMAL);
+                            pic.setResult("pass");
                         } else {
                             pic.setStatus(CorgiPic.NEED_CHECK);
-                            pic.setResult("image moderation not success. code:" + body.getCode());
-                            addCheckPic(pic, sourceId, type);
+                            pic.setResult(resultStr);
                         }
+                        addCheckPic(pic, sourceId, type);
                     } else {
                         pic.setStatus(CorgiPic.NEED_CHECK);
-                        pic.setResult("response not success. status:" + response.getStatusCode());
+                        pic.setResult("image moderation not success. code:" + body.getCode());
                         addCheckPic(pic, sourceId, type);
                     }
+                } else {
+                    pic.setStatus(CorgiPic.NEED_CHECK);
+                    pic.setResult("response not success. status:" + response.getStatusCode());
+                    addCheckPic(pic, sourceId, type);
                 }
             }
         } catch (Exception e) {
@@ -664,42 +662,37 @@ public class AliyunGreenService {
             textModerationPlusRequest.setService(serviceName);
             textModerationPlusRequest.setServiceParameters(serviceParameters.toJSONString());
             TextModerationPlusResponse response = client.textModerationPlus(textModerationPlusRequest);
-            log.info("response:{} ", JSONObject.toJSON(response));
-            if (response.getStatusCode() == 200) {
-                TextModerationPlusResponseBody result = response.getBody();
-                log.info(JSON.toJSONString(result));
-                Integer code = result.getCode();
-                if (200 == code) {
-                    TextModerationPlusResponseBody.TextModerationPlusResponseBodyData data = result.getData();
-                    if ("high".equals(data.getRiskLevel())) {
-                        textResult.setPass(false);
-                        textResult.setContent("****");
-                    } else if (!CollectionUtils.isEmpty(data.getResult())) {
-                        for (TextModerationPlusResponseBody.TextModerationPlusResponseBodyDataResult responseBodyDataResult : data.getResult()) {
-                            if (!CollectionUtils.isEmpty(responseBodyDataResult.getCustomizedHit())) {
-                                for (TextModerationPlusResponseBody.TextModerationPlusResponseBodyDataResultCustomizedHit customizedHit : responseBodyDataResult.getCustomizedHit()) {
-                                    if (!StringUtils.isEmpty(customizedHit.getKeyWords())) {
-                                        String[] words = customizedHit.getKeyWords().split(",");
-                                        for (int i = 0; i < words.length; i++) {
-                                            text = text.replaceAll(words[i], "**");
-                                        }
+            TextModerationPlusResponseBody result = response.getBody();
+            log.info(JSON.toJSONString(result));
+            Integer code = result.getCode();
+            if (200 == code) {
+                TextModerationPlusResponseBody.TextModerationPlusResponseBodyData data = result.getData();
+                if ("high".equals(data.getRiskLevel())) {
+                    textResult.setPass(false);
+                    textResult.setContent("****");
+                } else if (!CollectionUtils.isEmpty(data.getResult())) {
+                    for (TextModerationPlusResponseBody.TextModerationPlusResponseBodyDataResult responseBodyDataResult : data.getResult()) {
+                        if (!CollectionUtils.isEmpty(responseBodyDataResult.getCustomizedHit())) {
+                            for (TextModerationPlusResponseBody.TextModerationPlusResponseBodyDataResultCustomizedHit customizedHit : responseBodyDataResult.getCustomizedHit()) {
+                                if (!StringUtils.isEmpty(customizedHit.getKeyWords())) {
+                                    String[] words = customizedHit.getKeyWords().split(",");
+                                    for (int i = 0; i < words.length; i++) {
+                                        text = text.replaceAll(words[i], "**");
                                     }
                                 }
                             }
-                            if (!StringUtils.isEmpty(responseBodyDataResult.getRiskWords())) {
-                                String[] words = responseBodyDataResult.getRiskWords().split(",");
-                                for (int i = 0; i < words.length; i++) {
-                                    text = text.replaceAll(words[i], "**");
-                                }
+                        }
+                        if (!StringUtils.isEmpty(responseBodyDataResult.getRiskWords())) {
+                            String[] words = responseBodyDataResult.getRiskWords().split(",");
+                            for (int i = 0; i < words.length; i++) {
+                                text = text.replaceAll(words[i], "**");
                             }
                         }
-                        textResult.setContent(text);
                     }
-                } else {
-                    log.info("text moderation not success. code:" + code);
+                    textResult.setContent(text);
                 }
             } else {
-                log.info("response not success. status:" + response.getStatusCode());
+                log.info("text moderation not success. code:" + code);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
