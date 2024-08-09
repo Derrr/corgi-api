@@ -614,6 +614,7 @@ public class CorgiUserController extends BaseController {
         CorgiUserGoods goodQuery = new CorgiUserGoods();
         goodQuery.setUserId(getUserId());
         goodQuery.setGoodsType(CorgiMerchandise.WECHAT);
+        goodQuery.setSize(1000);
         List<String> paidUserIds = corgiOrderService.getUserGoods(goodQuery).stream().map(g -> g.getGoodsId()).collect(Collectors.toList());
         List<CorgiUserWechat> results = new ArrayList<>();
         for (UserWechat userWechat : userWechats) {
