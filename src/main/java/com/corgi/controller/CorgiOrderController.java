@@ -806,32 +806,49 @@ public class CorgiOrderController extends BaseController {
                 .sellerId(userId)
                 .build();
         Double totalIncome = corgiOrderService.countIncome(query);
-        query.setSellerId(null);
-        query.setUserId(userId);
-        query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
-        Double balancePay = corgiOrderService.countIncome(query);
-        query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-        Double successWithdraw = corgiOrderService.countIncome(query);
-        query.setStatus(CorgiOrder.STATUS.CREATED);
-        Double withdrawing = corgiOrderService.countIncome(query);
-        Double totalWithdraw = successWithdraw + withdrawing;
-        CorgiOrder withdrawQuery = new CorgiOrder();
-        withdrawQuery.setStatus(CorgiOrder.STATUS.CREATED);
-        withdrawQuery.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
-        withdrawQuery.setUserId(userId);
-        List<CorgiOrder> orders = corgiOrderService.getOrderByPage(withdrawQuery, 1, 1);
-        if (CollectionUtils.isNotEmpty(orders)) {
-            result.put("withdrawOrder", orders);
-        }
-        Double rate = 0.6;
-        if ("influencer".equals(detail.getAvatarStatus())) {
-            rate = 0.65;
+        Double totalWithdraw = 0.0;
+        Double balancePay = 0.0;
+        Double remainWithdraw = 0.0;
+        Double remainBalance = 0.0;
+        if (totalIncome > 0) {
+            query.setSellerId(null);
+            query.setUserId(userId);
+            query.setPayType(CorgiOrder.PAY_TYPE.BALANCE);
+            balancePay = corgiOrderService.countIncome(query);
+            query.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
+            Double successWithdraw = corgiOrderService.countIncome(query);
+            query.setStatus(CorgiOrder.STATUS.CREATED);
+            Double withdrawing = corgiOrderService.countIncome(query);
+            totalWithdraw = successWithdraw + withdrawing;
+            CorgiOrder withdrawQuery = new CorgiOrder();
+            withdrawQuery.setStatus(CorgiOrder.STATUS.CREATED);
+            withdrawQuery.setPayType(CorgiOrder.PAY_TYPE.WITHDRAW);
+            withdrawQuery.setUserId(userId);
+            List<CorgiOrder> orders = corgiOrderService.getOrderByPage(withdrawQuery, 1, 1);
+            if (CollectionUtils.isNotEmpty(orders)) {
+                result.put("withdrawOrder", orders);
+            }
+            Double rate = 0.6;
+            if ("influencer".equals(detail.getAvatarStatus())) {
+                rate = 0.65;
+            }
+            remainWithdraw = (totalIncome - balancePay) * rate - totalWithdraw;
+            if (remainWithdraw < 0) {
+                remainWithdraw = 0.0;
+            }
+            remainWithdraw = Math.round((remainWithdraw) * 100) / 100.0;
+
+            remainBalance = totalIncome - balancePay - totalWithdraw / rate;
+            if (remainBalance < 0) {
+                remainBalance = 0.0;
+            }
+            remainBalance = Math.round((remainBalance) * 100) / 100.0;
         }
         result.put("totalIncome", totalIncome);
         result.put("totalWithdraw", totalWithdraw);
         result.put("balancePay", balancePay);
-        result.put("remainWithdraw", Math.round(((totalIncome - balancePay) * rate - totalWithdraw)*100)/100.0);
-        result.put("remainBalance", Math.round((totalIncome - balancePay - totalWithdraw / rate)*100)/100.0);
+        result.put("remainWithdraw", remainWithdraw);
+        result.put("remainBalance", remainBalance);
         return new JsonResult(result);
     }
 
