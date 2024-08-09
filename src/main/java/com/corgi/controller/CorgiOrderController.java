@@ -831,7 +831,7 @@ public class CorgiOrderController extends BaseController {
         result.put("totalWithdraw", totalWithdraw);
         result.put("balancePay", balancePay);
         result.put("remainWithdraw", (totalIncome - balancePay) * rate - totalWithdraw);
-        result.put("remainBalance", totalIncome - balancePay - totalWithdraw);
+        result.put("remainBalance", totalIncome - balancePay - totalWithdraw / rate);
         return new JsonResult(result);
     }
 
