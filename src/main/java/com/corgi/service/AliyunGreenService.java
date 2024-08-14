@@ -371,7 +371,9 @@ public class AliyunGreenService {
                 //公网可访问的URL。
                 serviceParameters.put("imageUrl", pic.getPicUrl());
                 //待检测数据唯一标识
-                serviceParameters.put("dataId", UUID.randomUUID().toString());
+                String dataId = UUID.randomUUID().toString();
+                serviceParameters.put("dataId", dataId);
+                pic.setDataId(dataId);
 
                 ImageModerationRequest request = new ImageModerationRequest();
                 // 图片检测service：内容安全控制台图片增强版规则配置的serviceCode，示例：baselineCheck
