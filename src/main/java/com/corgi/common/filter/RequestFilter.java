@@ -81,6 +81,7 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "Socket")
                 || checkURI(servletRequest, "chat")
                 || checkURI(servletRequest, "get_config")
+                || checkURI(servletRequest, "get_version")
                 || checkURI(servletRequest, "yinyuan")
                 || checkURI(servletRequest, "callback")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
