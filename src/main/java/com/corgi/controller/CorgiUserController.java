@@ -169,7 +169,7 @@ public class CorgiUserController extends BaseController {
                     }
                     userLogin.setUserId(getUserId());
                     corgiUserService.updateUserLogin(userLogin);
-                    return new JsonResult(0,"更新手机号成功");
+                    return new JsonResult(0, "更新手机号成功");
                 }
             } finally {
                 corgiUtilService.unlock(lockKey);
@@ -1366,7 +1366,39 @@ public class CorgiUserController extends BaseController {
         if (StringUtils.isEmpty(userId)) {
             userId = getUserId();
         }
-        return new JsonResult(corgiVisitService.getVisitor(userId, page, size));
+        List<UserProfile> visitors = corgiVisitService.getVisitor(userId, page, size);
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
+        if (!"influencer".equals(userDetail.getAvatarCheckStatus())) {
+            String expireDate = corgiUserService.getUserVipExpire(userId);
+            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+                UserPosition position = corgiUserService.getUserPosition(userId);
+                List<UserProfile> results = new ArrayList<>();
+                for (UserProfile profile : visitors) {
+                    UserProfile result = new UserProfile();
+                    result.setAvatar(profile.getAvatar());
+                    results.add(result);
+
+                    boolean isGood = corgiUserFollowService.countFollowed(profile.getUserId()) > 100;
+                    if (profile.getCity().equals(position.getCity())) {
+                        if (isGood) {
+                            result.setNickname("有位粉丝数100+且在你附近的帅哥对你感兴趣");
+                        } else {
+                            result.setNickname("来自你附近的帅哥对你感兴趣");
+                        }
+                    } else if (profile.getActivityCount() != null && profile.getActivityCount() > 3) {
+                        if (isGood) {
+                            result.setNickname("有位粉丝数100+且疯狂查看你3+次的帅哥对你感兴趣");
+                        } else {
+                            result.setNickname("有位帅哥疯狂查看了你3+次");
+                        }
+                    }else if(isGood){
+                        result.setNickname("有位粉丝数100+的帅哥对你感兴趣");
+                    }
+                }
+                return new JsonResult(results);
+            }
+        }
+        return new JsonResult(visitors);
     }
 
     @GetMapping("get_visited")
