@@ -1379,20 +1379,27 @@ public class CorgiUserController extends BaseController {
                     results.add(result);
 
                     boolean isGood = corgiUserFollowService.countFollowed(profile.getUserId()) > 100;
+                    result.setCheckStatus("0");
+                    result.setNickname("有位神秘帅哥对你感兴趣");
                     if (profile.getCity().equals(position.getCity())) {
                         if (isGood) {
                             result.setNickname("有位粉丝数100+且在你附近的帅哥对你感兴趣");
+                            result.setCheckStatus("4");
                         } else {
                             result.setNickname("来自你附近的帅哥对你感兴趣");
+                            result.setCheckStatus("1");
                         }
                     } else if (profile.getActivityCount() != null && profile.getActivityCount() > 3) {
                         if (isGood) {
                             result.setNickname("有位粉丝数100+且疯狂查看你3+次的帅哥对你感兴趣");
+                            result.setCheckStatus("5");
                         } else {
                             result.setNickname("有位帅哥疯狂查看了你3+次");
+                            result.setCheckStatus("2");
                         }
-                    }else if(isGood){
+                    } else if (isGood) {
                         result.setNickname("有位粉丝数100+的帅哥对你感兴趣");
+                        result.setCheckStatus("3");
                     }
                 }
                 return new JsonResult(results);
