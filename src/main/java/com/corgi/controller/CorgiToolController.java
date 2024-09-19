@@ -529,7 +529,7 @@ public class CorgiToolController extends BaseController {
             content.add(new JSONObject().fluentPut("text", " 您已获得5元阅读券，快去我的钱包-阅读券中查看吧～"));
             extra.put("content", content);
             extra.put("bottomText", "去查看>");
-            extra.put("bottomUrlType", "19");
+            extra.put("bottomUrlType", "18");
             pushMessage.setExtra(extra);
             mqService.sendMessage(pushMessage);
         }
