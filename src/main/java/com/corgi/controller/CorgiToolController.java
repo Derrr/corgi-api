@@ -1,6 +1,8 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.api.CorgiActivityService;
 import com.corgi.activity.api.CorgiMatchService;
 import com.corgi.activity.entity.CorgiActivity;
@@ -508,7 +510,7 @@ public class CorgiToolController extends BaseController {
         corgiUserService.updateDetail(detail);
         if (Arrays.asList("1","7","593","977560","858064","982573").contains(userId)) {
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DATE, 1);
+            calendar.add(Calendar.DATE, 30);
             CouponActivity coupon = new CouponActivity();
             coupon.setTitle("APP Store五星好评奖励");
             coupon.setUserId(userId);
@@ -516,8 +518,19 @@ public class CorgiToolController extends BaseController {
 
             coupon.setValue(5.0);
             corgiCouponActivityService.addCouponActivity(coupon);
-            coupon.setValue(0.0);
-            corgiCouponActivityService.addCouponActivity(coupon);
+
+            PushMessage pushMessage = new PushMessage();
+            pushMessage.setSourceUserId("corgihelper");
+            pushMessage.setTargetUserId(userId);
+            pushMessage.setMessage("您已获得阅读券");
+            HashMap<String, Object> extra = new HashMap<>();
+            extra.put("type", "907");
+            JSONArray content = new JSONArray();
+            content.add(new JSONObject().fluentPut("text", " 您已获得5元阅读券，快去我的钱包-阅读券中查看吧～"));
+            extra.put("content", content);
+            extra.put("bottomText", "去查看>");
+            extra.put("bottomUrlType", "19");
+            pushMessage.setExtra(extra);
         }
         return new JsonResult();
     }
