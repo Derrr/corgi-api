@@ -1376,6 +1376,7 @@ public class CorgiUserController extends BaseController {
                 for (UserProfile profile : visitors) {
                     UserProfile result = new UserProfile();
                     result.setAvatar(profile.getAvatar());
+                    result.setFollowTime(profile.getFollowTime());
                     results.add(result);
 
                     boolean isGood = corgiUserFollowService.countFollowed(profile.getUserId()) > 100;
