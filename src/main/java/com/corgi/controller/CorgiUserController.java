@@ -1381,7 +1381,7 @@ public class CorgiUserController extends BaseController {
                     boolean isGood = corgiUserFollowService.countFollowed(profile.getUserId()) > 100;
                     result.setCheckStatus("0");
                     result.setNickname("有位神秘帅哥对你感兴趣");
-                    if (profile.getCity().equals(position.getCity())) {
+                    if (profile.getCity() != null profile.getCity().equals(position.getCity())) {
                         if (isGood) {
                             result.setNickname("有位粉丝数100+且在你附近的帅哥对你感兴趣");
                             result.setCheckStatus("4");
