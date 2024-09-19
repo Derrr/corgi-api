@@ -531,6 +531,7 @@ public class CorgiToolController extends BaseController {
             extra.put("bottomText", "去查看>");
             extra.put("bottomUrlType", "19");
             pushMessage.setExtra(extra);
+            mqService.sendMessage(pushMessage);
         }
         return new JsonResult();
     }
