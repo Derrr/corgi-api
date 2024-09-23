@@ -1370,7 +1370,7 @@ public class CorgiUserController extends BaseController {
         UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
         if (!"influencer".equals(userDetail.getAvatarCheckStatus())) {
             String expireDate = corgiUserService.getUserVipExpire(userId);
-            if (!org.springframework.util.StringUtils.isEmpty(expireDate) && !"-".equals(expireDate)) {
+            if (org.springframework.util.StringUtils.isEmpty(expireDate) || "-".equals(expireDate)) {
                 UserPosition position = corgiUserService.getUserPosition(userId);
                 List<UserProfile> results = new ArrayList<>();
                 for (UserProfile profile : visitors) {
