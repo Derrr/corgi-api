@@ -974,8 +974,13 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(corgiStatisticService.getContentData(contentReq));
     }
 
+    @GetMapping("get_tlx_activity")
+    public JsonResult<List<TlxActivity>> getTlxActivity(@RequestParam("page")Integer page, @RequestParam("size")Integer size){
+        return new JsonResult<>(tlxActivityService.getActivityList(page,size,new TlxActivity()));
+    }
+
     @GetMapping("tlx_refresh")
-    public String tlxRefresh() {
+    public JsonResult tlxRefresh() {
         String result = CorgiHttpUtil.doGet("http://www.tianlangxing.top/activities/get", null, null);
         JSONArray array = JSON.parseArray(result);
         String version = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
@@ -1002,6 +1007,6 @@ public class CorgiToolController extends BaseController {
         if (array.size() > 0) {
             tlxActivityService.refreshStatus(version);
         }
-        return "success";
+        return new JsonResult();
     }
 }
