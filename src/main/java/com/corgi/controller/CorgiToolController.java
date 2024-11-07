@@ -978,10 +978,11 @@ public class CorgiToolController extends BaseController {
     public String tlxRefresh() {
         String result = CorgiHttpUtil.doGet("http://www.tianlangxing.top/activities/get", null, null);
         JSONArray array = JSON.parseArray(result);
+        String version = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         for (int i = 0; i < array.size(); i++) {
             JSONObject obj = array.getJSONObject(i);
             TlxActivity tlxActivity = new TlxActivity();
-            tlxActivity.setId(obj.getString("id"));
+            tlxActivity.setId(obj.getString("ID"));
             tlxActivity.setCity(obj.getString("city"));
             tlxActivity.setBody(obj.getString("body"));
             tlxActivity.setDays(obj.getInteger("days"));
@@ -995,7 +996,11 @@ public class CorgiToolController extends BaseController {
             tlxActivity.setPrice(obj.getInteger("price"));
             tlxActivity.setShorttitle(obj.getString("shorttitle"));
             tlxActivity.setTripContent(obj.getString("trip_content"));
+            tlxActivity.setVersion(version);
             tlxActivityService.updateActivity(tlxActivity);
+        }
+        if (array.size() > 0) {
+            tlxActivityService.refreshStatus(version);
         }
         return "success";
     }
