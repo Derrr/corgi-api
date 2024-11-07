@@ -1,6 +1,7 @@
 package com.corgi.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.corgi.activity.api.CorgiActivityService;
@@ -12,6 +13,7 @@ import com.corgi.common.JsonResult;
 import com.corgi.common.constant.CacheConstants;
 import com.corgi.common.constant.Constants;
 import com.corgi.common.messages.PushMessage;
+import com.corgi.common.util.CorgiHttpUtil;
 import com.corgi.common.util.RequestUtil;
 import com.corgi.entity.*;
 import com.corgi.entity.tool.Hashtag;
@@ -79,6 +81,9 @@ public class CorgiToolController extends BaseController {
     private CorgiExtraService corgiExtraService;
     @Reference
     private CorgiCouponActivityService corgiCouponActivityService;
+    @Reference
+    private TlxActivityService tlxActivityService;
+
     @Autowired
     private CorgiUtilService corgiUtilService;
     @Autowired
@@ -508,7 +513,7 @@ public class CorgiToolController extends BaseController {
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
         corgiUserService.updateDetail(detail);
-        if (Arrays.asList("1","7","593","977560","858064","982573").contains(userId)) {
+        if (Arrays.asList("1", "7", "593", "977560", "858064", "982573").contains(userId)) {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, 30);
             CouponActivity coupon = new CouponActivity();
@@ -969,59 +974,29 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(corgiStatisticService.getContentData(contentReq));
     }
 
-    @GetMapping("chat")
-    public String test(String text, String userId) {
-        return ernieBotService.getMessage("1", getUserMessage(userId), text);
-    }
-
-    @GetMapping("yinyuan")
-    public String yinyuantest(String userId) {
-        return ernieBotService.getMessage("1", getUserMessage(userId), "以下是我的信息：\n" + getUserMessage("7") + "\n请问我和你适合谈恋爱吗？如果你给我们两个打分，我们的合拍指数是多少？具体有哪些地方是合拍的？哪些地方不合拍？基于你和我的兴趣爱好，我应该如何追求你？");
-    }
-
-    private String getUserMessage(String userId) {
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
-        StringBuilder sb = new StringBuilder();
-        sb.append("姓名：").append(userDetail.getNickname()).append("\n");
-        sb.append("生日：").append(userDetail.getBirthday()).append("\n");
-        sb.append("星座：").append(userDetail.getCon()).append("\n");
-        if (userDetail.getHeight() > 0) {
-            sb.append("身高：").append(userDetail.getHeight()).append("\n");
+    @GetMapping("tlx_refresh")
+    public String tlxRefresh() {
+        String result = CorgiHttpUtil.doGet("http://www.tianlangxing.top/activities/get", null, null);
+        JSONArray array = JSON.parseArray(result);
+        for (int i = 0; i < array.size(); i++) {
+            JSONObject obj = array.getJSONObject(i);
+            TlxActivity tlxActivity = new TlxActivity();
+            tlxActivity.setId(obj.getString("id"));
+            tlxActivity.setCity(obj.getString("city"));
+            tlxActivity.setBody(obj.getString("body"));
+            tlxActivity.setDays(obj.getInteger("days"));
+            tlxActivity.setDepartdate(obj.getString("departdate"));
+            tlxActivity.setExpenseDetail(obj.getString("expense_detail"));
+            tlxActivity.setHeaderImage(obj.getString("header_image"));
+            tlxActivity.setLongtitle(obj.getString("longtitle"));
+            tlxActivity.setMeetingPoint(obj.getString("meeting_point"));
+            tlxActivity.setNote(obj.getString("note"));
+            tlxActivity.setPosterImage(obj.getString("poster_image"));
+            tlxActivity.setPrice(obj.getInteger("price"));
+            tlxActivity.setShorttitle(obj.getString("shorttitle"));
+            tlxActivity.setTripContent(obj.getString("trip_content"));
+            tlxActivityService.updateActivity(tlxActivity);
         }
-        if (userDetail.getWeight() > 0) {
-            sb.append("体重：").append(userDetail.getWeight()).append("\n");
-        }
-        if (!StringUtils.isEmpty(userDetail.getDesc())) {
-            sb.append("个人简介：").append(userDetail.getDesc());
-            if (!StringUtils.isEmpty(userDetail.getRelation()) && !"无".equals(userDetail.getRelation())) {
-                sb.append(" ").append(userDetail.getRelation());
-            }
-            sb.append("\n\n");
-        }
-        if (!StringUtils.isEmpty(userDetail.getRole())) {
-            sb.append("角色：").append(userDetail.getRole()).append("\n");
-        }
-        if (!StringUtils.isEmpty(userDetail.getGroup())) {
-            sb.append("身材：").append(userDetail.getGroup()).append("\n");
-        }
-        UserExtra userExtra = corgiExtraService.getUserExtra(userId);
-        if (userExtra != null) {
-            if (!StringUtils.isEmpty(userExtra.getIncome())) {
-                sb.append("收入水平：").append(userExtra.getIncome()).append("\n");
-            }
-            if (!StringUtils.isEmpty(userExtra.getProfession())) {
-                sb.append("职业：").append(userExtra.getProfession()).append("\n");
-            }
-            if (!StringUtils.isEmpty(userExtra.getAim())) {
-                sb.append("交友目标：").append(userExtra.getAim()).append("\n");
-            }
-            if (!StringUtils.isEmpty(userExtra.getInterests())) {
-                sb.append("兴趣爱好：").append(userExtra.getInterests()).append("\n");
-            }
-            if (!StringUtils.isEmpty(userExtra.getTags())) {
-                sb.append("个人标签：").append(userExtra.getTags()).append("\n");
-            }
-        }
-        return sb.toString();
+        return "success";
     }
 }
