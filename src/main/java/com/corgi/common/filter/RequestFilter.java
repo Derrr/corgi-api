@@ -82,7 +82,7 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "chat")
                 || checkURI(servletRequest, "get_config")
                 || checkURI(servletRequest, "get_version")
-                || checkURI(servletRequest, "yinyuan")
+                || checkURI(servletRequest, "tlx_refresh")
                 || checkURI(servletRequest, "callback")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         } else {
