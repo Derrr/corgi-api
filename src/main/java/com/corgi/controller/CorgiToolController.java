@@ -188,6 +188,22 @@ public class CorgiToolController extends BaseController {
         addCouponActivity.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
         addCouponActivity.setTitle("APP Store五星好评奖励");
         corgiCouponActivityService.addCouponActivity(addCouponActivity);
+
+
+        PushMessage pushMessage = new PushMessage();
+        pushMessage.setSourceUserId("corgihelper");
+        pushMessage.setTargetUserId(userId);
+        pushMessage.setMessage("您已获得阅读券");
+        HashMap<String, Object> extra = new HashMap<>();
+        extra.put("type", "907");
+        JSONArray content = new JSONArray();
+        content.add(new JSONObject().fluentPut("text", " 您已获得5元阅读券，快去我的钱包-阅读券中查看吧～"));
+        extra.put("content", content);
+        extra.put("bottomText", "去查看>");
+        extra.put("bottomUrlType", "18");
+        pushMessage.setExtra(extra);
+        mqService.sendMessage(pushMessage);
+
         return new JsonResult();
     }
 
@@ -513,31 +529,6 @@ public class CorgiToolController extends BaseController {
         detail.setUserId(userId);
         detail.setCheckStatus(AliyunGreenService.PASS);
         corgiUserService.updateDetail(detail);
-        if (Arrays.asList("1", "7", "593", "977560", "858064", "982573").contains(userId)) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DATE, 30);
-            CouponActivity coupon = new CouponActivity();
-            coupon.setTitle("APP Store五星好评奖励");
-            coupon.setUserId(userId);
-            coupon.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
-
-            coupon.setValue(5.0);
-            corgiCouponActivityService.addCouponActivity(coupon);
-
-            PushMessage pushMessage = new PushMessage();
-            pushMessage.setSourceUserId("corgihelper");
-            pushMessage.setTargetUserId(userId);
-            pushMessage.setMessage("您已获得阅读券");
-            HashMap<String, Object> extra = new HashMap<>();
-            extra.put("type", "907");
-            JSONArray content = new JSONArray();
-            content.add(new JSONObject().fluentPut("text", " 您已获得5元阅读券，快去我的钱包-阅读券中查看吧～"));
-            extra.put("content", content);
-            extra.put("bottomText", "去查看>");
-            extra.put("bottomUrlType", "18");
-            pushMessage.setExtra(extra);
-            mqService.sendMessage(pushMessage);
-        }
         return new JsonResult();
     }
 
