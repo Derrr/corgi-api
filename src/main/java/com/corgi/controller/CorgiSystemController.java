@@ -51,7 +51,9 @@ public class CorgiSystemController extends BaseController {
             @RequestParam(value = "filterTitle", required = false) String filterTitle,
             @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<SystemMessage> systemMessages = corgiSystemMessageService.getSystemMessageByPage(filterTitle, page, pageSize);
-        return new JsonResult(systemMessages);
+        JsonResult result = new JsonResult(systemMessages);
+        result.setTotal(corgiSystemMessageService.countSystemMessage(filterTitle));
+        return result;
     }
 
     @GetMapping("get_message_record")
