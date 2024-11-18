@@ -53,4 +53,17 @@ public class TlxActivityController extends BaseController {
         tlx.setCount(tlxActivityService.countActivityUser(id));
         return new JsonResult(tlx);
     }
+
+    @GetMapping("add_user")
+    public JsonResult addUser(@RequestParam("id")String id){
+        tlxActivityService.addActivityUser(id, getUserId());
+        return new JsonResult();
+    }
+
+    @GetMapping("delete_user")
+    public JsonResult deleteUser(@RequestParam("id")String id){
+        tlxActivityService.deleteActivityUser(id, getUserId());
+        return new JsonResult();
+    }
+
 }
