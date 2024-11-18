@@ -974,9 +974,20 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(corgiStatisticService.getContentData(contentReq));
     }
 
+    @GetMapping("update_tlx_activity")
+    public JsonResult updateTlxActivity(@RequestParam("id")String id, @RequestParam("status")String status){
+        tlxActivityService.updateStatus(id,status);
+        return new JsonResult();
+    }
+
     @GetMapping("get_tlx_activity")
-    public JsonResult<List<TlxActivity>> getTlxActivity(@RequestParam("page")Integer page, @RequestParam("size")Integer size){
-        return new JsonResult<>(tlxActivityService.getActivityList(page,size,new TlxActivity()));
+    public JsonResult<List<TlxActivity>> getTlxActivity(@RequestParam("page")Integer page, @RequestParam("size")Integer size,
+                                                        @RequestParam(name = "status",defaultValue = "") String status){
+        TlxActivity query = new TlxActivity();
+        query.setStatus(status);
+        JsonResult result = new JsonResult<>(tlxActivityService.getActivityList(page,size,query));
+        result.setTotal(tlxActivityService.countActivity(query));
+        return result;
     }
 
     @GetMapping("tlx_refresh")
