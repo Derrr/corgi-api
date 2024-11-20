@@ -602,9 +602,14 @@ public class CorgiOrderController extends BaseController {
     @GetMapping("count_order")
     public JsonResult countOrder(@RequestParam(name = "type", required = false) String type,
                                  @RequestParam(name = "status", required = false) String status,
-                                 @RequestParam(name = "userId", required = false) String userId) {
+                                 @RequestParam(name = "userId", required = false) String userId,
+                                 @RequestParam(name = "orderId", required = false) String orderId,
+                                 @RequestParam(name = "tradeNo", required = false) String tradeNo) {
         if (hasUserId()) {
             return new JsonResult();
+        }
+        if(StringUtils.isNotEmpty(orderId) || StringUtils.isNotEmpty(tradeNo)){
+            return new JsonResult(1);
         }
         CorgiOrder query = CorgiOrder.builder()
                 .userId(userId)
