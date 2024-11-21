@@ -178,15 +178,30 @@ public class CorgiToolController extends BaseController {
         return new JsonResult(result);
     }
 
+    @GetMapping("list_coupon_activity")
+    public JsonResult listCouponActivity(@RequestParam("page")Integer page, @RequestParam("size")Integer size){
+        CouponActivity query = new CouponActivity();
+        query.setExpireDate("0");
+        JsonResult result = new JsonResult(corgiCouponActivityService.getCouponList(query,page,size));
+        result.setTotal(corgiCouponActivityService.countCoupon(query));
+        return result;
+    }
+
     @GetMapping("add_coupon_activity")
-    public JsonResult addCouponActivity(@RequestParam("userId") String userId, @RequestParam("value") Double value, @RequestParam("expireDate") Integer date) {
+    public JsonResult addCouponActivity(@RequestParam("title") String title,
+                                        @RequestParam("userId") String userId,
+                                        @RequestParam("value") Double value,
+                                        @RequestParam("expireDate") Integer date) {
         CouponActivity addCouponActivity = new CouponActivity();
         addCouponActivity.setUserId(userId);
         addCouponActivity.setValue(value);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, date);
         addCouponActivity.setExpireDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime()));
-        addCouponActivity.setTitle("APP Store五星好评奖励");
+        addCouponActivity.setTitle(title);
+        if (StringUtils.isEmpty(title)) {
+            addCouponActivity.setTitle("APP Store五星好评奖励");
+        }
         corgiCouponActivityService.addCouponActivity(addCouponActivity);
 
 
