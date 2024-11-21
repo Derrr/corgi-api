@@ -188,7 +188,7 @@ public class CorgiToolController extends BaseController {
     }
 
     @GetMapping("add_coupon_activity")
-    public JsonResult addCouponActivity(@RequestParam("title") String title,
+    public JsonResult addCouponActivity(@RequestParam(required = false,name = "title",defaultValue = "") String title,
                                         @RequestParam("userId") String userId,
                                         @RequestParam("value") Double value,
                                         @RequestParam("expireDate") Integer date) {
