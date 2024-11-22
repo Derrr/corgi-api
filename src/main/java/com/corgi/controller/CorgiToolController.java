@@ -182,7 +182,6 @@ public class CorgiToolController extends BaseController {
     public JsonResult listCouponActivity(@RequestParam("page")Integer page, @RequestParam("size")Integer size, @RequestParam("userId")String userId){
         CouponActivity query = new CouponActivity();
         query.setUserId(userId);
-        query.setExpireDate("0");
         JsonResult result = new JsonResult(corgiCouponActivityService.getCouponList(query,page,size));
         result.setTotal(corgiCouponActivityService.countCoupon(query));
         return result;
