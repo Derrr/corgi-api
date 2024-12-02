@@ -98,14 +98,17 @@ public class TlxActivityController extends BaseController {
                     PushMessage pushMessage = new PushMessage();
                     pushMessage.setSourceUserId("corgihelper");
                     pushMessage.setTargetUserId(profile.getUserId());
-                    pushMessage.setMessage("您已获得阅读券");
+                    pushMessage.setMessage("您关注的人报名了活动");
                     HashMap<String, Object> extra = new HashMap<>();
                     extra.put("type", "907");
                     JSONArray content = new JSONArray();
                     content.add(new JSONObject().fluentPut("text", message));
+//                    content.add(new JSONObject().fluentPut("text", "查看活动>")
+//                            .fluentPut("url",id).fluentPut("urlType","19"));
                     extra.put("content", content);
                     extra.put("bottomText", "查看活动>");
-                    extra.put("bottomUrlType", "18");
+                    extra.put("bottomUrlType", "19");
+                    extra.put("bottomUrl", id);
                     pushMessage.setExtra(extra);
                     mqService.sendMessage(pushMessage);
                 }
