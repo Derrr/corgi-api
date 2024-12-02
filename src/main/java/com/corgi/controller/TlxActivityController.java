@@ -50,6 +50,12 @@ public class TlxActivityController extends BaseController {
     @Autowired
     private MQService mqService;
 
+    @GetMapping("get_by_id")
+    public JsonResult getById(@RequestParam("id")String id){
+        TlxActivity result = tlxActivityService.getActivity(id);
+        return new JsonResult(result);
+    }
+
     @GetMapping("get_by_city")
     public JsonResult getByCity(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         TlxActivity query = new TlxActivity();
