@@ -12,12 +12,14 @@ import com.corgi.entity.ActivityBillboardDetail;
 import com.corgi.entity.CorgiActivityDetail;
 import com.corgi.entity.IncomeBillboardUser;
 import com.corgi.entity.PicInfo;
+import com.corgi.entity.tlx.TlxActivityList;
 import com.corgi.entity.tlx.TlxUser;
 import com.corgi.service.AliyunGreenService;
 import com.corgi.service.MQService;
 import com.corgi.user.api.*;
 import com.corgi.user.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
@@ -53,7 +55,16 @@ public class TlxActivityController extends BaseController {
         TlxActivity query = new TlxActivity();
         query.setCity(city);
         query.setStatus("1");
-        return new JsonResult(tlxActivityService.getActivityList(page, size, query));
+        List<TlxActivity> tlxActivities = tlxActivityService.getActivityList(page, size, query);
+        List<TlxActivityList> tlxActivityLists = new ArrayList<>();
+        for (TlxActivity activity : tlxActivities) {
+            TlxActivityList activityList = new TlxActivityList();
+            BeanUtils.copyProperties(activity,activityList);
+            activityList.setNickname("天狼星户外旅行");
+            activityList.setAvatar("http://image.corgi.org.cn/default-avatar/WechatIMG148.jpg");
+            tlxActivityLists.add(activityList);
+        }
+        return new JsonResult(tlxActivityLists);
     }
 
     @GetMapping("get_extra_info")
