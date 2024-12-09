@@ -60,7 +60,7 @@ public class TlxActivityController extends BaseController {
     public JsonResult getByCity(@RequestParam("city") String city, @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
         TlxActivity query = new TlxActivity();
         query.setCity(city);
-        query.setStatus("1");
+        query.setStatus("2");
         List<TlxActivity> tlxActivities = tlxActivityService.getActivityList(page, size, query);
         List<TlxActivityList> tlxActivityLists = new ArrayList<>();
         for (TlxActivity activity : tlxActivities) {
