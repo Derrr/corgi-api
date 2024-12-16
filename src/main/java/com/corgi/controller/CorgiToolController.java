@@ -112,6 +112,7 @@ public class CorgiToolController extends BaseController {
         config.put("showDiscovery", 1);
         config.put("showPurse", 1);
         config.put("showMap", 1);
+        config.put("city",Arrays.asList("上海","北京","广州","重庆","深圳","武汉","杭州","成都","长沙","西安","郑州"));
         try {
 //            Integer userId = Integer.valueOf(getUserId());
 //            if (userId % 4 == 0 || userId.equals(1) || userId.equals(593) || userId.equals(7)) {
