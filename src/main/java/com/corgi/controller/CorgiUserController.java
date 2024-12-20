@@ -911,7 +911,7 @@ public class CorgiUserController extends BaseController {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new PermissionException(Constants.SERVER_ERROR_CODE, e.getMessage());
+            throw new PermissionException(Constants.SERVER_ERROR_CODE, "");
         }
         UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
         userPosition.setChannel(RequestUtil.getChannel());
