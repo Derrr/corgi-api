@@ -1017,7 +1017,7 @@ public class CorgiToolController extends BaseController {
             tlxActivity.setMeetingPoint(obj.getString("meeting_point"));
             tlxActivity.setNote(obj.getString("note"));
             tlxActivity.setPosterImage(obj.getString("poster_image"));
-            tlxActivity.setPrice(obj.getInteger("price"));
+            tlxActivity.setPrice(obj.getDouble("price"));
             tlxActivity.setShorttitle(obj.getString("shorttitle"));
             tlxActivity.setTripContent(obj.getString("trip_content"));
             tlxActivity.setVersion(version);
