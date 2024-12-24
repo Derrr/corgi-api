@@ -1008,7 +1008,7 @@ public class CorgiToolController extends BaseController {
             tlxActivity.setId(obj.getString("ID"));
             tlxActivity.setCity(obj.getString("city"));
             tlxActivity.setBody(obj.getString("body"));
-            tlxActivity.setDays(obj.getInteger("days"));
+            tlxActivity.setDays(obj.getDouble("days"));
             tlxActivity.setPeriod(obj.getString("period"));
             tlxActivity.setDepartdate(obj.getString("departdate"));
             tlxActivity.setExpenseDetail(obj.getString("expense_detail"));
