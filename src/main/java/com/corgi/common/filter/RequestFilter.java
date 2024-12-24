@@ -82,12 +82,12 @@ public class RequestFilter implements Filter {
                 || checkURI(servletRequest, "chat")
                 || checkURI(servletRequest, "get_config")
                 || checkURI(servletRequest, "get_version")
-                || checkURI(servletRequest, "yinyuan")
+                || checkURI(servletRequest, "tlx_")
                 || checkURI(servletRequest, "callback")) {
             log.info("into none jwt uri...." + ((HttpServletRequest) servletRequest).getRequestURI());
         } else {
             JsonResult jsonResult = new JsonResult("");
-            jsonResult.setCode(Constants.PARAMETER_ERROR_CODE);
+            jsonResult.setCode(Constants.PERMISSION_ERROR_CODE);
             jsonResult.setMessage("嘿 小哥哥！我们的攻程湿们为了大家更好的面基体验，已经更新了版本哦，速去下载更新吧！");
             servletResponse.setContentType("application/json;charset=UTF-8");
             servletResponse.setCharacterEncoding("UTF-8");

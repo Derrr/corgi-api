@@ -911,7 +911,7 @@ public class CorgiUserController extends BaseController {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new PermissionException(Constants.SERVER_ERROR_CODE, e.getMessage());
+            throw new PermissionException(Constants.SERVER_ERROR_CODE, "");
         }
         UserPosition oldPosition = corgiUserService.getUserPosition(userPosition.getUserId());
         userPosition.setChannel(RequestUtil.getChannel());
@@ -1367,11 +1367,11 @@ public class CorgiUserController extends BaseController {
             userId = getUserId();
         }
         List<UserProfile> visitors = corgiVisitService.getVisitor(userId, page, size);
-        UserDetail userDetail = corgiUserService.getUserDetailBasic(userId);
-        if (!"influencer".equals(userDetail.getAvatarCheckStatus())) {
-            String expireDate = corgiUserService.getUserVipExpire(userId);
+        UserDetail userDetail = corgiUserService.getUserDetailBasic(getUserId());
+        if (!"influencer".equals(userDetail.getAvatarStatus())) {
+            String expireDate = corgiUserService.getUserVipExpire(getUserId());
             if (org.springframework.util.StringUtils.isEmpty(expireDate) || "-".equals(expireDate)) {
-                UserPosition position = corgiUserService.getUserPosition(userId);
+                UserPosition position = corgiUserService.getUserPosition(getUserId());
                 List<UserProfile> results = new ArrayList<>();
                 for (UserProfile profile : visitors) {
                     UserProfile result = new UserProfile();

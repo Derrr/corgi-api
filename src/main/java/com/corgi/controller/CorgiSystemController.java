@@ -51,18 +51,24 @@ public class CorgiSystemController extends BaseController {
             @RequestParam(value = "filterTitle", required = false) String filterTitle,
             @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<SystemMessage> systemMessages = corgiSystemMessageService.getSystemMessageByPage(filterTitle, page, pageSize);
-        return new JsonResult(systemMessages);
+        JsonResult result = new JsonResult(systemMessages);
+        result.setTotal(corgiSystemMessageService.countSystemMessage(filterTitle));
+        return result;
     }
 
     @GetMapping("get_message_record")
     public JsonResult getMessageRecord(@RequestParam(required = false, name = "messageId") String messageId, @RequestParam("page") Integer page, @RequestParam("pageSize") Integer pageSize) {
         List<MessageRecord> messageRecords;
+        Integer total = 0;
         if (StringUtils.isEmpty(messageId)) {
             messageRecords = corgiSystemMessageService.getMessageRecordByPage(page, pageSize);
         } else {
             messageRecords = corgiSystemMessageService.getMessageRecordByMessageId(page, pageSize, messageId);
+            total = corgiSystemMessageService.countMessageRecordByMessageId(messageId);
         }
-        return new JsonResult(messageRecords);
+        JsonResult result = new JsonResult(messageRecords);
+        result.setTotal(total);
+        return result;
     }
 
 

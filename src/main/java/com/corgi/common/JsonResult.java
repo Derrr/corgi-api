@@ -14,6 +14,7 @@ public class JsonResult<T> implements Serializable {
     private T data;
     private int code;
     private String message = CorgiConstants.SUCCESS;
+    private int total;
 
 
     public JsonResult(){
