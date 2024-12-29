@@ -41,12 +41,13 @@ public class RequestFilter implements Filter {
         MDC.put("usrID", "-1");
         long time = System.currentTimeMillis();
         String jwt = ((HttpServletRequest) servletRequest).getHeader(JWTUtils.JWT_HEADER);
+
         if (!StringUtils.isEmpty(jwt) && !checkURI(servletRequest, "update_user_position")) {
             DecodedJWT decodedJWT;
             try {
                 decodedJWT = JWTUtils.verifyToken(jwt);
             } catch (Exception e) {
-                //log.error(e.getMessage());
+                log.info("jwt: " + jwt);
                 JsonResult jsonResult = new JsonResult("");
                 jsonResult.setCode(Constants.JWT_ERROR_CODE);
                 jsonResult.setMessage(e.getMessage());
